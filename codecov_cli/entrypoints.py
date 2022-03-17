@@ -8,6 +8,7 @@ import requests
 from codecov_cli.network import GitFileFinder
 from codecov_cli.types import UploadCollectionResult
 from codecov_cli.upload_collector import UploadCollector
+from codecov_cli.plugins import select_preparation_plugins
 
 
 @dataclass
@@ -59,10 +60,6 @@ class CoverageFileFinder(object):
         return []
 
 
-def select_preparation_plugins(plugin_names):
-    return []
-
-
 def select_network_finder(root_network_folder):
     return GitFileFinder(root_network_folder)
 
@@ -83,7 +80,7 @@ def do_upload_logic(
     name: typing.Optional[str],
     network_root_folder: Path,
     coverage_files_search_folder: Path,
-    plugin_names: typing.List[str]
+    plugin_names: typing.List[str],
 ):
     preparation_plugins = select_preparation_plugins(plugin_names)
     network_finder = select_network_finder(network_root_folder)

@@ -56,7 +56,7 @@ def _turn_env_vars_into_dict(ctx, params, value):
 )
 @click.option("--env-var", "env_vars", multiple=True, callback=_turn_env_vars_into_dict)
 @click.option("--flag", "flags", multiple=True, default=[])
-@click.option("--plugin", "plugin_names", multiple=True, default=[])
+@click.option("--plugin", "plugin_names", multiple=True, default=["gcov"])
 @click.option("--name")
 @click.pass_context
 def do_upload(
@@ -71,7 +71,7 @@ def do_upload(
     name: typing.Optional[str],
     network_root_folder: pathlib.Path,
     coverage_files_search_folder: pathlib.Path,
-    plugin_names: typing.List[str]
+    plugin_names: typing.List[str],
 ):
     print(
         dict(
@@ -85,7 +85,7 @@ def do_upload(
             name=name,
             network_root_folder=network_root_folder,
             coverage_files_search_folder=coverage_files_search_folder,
-            plugin_names=plugin_names
+            plugin_names=plugin_names,
         )
     )
     do_upload_logic(
@@ -99,5 +99,5 @@ def do_upload(
         name=name,
         network_root_folder=network_root_folder,
         coverage_files_search_folder=coverage_files_search_folder,
-        plugin_names=plugin_names
+        plugin_names=plugin_names,
     )

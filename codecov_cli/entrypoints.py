@@ -29,9 +29,11 @@ class UploadSendingError(object):
 
 @dataclass
 class UploadSendingResult(object):
-    __slots__ = ("error", "warnings")
+    __slots__ = ("error", "warnings", "putURL", "resultURL")
     error: typing.Optional[UploadSendingError]
     warnings: typing.List[UploadSendingResultWarning]
+    putURL: str
+    resultURL: str
 
 
 class UploadSender(object):
@@ -44,7 +46,11 @@ class UploadSender(object):
         payload = {
             "network": upload_data.network,
         }
-        resp = requests.post("https://codecov.io/upload/v4")
+        params = {'package': f'codecov-cli/{codecov_cli_version}', 'commit': commit_sha}
+        headers = {'X-Upload-Token': token.hex}
+        
+        resp = requests.post("https://codecov.io/upload/v4", headers=headers, params=params)
+        
         if resp.status_code >= 400:
             return UploadSendingResult(
                 error=UploadSendingError(
@@ -54,9 +60,14 @@ class UploadSender(object):
                 ),
                 warnings=[UploadSendingResultWarning("This did not go perfectly")],
             )
+            
+        resultURL, putURL = resp.text.split('\n')
+        
         return UploadSendingResult(
             error=None,
             warnings=[],
+            resultURL=resultURL,
+            putURL=putURL
         )
 
 

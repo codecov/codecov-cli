@@ -10,6 +10,7 @@ from codecov_cli.network import GitFileFinder
 from codecov_cli.types import UploadCollectionResult
 from codecov_cli.upload_collector import UploadCollector
 from codecov_cli.plugins import select_preparation_plugins
+from codecov_cli import __version__ as codecov_cli_version
 
 
 @dataclass
@@ -37,7 +38,8 @@ class UploadSender(object):
     def send_upload_data(
         self,
         upload_data: UploadCollectionResult,
-        token: uuid.UUID
+        token: uuid.UUID,
+        commit_sha: str
     ) -> UploadSendingResult:
         payload = {
             "network": upload_data.network,
@@ -95,7 +97,7 @@ def do_upload_logic(
     upload_data = collector.generate_upload_data()
     print(upload_data)
     sender = UploadSender()
-    sending_result = sender.send_upload_data(upload_data, token)
+    sending_result = sender.send_upload_data(upload_data, token, commit_sha)
     if sending_result.warnings:
         number_warnings = len(sending_result.warnings)
         pluralization = "warnings" if number_warnings > 1 else "warning"

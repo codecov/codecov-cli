@@ -39,15 +39,13 @@ class UploadSendingResult(object):
 class UploadSender(object):
     def send_upload_data(
         self,
-        upload_data: UploadCollectionResult,
-        token: uuid.UUID,
-        commit_sha: str
+        upload_data: UploadCollectionResult
     ) -> UploadSendingResult:
         payload = {
             "network": upload_data.network,
         }
-        params = {'package': f'codecov-cli/{codecov_cli_version}', 'commit': commit_sha}
-        headers = {'X-Upload-Token': token.hex}
+        params = {'package': f'codecov-cli/{codecov_cli_version}', 'commit': upload_data.commit_sha}
+        headers = {'X-Upload-Token': upload_data.token.hex}
         
         resp = requests.post("https://codecov.io/upload/v4", headers=headers, params=params)
         
@@ -62,7 +60,6 @@ class UploadSender(object):
             )
             
         resultURL, putURL = resp.text.split('\n')
-        
         return UploadSendingResult(
             error=None,
             warnings=[],
@@ -105,10 +102,10 @@ def do_upload_logic(
     collector = UploadCollector(
         preparation_plugins, network_finder, coverage_file_selector
     )
-    upload_data = collector.generate_upload_data()
+    upload_data = collector.generate_upload_data(commit_sha, token)
     print(upload_data)
     sender = UploadSender()
-    sending_result = sender.send_upload_data(upload_data, token, commit_sha)
+    sending_result = sender.send_upload_data(upload_data)
     if sending_result.warnings:
         number_warnings = len(sending_result.warnings)
         pluralization = "warnings" if number_warnings > 1 else "warning"

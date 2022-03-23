@@ -1,7 +1,7 @@
 import typing
 from dataclasses import dataclass
 from pathlib import Path
-
+import uuid
 
 class UploadCollectionResultFile(object):
     def get_filename(self) -> bytes:
@@ -15,6 +15,8 @@ class UploadCollectionResultFile(object):
 class UploadCollectionResult(object):
     network: typing.List[str]
     coverage_files: typing.List[UploadCollectionResultFile]
+    token: uuid.UUID
+    commit_sha: str
 
 
 class PreparationPluginInterface(object):

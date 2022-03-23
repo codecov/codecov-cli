@@ -1,17 +1,37 @@
 import os
 import pathlib
 import typing
+import uuid
 
 import click
 
 from codecov_cli.entrypoints import do_upload_logic
 from codecov_cli.fallbackers import CodecovOption, FallbackFieldEnum
+from codecov_cli.helpers.token import get_token
 
 
 def _turn_env_vars_into_dict(ctx, params, value):
     return dict((v, os.getenv(v, None)) for v in value)
 
 
+def _validate_token_argument(ctx, params, value) -> uuid.UUID:
+    try:
+        return click.UUID(value)
+    except click.exceptions.BadParameter:
+        print("Couldn't parse input token as a UUID. trying to parse it as a file...")
+    
+    try:
+        with open(value, 'r') as tokenFile:
+            return click.UUID(tokenFile.readline())
+    except click.exceptions.BadParameter as err:
+        print(f"The provided file content couldn't be parsed as a valid token: {err}")
+    except OSError as err:
+        print(f"File {value} coulnd't be opened for the following reason: {err}")
+    
+    
+    raise click.exceptions.BadParameter("The provided parameter couldn't be parsed")
+        
+    
 @click.command()
 @click.option(
     "--commit-sha",
@@ -54,6 +74,13 @@ def _turn_env_vars_into_dict(ctx, params, value):
     cls=CodecovOption,
     fallback_field=FallbackFieldEnum.job_code,
 )
+@click.option(
+    "-t",
+    "--token",
+    help="Codecov upload token represented as UUID or path to file containing the token",
+    type=str,
+    callback=_validate_token_argument
+)
 @click.option("--env-var", "env_vars", multiple=True, callback=_turn_env_vars_into_dict)
 @click.option("--flag", "flags", multiple=True, default=[])
 @click.option("--plugin", "plugin_names", multiple=True, default=["gcov"])
@@ -71,8 +98,12 @@ def do_upload(
     name: typing.Optional[str],
     network_root_folder: pathlib.Path,
     coverage_files_search_folder: pathlib.Path,
+    token: uuid.UUID,
     plugin_names: typing.List[str],
 ):
+    # if not token:
+    #     token = get_token()
+    
     print(
         dict(
             commit_sha=commit_sha,
@@ -86,6 +117,7 @@ def do_upload(
             network_root_folder=network_root_folder,
             coverage_files_search_folder=coverage_files_search_folder,
             plugin_names=plugin_names,
+            token=token
         )
     )
     do_upload_logic(
@@ -100,4 +132,5 @@ def do_upload(
         network_root_folder=network_root_folder,
         coverage_files_search_folder=coverage_files_search_folder,
         plugin_names=plugin_names,
+        token=token
     )

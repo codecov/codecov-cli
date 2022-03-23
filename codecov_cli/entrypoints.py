@@ -1,6 +1,7 @@
 import typing
 from dataclasses import dataclass
 from pathlib import Path
+import uuid
 
 import click
 import requests
@@ -34,7 +35,9 @@ class UploadSendingResult(object):
 
 class UploadSender(object):
     def send_upload_data(
-        self, upload_data: UploadCollectionResult
+        self,
+        upload_data: UploadCollectionResult,
+        token: uuid.UUID
     ) -> UploadSendingResult:
         payload = {
             "network": upload_data.network,
@@ -81,6 +84,7 @@ def do_upload_logic(
     network_root_folder: Path,
     coverage_files_search_folder: Path,
     plugin_names: typing.List[str],
+    token: uuid.UUID
 ):
     preparation_plugins = select_preparation_plugins(plugin_names)
     network_finder = select_network_finder(network_root_folder)
@@ -91,7 +95,7 @@ def do_upload_logic(
     upload_data = collector.generate_upload_data()
     print(upload_data)
     sender = UploadSender()
-    sending_result = sender.send_upload_data(upload_data)
+    sending_result = sender.send_upload_data(upload_data, token)
     if sending_result.warnings:
         number_warnings = len(sending_result.warnings)
         pluralization = "warnings" if number_warnings > 1 else "warning"

@@ -19,19 +19,18 @@ def _validate_token_argument(ctx, params, value) -> uuid.UUID:
         return click.UUID(value)
     except click.exceptions.BadParameter:
         print("Couldn't parse input token as a UUID. trying to parse it as a file...")
-    
+
     try:
-        with open(value, 'r') as tokenFile:
+        with open(value, "r") as tokenFile:
             return click.UUID(tokenFile.readline())
     except click.exceptions.BadParameter as err:
         print(f"The provided file content couldn't be parsed as a valid token: {err}")
     except OSError as err:
         print(f"File {value} coulnd't be opened for the following reason: {err}")
-    
-    
+
     raise click.exceptions.BadParameter("The provided parameter couldn't be parsed")
-        
-    
+
+
 @click.command()
 @click.option(
     "--commit-sha",
@@ -79,7 +78,7 @@ def _validate_token_argument(ctx, params, value) -> uuid.UUID:
     "--token",
     help="Codecov upload token represented as UUID or path to file containing the token",
     type=str,
-    callback=_validate_token_argument
+    callback=_validate_token_argument,
 )
 @click.option("--env-var", "env_vars", multiple=True, callback=_turn_env_vars_into_dict)
 @click.option("--flag", "flags", multiple=True, default=[])
@@ -103,7 +102,7 @@ def do_upload(
 ):
     # if not token:
     #     token = get_token()
-    
+
     print(
         dict(
             commit_sha=commit_sha,
@@ -117,7 +116,7 @@ def do_upload(
             network_root_folder=network_root_folder,
             coverage_files_search_folder=coverage_files_search_folder,
             plugin_names=plugin_names,
-            token=token
+            token=token,
         )
     )
     do_upload_logic(
@@ -132,5 +131,5 @@ def do_upload(
         network_root_folder=network_root_folder,
         coverage_files_search_folder=coverage_files_search_folder,
         plugin_names=plugin_names,
-        token=token
+        token=token,
     )

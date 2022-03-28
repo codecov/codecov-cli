@@ -24,4 +24,9 @@ class UploadCollector(object):
             prep.run_preparation(self)
         network = self.network_finder.find_files()
         coverage_files = self.coverage_file_finder.find_coverage_files()
-        return UploadCollectionResult(network=network, coverage_files=coverage_files, commit_sha=commit_sha, token=token)
+        return UploadCollectionResult(
+            network=network,
+            coverage_files=coverage_files,
+            commit_sha=commit_sha,
+            token=token,
+        )

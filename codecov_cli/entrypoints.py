@@ -1,16 +1,16 @@
 import typing
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
-import uuid
 
 import click
 import requests
 
+from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.network import GitFileFinder
+from codecov_cli.plugins import select_preparation_plugins
 from codecov_cli.types import UploadCollectionResult
 from codecov_cli.upload_collector import UploadCollector
-from codecov_cli.plugins import select_preparation_plugins
-from codecov_cli import __version__ as codecov_cli_version
 
 
 @dataclass
@@ -29,26 +29,30 @@ class UploadSendingError(object):
 
 @dataclass
 class UploadSendingResult(object):
-    __slots__ = ("error", "warnings", "putURL", "resultURL")
+    __slots__ = ("error", "warnings", "put_url", "result_url")
     error: typing.Optional[UploadSendingError]
     warnings: typing.List[UploadSendingResultWarning]
-    putURL: str
-    resultURL: str
+    put_url: str
+    result_url: str
 
 
 class UploadSender(object):
     def send_upload_data(
-        self,
-        upload_data: UploadCollectionResult
+        self, upload_data: UploadCollectionResult
     ) -> UploadSendingResult:
         payload = {
             "network": upload_data.network,
         }
-        params = {'package': f'codecov-cli/{codecov_cli_version}', 'commit': upload_data.commit_sha}
-        headers = {'X-Upload-Token': upload_data.token.hex}
-        
-        resp = requests.post("https://codecov.io/upload/v4", headers=headers, params=params)
-        
+        params = {
+            "package": f"codecov-cli/{codecov_cli_version}",
+            "commit": upload_data.commit_sha,
+        }
+        headers = {"X-Upload-Token": upload_data.token.hex}
+
+        resp = requests.post(
+            "https://codecov.io/upload/v4", headers=headers, params=params
+        )
+
         if resp.status_code >= 400:
             return UploadSendingResult(
                 error=UploadSendingError(
@@ -58,13 +62,10 @@ class UploadSender(object):
                 ),
                 warnings=[UploadSendingResultWarning("This did not go perfectly")],
             )
-            
-        resultURL, putURL = resp.text.split('\n')
+
+        result_url, put_url = resp.text.split("\n")
         return UploadSendingResult(
-            error=None,
-            warnings=[],
-            resultURL=resultURL,
-            putURL=putURL
+            error=None, warnings=[], result_url=result_url, put_url=put_url
         )
 
 
@@ -94,7 +95,7 @@ def do_upload_logic(
     network_root_folder: Path,
     coverage_files_search_folder: Path,
     plugin_names: typing.List[str],
-    token: uuid.UUID
+    token: uuid.UUID,
 ):
     preparation_plugins = select_preparation_plugins(plugin_names)
     network_finder = select_network_finder(network_root_folder)

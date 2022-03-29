@@ -1,4 +1,6 @@
 import typing
+import uuid
+
 
 from codecov_cli.types import (
     CoverageFileFinderInterface,

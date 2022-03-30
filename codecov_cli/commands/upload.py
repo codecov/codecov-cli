@@ -97,7 +97,7 @@ def do_upload(
     name: typing.Optional[str],
     network_root_folder: pathlib.Path,
     coverage_files_search_folder: pathlib.Path,
-    token: uuid.UUID,
+    token: typing.Optional[uuid.UUID],
     plugin_names: typing.List[str],
 ):
     # if not token:

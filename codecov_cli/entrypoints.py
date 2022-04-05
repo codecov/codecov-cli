@@ -1,3 +1,4 @@
+import os
 import typing
 import uuid
 from dataclasses import dataclass
@@ -79,7 +80,35 @@ class UploadSender(object):
         return UploadSendingResult(error=None, warnings=[])
 
     def _generate_payload(self, upload_data: UploadCollectionResult) -> bytes:
-        return "Random payload"
+        env_vars_section = self._generate_env_vars_section(upload_data)
+        return env_vars_section
+
+    def _generate_env_vars_section(self, upload_data: UploadCollectionResult) -> bytes:
+        env_vars = (
+            upload_data.env_vars_clargs
+            if upload_data.env_vars_clargs
+            else self._get_env_vars()
+        )
+
+        filtered_env_vars = {
+            key: value for key, value in env_vars.items() if value is not None
+        }
+
+        if not filtered_env_vars:
+            return b""
+
+        env_vars_section = "".join(
+            f"{env_var}={value}\n" for env_var, value in filtered_env_vars.items()
+        )
+        return env_vars_section.encode() + b"<<<<<< ENV\n"
+
+    def _get_env_vars(self) -> typing.Dict[str, typing.Optional[str]]:
+        """Extracts and formats upload environment variables from CODECOV_ENV environment variable, or empty dictionary if CODECOV_ENV not found"""
+        codecov_env = os.getenv("CODECOV_ENV", None)
+        if not codecov_env:
+            return {}
+
+        return {var: os.getenv(var, None) for var in codecov_env.split(",")}
 
 
 class CoverageFileFinder(object):

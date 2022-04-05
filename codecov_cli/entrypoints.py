@@ -29,11 +29,9 @@ class UploadSendingError(object):
 
 @dataclass
 class UploadSendingResult(object):
-    __slots__ = ("error", "warnings", "put_url", "result_url")
+    __slots__ = ("error", "warnings")
     error: typing.Optional[UploadSendingError]
     warnings: typing.List[UploadSendingResultWarning]
-    put_url: str
-    result_url: str
 
 
 class UploadSender(object):
@@ -64,9 +62,7 @@ class UploadSender(object):
             )
 
         result_url, put_url = resp.text.split("\n")
-        return UploadSendingResult(
-            error=None, warnings=[], result_url=result_url, put_url=put_url
-        )
+        return UploadSendingResult(error=None, warnings=[])
 
 
 class CoverageFileFinder(object):

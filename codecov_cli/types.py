@@ -18,6 +18,7 @@ class UploadCollectionResult(object):
     coverage_files: typing.List[UploadCollectionResultFile]
     token: uuid.UUID
     commit_sha: str
+    env_vars_clargs: typing.Dict[str, str]
 
 
 class PreparationPluginInterface(object):

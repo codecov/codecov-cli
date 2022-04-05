@@ -62,7 +62,24 @@ class UploadSender(object):
             )
 
         result_url, put_url = resp.text.split("\n")
+
+        reports_payload = self._generate_payload(upload_data)
+        resp = requests.put(put_url, data=reports_payload)
+
+        if resp.status_code >= 400:
+            return UploadSendingResult(
+                error=UploadSendingError(
+                    code=f"HTTP Error {resp.status_code}",
+                    description=resp.text,
+                    params={},
+                ),
+                warnings=[UploadSendingResultWarning("This did not go perfectly")],
+            )
+
         return UploadSendingResult(error=None, warnings=[])
+
+    def _generate_payload(self, upload_data: UploadCollectionResult) -> bytes:
+        return "Random payload"
 
 
 class CoverageFileFinder(object):
@@ -99,7 +116,7 @@ def do_upload_logic(
     collector = UploadCollector(
         preparation_plugins, network_finder, coverage_file_selector
     )
-    upload_data = collector.generate_upload_data(commit_sha, token)
+    upload_data = collector.generate_upload_data(commit_sha, token, env_vars)
     print(upload_data)
     sender = UploadSender()
     sending_result = sender.send_upload_data(upload_data)

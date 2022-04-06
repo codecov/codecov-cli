@@ -135,7 +135,7 @@ class UploadSender(object):
             ]
 
         network_files_section = "".join(file + "\n" for file in network_files)
-        return network_files_section.encode() + b"<<<<<< network"
+        return network_files_section.encode() + b"<<<<<< network\n"
 
 
 class CoverageFileFinder(object):

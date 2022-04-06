@@ -2,6 +2,7 @@ import typing
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
+from enum import Enum
 
 
 class UploadCollectionResultFile(object):
@@ -19,6 +20,9 @@ class UploadCollectionResult(object):
     token: uuid.UUID
     commit_sha: str
     env_vars_clargs: typing.Dict[str, str]
+    toggled_features: frozenset[str]
+    network_prefix: typing.Optional[str]
+    network_filter: typing.Optional[str]
 
 
 class PreparationPluginInterface(object):
@@ -39,3 +43,16 @@ class NetworkFinderInterface(object):
 
     def find_files(self) -> typing.List[str]:
         pass
+
+
+class Feature(str, Enum):
+    GCOV = "gcov"
+    COVERAGEPY = "coveragepy"
+    FIX = "fix"
+    SEARCH = "search"
+    XCODE = "xcode"
+    NETWORK = "network"
+    GCOVOUT = "gcovout"
+    HTML = "html"
+    RECURSESUBS = "recursesubs"
+    YAML = "yaml"

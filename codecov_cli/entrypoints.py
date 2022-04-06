@@ -11,6 +11,7 @@ from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.network import GitFileFinder
 from codecov_cli.plugins import select_preparation_plugins
 from codecov_cli.types import UploadCollectionResult
+from codecov_cli.types import Feature
 from codecov_cli.upload_collector import UploadCollector
 
 
@@ -138,6 +139,9 @@ def do_upload_logic(
     coverage_files_search_folder: Path,
     plugin_names: typing.List[str],
     token: uuid.UUID,
+    toggled_features: frozenset[str],
+    network_prefix: typing.Optional[str],
+    network_filter: typing.Optional[str],
 ):
     preparation_plugins = select_preparation_plugins(plugin_names)
     network_finder = select_network_finder(network_root_folder)
@@ -145,7 +149,9 @@ def do_upload_logic(
     collector = UploadCollector(
         preparation_plugins, network_finder, coverage_file_selector
     )
-    upload_data = collector.generate_upload_data(commit_sha, token, env_vars)
+    upload_data = collector.generate_upload_data(
+        commit_sha, token, env_vars, toggled_features, network_prefix, network_filter
+    )
     print(upload_data)
     sender = UploadSender()
     sending_result = sender.send_upload_data(upload_data)

@@ -82,7 +82,9 @@ class UploadSender(object):
 
     def _generate_payload(self, upload_data: UploadCollectionResult) -> bytes:
         env_vars_section = self._generate_env_vars_section(upload_data)
-        return env_vars_section
+        network_section = self._generate_network_section(upload_data)
+
+        return b"".join([env_vars_section, network_section])
 
     def _generate_env_vars_section(self, upload_data: UploadCollectionResult) -> bytes:
         env_vars = (
@@ -110,6 +112,30 @@ class UploadSender(object):
             return {}
 
         return {var: os.getenv(var, None) for var in codecov_env.split(",")}
+
+    def _generate_network_section(self, upload_data: UploadCollectionResult) -> bytes:
+        if Feature.NETWORK in upload_data.toggled_features:
+            return b""
+
+        network_files = upload_data.network
+
+        if upload_data.network_filter is not None:
+            network_files = [
+                file
+                for file in network_files
+                if file.startswith(upload_data.network_filter)
+            ]
+
+        if not network_files:
+            return b""
+
+        if upload_data.network_prefix is not None:
+            network_files = [
+                upload_data.network_prefix + file for file in network_files
+            ]
+
+        network_files_section = "".join(file + "\n" for file in network_files)
+        return network_files_section.encode() + b"<<<<<< network"
 
 
 class CoverageFileFinder(object):

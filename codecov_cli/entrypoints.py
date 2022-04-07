@@ -11,7 +11,6 @@ from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.network import GitFileFinder
 from codecov_cli.plugins import select_preparation_plugins
 from codecov_cli.types import UploadCollectionResult
-from codecov_cli.types import Feature
 from codecov_cli.upload_collector import UploadCollector
 
 
@@ -115,25 +114,10 @@ class UploadSender(object):
         return {var: os.getenv(var, None) for var in codecov_env.split(",")}
 
     def _generate_network_section(self, upload_data: UploadCollectionResult) -> bytes:
-        if Feature.NETWORK in upload_data.toggled_features:
-            return b""
-
         network_files = upload_data.network
-
-        if upload_data.network_filter is not None:
-            network_files = [
-                file
-                for file in network_files
-                if file.startswith(upload_data.network_filter)
-            ]
 
         if not network_files:
             return b""
-
-        if upload_data.network_prefix is not None:
-            network_files = [
-                upload_data.network_prefix + file for file in network_files
-            ]
 
         network_files_section = "".join(file + "\n" for file in network_files)
         return network_files_section.encode() + b"<<<<<< network\n"
@@ -178,9 +162,6 @@ def do_upload_logic(
     coverage_files_search_folder: Path,
     plugin_names: typing.List[str],
     token: uuid.UUID,
-    toggled_features: frozenset[str],
-    network_prefix: typing.Optional[str],
-    network_filter: typing.Optional[str],
 ):
     preparation_plugins = select_preparation_plugins(plugin_names)
     network_finder = select_network_finder(network_root_folder)
@@ -189,7 +170,9 @@ def do_upload_logic(
         preparation_plugins, network_finder, coverage_file_selector
     )
     upload_data = collector.generate_upload_data(
-        commit_sha, token, env_vars, toggled_features, network_prefix, network_filter
+        commit_sha,
+        token,
+        env_vars,
     )
     print(upload_data)
     sender = UploadSender()

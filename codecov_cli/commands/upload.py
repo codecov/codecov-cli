@@ -31,14 +31,6 @@ def _validate_token_argument(ctx, params, value) -> uuid.UUID:
     raise click.exceptions.BadParameter("The provided parameter couldn't be parsed")
 
 
-def _parse_toggled_features(ctx, params, value) -> frozenset[str]:
-    return (
-        frozenset(feature.lower() for feature in value.split(","))
-        if value is not None
-        else frozenset()
-    )
-
-
 @click.command()
 @click.option(
     "--commit-sha",
@@ -88,25 +80,6 @@ def _parse_toggled_features(ctx, params, value) -> frozenset[str]:
     type=str,
     callback=_validate_token_argument,
 )
-@click.option(
-    "-X",
-    "toggled_features",
-    help="Toggle functionalities. Separate multiple ones by comma: -X network,search",
-    type=str,
-    callback=_parse_toggled_features,
-)
-@click.option(
-    "-i",
-    "network_filter",
-    help="Specify a filter on the files listed in the network section of the Codecov report. Useful for upload-specific path fixing",
-    type=str,
-)
-@click.option(
-    "-k",
-    "network_prefix",
-    help="Specify a prefix on files listed in the network section of the Codecov report. Useful to help resolve path fixing",
-    type=str,
-)
 @click.option("--env-var", "env_vars", multiple=True, callback=_turn_env_vars_into_dict)
 @click.option("--flag", "flags", multiple=True, default=[])
 @click.option("--plugin", "plugin_names", multiple=True, default=["gcov"])
@@ -126,9 +99,6 @@ def do_upload(
     coverage_files_search_folder: pathlib.Path,
     token: typing.Optional[uuid.UUID],
     plugin_names: typing.List[str],
-    toggled_features: typing.FrozenSet[str],
-    network_filter: typing.Optional[str],
-    network_prefix: typing.Optional[str],
 ):
     # if not token:
     #     token = get_token()
@@ -147,9 +117,6 @@ def do_upload(
             coverage_files_search_folder=coverage_files_search_folder,
             plugin_names=plugin_names,
             token=token,
-            toggled_features=toggled_features,
-            network_filter=network_filter,
-            network_prefix=network_prefix,
         )
     )
     do_upload_logic(
@@ -165,7 +132,4 @@ def do_upload(
         coverage_files_search_folder=coverage_files_search_folder,
         plugin_names=plugin_names,
         token=token,
-        toggled_features=toggled_features,
-        network_filter=network_filter,
-        network_prefix=network_prefix,
     )

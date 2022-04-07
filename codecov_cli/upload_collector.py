@@ -26,9 +26,6 @@ class UploadCollector(object):
         commit_sha: str,
         token: uuid.UUID,
         env_vars_clargs: typing.Dict[str, str],
-        toggled_features: frozenset[str],
-        network_prefix: typing.Optional[str],
-        network_filter: typing.Optional[str],
     ) -> ...:
         for prep in self.preparation_plugins:
             prep.run_preparation(self)
@@ -40,7 +37,4 @@ class UploadCollector(object):
             commit_sha=commit_sha,
             token=token,
             env_vars_clargs=env_vars_clargs,
-            toggled_features=toggled_features,
-            network_filter=network_filter,
-            network_prefix=network_prefix,
         )

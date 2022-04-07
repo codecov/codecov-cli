@@ -14,6 +14,7 @@ PyYAML = "^6.0"
 pytest = "^5.2"
 black = "^22.1.0"
 isort = "^5.10.1"
+pytest-cov = "^3.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

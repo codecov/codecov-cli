@@ -7,7 +7,6 @@ import click
 
 from codecov_cli.entrypoints import do_upload_logic
 from codecov_cli.fallbackers import CodecovOption, FallbackFieldEnum
-from codecov_cli.helpers.token import get_token
 
 
 def _turn_env_vars_into_dict(ctx, params, value):

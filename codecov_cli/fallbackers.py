@@ -1,7 +1,7 @@
 import typing
 from enum import Enum, auto
 
-from click import Context, Option
+from click import Context, Option, BadParameter
 
 
 class CircleCIFallbacker(object):
@@ -32,10 +32,11 @@ class CodecovOption(Option):
         self, ctx: Context, call: bool = True
     ) -> typing.Optional[typing.Union[typing.Any, typing.Callable[[], typing.Any]]]:
         res = super().get_default(ctx, call=call)
+        if res is not None:
+            return res
         if (
-            res is None
-            and self.fallback_field is not None
+            self.fallback_field is not None
             and ctx.obj.get("fallbacker") is not None
         ):
             return ctx.obj.get("fallbacker").get_value(self.fallback_field)
-        return res
+        raise BadParameter(f"{self.fallback_field.name} needs to be set by either command line or envvars or CI")

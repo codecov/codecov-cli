@@ -1,5 +1,4 @@
-from codecov_cli import __version__
-from codecov_cli import main
+from codecov_cli import __version__, main
 
 
 def test_version():

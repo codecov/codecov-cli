@@ -34,6 +34,4 @@ class CodecovOption(click.Option):
                 )
                 if res is not None:
                     return res
-        raise click.BadParameter(
-            f"{self.fallback_field.name} needs to be set by either command line or envvars or CI"
-        )
+        return None

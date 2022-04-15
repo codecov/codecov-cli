@@ -10,6 +10,9 @@ class FallbackFieldEnum(Enum):
     build_code = auto()
     job_code = auto()
     pull_request_number = auto()
+    slug = auto()
+    branch = auto()
+    service = auto()
 
 
 class CodecovOption(click.Option):

@@ -4,4 +4,4 @@ class CoverageFileFinder(object):
 
 
 def select_coverage_file_finder():
-    CoverageFileFinder()
+    return CoverageFileFinder()

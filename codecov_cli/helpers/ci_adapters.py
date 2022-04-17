@@ -9,59 +9,59 @@ class FallbackerBase(ABC):
     def __init__(self):
         # If a fallbacker has extra fields, they should be added to this dictionary in the fallbacker's constructor.
         self.fallback_to_prop = {
-            FallbackFieldEnum.branch: self.branch,
-            FallbackFieldEnum.build_code: self.build_code,
-            FallbackFieldEnum.build_url: self.build_url,
-            FallbackFieldEnum.commit_sha: self.commit_sha,
-            FallbackFieldEnum.slug: self.slug,
-            FallbackFieldEnum.service: self.service,
-            FallbackFieldEnum.pull_request_number: self.pull_request_number,
-            FallbackFieldEnum.job_code: self.job_code,
+            FallbackFieldEnum.branch: self._branch,
+            FallbackFieldEnum.build_code: self._build_code,
+            FallbackFieldEnum.build_url: self._build_url,
+            FallbackFieldEnum.commit_sha: self._commit_sha,
+            FallbackFieldEnum.slug: self._slug,
+            FallbackFieldEnum.service: self._service,
+            FallbackFieldEnum.pull_request_number: self._pull_request_number,
+            FallbackFieldEnum.job_code: self._job_code,
         }
 
     def get_fallback_value(
         self, fallback_field: FallbackFieldEnum
     ) -> typing.Optional[str]:
-        return self.fallback_to_prop[fallback_field]
+        return self.fallback_to_prop.get(fallback_field)
 
     @property
     @abstractmethod
-    def commit_sha(self):
+    def _commit_sha(self):
         pass
 
     @property
     @abstractmethod
-    def build_url(self):
+    def _build_url(self):
         pass
 
     @property
     @abstractmethod
-    def build_code(self):
+    def _build_code(self):
         pass
 
     @property
     @abstractmethod
-    def job_code(self):
+    def _job_code(self):
         pass
 
     @property
     @abstractmethod
-    def pull_request_number(self):
+    def _pull_request_number(self):
         pass
 
     @property
     @abstractmethod
-    def slug(self):
+    def _slug(self):
         pass
 
     @property
     @abstractmethod
-    def branch(self):
+    def _branch(self):
         pass
 
     @property
     @abstractmethod
-    def service(self):
+    def _service(self):
         pass
 
 
@@ -69,27 +69,27 @@ class CircleCIFallbacker(FallbackerBase):
     # https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables
 
     @property
-    def commit_sha(self):
+    def _commit_sha(self):
         return os.getenv("CIRCLE_SHA1")
 
     @property
-    def build_url(self):
+    def _build_url(self):
         return os.getenv("CIRCLE_BUILD_URL")
 
     @property
-    def build_code(self):
+    def _build_code(self):
         return os.getenv("CIRCLE_BUILD_NUM")
 
     @property
-    def job_code(self):
+    def _job_code(self):
         return os.getenv("CIRCLE_NODE_INDEX")
 
     @property
-    def pull_request_number(self):
+    def _pull_request_number(self):
         return os.getenv("CIRCLE_PR_NUMBER")
 
     @property
-    def slug(self):
+    def _slug(self):
         project_username = os.getenv("CIRCLE_PROJECT_USERNAME")
         project_repo_name = os.getenv("CIRCLE_PROJECT_REPONAME")
 
@@ -104,11 +104,11 @@ class CircleCIFallbacker(FallbackerBase):
         return None
 
     @property
-    def branch(self):
+    def _branch(self):
         return os.getenv("CIRCLE_BRANCH")
 
     @property
-    def service(self):
+    def _service(self):
         return "circleci"
 
 

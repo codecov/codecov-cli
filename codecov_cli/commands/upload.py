@@ -78,7 +78,7 @@ def _validate_token_argument(ctx, params, value) -> uuid.UUID:
     help="Codecov upload token represented as UUID or path to file containing the token",
     type=str,
     callback=_validate_token_argument,
-    default=lambda: os.environ.get("CODECOV_TOKEN", None),
+    envvar="CODECOV_TOKEN",
     show_default="Value of CODECOV_TOKEN environment variable",
 )
 @click.option("--env-var", "env_vars", multiple=True, callback=_turn_env_vars_into_dict)

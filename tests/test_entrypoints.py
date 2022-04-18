@@ -1,7 +1,11 @@
 import pytest
 import uuid
+import responses
+import requests
 
+from responses import matchers
 from unittest.mock import Mock, MagicMock
+from urllib import parse
 
 
 from codecov_cli.types import UploadCollectionResult
@@ -11,10 +15,6 @@ from codecov_cli import __version__ as codecov_cli_version
 
 
 class TestUploadSender(object):
-    class MockHTTPResponse:
-        status_code = -1
-        text = ""
-
     @pytest.fixture
     def fake_upload_data(self):
         upload_collection = UploadCollectionResult(["1", "apple.py", "3"], [])
@@ -23,13 +23,23 @@ class TestUploadSender(object):
         return (upload_collection, random_token, random_sha)
 
     @pytest.fixture
-    def mocked_post(self, mocker):
-        return mocker.patch(
-            "codecov_cli.entrypoints.requests.post", return_value=self.MockHTTPResponse
+    def mocked_responses(self):
+        with responses.RequestsMock() as rsps:
+            yield rsps
+
+    @pytest.fixture()
+    def mocked_post(self, mocked_responses):
+        resp = responses.Response(
+            responses.POST,
+            "https://codecov.io/upload/v4",
+            body="aa\nbb",
+            status=200,
         )
+        mocked_responses.add(resp)
+        yield resp
 
     def test_upload_sender_post_called_with_right_parameters(
-        self, fake_upload_data, mocked_post
+        self, fake_upload_data, mocked_responses, mocked_post
     ):
         (upload_collection, random_token, random_sha) = fake_upload_data
 
@@ -39,22 +49,29 @@ class TestUploadSender(object):
             "commit": random_sha,
         }
 
-        self.MockHTTPResponse.status_code = 200
-        self.MockHTTPResponse.text = "aa\nbb"
+        mocked_post.match = match = [
+            matchers.query_param_matcher(params),
+            matchers.header_matcher(headers),
+        ]
 
         sender = UploadSender().send_upload_data(
             upload_collection, random_sha, random_token
         )
 
-        mocked_post.assert_called_with(
-            "https://codecov.io/upload/v4", headers=headers, params=params
-        )
+        assert len(mocked_responses.calls) == 1
 
-    def test_upload_sender_result_success(self, fake_upload_data, mocked_post):
+        req_made = mocked_responses.calls[0].request
+
+        assert req_made.url.split("?")[0] == "https://codecov.io/upload/v4"
+        assert dict(parse.parse_qsl(parse.urlsplit(req_made.url).query)) == params
+        assert (
+            req_made.headers.items() >= headers.items()
+        )  # test dict is a subset of the other
+
+    def test_upload_sender_result_success(
+        self, fake_upload_data, mocked_responses, mocked_post
+    ):
         (upload_collection, random_token, random_sha) = fake_upload_data
-
-        self.MockHTTPResponse.status_code = 200
-        self.MockHTTPResponse.text = "aa\nbb"
 
         sender = UploadSender().send_upload_data(
             upload_collection, random_sha, random_token
@@ -63,30 +80,31 @@ class TestUploadSender(object):
         assert sender.error is None
         assert not sender.warnings
 
-    def test_upload_sender_result_fail(self, fake_upload_data, mocked_post):
+    def test_upload_sender_result_fail(
+        self, fake_upload_data, mocked_responses, mocked_post
+    ):
         (upload_collection, random_token, random_sha) = fake_upload_data
 
-        self.MockHTTPResponse.status_code = 400
-        self.MockHTTPResponse.text = ""
+        mocked_post.status = 400
 
         sender = UploadSender().send_upload_data(
             upload_collection, random_sha, random_token
         )
 
         assert sender.error is not None
-        assert str(self.MockHTTPResponse.status_code) in sender.error.code
+        assert "400" in sender.error.code
 
         assert sender.warnings is not None
 
     def test_upload_sender_http_error_with_invalid_sha(
-        self, fake_upload_data, mocked_post
+        self, fake_upload_data, mocked_responses, mocked_post
     ):
         (upload_collection, random_token, random_sha) = fake_upload_data
 
         random_sha = "invalid"
 
-        self.MockHTTPResponse.status_code = 400
-        self.MockHTTPResponse.text = "Invalid request parameters"
+        mocked_post.body = "Invalid request parameters"
+        mocked_post.status = 400
 
         sender = UploadSender().send_upload_data(
             upload_collection, random_sha, random_token
@@ -94,4 +112,4 @@ class TestUploadSender(object):
 
         assert sender.error is not None
         assert "HTTP Error 400" in sender.error.code
-        assert self.MockHTTPResponse.text in sender.error.description
+        assert "Invalid request parameters" in sender.error.description

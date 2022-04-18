@@ -21,7 +21,7 @@ class UploadCollector(object):
         self.network_finder = network_finder
         self.coverage_file_finder = coverage_file_finder
 
-    def generate_upload_data(self, commit_sha: str, token: uuid.UUID) -> ...:
+    def generate_upload_data(self) -> ...:
         for prep in self.preparation_plugins:
             prep.run_preparation(self)
         network = self.network_finder.find_files()
@@ -29,6 +29,4 @@ class UploadCollector(object):
         return UploadCollectionResult(
             network=network,
             coverage_files=coverage_files,
-            commit_sha=commit_sha,
-            token=token,
         )

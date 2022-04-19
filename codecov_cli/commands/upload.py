@@ -13,21 +13,7 @@ def _turn_env_vars_into_dict(ctx, params, value):
     return dict((v, os.getenv(v, None)) for v in value)
 
 
-def _validate_token_argument(ctx, params, value) -> uuid.UUID:
-    try:
-        return click.UUID(value)
-    except click.exceptions.BadParameter:
-        print("Couldn't parse input token as a UUID. trying to parse it as a file...")
 
-    try:
-        with open(value, "r") as tokenFile:
-            return click.UUID(tokenFile.readline())
-    except click.exceptions.BadParameter as err:
-        print(f"The provided file content couldn't be parsed as a valid token: {err}")
-    except OSError as err:
-        print(f"File {value} coulnd't be opened for the following reason: {err}")
-
-    raise click.exceptions.BadParameter("The provided parameter couldn't be parsed")
 
 
 @click.command()
@@ -76,8 +62,7 @@ def _validate_token_argument(ctx, params, value) -> uuid.UUID:
     "-t",
     "--token",
     help="Codecov upload token represented as UUID or path to file containing the token",
-    type=str,
-    callback=_validate_token_argument,
+    type=click.UUID,
     envvar="CODECOV_TOKEN",
     show_default="Value of CODECOV_TOKEN environment variable",
 )

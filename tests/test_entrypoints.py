@@ -119,10 +119,11 @@ class TestUploadSender(object):
 
 class TestPayloadGeneration(object):
     def test_generate_env_vars_section(self):
-        expected = (b"var1=value1\n"
-        + b"var2=value2\n"
-        + b"abc=valbc\n"
-        + b"<<<<<< ENV\n"
+        expected = (b"""var1=value1
+        var2=value2
+        abc=valbc
+        <<<<<< ENV
+        """
         )
         
         env_vars = {
@@ -132,7 +133,7 @@ class TestPayloadGeneration(object):
             "abc": "valbc"
         }
         
-        expected_lines = set(expected.split(b'\n'))
+        expected_lines = set(line.strip() for line in expected.split(b'\n'))
         actual_lines = set(UploadSender()._generate_env_vars_section(env_vars).split(b'\n'))
         
         

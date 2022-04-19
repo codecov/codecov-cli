@@ -155,3 +155,40 @@ class TestPayloadGeneration(object):
         
         assert UploadSender()._generate_env_vars_section(env_vars) == b""
 
+
+
+
+    def test_generate_network_section(self):
+        network_files = [
+            "./codecov.yaml",
+            "Makefile",
+            "awesome/__init__.py",
+            "awesome/code_fib.py",
+            "dev.sh",
+            "tests/__init__.py",
+            "tests/test_number_two.py",
+            "tests/test_sample.py",
+            "unit.coverage.xml",
+        ]
+        
+        expected_network_section = (b"""./codecov.yaml
+                                    Makefile
+                                    awesome/__init__.py
+                                    awesome/code_fib.py
+                                    dev.sh
+                                    tests/__init__.py
+                                    tests/test_number_two.py
+                                    tests/test_sample.py
+                                    unit.coverage.xml
+                                    <<<<<< network
+                                    """)
+        
+        upload_data = UploadCollectionResult(network_files, [])
+        
+        actual_network_section = UploadSender()._generate_network_section(upload_data)
+        
+        assert [line.strip() for line in expected_network_section.split(b"\n")] == [line for line in actual_network_section.split(b"\n")]
+        
+        
+    def test_generate_network_section_empty_result(self):
+        assert UploadSender()._generate_network_section(UploadCollectionResult([], [])) == b""

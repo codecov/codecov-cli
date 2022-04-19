@@ -49,7 +49,7 @@ class TestUploadSender(object):
             "commit": random_sha,
         }
 
-        mocked_post.match = match = [
+        mocked_post.match = [
             matchers.query_param_matcher(params),
             matchers.header_matcher(headers),
         ]

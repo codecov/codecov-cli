@@ -37,16 +37,14 @@ class UploadSendingResult(object):
 
 class UploadSender(object):
     def send_upload_data(
-        self, upload_data: UploadCollectionResult
+        self, upload_data: UploadCollectionResult, commit_sha: str, token: uuid.UUID, env_vars: typing.Dict[str, str],
     ) -> UploadSendingResult:
-        payload = {
-            "network": upload_data.network,
-        }
+        
         params = {
             "package": f"codecov-cli/{codecov_cli_version}",
-            "commit": upload_data.commit_sha,
+            "commit": commit_sha,
         }
-        headers = {"X-Upload-Token": upload_data.token.hex}
+        headers = {"X-Upload-Token": token.hex}
 
         resp = requests.post(
             "https://codecov.io/upload/v4", headers=headers, params=params
@@ -64,7 +62,7 @@ class UploadSender(object):
 
         result_url, put_url = resp.text.split("\n")
 
-        reports_payload = self._generate_payload(upload_data)
+        reports_payload = self._generate_payload(upload_data, env_vars)
         resp = requests.put(put_url, data=reports_payload)
 
         if resp.status_code >= 400:
@@ -80,18 +78,12 @@ class UploadSender(object):
         return UploadSendingResult(error=None, warnings=[])
 
     def _generate_payload(self, upload_data: UploadCollectionResult) -> bytes:
-        env_vars_section = self._generate_env_vars_section(upload_data)
+        env_vars_section = self._generate_env_vars_section(env_vars)
         network_section = self._generate_network_section(upload_data)
 
         return b"".join([env_vars_section, network_section])
 
-    def _generate_env_vars_section(self, upload_data: UploadCollectionResult) -> bytes:
-        env_vars = (
-            upload_data.env_vars_clargs
-            if upload_data.env_vars_clargs
-            else self._get_env_vars()
-        )
-
+    def _generate_env_vars_section(self, env_vars) -> bytes:
         filtered_env_vars = {
             key: value for key, value in env_vars.items() if value is not None
         }
@@ -103,14 +95,7 @@ class UploadSender(object):
             f"{env_var}={value}\n" for env_var, value in filtered_env_vars.items()
         )
         return env_vars_section.encode() + b"<<<<<< ENV\n"
-
-    def _get_env_vars(self) -> typing.Dict[str, typing.Optional[str]]:
-        """Extracts and formats upload environment variables from CODECOV_ENV environment variable, or empty dictionary if CODECOV_ENV not found"""
-        codecov_env = os.getenv("CODECOV_ENV", None)
-        if not codecov_env:
-            return {}
-
-        return {var: os.getenv(var, None) for var in codecov_env.split(",")}
+    
 
     def _generate_network_section(self, upload_data: UploadCollectionResult) -> bytes:
         network_files = upload_data.network
@@ -156,14 +141,10 @@ def do_upload_logic(
     collector = UploadCollector(
         preparation_plugins, network_finder, coverage_file_selector
     )
-    upload_data = collector.generate_upload_data(
-        commit_sha,
-        token,
-        env_vars,
-    )
+    upload_data = collector.generate_upload_data()
     print(upload_data)
     sender = UploadSender()
-    sending_result = sender.send_upload_data(upload_data)
+    sending_result = sender.send_upload_data(upload_data, commit_sha, token, env_vars)
     if sending_result.warnings:
         number_warnings = len(sending_result.warnings)
         pluralization = "warnings" if number_warnings > 1 else "warning"

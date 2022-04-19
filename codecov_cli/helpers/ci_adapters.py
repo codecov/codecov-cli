@@ -26,7 +26,7 @@ class CIAdapterBase(ABC):
         if not fallback_field in self.fallback_to_method:
             raise ValueError("The provided fallback_field is not valid")
 
-        return self.fallback_to_method.get(fallback_field)()
+        return self.fallback_to_method[fallback_field]()
 
     @abstractmethod
     def _get_commit_sha(self):

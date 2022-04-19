@@ -79,7 +79,6 @@ class UploadSender(object):
 
     def _generate_payload(self, upload_data: UploadCollectionResult, env_vars: typing.Dict[str, str]) -> bytes:
         env_vars_section = self._generate_env_vars_section(env_vars)
-        print(env_vars_section.decode())
         return env_vars_section
 
     def _generate_env_vars_section(self, env_vars) -> bytes:

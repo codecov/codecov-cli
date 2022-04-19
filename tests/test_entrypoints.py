@@ -119,10 +119,11 @@ class TestUploadSender(object):
 
 class TestPayloadGeneration(object):
     def test_generate_env_vars_section(self):
-        expected = (b"""var1=value1
+        terminator = b"<<<<<< ENV"
+        
+        expected_without_terminator = (b"""var1=value1
         var2=value2
         abc=valbc
-        <<<<<< ENV
         """
         )
         
@@ -133,11 +134,19 @@ class TestPayloadGeneration(object):
             "abc": "valbc"
         }
         
-        expected_lines = set(line.strip() for line in expected.split(b'\n'))
-        actual_lines = set(UploadSender()._generate_env_vars_section(env_vars).split(b'\n'))
+        actual_lines = UploadSender()._generate_env_vars_section(env_vars).split(b'\n')
+        assert terminator in actual_lines
+        
+        # lines might not be in the same order since env_vars is a dict. lines' order doesn't matter, only last (non-empty) line must be terminator
+        
+        expected_lines_without_terminator = {line.strip() for line in expected_without_terminator.split(b'\n')}
+        actual_lines_without_terminator = {line for line in actual_lines if line != terminator}
         
         
-        assert actual_lines == expected_lines
+        assert expected_lines_without_terminator == actual_lines_without_terminator
+        
+        assert actual_lines[-2] == terminator # assuming that there will alawys be a new line after terminator
+        
         
     def test_generate_env_vars_section_empty_result(self):
         env_vars = {

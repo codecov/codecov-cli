@@ -12,6 +12,7 @@ from codecov_cli.types import UploadCollectionResult
 from codecov_cli.entrypoints import UploadSendingResult
 from codecov_cli.entrypoints import UploadSender
 from codecov_cli import __version__ as codecov_cli_version
+from codecov_cli.entrypoints import UploadSender
 
 
 class TestUploadSender(object):
@@ -113,3 +114,34 @@ class TestUploadSender(object):
         assert sender.error is not None
         assert "HTTP Error 400" in sender.error.code
         assert "Invalid request parameters" in sender.error.description
+
+
+
+class TestPayloadGeneration(object):
+    def test_generate_env_vars_section(self):
+        expected = (b"var1=value1\n"
+        + b"var2=value2\n"
+        + b"abc=valbc\n"
+        + b"<<<<<< ENV\n"
+        )
+        
+        env_vars = {
+            "var1": "value1",
+            "var2": "value2",
+            "var3": None,
+            "abc": "valbc"
+        }
+        
+        expected_lines = set(expected.split(b'\n'))
+        actual_lines = set(UploadSender()._generate_env_vars_section(env_vars).split(b'\n'))
+        
+        
+        assert actual_lines == expected_lines
+        
+    def test_generate_env_vars_section_empty_result(self):
+        env_vars = {
+            "var1": None
+        }
+        
+        assert UploadSender()._generate_env_vars_section(env_vars) == b""
+

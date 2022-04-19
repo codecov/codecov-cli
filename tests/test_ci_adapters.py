@@ -1,9 +1,10 @@
+import os
 from enum import Enum
 
 import pytest
 
 from codecov_cli.fallbacks import FallbackFieldEnum
-from codecov_cli.helpers.ci_adapters import CircleCIFallbacker
+from codecov_cli.helpers.ci_adapters import CircleCICIAdapter
 
 
 class TestCircleCi(object):
@@ -19,77 +20,104 @@ class TestCircleCi(object):
         CIRCLE_BRANCH = "CIRCLE_BRANCH"
 
     # Test individual fields
-    def test_commit_sha(self, monkeypatch):
+    def test_commit_sha(self, mocker):
+        actual = CircleCICIAdapter().get_fallback_value(FallbackFieldEnum.commit_sha)
+        assert actual is None
+
         expected = "some_random_sha"
-        monkeypatch.setenv(self.EnvEnum.CIRCLE_SHA1, expected)
+        mocker.patch.dict(os.environ, {self.EnvEnum.CIRCLE_SHA1: expected})
 
-        actual = CircleCIFallbacker().get_fallback_value(FallbackFieldEnum.commit_sha)
+        actual = CircleCICIAdapter().get_fallback_value(FallbackFieldEnum.commit_sha)
 
         assert actual == expected
 
-    def test_build_url(self, monkeypatch):
+    def test_build_url(self, mocker):
+        actual = CircleCICIAdapter().get_fallback_value(FallbackFieldEnum.build_url)
+        assert actual is None
+
         expected = "test@test.org/test"
-        monkeypatch.setenv(self.EnvEnum.CIRCLE_BUILD_URL, expected)
+        mocker.patch.dict(os.environ, {self.EnvEnum.CIRCLE_BUILD_URL: expected})
 
-        actual = CircleCIFallbacker().get_fallback_value(FallbackFieldEnum.build_url)
+        actual = CircleCICIAdapter().get_fallback_value(FallbackFieldEnum.build_url)
 
         assert actual == expected
 
-    def test_build_code(self, monkeypatch):
+    def test_build_code(self, mocker):
+        actual = CircleCICIAdapter().get_fallback_value(FallbackFieldEnum.build_code)
+        assert actual is None
+
         expected = "test_code"
-        monkeypatch.setenv(self.EnvEnum.CIRCLE_BUILD_NUM, expected)
+        mocker.patch.dict(os.environ, {self.EnvEnum.CIRCLE_BUILD_NUM: expected})
 
-        actual = CircleCIFallbacker().get_fallback_value(FallbackFieldEnum.build_code)
+        actual = CircleCICIAdapter().get_fallback_value(FallbackFieldEnum.build_code)
 
         assert actual == expected
 
-    def test_job_code(self, monkeypatch):
+    def test_job_code(self, mocker):
+        actual = CircleCICIAdapter().get_fallback_value(FallbackFieldEnum.job_code)
+        assert actual is None
+
         expected = "test_code"
-        monkeypatch.setenv(self.EnvEnum.CIRCLE_NODE_INDEX, expected)
+        mocker.patch.dict(os.environ, {self.EnvEnum.CIRCLE_NODE_INDEX: expected})
 
-        actual = CircleCIFallbacker().get_fallback_value(FallbackFieldEnum.job_code)
+        actual = CircleCICIAdapter().get_fallback_value(FallbackFieldEnum.job_code)
 
         assert actual == expected
 
-    def test_pull_request_number(self, monkeypatch):
+    def test_pull_request_number(self, mocker):
+        actual = CircleCICIAdapter().get_fallback_value(
+            FallbackFieldEnum.pull_request_number
+        )
+        assert actual is None
+
         expected = "random_number"
-        monkeypatch.setenv(self.EnvEnum.CIRCLE_PR_NUMBER, expected)
+        mocker.patch.dict(os.environ, {self.EnvEnum.CIRCLE_PR_NUMBER: expected})
 
-        actual = CircleCIFallbacker().get_fallback_value(
+        actual = CircleCICIAdapter().get_fallback_value(
             FallbackFieldEnum.pull_request_number
         )
 
         assert actual == expected
 
-    def test_slug_from_project_and_repo_names(self, monkeypatch):
+    def test_slug_from_project_and_repo_names(self, mocker):
         project_username = "myname"
         repo_name = "myrepo123"
-        monkeypatch.setenv(self.EnvEnum.CIRCLE_PROJECT_USERNAME, project_username)
-        monkeypatch.setenv(self.EnvEnum.CIRCLE_PROJECT_REPONAME, repo_name)
+        mocker.patch.dict(
+            os.environ, {self.EnvEnum.CIRCLE_PROJECT_USERNAME: project_username}
+        )
+        mocker.patch.dict(os.environ, {self.EnvEnum.CIRCLE_PROJECT_REPONAME: repo_name})
 
         expected = f"{project_username}/{repo_name}"
 
-        actual = CircleCIFallbacker().get_fallback_value(FallbackFieldEnum.slug)
+        actual = CircleCICIAdapter().get_fallback_value(FallbackFieldEnum.slug)
 
         assert actual == expected
 
-    def test_slug_from_repo_url(self, monkeypatch):
+    def test_slug_from_repo_url(self, mocker):
         repo_url = "git@github.com:codecov/codecov-cli.git"
-        monkeypatch.setenv(self.EnvEnum.CIRCLE_REPOSITORY_URL, repo_url)
+        mocker.patch.dict(os.environ, {self.EnvEnum.CIRCLE_REPOSITORY_URL: repo_url})
 
         expected = "codecov/codecov-cli"
 
-        actual = CircleCIFallbacker().get_fallback_value(FallbackFieldEnum.slug)
+        actual = CircleCICIAdapter().get_fallback_value(FallbackFieldEnum.slug)
 
         assert actual == expected
 
-    def test_branch(self, monkeypatch):
+    def test_slug_doesnt_exist(self):
+        actual = CircleCICIAdapter().get_fallback_value(FallbackFieldEnum.slug)
+        assert actual is None
+
+    def test_branch(self, mocker):
+        actual = CircleCICIAdapter().get_fallback_value(FallbackFieldEnum.branch)
+        assert actual is None
+
         expected = "random"
-        monkeypatch.setenv(self.EnvEnum.CIRCLE_BRANCH, expected)
+        mocker.patch.dict(os.environ, {self.EnvEnum.CIRCLE_BRANCH: expected})
 
-        actual = CircleCIFallbacker().get_fallback_value(FallbackFieldEnum.branch)
+        actual = CircleCICIAdapter().get_fallback_value(FallbackFieldEnum.branch)
 
         assert actual == expected
 
-    def test_returns_none_if_unvalid_field(self, monkeypatch):
-        assert CircleCIFallbacker().get_fallback_value("some random key x 123") is None
+    def test_returns_none_if_unvalid_field(self, mocker):
+        with pytest.raises(ValueError) as ex:
+            CircleCICIAdapter().get_fallback_value("some random key x 123")

@@ -257,6 +257,6 @@ class TestPayloadGeneration(object):
         
         actual_report = UploadSender()._generate_payload(None, None)
         
-        assert actual_report == reports_examples.
+        assert actual_report == reports_examples.env_network_coverage_sections
         
         

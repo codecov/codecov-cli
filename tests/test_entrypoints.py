@@ -8,6 +8,7 @@ from unittest.mock import Mock, MagicMock
 from urllib import parse
 
 
+from tests.data import reports_examples
 from codecov_cli.types import UploadCollectionResult
 from codecov_cli.entrypoints import UploadSendingResult
 from codecov_cli.entrypoints import UploadSender
@@ -116,47 +117,39 @@ class TestUploadSender(object):
         assert "Invalid request parameters" in sender.error.description
 
 
-
 class TestPayloadGeneration(object):
     def test_generate_env_vars_section(self):
         terminator = b"<<<<<< ENV"
-        
-        expected_without_terminator = (b"""var1=value1
+
+        expected_without_terminator = b"""var1=value1
         var2=value2
         abc=valbc
         """
-        )
-        
-        env_vars = {
-            "var1": "value1",
-            "var2": "value2",
-            "var3": None,
-            "abc": "valbc"
-        }
-        
-        actual_lines = UploadSender()._generate_env_vars_section(env_vars).split(b'\n')
+
+        env_vars = {"var1": "value1", "var2": "value2", "var3": None, "abc": "valbc"}
+
+        actual_lines = UploadSender()._generate_env_vars_section(env_vars).split(b"\n")
         assert terminator in actual_lines
-        
+
         # lines might not be in the same order since env_vars is a dict. lines' order doesn't matter, only last (non-empty) line must be terminator
-        
-        expected_lines_without_terminator = {line.strip() for line in expected_without_terminator.split(b'\n')}
-        actual_lines_without_terminator = {line for line in actual_lines if line != terminator}
-        
-        
-        assert expected_lines_without_terminator == actual_lines_without_terminator
-        
-        assert actual_lines[-2] == terminator # assuming that there will alawys be a new line after terminator
-        
-        
-    def test_generate_env_vars_section_empty_result(self):
-        env_vars = {
-            "var1": None
+
+        expected_lines_without_terminator = {
+            line.strip() for line in expected_without_terminator.split(b"\n")
         }
-        
+        actual_lines_without_terminator = {
+            line for line in actual_lines if line != terminator
+        }
+
+        assert expected_lines_without_terminator == actual_lines_without_terminator
+
+        assert (
+            actual_lines[-2] == terminator
+        )  # assuming that there will alawys be a new line after terminator
+
+    def test_generate_env_vars_section_empty_result(self):
+        env_vars = {"var1": None}
+
         assert UploadSender()._generate_env_vars_section(env_vars) == b""
-
-
-
 
     def test_generate_network_section(self):
         network_files = [
@@ -170,8 +163,8 @@ class TestPayloadGeneration(object):
             "tests/test_sample.py",
             "unit.coverage.xml",
         ]
-        
-        expected_network_section = (b"""./codecov.yaml
+
+        expected_network_section = b"""./codecov.yaml
                                     Makefile
                                     awesome/__init__.py
                                     awesome/code_fib.py
@@ -181,14 +174,89 @@ class TestPayloadGeneration(object):
                                     tests/test_sample.py
                                     unit.coverage.xml
                                     <<<<<< network
-                                    """)
-        
+                                    """
+
         upload_data = UploadCollectionResult(network_files, [])
-        
+
         actual_network_section = UploadSender()._generate_network_section(upload_data)
-        
-        assert [line.strip() for line in expected_network_section.split(b"\n")] == [line for line in actual_network_section.split(b"\n")]
-        
-        
+
+        assert [line.strip() for line in expected_network_section.split(b"\n")] == [
+            line for line in actual_network_section.split(b"\n")
+        ]
+
     def test_generate_network_section_empty_result(self):
-        assert UploadSender()._generate_network_section(UploadCollectionResult([], [])) == b""
+        assert (
+            UploadSender()._generate_network_section(UploadCollectionResult([], []))
+            == b""
+        )
+
+
+    def test_formate_coverage_file(self, mocker):
+        fake_result_file = mocker.MagicMock()
+        mocker.patch(
+            "codecov_cli.entrypoints.UploadCollectionResultFile",
+            return_value=fake_result_file,
+        )
+
+        coverage_file_seperated = reports_examples.coverage_file_section_simple.split(
+            b"\n", 1
+        )
+
+        fake_result_file.get_filename.return_value = (
+            coverage_file_seperated[0].removeprefix(b"# path=").strip()
+        )
+        fake_result_file.get_content.return_value = coverage_file_seperated[
+            1
+        ].removesuffix(b"\n<<<<<< EOF\n")
+
+        actual_coverage_file_section = UploadSender()._formate_coverage_file(
+            fake_result_file
+        )
+
+        assert (
+            actual_coverage_file_section
+            == reports_examples.coverage_file_section_simple
+        )
+
+    def test_generage_coverage_files_section(self, mocker):
+
+        mocker.patch(
+            "codecov_cli.entrypoints.UploadSender._formate_coverage_file",
+            side_effect=lambda file_bytes: file_bytes,
+        )
+
+        coverage_files = [
+            reports_examples.coverage_file_section_simple,
+            reports_examples.coverage_file_section_simple,
+            reports_examples.coverage_file_section_small,
+            reports_examples.coverage_file_section_simple,
+        ]
+
+        actual_section = UploadSender()._generage_coverage_files_section(
+            UploadCollectionResult([], coverage_files)
+        )
+
+        expected_section = b"".join(coverage_files)
+
+        assert actual_section == expected_section
+
+
+    def test_generate_payload_overall(self, mocker):
+        mocker.patch(
+            "codecov_cli.entrypoints.UploadSender._generate_env_vars_section",
+            return_value=reports_examples.env_section,
+        )
+        mocker.patch(
+            "codecov_cli.entrypoints.UploadSender._generate_network_section",
+            return_value=reports_examples.network_section,
+        )
+        mocker.patch(
+            "codecov_cli.entrypoints.UploadSender._generage_coverage_files_section",
+            return_value=reports_examples.coverage_file_section_simple,
+        )
+        
+        actual_report = UploadSender()._generate_payload(None, None)
+        
+        assert actual_report == reports_examples.
+        
+        

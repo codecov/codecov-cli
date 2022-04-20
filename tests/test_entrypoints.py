@@ -29,19 +29,33 @@ class TestUploadSender(object):
         with responses.RequestsMock() as rsps:
             yield rsps
 
-    @pytest.fixture()
+    @pytest.fixture
     def mocked_post(self, mocked_responses):
         resp = responses.Response(
             responses.POST,
             "https://codecov.io/upload/v4",
-            body="aa\nbb",
+            body="https://resulturl.com\nhttps://puturl.com",
             status=200,
         )
         mocked_responses.add(resp)
         yield resp
 
+
+    @pytest.fixture
+    def mocked_put(self, mocked_responses):
+        resp = responses.Response(
+            responses.PUT,
+            "https://puturl.com",
+            status=200    
+        )
+        mocked_responses.add(resp)
+        print("take that")
+        yield resp
+
+
+        
     def test_upload_sender_post_called_with_right_parameters(
-        self, fake_upload_data, mocked_responses, mocked_post
+        self, fake_upload_data, mocked_responses, mocked_post, mocked_put
     ):
         (upload_collection, random_token, random_sha) = fake_upload_data
 
@@ -57,32 +71,53 @@ class TestUploadSender(object):
         ]
 
         sender = UploadSender().send_upload_data(
-            upload_collection, random_sha, random_token
+            upload_collection, random_sha, random_token, {}
         )
 
-        assert len(mocked_responses.calls) == 1
+        assert len(mocked_responses.calls) == 2
 
-        req_made = mocked_responses.calls[0].request
+        post_req_made = mocked_responses.calls[0].request
 
-        assert req_made.url.split("?")[0] == "https://codecov.io/upload/v4"
-        assert dict(parse.parse_qsl(parse.urlsplit(req_made.url).query)) == params
+        assert post_req_made.url.split("?")[0] == "https://codecov.io/upload/v4"
+        assert dict(parse.parse_qsl(parse.urlsplit(post_req_made.url).query)) == params
         assert (
-            req_made.headers.items() >= headers.items()
+            post_req_made.headers.items() >= headers.items()
         )  # test dict is a subset of the other
 
-    def test_upload_sender_result_success(
-        self, fake_upload_data, mocked_responses, mocked_post
+
+    def test_upload_sender_put_called_with_right_parameters(
+        self, fake_upload_data, mocked_responses, mocked_post, mocked_put
     ):
         (upload_collection, random_token, random_sha) = fake_upload_data
 
         sender = UploadSender().send_upload_data(
-            upload_collection, random_sha, random_token
+            upload_collection, random_sha, random_token, {}
         )
 
+        assert len(mocked_responses.calls) == 2
+        
+        put_req_mad = mocked_responses.calls[1].request
+        assert put_req_mad.url == "https://puturl.com/"
+        
+        
+
+    def test_upload_sender_result_success(
+        self, fake_upload_data, mocked_responses, mocked_post, mocked_put
+    ):
+        (upload_collection, random_token, random_sha) = fake_upload_data
+
+        sender = UploadSender().send_upload_data(
+            upload_collection, random_sha, random_token, {}
+        )
+
+        # default status for both put and post is 200
+        
         assert sender.error is None
         assert not sender.warnings
 
-    def test_upload_sender_result_fail(
+
+
+    def test_upload_sender_result_fail_post_400(
         self, fake_upload_data, mocked_responses, mocked_post
     ):
         (upload_collection, random_token, random_sha) = fake_upload_data
@@ -90,13 +125,34 @@ class TestUploadSender(object):
         mocked_post.status = 400
 
         sender = UploadSender().send_upload_data(
-            upload_collection, random_sha, random_token
+            upload_collection, random_sha, random_token, {}
         )
-
+        
+        
+        assert len(mocked_responses.calls) == 1
         assert sender.error is not None
         assert "400" in sender.error.code
 
         assert sender.warnings is not None
+        
+        
+    def test_upload_sender_result_fail_put_400(
+        self, fake_upload_data, mocked_responses, mocked_post, mocked_put
+    ):
+        (upload_collection, random_token, random_sha) = fake_upload_data
+
+        mocked_put.status = 400
+
+        sender = UploadSender().send_upload_data(
+            upload_collection, random_sha, random_token, {}
+        )
+
+        assert len(mocked_responses.calls) == 2
+        assert sender.error is not None
+        assert "400" in sender.error.code
+
+        assert sender.warnings is not None
+        
 
     def test_upload_sender_http_error_with_invalid_sha(
         self, fake_upload_data, mocked_responses, mocked_post
@@ -109,7 +165,7 @@ class TestUploadSender(object):
         mocked_post.status = 400
 
         sender = UploadSender().send_upload_data(
-            upload_collection, random_sha, random_token
+            upload_collection, random_sha, random_token, {}
         )
 
         assert sender.error is not None

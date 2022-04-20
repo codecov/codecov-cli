@@ -78,7 +78,7 @@ class UploadSender(object):
 
         return UploadSendingResult(error=None, warnings=[])
 
-    def _generate_payload(self, upload_data: UploadCollectionResult) -> bytes:
+    def _generate_payload(self, upload_data: UploadCollectionResult, env_vars: typing.Dict[str, str]) -> bytes:
         env_vars_section = self._generate_env_vars_section(env_vars)
         network_section = self._generate_network_section(upload_data)
         coverage_files_section = self._generage_coverage_files_section(upload_data)

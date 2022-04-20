@@ -114,7 +114,7 @@ class UploadSender(object):
 
     def _formate_coverage_file(self, file) -> bytes:
         header = b"# path=" + file.get_filename() + b"\n"
-        file_content = file.get_content()
+        file_content = file.get_content() + b"\n"
         file_end = b"<<<<<< EOF\n"
 
         return header + file_content + file_end

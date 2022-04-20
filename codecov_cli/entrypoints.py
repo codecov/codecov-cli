@@ -12,6 +12,7 @@ from codecov_cli.network import GitFileFinder
 from codecov_cli.plugins import select_preparation_plugins
 from codecov_cli.types import UploadCollectionResult
 from codecov_cli.upload_collector import UploadCollector
+from codecov_cli.types import UploadCollectionResultFile
 
 
 @dataclass
@@ -112,7 +113,7 @@ class UploadSender(object):
             self._formate_coverage_file(file) for file in upload_data.coverage_files
         )
 
-    def _formate_coverage_file(self, file) -> bytes:
+    def _formate_coverage_file(self, file: UploadCollectionResultFile) -> bytes:
         header = b"# path=" + file.get_filename() + b"\n"
         file_content = file.get_content() + b"\n"
         file_end = b"<<<<<< EOF\n"

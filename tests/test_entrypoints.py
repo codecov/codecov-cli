@@ -39,19 +39,12 @@ class TestUploadSender(object):
         mocked_responses.add(resp)
         yield resp
 
-
     @pytest.fixture
     def mocked_put(self, mocked_responses):
-        resp = responses.Response(
-            responses.PUT,
-            "https://puturl.com",
-            status=200    
-        )
+        resp = responses.Response(responses.PUT, "https://puturl.com", status=200)
         mocked_responses.add(resp)
         yield resp
 
-
-        
     def test_upload_sender_post_called_with_right_parameters(
         self, fake_upload_data, mocked_responses, mocked_post, mocked_put
     ):
@@ -82,7 +75,6 @@ class TestUploadSender(object):
             post_req_made.headers.items() >= headers.items()
         )  # test dict is a subset of the other
 
-
     def test_upload_sender_put_called_with_right_parameters(
         self, fake_upload_data, mocked_responses, mocked_post, mocked_put
     ):
@@ -93,11 +85,9 @@ class TestUploadSender(object):
         )
 
         assert len(mocked_responses.calls) == 2
-        
+
         put_req_mad = mocked_responses.calls[1].request
         assert put_req_mad.url == "https://puturl.com/"
-        
-        
 
     def test_upload_sender_result_success(
         self, fake_upload_data, mocked_responses, mocked_post, mocked_put
@@ -109,11 +99,9 @@ class TestUploadSender(object):
         )
 
         # default status for both put and post is 200
-        
+
         assert sender.error is None
         assert not sender.warnings
-
-
 
     def test_upload_sender_result_fail_post_400(
         self, fake_upload_data, mocked_responses, mocked_post
@@ -125,15 +113,13 @@ class TestUploadSender(object):
         sender = UploadSender().send_upload_data(
             upload_collection, random_sha, random_token, {}
         )
-        
-        
+
         assert len(mocked_responses.calls) == 1
         assert sender.error is not None
         assert "400" in sender.error.code
 
         assert sender.warnings is not None
-        
-        
+
     def test_upload_sender_result_fail_put_400(
         self, fake_upload_data, mocked_responses, mocked_post, mocked_put
     ):
@@ -150,7 +136,6 @@ class TestUploadSender(object):
         assert "400" in sender.error.code
 
         assert sender.warnings is not None
-        
 
     def test_upload_sender_http_error_with_invalid_sha(
         self, fake_upload_data, mocked_responses, mocked_post
@@ -171,42 +156,36 @@ class TestUploadSender(object):
         assert "Invalid request parameters" in sender.error.description
 
 
-
 class TestPayloadGeneration(object):
     def test_generate_env_vars_section(self):
         terminator = b"<<<<<< ENV"
-        
-        expected_without_terminator = (b"""var1=value1
+
+        expected_without_terminator = b"""var1=value1
         var2=value2
         abc=valbc
         """
-        )
-        
-        env_vars = {
-            "var1": "value1",
-            "var2": "value2",
-            "var3": None,
-            "abc": "valbc"
-        }
-        
-        actual_lines = UploadSender()._generate_env_vars_section(env_vars).split(b'\n')
-        assert terminator in actual_lines
-        
-        # lines might not be in the same order since env_vars is a dict. lines' order doesn't matter, only last (non-empty) line must be terminator
-        
-        expected_lines_without_terminator = {line.strip() for line in expected_without_terminator.split(b'\n')}
-        actual_lines_without_terminator = {line for line in actual_lines if line != terminator}
-        
-        
-        assert expected_lines_without_terminator == actual_lines_without_terminator
-        
-        assert actual_lines[-2] == terminator # assuming that there will alawys be a new line after terminator
-        
-        
-    def test_generate_env_vars_section_empty_result(self):
-        env_vars = {
-            "var1": None
-        }
-        
-        assert UploadSender()._generate_env_vars_section(env_vars) == b""
 
+        env_vars = {"var1": "value1", "var2": "value2", "var3": None, "abc": "valbc"}
+
+        actual_lines = UploadSender()._generate_env_vars_section(env_vars).split(b"\n")
+        assert terminator in actual_lines
+
+        # lines might not be in the same order since env_vars is a dict. lines' order doesn't matter, only last (non-empty) line must be terminator
+
+        expected_lines_without_terminator = {
+            line.strip() for line in expected_without_terminator.split(b"\n")
+        }
+        actual_lines_without_terminator = {
+            line for line in actual_lines if line != terminator
+        }
+
+        assert expected_lines_without_terminator == actual_lines_without_terminator
+
+        assert (
+            actual_lines[-2] == terminator
+        )  # assuming that there will alawys be a new line after terminator
+
+    def test_generate_env_vars_section_empty_result(self):
+        env_vars = {"var1": None}
+
+        assert UploadSender()._generate_env_vars_section(env_vars) == b""

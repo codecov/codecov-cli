@@ -1,4 +1,4 @@
-"""This modules defiens some reports examples that are going to be used by tests."""
+"""This module defiens some reports examples that are going to be used by tests"""
 
 # Avoid parsing and removing indentation from multiline strings by defining them in the top level of this file
 

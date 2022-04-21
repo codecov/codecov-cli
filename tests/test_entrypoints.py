@@ -49,7 +49,6 @@ class TestUploadSender(object):
             status=200    
         )
         mocked_responses.add(resp)
-        print("take that")
         yield resp
 
 

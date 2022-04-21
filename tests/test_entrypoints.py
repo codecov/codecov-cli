@@ -229,7 +229,6 @@ class TestPayloadGeneration(object):
             == b""
         )
 
-
     def test_formate_coverage_file(self, mocker):
         fake_result_file = mocker.MagicMock()
         mocker.patch(
@@ -279,7 +278,6 @@ class TestPayloadGeneration(object):
 
         assert actual_section == expected_section
 
-
     def test_generate_payload_overall(self, mocker):
         mocker.patch(
             "codecov_cli.entrypoints.UploadSender._generate_env_vars_section",
@@ -293,9 +291,7 @@ class TestPayloadGeneration(object):
             "codecov_cli.entrypoints.UploadSender._generage_coverage_files_section",
             return_value=reports_examples.coverage_file_section_simple,
         )
-        
+
         actual_report = UploadSender()._generate_payload(None, None)
-        
+
         assert actual_report == reports_examples.env_network_coverage_sections
-        
-        

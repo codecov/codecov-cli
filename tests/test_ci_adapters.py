@@ -5,9 +5,18 @@ import pytest
 
 from codecov_cli.fallbacks import FallbackFieldEnum
 from codecov_cli.helpers.ci_adapters import CircleCICIAdapter
+from codecov_cli.helpers.ci_adapters import get_ci_adapter
 
 
-class TestCircleCi(object):
+class TestCISelector(object):
+    def test_returns_none_if_name_is_invalid(self):
+        assert get_ci_adapter("random ci adapter name") is None
+
+    def test_returns_circleCI(self):
+        assert type(get_ci_adapter("circleci")) is CircleCICIAdapter
+
+
+class TestCircleCI(object):
     class EnvEnum(str, Enum):
         CIRCLE_SHA1 = "CIRCLE_SHA1"
         CIRCLE_BUILD_URL = "CIRCLE_BUILD_URL"
@@ -118,6 +127,12 @@ class TestCircleCi(object):
 
         assert actual == expected
 
-    def test_raises_value_error_if_unvalid_field(self, mocker):
+    def test_raises_value_error_if_unvalid_field(self):
         with pytest.raises(ValueError) as ex:
             CircleCICIAdapter().get_fallback_value("some random key x 123")
+
+    def test_service(self):
+        assert (
+            CircleCICIAdapter().get_fallback_value(FallbackFieldEnum.service)
+            == "circleci"
+        )

@@ -118,6 +118,6 @@ class TestCircleCi(object):
 
         assert actual == expected
 
-    def test_returns_none_if_unvalid_field(self, mocker):
+    def test_raises_value_error_if_unvalid_field(self, mocker):
         with pytest.raises(ValueError) as ex:
             CircleCICIAdapter().get_fallback_value("some random key x 123")

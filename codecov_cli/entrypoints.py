@@ -8,7 +8,9 @@ import click
 import requests
 
 from codecov_cli import __version__ as codecov_cli_version
-from codecov_cli.network import GitFileFinder
+from codecov_cli.helpers.coverage_file_finder import select_coverage_file_finder
+from codecov_cli.helpers.network_finder import select_network_finder
+from codecov_cli.helpers.versioning_systems import VersioningSystemInterface
 from codecov_cli.plugins import select_preparation_plugins
 from codecov_cli.types import UploadCollectionResult
 from codecov_cli.upload_collector import UploadCollector
@@ -107,20 +109,8 @@ class UploadSender(object):
         return network_files_section.encode() + b"<<<<<< network\n"
 
 
-class CoverageFileFinder(object):
-    def find_coverage_files(self):
-        return []
-
-
-def select_network_finder(root_network_folder):
-    return GitFileFinder(root_network_folder)
-
-
-def select_coverage_file_finder():
-    return CoverageFileFinder()
-
-
 def do_upload_logic(
+    versioning_system: VersioningSystemInterface,
     *,
     commit_sha: str,
     report_code: str,
@@ -136,13 +126,12 @@ def do_upload_logic(
     token: uuid.UUID,
 ):
     preparation_plugins = select_preparation_plugins(plugin_names)
-    network_finder = select_network_finder(network_root_folder)
     coverage_file_selector = select_coverage_file_finder()
+    network_finder = select_network_finder(versioning_system)
     collector = UploadCollector(
         preparation_plugins, network_finder, coverage_file_selector
     )
     upload_data = collector.generate_upload_data()
-    print(upload_data)
     sender = UploadSender()
     sending_result = sender.send_upload_data(upload_data, commit_sha, token, env_vars)
     if sending_result.warnings:

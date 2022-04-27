@@ -6,14 +6,11 @@ import uuid
 import click
 
 from codecov_cli.entrypoints import do_upload_logic
-from codecov_cli.fallbackers import CodecovOption, FallbackFieldEnum
+from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
 
 
 def _turn_env_vars_into_dict(ctx, params, value):
     return dict((v, os.getenv(v, None)) for v in value)
-
-
-
 
 
 @click.command()
@@ -22,6 +19,7 @@ def _turn_env_vars_into_dict(ctx, params, value):
     help="Commit SHA (with 40 chars)",
     cls=CodecovOption,
     fallback_field=FallbackFieldEnum.commit_sha,
+    required=True
 )
 @click.option(
     "--report-code",
@@ -64,7 +62,6 @@ def _turn_env_vars_into_dict(ctx, params, value):
     help="Codecov upload token represented as UUID or path to file containing the token",
     type=click.UUID,
     envvar="CODECOV_TOKEN",
-    show_default="Value of CODECOV_TOKEN environment variable",
 )
 @click.option("--env-var", "env_vars", multiple=True, callback=_turn_env_vars_into_dict)
 @click.option("--flag", "flags", multiple=True, default=[])
@@ -86,7 +83,7 @@ def do_upload(
     token: typing.Optional[uuid.UUID],
     plugin_names: typing.List[str],
 ):
-
+    versioning_system = ctx.obj["versioning_system"]
     print(
         dict(
             commit_sha=commit_sha,
@@ -104,6 +101,7 @@ def do_upload(
         )
     )
     do_upload_logic(
+        versioning_system,
         commit_sha=commit_sha,
         report_code=report_code,
         build_code=build_code,

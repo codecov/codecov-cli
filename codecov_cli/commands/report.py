@@ -1,6 +1,6 @@
 import click
 
-from codecov_cli.fallbackers import CodecovOption, FallbackFieldEnum
+from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
 
 
 @click.command()

@@ -1,25 +1,21 @@
 import pytest
 import uuid
 import responses
-import requests
 
 from responses import matchers
-from unittest.mock import Mock, MagicMock
 from urllib import parse
 
 
 from tests.data import reports_examples
 from codecov_cli.types import UploadCollectionResult
-from codecov_cli.entrypoints import UploadSendingResult
 from codecov_cli.entrypoints import UploadSender
 from codecov_cli import __version__ as codecov_cli_version
-from codecov_cli.entrypoints import UploadSender
 
 
 class TestUploadSender(object):
     @pytest.fixture
     def fake_upload_data(self):
-        upload_collection = UploadCollectionResult(["1", "apple.py", "3"], [])
+        upload_collection = UploadCollectionResult(["1", "apple.py", "3"], [], [])
         random_token = uuid.UUID("f359afb9-8a2a-42ab-a448-c3d267ff495b")
         random_sha = "845548c6b95223f12e8317a1820705f64beaf69e"
         return (upload_collection, random_token, random_sha)
@@ -215,7 +211,7 @@ class TestPayloadGeneration(object):
                                     <<<<<< network
                                     """
 
-        upload_data = UploadCollectionResult(network_files, [])
+        upload_data = UploadCollectionResult(network_files, [], [])
 
         actual_network_section = UploadSender()._generate_network_section(upload_data)
 
@@ -225,7 +221,7 @@ class TestPayloadGeneration(object):
 
     def test_generate_network_section_empty_result(self):
         assert (
-            UploadSender()._generate_network_section(UploadCollectionResult([], []))
+            UploadSender()._generate_network_section(UploadCollectionResult([], [], []))
             == b""
         )
 

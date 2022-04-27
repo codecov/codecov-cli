@@ -267,7 +267,7 @@ class TestPayloadGeneration(object):
         ]
 
         actual_section = UploadSender()._generage_coverage_files_section(
-            UploadCollectionResult([], coverage_files)
+            UploadCollectionResult([], coverage_files, [])
         )
 
         expected_section = b"".join(coverage_files)

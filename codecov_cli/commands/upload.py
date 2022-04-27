@@ -13,9 +13,6 @@ def _turn_env_vars_into_dict(ctx, params, value):
     return dict((v, os.getenv(v, None)) for v in value)
 
 
-
-
-
 @click.command()
 @click.option(
     "--commit-sha",
@@ -64,7 +61,6 @@ def _turn_env_vars_into_dict(ctx, params, value):
     help="Codecov upload token represented as UUID or path to file containing the token",
     type=click.UUID,
     envvar="CODECOV_TOKEN",
-    show_default="Value of CODECOV_TOKEN environment variable",
 )
 @click.option("--env-var", "env_vars", multiple=True, callback=_turn_env_vars_into_dict)
 @click.option("--flag", "flags", multiple=True, default=[])

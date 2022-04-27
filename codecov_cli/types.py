@@ -1,5 +1,4 @@
 import typing
-import uuid
 from dataclasses import dataclass
 from pathlib import Path
 

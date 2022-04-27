@@ -2,7 +2,6 @@ import pathlib
 from unittest.mock import MagicMock, Mock, PropertyMock
 
 import pytest
-from more_itertools import side_effect
 
 from codecov_cli.plugins.pycoverage import Pycoverage
 

@@ -1,9 +1,9 @@
+import pathlib
 from more_itertools import side_effect
 import pytest
 
 
 from unittest.mock import Mock, MagicMock, PropertyMock
-from glob import glob
 
 from codecov_cli.plugins.pycoverage import Pycoverage
 
@@ -86,6 +86,64 @@ class TestPycoverage(object):
         
         
         
+    @pytest.fixture
+    def mocked_generator(self, mocker):
+        def generate_XML_report_side_effect(*args, **kwargs):
+            working_dir = args[0]
+            working_dir = pathlib.Path(working_dir) # make sure it is of type Path not strings to avoid exceptions
+            
+            if (working_dir / ".coverage").exists():
+                (working_dir / "coverage.xml").touch()
+                return True
+
+            return False
+        
+        yield mocker.patch("codecov_cli.plugins.pycoverage.Pycoverage._generate_XML_report",
+                     side_effect=generate_XML_report_side_effect)
+        
+    @pytest.fixture
+    def mocked_getcwd(self, mocker, tmp_path):
+        mocker.patch("codecov_cli.plugins.pycoverage.os.getcwd", return_value=tmp_path)
+        
+        
+    @pytest.fixture
+    def mocked_glob(self, mocker, tmp_path):
+        
+        def glob_side_effect(*args, **kwargs):
+            # Ignore recursive argument since it is not defined in pathlib.Path.glob
+            return list(tmp_path.glob(args[0]))
+        
+        mocker.patch("codecov_cli.plugins.pycoverage.glob", side_effect=glob_side_effect)
+
+
+    def test_run_preparation_creates_reports_in_root_dir(self, mocked_generator, mocked_getcwd, tmp_path, mocked_glob):
+
+        Pycoverage().run_preparation(None)
+        assert not (tmp_path / "coverage.xml").exists()
+        
+        mocked_generator.reset_mock()
+        
+        (tmp_path / ".coverage").touch()
+        Pycoverage().run_preparation(None)
+        assert (tmp_path / "coverage.xml").exists()
+        
+        mocked_generator.assert_called_once()
+        
+    def test_run_preparation_creates_reports_in_sub_dirs(self, mocked_generator, mocked_getcwd, tmp_path, mocked_glob):
+        
+        (tmp_path / "sub").mkdir()
+        (tmp_path / "sub" / ".coverage").touch()
+        Pycoverage().run_preparation(None)
+
+        assert (tmp_path / "sub" / "coverage.xml").exists()
+        
+    
+    def test_aborts_plugin_if_coverage_is_not_installed(self, mocker, mocked_generator):
+        
+        mocker.patch("codecov_cli.plugins.pycoverage.shutil.which", return_value=None)
+        Pycoverage().run_preparation(None)
+        
+        mocked_generator.assert_not_called()
         
         
         

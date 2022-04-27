@@ -1,7 +1,5 @@
 import typing
-import uuid
 from dataclasses import dataclass
-from pathlib import Path
 
 
 class UploadCollectionResultFile(object):
@@ -14,25 +12,12 @@ class UploadCollectionResultFile(object):
 
 @dataclass
 class UploadCollectionResult(object):
+    __slots__ = ["network", "coverage_files", "file_fixes"]
     network: typing.List[str]
     coverage_files: typing.List[UploadCollectionResultFile]
+    file_fixes: typing.List[typing.Dict]
 
 
 class PreparationPluginInterface(object):
     def run_preparation(self) -> None:
-        pass
-
-
-class CoverageFileFinderInterface(object):
-    def find_coverage_files(self) -> typing.List[UploadCollectionResultFile]:
-        pass
-
-
-class NetworkFinderInterface(object):
-    def __init__(
-        self, network_root_folder: Path, patterns_to_search, patterns_to_exclude
-    ):
-        pass
-
-    def find_files(self) -> typing.List[str]:
         pass

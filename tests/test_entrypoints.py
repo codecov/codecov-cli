@@ -1,18 +1,14 @@
 import pytest
 import uuid
 import responses
-import requests
 
 from responses import matchers
-from unittest.mock import Mock, MagicMock
 from urllib import parse
 
 
 from codecov_cli.types import UploadCollectionResult
-from codecov_cli.entrypoints import UploadSendingResult
 from codecov_cli.entrypoints import UploadSender
 from codecov_cli import __version__ as codecov_cli_version
-from codecov_cli.entrypoints import UploadSender
 
 
 class TestUploadSender(object):

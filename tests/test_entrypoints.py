@@ -210,7 +210,7 @@ class TestPayloadGeneration(object):
                                     <<<<<< network
                                     """
 
-        upload_data = UploadCollectionResult(network_files, [])
+        upload_data = UploadCollectionResult(network_files, [], [])
 
         actual_network_section = UploadSender()._generate_network_section(upload_data)
 
@@ -220,6 +220,6 @@ class TestPayloadGeneration(object):
 
     def test_generate_network_section_empty_result(self):
         assert (
-            UploadSender()._generate_network_section(UploadCollectionResult([], []))
+            UploadSender()._generate_network_section(UploadCollectionResult([], [], []))
             == b""
         )

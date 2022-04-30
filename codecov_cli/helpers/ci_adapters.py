@@ -1,6 +1,6 @@
 import os
 import typing
-from abc import ABC, abstractmethod
+from abc import ABC
 
 from codecov_cli.fallbacks import FallbackFieldEnum
 

@@ -51,10 +51,6 @@ class TestPycoverage(object):
     @pytest.fixture
     def xml_subprocess_mock(self, mocker):
         def xml_subprocess_side_effect(*args, **kwargs):
-
-            if args[0][1] != "xml":
-                return MagicMock()
-
             # path is the same as tmp_path
             path = kwargs["cwd"]
 
@@ -91,11 +87,8 @@ class TestPycoverage(object):
                 working_dir
             )  # make sure it is of type Path not strings to avoid exceptions
 
-            if (working_dir / ".coverage").exists():
-                (working_dir / "coverage.xml").touch()
-                return True
-
-            return False
+            (working_dir / "coverage.xml").touch()
+            return True
 
         yield mocker.patch(
             "codecov_cli.plugins.pycoverage.Pycoverage._generate_XML_report",
@@ -108,8 +101,7 @@ class TestPycoverage(object):
 
         Pycoverage(tmp_path).run_preparation(None)
         assert not (tmp_path / "coverage.xml").exists()
-
-        mocked_generator.reset_mock()
+        mocked_generator.not_called()
 
         (tmp_path / ".coverage").touch()
         Pycoverage(tmp_path).run_preparation(None)

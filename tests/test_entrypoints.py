@@ -1,14 +1,13 @@
-import pytest
 import uuid
-import responses
-
-from responses import matchers
 from urllib import parse
 
+import pytest
+import responses
+from responses import matchers
 
-from codecov_cli.types import UploadCollectionResult
-from codecov_cli.entrypoints import UploadSender
 from codecov_cli import __version__ as codecov_cli_version
+from codecov_cli.entrypoints import UploadSender
+from codecov_cli.types import UploadCollectionResult
 
 
 class TestUploadSender(object):

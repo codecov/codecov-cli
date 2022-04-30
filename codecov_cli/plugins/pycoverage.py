@@ -1,11 +1,14 @@
 import os
 import shutil
 import subprocess
-from glob import glob
+from glob import iglob
 from pathlib import Path
 
 
 class Pycoverage(object):
+    def __init__(self, project_root=None):
+        self.project_root = project_root or os.getcwd()
+
     def run_preparation(self, collector):
         print("Running coverage.py plugin...")
 
@@ -14,29 +17,20 @@ class Pycoverage(object):
             print("aborting coverage.py plugin...")
             return
 
-        successfully_generated = self._generate_XML_report(os.getcwd())
-
-        if successfully_generated:
-            print("aborting coverage.py plugin...")
-            return
-
-        print(
-            f"Couldn't find coverage data in {os.getcwd()}. Searching in subdirectories..."
-        )
-
         # This might need optimization
-        coverage_data = glob("**/.coverage", recursive=True) or glob(
-            "**/.coverage.*", recursive=True
+        path_to_coverage_data = next(
+            iglob(os.path.join(self.project_root, "**/.coverage"), recursive=True), None
+        ) or next(
+            iglob(os.path.join(self.project_root, "**/.coverage.*"), recursive=True),
+            None,
         )
 
-        if not coverage_data:
+        if path_to_coverage_data is None:
             print("No coverage data found.")
             print("aborting coverage.py plugin...")
             return
 
-        coverage_data_directory = os.path.join(
-            os.getcwd(), Path(coverage_data[0]).parent
-        )  # absolute paths are more clear for the user
+        coverage_data_directory = Path(path_to_coverage_data).parent
         self._generate_XML_report(coverage_data_directory)
 
         print("aborting coverage.py plugin...")
@@ -46,7 +40,7 @@ class Pycoverage(object):
 
         # the following if conditions avoid creating dummy .coverage file
 
-        if glob(os.path.join(dir, ".coverage.*")):
+        if next(iglob(os.path.join(dir, ".coverage.*")), None) is not None:
             print(f"Running coverage combine -a in {dir}")
             subprocess.run(["coverage", "combine", "-a"], cwd=dir)
 

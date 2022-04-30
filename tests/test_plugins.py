@@ -7,12 +7,10 @@ from codecov_cli.plugins.pycoverage import Pycoverage
 
 
 class TestPycoverage(object):
-    def test_coverage_combine_called_if_coverage_data_exist(self, tmp_path, mocker):
+    @pytest.fixture
+    def combine_subprocess_mock(self, mocker):
         def combine_subprocess_side_effect(*args, **kwargs):
-            try:
-                if args[0][1] != "combine":
-                    return MagicMock()
-            except IndexError:
+            if args[0][1] != "combine":
                 return MagicMock()
 
             # path is the same as tmp_path
@@ -21,35 +19,40 @@ class TestPycoverage(object):
             (path / ".coverage").touch()
             return MagicMock()
 
-        subprocess_mock = mocker.patch(
+        yield mocker.patch(
             "codecov_cli.plugins.pycoverage.subprocess.run",
             side_effect=combine_subprocess_side_effect,
         )
 
-        # test coverage combine is not called if no coverage data exist
-        Pycoverage()._generate_XML_report(tmp_path)
+    def test_coverage_combine_called_if_coverage_data_exist(
+        self, tmp_path, mocker, combine_subprocess_mock
+    ):
+        Pycoverage(tmp_path)._generate_XML_report(tmp_path)
 
         with pytest.raises(AssertionError):
-            subprocess_mock.assert_any_call(["coverage", "combine", "-a"], cwd=tmp_path)
+            combine_subprocess_mock.assert_any_call(
+                ["coverage", "combine", "-a"], cwd=tmp_path
+            )
 
-        # test coverage combine is called if coverage data exist
-        subprocess_mock.reset_mock()
+        combine_subprocess_mock.reset_mock()
+
         coverage_file_names = [".coverage.ac", ".coverage.a", ".coverage.b"]
         for name in coverage_file_names:
             p = tmp_path / name
             p.touch()
 
-        Pycoverage()._generate_XML_report(tmp_path)
+        Pycoverage(tmp_path)._generate_XML_report(tmp_path)
 
-        subprocess_mock.assert_any_call(["coverage", "combine", "-a"], cwd=tmp_path)
+        combine_subprocess_mock.assert_any_call(
+            ["coverage", "combine", "-a"], cwd=tmp_path
+        )
         assert (tmp_path / ".coverage").exists()
 
-    def test_xml_reports_generated_if_coverage_file_exists(self, tmp_path, mocker):
+    @pytest.fixture
+    def xml_subprocess_mock(self, mocker):
         def xml_subprocess_side_effect(*args, **kwargs):
-            try:
-                if args[0][1] != "xml":
-                    return MagicMock()
-            except IndexError:
+
+            if args[0][1] != "xml":
                 return MagicMock()
 
             # path is the same as tmp_path
@@ -61,21 +64,24 @@ class TestPycoverage(object):
 
             return mock
 
-        subprocess_mock = mocker.patch(
+        yield mocker.patch(
             "codecov_cli.plugins.pycoverage.subprocess.run",
             side_effect=xml_subprocess_side_effect,
         )
 
-        # test returns false if .coverage file doesn't exist
-        assert not Pycoverage()._generate_XML_report(tmp_path)
-        subprocess_mock.assert_not_called()
+    def test_xml_reports_generated_if_coverage_file_exists(
+        self, tmp_path, mocker, xml_subprocess_mock
+    ):
 
-        # test returns true if .coverage file exist
+        assert not Pycoverage(tmp_path)._generate_XML_report(tmp_path)
+        xml_subprocess_mock.assert_not_called()
+
         (tmp_path / ".coverage").touch()
-        assert Pycoverage()._generate_XML_report(tmp_path)
-        subprocess_mock.assert_called_with(
+        assert Pycoverage(tmp_path)._generate_XML_report(tmp_path)
+        xml_subprocess_mock.assert_called_with(
             ["coverage", "xml", "-i"], cwd=tmp_path, capture_output=True
         )
+        assert (tmp_path / ".coverage").exists()
 
     @pytest.fixture
     def mocked_generator(self, mocker):
@@ -96,48 +102,34 @@ class TestPycoverage(object):
             side_effect=generate_XML_report_side_effect,
         )
 
-    @pytest.fixture
-    def mocked_getcwd(self, mocker, tmp_path):
-        mocker.patch("codecov_cli.plugins.pycoverage.os.getcwd", return_value=tmp_path)
-
-    @pytest.fixture
-    def mocked_glob(self, mocker, tmp_path):
-        def glob_side_effect(*args, **kwargs):
-            # Ignore recursive argument since it is not defined in pathlib.Path.glob
-            return list(tmp_path.glob(args[0]))
-
-        mocker.patch(
-            "codecov_cli.plugins.pycoverage.glob", side_effect=glob_side_effect
-        )
-
     def test_run_preparation_creates_reports_in_root_dir(
-        self, mocked_generator, mocked_getcwd, tmp_path, mocked_glob
+        self, mocked_generator, tmp_path
     ):
 
-        Pycoverage().run_preparation(None)
+        Pycoverage(tmp_path).run_preparation(None)
         assert not (tmp_path / "coverage.xml").exists()
 
         mocked_generator.reset_mock()
 
         (tmp_path / ".coverage").touch()
-        Pycoverage().run_preparation(None)
+        Pycoverage(tmp_path).run_preparation(None)
         assert (tmp_path / "coverage.xml").exists()
 
-        mocked_generator.assert_called_once()
-
     def test_run_preparation_creates_reports_in_sub_dirs(
-        self, mocked_generator, mocked_getcwd, tmp_path, mocked_glob
+        self, mocked_generator, tmp_path
     ):
 
         (tmp_path / "sub").mkdir()
         (tmp_path / "sub" / ".coverage").touch()
-        Pycoverage().run_preparation(None)
+        Pycoverage(tmp_path).run_preparation(None)
 
         assert (tmp_path / "sub" / "coverage.xml").exists()
 
-    def test_aborts_plugin_if_coverage_is_not_installed(self, mocker, mocked_generator):
+    def test_aborts_plugin_if_coverage_is_not_installed(
+        self, tmp_path, mocker, mocked_generator
+    ):
 
         mocker.patch("codecov_cli.plugins.pycoverage.shutil.which", return_value=None)
-        Pycoverage().run_preparation(None)
+        Pycoverage(tmp_path).run_preparation(None)
 
         mocked_generator.assert_not_called()

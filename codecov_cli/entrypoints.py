@@ -1,4 +1,3 @@
-import os
 import typing
 import uuid
 from dataclasses import dataclass
@@ -103,7 +102,6 @@ class UploadSender(object):
             f"{env_var}={value}\n" for env_var, value in filtered_env_vars.items()
         )
         return env_vars_section.encode() + b"<<<<<< ENV\n"
-    
 
     def _generate_network_section(self, upload_data: UploadCollectionResult) -> bytes:
         network_files = upload_data.network

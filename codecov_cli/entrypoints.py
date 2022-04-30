@@ -1,4 +1,3 @@
-import os
 import typing
 import uuid
 from dataclasses import dataclass
@@ -12,9 +11,8 @@ from codecov_cli.helpers.coverage_file_finder import select_coverage_file_finder
 from codecov_cli.helpers.network_finder import select_network_finder
 from codecov_cli.helpers.versioning_systems import VersioningSystemInterface
 from codecov_cli.plugins import select_preparation_plugins
-from codecov_cli.types import UploadCollectionResult
+from codecov_cli.types import UploadCollectionResult, UploadCollectionResultFile
 from codecov_cli.upload_collector import UploadCollector
-from codecov_cli.types import UploadCollectionResultFile
 
 
 @dataclass
@@ -40,9 +38,13 @@ class UploadSendingResult(object):
 
 class UploadSender(object):
     def send_upload_data(
-        self, upload_data: UploadCollectionResult, commit_sha: str, token: uuid.UUID, env_vars: typing.Dict[str, str],
+        self,
+        upload_data: UploadCollectionResult,
+        commit_sha: str,
+        token: uuid.UUID,
+        env_vars: typing.Dict[str, str],
     ) -> UploadSendingResult:
-        
+
         params = {
             "package": f"codecov-cli/{codecov_cli_version}",
             "commit": commit_sha,
@@ -80,7 +82,9 @@ class UploadSender(object):
 
         return UploadSendingResult(error=None, warnings=[])
 
-    def _generate_payload(self, upload_data: UploadCollectionResult, env_vars: typing.Dict[str, str]) -> bytes:
+    def _generate_payload(
+        self, upload_data: UploadCollectionResult, env_vars: typing.Dict[str, str]
+    ) -> bytes:
         env_vars_section = self._generate_env_vars_section(env_vars)
         network_section = self._generate_network_section(upload_data)
         coverage_files_section = self._generage_coverage_files_section(upload_data)
@@ -99,7 +103,6 @@ class UploadSender(object):
             f"{env_var}={value}\n" for env_var, value in filtered_env_vars.items()
         )
         return env_vars_section.encode() + b"<<<<<< ENV\n"
-    
 
     def _generate_network_section(self, upload_data: UploadCollectionResult) -> bytes:
         network_files = upload_data.network

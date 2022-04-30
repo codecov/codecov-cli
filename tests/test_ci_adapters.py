@@ -4,8 +4,7 @@ from enum import Enum
 import pytest
 
 from codecov_cli.fallbacks import FallbackFieldEnum
-from codecov_cli.helpers.ci_adapters import CircleCICIAdapter
-from codecov_cli.helpers.ci_adapters import get_ci_adapter
+from codecov_cli.helpers.ci_adapters import CircleCICIAdapter, get_ci_adapter
 
 
 class TestCISelector(object):

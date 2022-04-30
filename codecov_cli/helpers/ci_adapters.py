@@ -28,38 +28,6 @@ class CIAdapterBase(ABC):
 
         return self.fallback_to_method[fallback_field]()
 
-    @abstractmethod
-    def _get_commit_sha(self):
-        pass
-
-    @abstractmethod
-    def _get_build_url(self):
-        pass
-
-    @abstractmethod
-    def _get_build_code(self):
-        pass
-
-    @abstractmethod
-    def _get_job_code(self):
-        pass
-
-    @abstractmethod
-    def _get_pull_request_number(self):
-        pass
-
-    @abstractmethod
-    def _get_slug(self):
-        pass
-
-    @abstractmethod
-    def _get_branch(self):
-        pass
-
-    @abstractmethod
-    def _get_service(self):
-        pass
-
 
 class CircleCICIAdapter(CIAdapterBase):
     # https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables

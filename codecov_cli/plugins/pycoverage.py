@@ -26,7 +26,7 @@ class Pycoverage(object):
         )
 
         print(self.project_root)
-        
+
         if path_to_coverage_data is None:
             print("No coverage data found.")
             print("aborting coverage.py plugin...")
@@ -38,7 +38,7 @@ class Pycoverage(object):
         print("aborting coverage.py plugin...")
 
     def _generate_XML_report(self, dir):
-        """Generates up-to-date XML report in the given directory, returns true if successfully generated"""
+        """Generates up-to-date XML report in the given directory"""
 
         # the following if conditions avoid creating dummy .coverage file
 
@@ -54,7 +54,3 @@ class Pycoverage(object):
 
             output = completed_process.stdout.decode().strip()
             print(output)
-
-            return output == "Wrote XML report to coverage.xml"
-
-        return False

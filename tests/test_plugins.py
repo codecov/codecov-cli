@@ -69,11 +69,11 @@ class TestPycoverage(object):
         self, tmp_path, mocker, xml_subprocess_mock
     ):
 
-        assert not Pycoverage(tmp_path)._generate_XML_report(tmp_path)
+        Pycoverage(tmp_path)._generate_XML_report(tmp_path)
         xml_subprocess_mock.assert_not_called()
 
         (tmp_path / ".coverage").touch()
-        assert Pycoverage(tmp_path)._generate_XML_report(tmp_path)
+        Pycoverage(tmp_path)._generate_XML_report(tmp_path)
         xml_subprocess_mock.assert_called_with(
             ["coverage", "xml", "-i"], cwd=tmp_path, capture_output=True
         )
@@ -88,7 +88,6 @@ class TestPycoverage(object):
             )  # make sure it is of type Path not strings to avoid exceptions
 
             (working_dir / "coverage.xml").touch()
-            return True
 
         yield mocker.patch(
             "codecov_cli.plugins.pycoverage.Pycoverage._generate_XML_report",

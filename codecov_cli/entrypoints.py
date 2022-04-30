@@ -41,7 +41,7 @@ class UploadSender(object):
     def send_upload_data(
         self, upload_data: UploadCollectionResult, commit_sha: str, token: uuid.UUID, env_vars: typing.Dict[str, str],
     ) -> UploadSendingResult:
-        
+
         params = {
             "package": f"codecov-cli/{codecov_cli_version}",
             "commit": commit_sha,

@@ -39,9 +39,13 @@ class UploadSendingResult(object):
 
 class UploadSender(object):
     def send_upload_data(
-        self, upload_data: UploadCollectionResult, commit_sha: str, token: uuid.UUID, env_vars: typing.Dict[str, str],
+        self,
+        upload_data: UploadCollectionResult,
+        commit_sha: str,
+        token: uuid.UUID,
+        env_vars: typing.Dict[str, str],
     ) -> UploadSendingResult:
-        
+
         params = {
             "package": f"codecov-cli/{codecov_cli_version}",
             "commit": commit_sha,
@@ -79,7 +83,9 @@ class UploadSender(object):
 
         return UploadSendingResult(error=None, warnings=[])
 
-    def _generate_payload(self, upload_data: UploadCollectionResult, env_vars: typing.Dict[str, str]) -> bytes:
+    def _generate_payload(
+        self, upload_data: UploadCollectionResult, env_vars: typing.Dict[str, str]
+    ) -> bytes:
         env_vars_section = self._generate_env_vars_section(env_vars)
         network_section = self._generate_network_section(upload_data)
 

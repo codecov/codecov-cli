@@ -19,7 +19,7 @@ def _turn_env_vars_into_dict(ctx, params, value):
     help="Commit SHA (with 40 chars)",
     cls=CodecovOption,
     fallback_field=FallbackFieldEnum.commit_sha,
-    required=True
+    required=True,
 )
 @click.option(
     "--report-code",
@@ -59,7 +59,7 @@ def _turn_env_vars_into_dict(ctx, params, value):
 @click.option(
     "-t",
     "--token",
-    help="Codecov upload token represented as UUID or path to file containing the token",
+    help="Codecov upload token",
     type=click.UUID,
     envvar="CODECOV_TOKEN",
 )

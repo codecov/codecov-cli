@@ -18,7 +18,6 @@ class UploadCollector(object):
         self.network_finder = network_finder
         self.coverage_file_finder = coverage_file_finder
 
-
     def _produce_file_fixes_for_network(self, network) -> typing.List[typing.Dict]:
         return []
 

@@ -22,6 +22,9 @@ jobs:
       - name: Check linting with black
         run: |
           poetry run black --check .
+      - name: Check imports order with isort
+        run: |
+          poetry run isort --check .
 
 
   build:

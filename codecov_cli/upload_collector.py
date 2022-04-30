@@ -1,7 +1,6 @@
 import typing
 import uuid
 
-
 from codecov_cli.helpers.coverage_file_finder import CoverageFileFinder
 from codecov_cli.helpers.network_finder import NetworkFinder
 from codecov_cli.types import PreparationPluginInterface, UploadCollectionResult

@@ -59,7 +59,7 @@ def _turn_env_vars_into_dict(ctx, params, value):
 @click.option(
     "-t",
     "--token",
-    help="Codecov upload token represented as UUID or path to file containing the token",
+    help="Codecov upload token",
     type=click.UUID,
     envvar="CODECOV_TOKEN",
 )

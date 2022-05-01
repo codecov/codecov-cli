@@ -14,6 +14,6 @@ def select_preparation_plugins(plugin_names):
 def _get_plugin(plugin_name):
     if plugin_name == "gcov":
         return GcovPlugin()
-    elif plugin_name == "pycoverage":
+    if plugin_name == "pycoverage":
         return Pycoverage()
     return NoopPlugin()

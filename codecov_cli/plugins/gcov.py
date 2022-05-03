@@ -23,14 +23,17 @@ class GcovPlugin(object):
 
     def run_preparation(self, collector):
         if shutil.which("gcov") is None:
-            return
+            return None
 
         matched_paths = self._get_matched_paths()
 
-        subprocess.run(
+        s = subprocess.run(
             ["gcov", "-pb", *self.extra_arguments, *matched_paths],
             cwd=self.project_root,
+            capture_output=True,
         )
+
+        return s
 
     def _get_matched_paths(self):
         # This method might need a lot of optimization

@@ -1,4 +1,5 @@
 import pathlib
+import typing
 from unittest.mock import MagicMock
 
 from codecov_cli.plugins.gcov import GcovPlugin
@@ -6,7 +7,10 @@ from codecov_cli.plugins.gcov import GcovPlugin
 
 class TestGcov(object):
     def create_and_add_paths(
-        self, files: list[str], dir: pathlib.Path, paths: set[pathlib.Path]
+        self,
+        files: typing.List[str],
+        dir: pathlib.Path,
+        paths: typing.Set[pathlib.Path],
     ):
         for file in files:
             (dir / file).touch()

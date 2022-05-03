@@ -1,6 +1,7 @@
 import os
 import pathlib
 import subprocess
+import shutil
 from itertools import chain
 from typing import Optional
 
@@ -21,6 +22,8 @@ class GcovPlugin(object):
         self.extra_arguments = extra_arguments
 
     def run_preparation(self, collector):
+        if shutil.which("gcov") is None:
+            return
 
         matched_paths = self._get_matched_paths()
 

@@ -47,6 +47,8 @@ class GcovPlugin(object):
             glob_match(path, [pattern]) for pattern in self.patterns_to_ignore
         )
 
-        matched_paths = (path for path in unfiltered_matched_paths if not should_ignore(path))
+        matched_paths = (
+            path for path in unfiltered_matched_paths if not should_ignore(path)
+        )
 
         return matched_paths

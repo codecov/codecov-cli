@@ -11,9 +11,9 @@ class GcovPlugin(object):
     def __init__(
         self,
         project_root: typing.Optional[pathlib.Path] = None,
-        patterns_to_include: typing.list[str] = [],
-        patterns_to_ignore: typing.list[str] = [],
-        extra_arguments: typing.list[str] = [],
+        patterns_to_include: typing.List[str] = [],
+        patterns_to_ignore: typing.List[str] = [],
+        extra_arguments: typing.List[str] = [],
     ):
         self.project_root = project_root or pathlib.Path(os.getcwd())
         self.patterns_to_include = patterns_to_include

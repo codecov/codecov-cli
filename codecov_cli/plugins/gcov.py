@@ -4,8 +4,7 @@ import subprocess
 import shutil
 from itertools import chain
 from typing import Optional
-
-from globmatch import glob_match
+from fnmatch import fnmatch
 
 
 class GcovPlugin(object):
@@ -45,9 +44,8 @@ class GcovPlugin(object):
             )
         )
 
-        # use glob_match since pathlib.Path.match doesn't support '**' syntax
         should_ignore = lambda path: any(
-            glob_match(path, [pattern]) for pattern in self.patterns_to_ignore
+            fnmatch(path, pattern) for pattern in self.patterns_to_ignore
         )
 
         matched_paths = (

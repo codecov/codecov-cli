@@ -1,7 +1,6 @@
 import pathlib
 from unittest.mock import MagicMock
 
-import pytest
 
 from codecov_cli.plugins.gcov import GcovPlugin
 
@@ -68,7 +67,7 @@ class TestGcov(object):
 
         actual_matches = set(
             GcovPlugin(
-                tmp_path, ["**/*.gcno", "**/*.json", "*.txt", "**/coverage.xml"]
+                tmp_path, ["*/*.gcno/*", "*.json", "*.txt", "*/coverage.xml"]
             )._get_matched_paths()
         )
 
@@ -123,8 +122,8 @@ class TestGcov(object):
         actual_matches = set(
             GcovPlugin(
                 tmp_path,
-                ["**/*.gcno", "**/*.json", "*.txt", "**/coverage.xml"],
-                ["**/.git/**", "**/package-lock.json"],
+                ["*/*.gcno/*", "*.json", "*.txt", "*/coverage.xml"],
+                ["*/.git/*", "*package-lock.json"],
             )._get_matched_paths()
         )
 

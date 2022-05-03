@@ -1,7 +1,6 @@
 import pathlib
 from unittest.mock import MagicMock
 
-
 from codecov_cli.plugins.gcov import GcovPlugin
 
 

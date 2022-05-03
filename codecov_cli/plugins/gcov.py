@@ -1,19 +1,19 @@
 import os
 import pathlib
-import subprocess
 import shutil
-from itertools import chain
-from typing import Optional
+import subprocess
+import typing
 from fnmatch import fnmatch
+from itertools import chain
 
 
 class GcovPlugin(object):
     def __init__(
         self,
-        project_root: Optional[pathlib.Path] = None,
-        patterns_to_include: list[str] = [],
-        patterns_to_ignore: list[str] = [],
-        extra_arguments: list[str] = [],
+        project_root: typing.Optional[pathlib.Path] = None,
+        patterns_to_include: typing.list[str] = [],
+        patterns_to_ignore: typing.list[str] = [],
+        extra_arguments: typing.list[str] = [],
     ):
         self.project_root = project_root or pathlib.Path(os.getcwd())
         self.patterns_to_include = patterns_to_include

@@ -18,7 +18,7 @@ def _turn_env_vars_into_dict(ctx, params, value):
     help="Commit SHA (with 40 chars)",
     cls=CodecovOption,
     fallback_field=FallbackFieldEnum.commit_sha,
-    required=True
+    required=True,
 )
 @click.option(
     "--report-code",

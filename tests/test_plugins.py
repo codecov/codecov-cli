@@ -1,8 +1,10 @@
 import pathlib
+import typing
 from unittest.mock import MagicMock, Mock, PropertyMock
 
 import pytest
 
+from codecov_cli.plugins.gcov import GcovPlugin
 from codecov_cli.plugins.pycoverage import Pycoverage
 
 
@@ -124,10 +126,6 @@ class TestPycoverage(object):
         Pycoverage(tmp_path).run_preparation(None)
 
         mocked_generator.assert_not_called()
-import typing
-from unittest.mock import MagicMock
-
-from codecov_cli.plugins.gcov import GcovPlugin
 
 
 class TestGcov(object):

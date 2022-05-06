@@ -25,7 +25,6 @@ class Pycoverage(object):
             None,
         )
 
-
         if path_to_coverage_data is None:
             print("No coverage data found.")
             print("aborting coverage.py plugin...")

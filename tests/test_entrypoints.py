@@ -8,6 +8,7 @@ from responses import matchers
 from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.entrypoints import UploadSender
 from codecov_cli.types import UploadCollectionResult
+from tests.data import reports_examples
 
 
 class TestUploadSender(object):
@@ -222,3 +223,70 @@ class TestPayloadGeneration(object):
             UploadSender()._generate_network_section(UploadCollectionResult([], [], []))
             == b""
         )
+
+    def test_formate_coverage_file(self, mocker):
+        fake_result_file = mocker.MagicMock()
+        mocker.patch(
+            "codecov_cli.entrypoints.UploadCollectionResultFile",
+            return_value=fake_result_file,
+        )
+
+        coverage_file_seperated = reports_examples.coverage_file_section_simple.split(
+            b"\n", 1
+        )
+
+        fake_result_file.get_filename.return_value = (
+            coverage_file_seperated[0].removeprefix(b"# path=").strip()
+        )
+        fake_result_file.get_content.return_value = coverage_file_seperated[
+            1
+        ].removesuffix(b"\n<<<<<< EOF\n")
+
+        actual_coverage_file_section = UploadSender()._formate_coverage_file(
+            fake_result_file
+        )
+
+        assert (
+            actual_coverage_file_section
+            == reports_examples.coverage_file_section_simple
+        )
+
+    def test_generage_coverage_files_section(self, mocker):
+
+        mocker.patch(
+            "codecov_cli.entrypoints.UploadSender._formate_coverage_file",
+            side_effect=lambda file_bytes: file_bytes,
+        )
+
+        coverage_files = [
+            reports_examples.coverage_file_section_simple,
+            reports_examples.coverage_file_section_simple,
+            reports_examples.coverage_file_section_small,
+            reports_examples.coverage_file_section_simple,
+        ]
+
+        actual_section = UploadSender()._generage_coverage_files_section(
+            UploadCollectionResult([], coverage_files, [])
+        )
+
+        expected_section = b"".join(coverage_files)
+
+        assert actual_section == expected_section
+
+    def test_generate_payload_overall(self, mocker):
+        mocker.patch(
+            "codecov_cli.entrypoints.UploadSender._generate_env_vars_section",
+            return_value=reports_examples.env_section,
+        )
+        mocker.patch(
+            "codecov_cli.entrypoints.UploadSender._generate_network_section",
+            return_value=reports_examples.network_section,
+        )
+        mocker.patch(
+            "codecov_cli.entrypoints.UploadSender._generage_coverage_files_section",
+            return_value=reports_examples.coverage_file_section_simple,
+        )
+
+        actual_report = UploadSender()._generate_payload(None, None)
+
+        assert actual_report == reports_examples.env_network_coverage_sections

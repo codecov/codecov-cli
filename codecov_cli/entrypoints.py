@@ -1,3 +1,4 @@
+import os
 import typing
 import uuid
 from dataclasses import dataclass
@@ -38,7 +39,11 @@ class UploadSendingResult(object):
 
 class UploadSender(object):
     def send_upload_data(
-        self, upload_data: UploadCollectionResult, commit_sha: str, token: uuid.UUID
+        self,
+        upload_data: UploadCollectionResult,
+        commit_sha: str,
+        token: uuid.UUID,
+        env_vars: typing.Dict[str, str],
     ) -> UploadSendingResult:
 
         params = {
@@ -62,7 +67,40 @@ class UploadSender(object):
             )
 
         result_url, put_url = resp.text.split("\n")
+
+        reports_payload = self._generate_payload(upload_data, env_vars)
+        resp = requests.put(put_url, data=reports_payload)
+
+        if resp.status_code >= 400:
+            return UploadSendingResult(
+                error=UploadSendingError(
+                    code=f"HTTP Error {resp.status_code}",
+                    description=resp.text,
+                    params={},
+                ),
+                warnings=[UploadSendingResultWarning("This did not go perfectly")],
+            )
+
         return UploadSendingResult(error=None, warnings=[])
+
+    def _generate_payload(
+        self, upload_data: UploadCollectionResult, env_vars: typing.Dict[str, str]
+    ) -> bytes:
+        env_vars_section = self._generate_env_vars_section(env_vars)
+        return env_vars_section
+
+    def _generate_env_vars_section(self, env_vars) -> bytes:
+        filtered_env_vars = {
+            key: value for key, value in env_vars.items() if value is not None
+        }
+
+        if not filtered_env_vars:
+            return b""
+
+        env_vars_section = "".join(
+            f"{env_var}={value}\n" for env_var, value in filtered_env_vars.items()
+        )
+        return env_vars_section.encode() + b"<<<<<< ENV\n"
 
 
 def do_upload_logic(
@@ -89,7 +127,7 @@ def do_upload_logic(
     )
     upload_data = collector.generate_upload_data()
     sender = UploadSender()
-    sending_result = sender.send_upload_data(upload_data, commit_sha, token)
+    sending_result = sender.send_upload_data(upload_data, commit_sha, token, env_vars)
     if sending_result.warnings:
         number_warnings = len(sending_result.warnings)
         pluralization = "warnings" if number_warnings > 1 else "warning"

@@ -236,7 +236,7 @@ class TestPayloadGeneration(object):
         )
 
         fake_result_file.get_filename.return_value = (
-            coverage_file_seperated[0].removeprefix(b"# path=").strip()
+            coverage_file_seperated[0].decode().removeprefix("# path=").strip().encode()
         )
         fake_result_file.get_content.return_value = coverage_file_seperated[
             1

@@ -1,8 +1,12 @@
+import pathlib
 import typing
 from dataclasses import dataclass
 
 
 class UploadCollectionResultFile(object):
+    def __init__(self, path: pathlib.Path):
+        self.path = path
+
     def get_filename(self) -> bytes:
         pass
 

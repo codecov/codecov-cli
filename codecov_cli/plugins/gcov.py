@@ -44,6 +44,11 @@ class GcovPlugin(object):
             )
         )
 
+        # !This is not accurate since fnmatch doesn't use the same rules for globbing as glob.glob or Path.glob
+        # !This will result in some weird pattern matching like this one
+        # path = Path("codecov-dev/a/b/hello.json")
+        # fnmatch(path, "codecov-*.json") => True
+
         should_ignore = lambda path: any(
             fnmatch(path, pattern) for pattern in self.patterns_to_ignore
         )

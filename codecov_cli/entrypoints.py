@@ -1,10 +1,12 @@
 import typing
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
 
 import click
 import requests
 
+from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.helpers.coverage_file_finder import select_coverage_file_finder
 from codecov_cli.helpers.network_finder import select_network_finder
 from codecov_cli.helpers.versioning_systems import VersioningSystemInterface
@@ -36,12 +38,19 @@ class UploadSendingResult(object):
 
 class UploadSender(object):
     def send_upload_data(
-        self, upload_data: UploadCollectionResult
+        self, upload_data: UploadCollectionResult, commit_sha: str, token: uuid.UUID
     ) -> UploadSendingResult:
-        payload = {
-            "network": upload_data.network,
+
+        params = {
+            "package": f"codecov-cli/{codecov_cli_version}",
+            "commit": commit_sha,
         }
-        resp = requests.post("https://codecov.io/upload/v4")
+        headers = {"X-Upload-Token": token.hex}
+
+        resp = requests.post(
+            "https://codecov.io/upload/v4", headers=headers, params=params
+        )
+
         if resp.status_code >= 400:
             return UploadSendingResult(
                 error=UploadSendingError(
@@ -51,10 +60,9 @@ class UploadSender(object):
                 ),
                 warnings=[UploadSendingResultWarning("This did not go perfectly")],
             )
-        return UploadSendingResult(
-            error=None,
-            warnings=[],
-        )
+
+        result_url, put_url = resp.text.split("\n")
+        return UploadSendingResult(error=None, warnings=[])
 
 
 def do_upload_logic(
@@ -71,6 +79,7 @@ def do_upload_logic(
     network_root_folder: Path,
     coverage_files_search_folder: Path,
     plugin_names: typing.List[str],
+    token: uuid.UUID,
 ):
     preparation_plugins = select_preparation_plugins(plugin_names)
     coverage_file_selector = select_coverage_file_finder()
@@ -80,7 +89,7 @@ def do_upload_logic(
     )
     upload_data = collector.generate_upload_data()
     sender = UploadSender()
-    sending_result = sender.send_upload_data(upload_data)
+    sending_result = sender.send_upload_data(upload_data, commit_sha, token)
     if sending_result.warnings:
         number_warnings = len(sending_result.warnings)
         pluralization = "warnings" if number_warnings > 1 else "warning"

@@ -1,4 +1,3 @@
-import os
 import typing
 import uuid
 from dataclasses import dataclass
@@ -87,7 +86,9 @@ class UploadSender(object):
         self, upload_data: UploadCollectionResult, env_vars: typing.Dict[str, str]
     ) -> bytes:
         env_vars_section = self._generate_env_vars_section(env_vars)
-        return env_vars_section
+        network_section = self._generate_network_section(upload_data)
+
+        return b"".join([env_vars_section, network_section])
 
     def _generate_env_vars_section(self, env_vars) -> bytes:
         filtered_env_vars = {
@@ -101,6 +102,15 @@ class UploadSender(object):
             f"{env_var}={value}\n" for env_var, value in filtered_env_vars.items()
         )
         return env_vars_section.encode() + b"<<<<<< ENV\n"
+
+    def _generate_network_section(self, upload_data: UploadCollectionResult) -> bytes:
+        network_files = upload_data.network
+
+        if not network_files:
+            return b""
+
+        network_files_section = "".join(file + "\n" for file in network_files)
+        return network_files_section.encode() + b"<<<<<< network\n"
 
 
 def do_upload_logic(

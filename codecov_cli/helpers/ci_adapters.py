@@ -155,4 +155,6 @@ class GithubActionsCIAdapter(CIAdapterBase):
 def get_ci_adapter(provider_name):
     if provider_name == "circleci":
         return CircleCICIAdapter()
+    if provider_name == "githubactions":
+        return GithubActionsCIAdapter()
     return None

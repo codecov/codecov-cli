@@ -224,7 +224,7 @@ class TestPayloadGeneration(object):
             == b""
         )
 
-    def test_formate_coverage_file(self, mocker):
+    def test_format_coverage_file(self, mocker):
         fake_result_file = mocker.MagicMock()
         mocker.patch(
             "codecov_cli.entrypoints.UploadCollectionResultFile",
@@ -241,7 +241,7 @@ class TestPayloadGeneration(object):
         fake_result_file.get_content.return_value = coverage_file_seperated[1][
             : -len(b"\n<<<<<< EOF\n")
         ]
-        actual_coverage_file_section = UploadSender()._formate_coverage_file(
+        actual_coverage_file_section = UploadSender()._format_coverage_file(
             fake_result_file
         )
 
@@ -250,10 +250,10 @@ class TestPayloadGeneration(object):
             == reports_examples.coverage_file_section_simple
         )
 
-    def test_generage_coverage_files_section(self, mocker):
+    def test_generate_coverage_files_section(self, mocker):
 
         mocker.patch(
-            "codecov_cli.entrypoints.UploadSender._formate_coverage_file",
+            "codecov_cli.entrypoints.UploadSender._format_coverage_file",
             side_effect=lambda file_bytes: file_bytes,
         )
 
@@ -264,7 +264,7 @@ class TestPayloadGeneration(object):
             reports_examples.coverage_file_section_simple,
         ]
 
-        actual_section = UploadSender()._generage_coverage_files_section(
+        actual_section = UploadSender()._generate_coverage_files_section(
             UploadCollectionResult([], coverage_files, [])
         )
 
@@ -282,7 +282,7 @@ class TestPayloadGeneration(object):
             return_value=reports_examples.network_section,
         )
         mocker.patch(
-            "codecov_cli.entrypoints.UploadSender._generage_coverage_files_section",
+            "codecov_cli.entrypoints.UploadSender._generate_coverage_files_section",
             return_value=reports_examples.coverage_file_section_simple,
         )
 

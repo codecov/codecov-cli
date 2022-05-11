@@ -111,12 +111,12 @@ class GithubActionsCIAdapter(CIAdapterBase):
         return os.getenv("GITHUB_WORKFLOW")
 
     def _get_pull_request_number(self):
-        if os.getenv("GITHUB_HEAD_REF") is None:
+        if not os.getenv("GITHUB_HEAD_REF"):
             return None
         
         pr_ref = os.getenv("GITHUB_REF")
         
-        if pr_ref is None:
+        if not pr_ref:
             return None
         
         match = re.search(r"/refs/pull/(\d+)/merge", pr_ref)

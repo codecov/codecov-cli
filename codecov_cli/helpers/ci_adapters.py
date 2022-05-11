@@ -1,6 +1,9 @@
 import os
 import typing
+import re
+import subprocess
 from abc import ABC
+
 
 from codecov_cli.fallbacks import FallbackFieldEnum
 
@@ -67,6 +70,87 @@ class CircleCICIAdapter(CIAdapterBase):
     def _get_service(self):
         return "circleci"
 
+
+
+class GithubActionsCIAdapter(CIAdapterBase):
+    # https://docs.github.com/en/actions/learn-github-actions/environment-variables
+
+    def _get_commit_sha(self):
+        pr = self._get_pull_request_number()
+        commit = os.getenv("GITHUB_SHA")
+        
+        if not pr:
+            return commit
+        
+        merge_commit_regex = re.compile("^[a-z0-9]{40} [a-z0-9]{40}$")
+        
+        completed_subprocess = subprocess.run(['git', 'show', '--no-patch', '--format=%P'], capture_output=True)
+        parent_hash = completed_subprocess.stdout.decode().strip()
+        
+        if merge_commit_regex.search(parent_hash):
+            return parent_hash.split(' ')[1]
+        
+        return commit
+
+
+    def _get_build_url(self):
+        server_url = os.getenv("GITHUB_SERVER_URL")
+        slug = self._get_slug()
+        build_code = self._get_build_code()
+        
+        if all(value for value in [server_url, slug, build_code]):
+            return f"{server_url}/{slug}/actions/runs/{build_code}"
+        
+        return None
+        
+
+    def _get_build_code(self):
+        return os.getenv("GITHUB_RUN_ID")
+
+    def _get_job_code(self):
+        return os.getenv("GITHUB_WORKFLOW")
+
+    def _get_pull_request_number(self):
+        if os.getenv("GITHUB_HEAD_REF") is None:
+            return None
+        
+        pr_ref = os.getenv("GITHUB_REF")
+        
+        if pr_ref is None:
+            return None
+        
+        match = re.search(r"/refs/pull/(\d+)/merge", pr_ref)
+        
+        if match is None:
+            return None
+        
+        pr = match.group(1)
+
+        return pr or None
+
+    def _get_slug(self):
+        return os.getenv("GITHUB_REPOSITORY")
+
+    def _get_branch(self):
+        if branch := os.getenv("GITHUB_HEAD_REF"):
+            return branch
+        
+        branch_ref = os.getenv("GITHUB_REF")
+        
+        if not branch_ref:
+            return None
+        
+        match = re.search(r"/refs/heads/(.*)", branch_ref)
+        
+        if match is None:
+            return None
+
+        branch = match.group(1)
+        return branch or None
+        
+
+    def _get_service(self):
+        return "github-actions"
 
 def get_ci_adapter(provider_name):
     if provider_name == "circleci":

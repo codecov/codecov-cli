@@ -159,7 +159,7 @@ class TestGithubActions(object):
             f"codecov_cli.helpers.ci_adapters.GithubActionsCIAdapter.{method}",
             return_value=return_value,
         )
-        
+
     @pytest.fixture
     def os_env(self, mocker):
         # override github actions actual os env vars to avoid reading it while running on CI.

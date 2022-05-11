@@ -63,7 +63,7 @@ class UploadSender(object):
                     description=resp.text,
                     params={},
                 ),
-                warnings=[UploadSendingResultWarning("This did not go perfectly")],
+                warnings=[],
             )
 
         result_url, put_url = resp.text.split("\n")
@@ -78,7 +78,7 @@ class UploadSender(object):
                     description=resp.text,
                     params={},
                 ),
-                warnings=[UploadSendingResultWarning("This did not go perfectly")],
+                warnings=[],
             )
 
         return UploadSendingResult(error=None, warnings=[])

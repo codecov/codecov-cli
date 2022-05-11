@@ -163,7 +163,7 @@ class TestGithubActions(object):
     @pytest.fixture
     def os_env(self, mocker):
         # override github actions actual os env vars to avoid reading it while running on CI.
-        mocker.patch.dict(os.environ, {})
+        mocker.patch.dict(os.environ, {}, clear=True)
 
     def test_commit_sha(self, mocker, os_env):
         mocker.patch.dict(os.environ, {self.EnvEnum.GITHUB_SHA: "1234"})

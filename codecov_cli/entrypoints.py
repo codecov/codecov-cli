@@ -11,7 +11,7 @@ from codecov_cli.helpers.coverage_file_finder import select_coverage_file_finder
 from codecov_cli.helpers.network_finder import select_network_finder
 from codecov_cli.helpers.versioning_systems import VersioningSystemInterface
 from codecov_cli.plugins import select_preparation_plugins
-from codecov_cli.types import UploadCollectionResult
+from codecov_cli.types import UploadCollectionResult, UploadCollectionResultFile
 from codecov_cli.upload_collector import UploadCollector
 
 
@@ -87,8 +87,9 @@ class UploadSender(object):
     ) -> bytes:
         env_vars_section = self._generate_env_vars_section(env_vars)
         network_section = self._generate_network_section(upload_data)
+        coverage_files_section = self._generate_coverage_files_section(upload_data)
 
-        return b"".join([env_vars_section, network_section])
+        return b"".join([env_vars_section, network_section, coverage_files_section])
 
     def _generate_env_vars_section(self, env_vars) -> bytes:
         filtered_env_vars = {
@@ -111,6 +112,18 @@ class UploadSender(object):
 
         network_files_section = "".join(file + "\n" for file in network_files)
         return network_files_section.encode() + b"<<<<<< network\n"
+
+    def _generate_coverage_files_section(self, upload_data: UploadCollectionResult):
+        return b"".join(
+            self._format_coverage_file(file) for file in upload_data.coverage_files
+        )
+
+    def _format_coverage_file(self, file: UploadCollectionResultFile) -> bytes:
+        header = b"# path=" + file.get_filename() + b"\n"
+        file_content = file.get_content() + b"\n"
+        file_end = b"<<<<<< EOF\n"
+
+        return header + file_content + file_end
 
 
 def do_upload_logic(

@@ -159,8 +159,13 @@ class TestGithubActions(object):
             f"codecov_cli.helpers.ci_adapters.GithubActionsCIAdapter.{method}",
             return_value=return_value,
         )
+        
+    @pytest.fixture
+    def os_env(self, mocker):
+        # override github actions actual os env vars to avoid reading it while running on CI.
+        mocker.patch.dict(os.environ, {})
 
-    def test_commit_sha(self, mocker):
+    def test_commit_sha(self, mocker, os_env):
         mocker.patch.dict(os.environ, {self.EnvEnum.GITHUB_SHA: "1234"})
         assert (
             GithubActionsCIAdapter().get_fallback_value(FallbackFieldEnum.commit_sha)
@@ -187,7 +192,7 @@ class TestGithubActions(object):
             == "20e1219371dff308fd910b206f47fdf250621abf"
         )
 
-    def test_build_url(self, mocker):
+    def test_build_url(self, mocker, os_env):
         assert (
             GithubActionsCIAdapter().get_fallback_value(FallbackFieldEnum.build_url)
             is None
@@ -216,7 +221,7 @@ class TestGithubActions(object):
 
         assert actual == expected
 
-    def test_build_code(self, mocker):
+    def test_build_code(self, mocker, os_env):
         assert (
             GithubActionsCIAdapter().get_fallback_value(FallbackFieldEnum.build_code)
             is None
@@ -231,7 +236,7 @@ class TestGithubActions(object):
 
         assert actual == expected
 
-    def test_job_code(self, mocker):
+    def test_job_code(self, mocker, os_env):
         assert (
             GithubActionsCIAdapter().get_fallback_value(FallbackFieldEnum.job_code)
             is None
@@ -244,7 +249,7 @@ class TestGithubActions(object):
 
         assert actual == expected
 
-    def test_pull_request_number(self, mocker):
+    def test_pull_request_number(self, mocker, os_env):
         assert (
             GithubActionsCIAdapter().get_fallback_value(
                 FallbackFieldEnum.pull_request_number
@@ -287,7 +292,7 @@ class TestGithubActions(object):
             == "123"
         )
 
-    def test_slug(self, mocker):
+    def test_slug(self, mocker, os_env):
         assert (
             GithubActionsCIAdapter().get_fallback_value(FallbackFieldEnum.slug) is None
         )
@@ -299,7 +304,7 @@ class TestGithubActions(object):
 
         assert actual == expected
 
-    def test_branch(self, mocker):
+    def test_branch(self, mocker, os_env):
         assert (
             GithubActionsCIAdapter().get_fallback_value(FallbackFieldEnum.branch)
             is None
@@ -338,7 +343,7 @@ class TestGithubActions(object):
             == "abc"
         )
 
-    def test_get_service(self, mocker):
+    def test_get_service(self, mocker, os_env):
         assert (
             GithubActionsCIAdapter().get_fallback_value(FallbackFieldEnum.service)
             == "github-actions"

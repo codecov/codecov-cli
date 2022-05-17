@@ -1,4 +1,5 @@
 import typing
+import uuid
 
 from codecov_cli.helpers.coverage_file_finder import CoverageFileFinder
 from codecov_cli.helpers.network_finder import NetworkFinder
@@ -19,7 +20,7 @@ class UploadCollector(object):
     def _produce_file_fixes_for_network(self, network) -> typing.List[typing.Dict]:
         return []
 
-    def generate_upload_data(self):
+    def generate_upload_data(self) -> UploadCollectionResult:
         for prep in self.preparation_plugins:
             prep.run_preparation(self)
         network = self.network_finder.find_files()

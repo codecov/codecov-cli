@@ -353,81 +353,95 @@ class TestGithubActions(object):
             == "github-actions"
         )
 
+
 class TestGitlabCI(object):
     class EnvEnum(str, Enum):
-       CI_MERGE_REQUEST_SOURCE_BRANCH_SHA = "CI_MERGE_REQUEST_SOURCE_BRANCH_SHA" 
-       CI_BUILD_REF = "CI_BUILD_REF"
-       CI_COMMIT_REF_NAME = "CI_COMMIT_REF_NAME"
-       CI_BUILD_REF_NAME = "CI_BUILD_REF_NAME"
-       CI_REPOSITORY_URL = "CI_REPOSITORY_URL"
-       CI_BUILD_REPO = "CI_BUILD_REPO"
-       CI_PROJECT_PATH = "CI_PROJECT_PATH"
-       CI_JOB_ID = "CI_JOB_ID"
-       CI_BUILD_ID = "CI_BUILD_ID"
-       CI_JOB_URL = "CI_JOB_URL"
-       CI_COMMIT_SHA = "CI_COMMIT_SHA"
-       
-       
-       
+        CI_MERGE_REQUEST_SOURCE_BRANCH_SHA = "CI_MERGE_REQUEST_SOURCE_BRANCH_SHA"
+        CI_BUILD_REF = "CI_BUILD_REF"
+        CI_COMMIT_REF_NAME = "CI_COMMIT_REF_NAME"
+        CI_BUILD_REF_NAME = "CI_BUILD_REF_NAME"
+        CI_REPOSITORY_URL = "CI_REPOSITORY_URL"
+        CI_BUILD_REPO = "CI_BUILD_REPO"
+        CI_PROJECT_PATH = "CI_PROJECT_PATH"
+        CI_JOB_ID = "CI_JOB_ID"
+        CI_BUILD_ID = "CI_BUILD_ID"
+        CI_JOB_URL = "CI_JOB_URL"
+        CI_COMMIT_SHA = "CI_COMMIT_SHA"
+
     def test_commit_sha(self, mocker):
-       mocker.patch.dict(os.environ, {self.EnvEnum.CI_COMMIT_SHA: "1234"})
-       assert GitlabCIAdapter().get_fallback_value(FallbackFieldEnum.commit_sha) == "1234"
+        mocker.patch.dict(os.environ, {self.EnvEnum.CI_COMMIT_SHA: "1234"})
+        assert (
+            GitlabCIAdapter().get_fallback_value(FallbackFieldEnum.commit_sha) == "1234"
+        )
 
-       mocker.patch.dict(os.environ, {self.EnvEnum.CI_BUILD_REF: "44"})
-       assert GitlabCIAdapter().get_fallback_value(FallbackFieldEnum.commit_sha) == "44"
+        mocker.patch.dict(os.environ, {self.EnvEnum.CI_BUILD_REF: "44"})
+        assert (
+            GitlabCIAdapter().get_fallback_value(FallbackFieldEnum.commit_sha) == "44"
+        )
 
-       mocker.patch.dict(os.environ, {self.EnvEnum.CI_MERGE_REQUEST_SOURCE_BRANCH_SHA: "11"})
-       assert GitlabCIAdapter().get_fallback_value(FallbackFieldEnum.commit_sha) == "11"
-    
-    
+        mocker.patch.dict(
+            os.environ, {self.EnvEnum.CI_MERGE_REQUEST_SOURCE_BRANCH_SHA: "11"}
+        )
+        assert (
+            GitlabCIAdapter().get_fallback_value(FallbackFieldEnum.commit_sha) == "11"
+        )
+
     def test_build_url(self, mocker):
         mocker.patch.dict(os.environ, {self.EnvEnum.CI_JOB_URL: "test@test.org"})
-        assert GitlabCIAdapter().get_fallback_value(FallbackFieldEnum.build_url) == "test@test.org"
-    
-    
+        assert (
+            GitlabCIAdapter().get_fallback_value(FallbackFieldEnum.build_url)
+            == "test@test.org"
+        )
+
     def test_build_code(self, mocker):
         mocker.patch.dict(os.environ, {self.EnvEnum.CI_JOB_ID: "123"})
-        assert GitlabCIAdapter().get_fallback_value(FallbackFieldEnum.build_code) == "123"
-    
+        assert (
+            GitlabCIAdapter().get_fallback_value(FallbackFieldEnum.build_code) == "123"
+        )
+
         mocker.patch.dict(os.environ, {self.EnvEnum.CI_BUILD_ID: "44"})
-        assert GitlabCIAdapter().get_fallback_value(FallbackFieldEnum.build_code) == "44"
-    
-    
+        assert (
+            GitlabCIAdapter().get_fallback_value(FallbackFieldEnum.build_code) == "44"
+        )
+
     def test_job_code(self, mocker):
         assert GitlabCIAdapter().get_fallback_value(FallbackFieldEnum.job_code) is None
-    
-    
+
     def test_pull_request_number(self, mocker):
-        assert GitlabCIAdapter().get_fallback_value(FallbackFieldEnum.pull_request_number) is None
-    
+        assert (
+            GitlabCIAdapter().get_fallback_value(FallbackFieldEnum.pull_request_number)
+            is None
+        )
+
     def test_slug(self, mocker):
         assert GitlabCIAdapter().get_fallback_value(FallbackFieldEnum.slug) is None
-        
-        mocker.patch.dict(os.environ, {self.EnvEnum.CI_BUILD_REPO: "git@github.com:codecov/codecov-cli.git"})
-        
+
+        mocker.patch.dict(
+            os.environ,
+            {self.EnvEnum.CI_BUILD_REPO: "git@github.com:codecov/codecov-cli.git"},
+        )
+
         mocker.patch(
             f"codecov_cli.helpers.ci_adapters.parse_slug",
             return_value="codecov/codecov-cli",
         )
-        
-        
-        assert GitlabCIAdapter().get_fallback_value(FallbackFieldEnum.slug) == "codecov/codecov-cli"
-        
+
+        assert (
+            GitlabCIAdapter().get_fallback_value(FallbackFieldEnum.slug)
+            == "codecov/codecov-cli"
+        )
+
         mocker.patch.dict(os.environ, {self.EnvEnum.CI_PROJECT_PATH: "123"})
         assert GitlabCIAdapter().get_fallback_value(FallbackFieldEnum.slug) == "123"
-    
-        
+
     def test_branch(self, mocker):
         mocker.patch.dict(os.environ, {self.EnvEnum.CI_COMMIT_REF_NAME: "aa"})
         assert GitlabCIAdapter().get_fallback_value(FallbackFieldEnum.branch) == "aa"
-    
+
         mocker.patch.dict(os.environ, {self.EnvEnum.CI_BUILD_REF_NAME: "bb"})
         assert GitlabCIAdapter().get_fallback_value(FallbackFieldEnum.branch) == "bb"
-    
-    
+
     def test_service(self, mocker):
-        assert GitlabCIAdapter().get_fallback_value(FallbackFieldEnum.service) == "gitlab"
-        
-       
-       
-    
+        assert (
+            GitlabCIAdapter().get_fallback_value(FallbackFieldEnum.service) == "gitlab"
+        )

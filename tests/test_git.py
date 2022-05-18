@@ -1,5 +1,6 @@
-from codecov_cli.helpers import git
 import pytest
+
+from codecov_cli.helpers import git
 
 
 @pytest.mark.parametrize(
@@ -13,16 +14,12 @@ import pytest
 )
 def test_parse_slug_valid_address(address):
     assert git.parse_slug(address) == "codecov/codecov-cli"
-    
+
 
 @pytest.mark.parametrize(
     "address",
-    [
-        ("https://github.com"),
-        ("test@test.org"), 
-        ("aa")       
-    ],
-)  
+    [("https://github.com"), ("test@test.org"), ("aa")],
+)
 def test_parse_slug_invalid_address(address):
     with pytest.raises(ValueError):
         assert git.parse_slug(address)

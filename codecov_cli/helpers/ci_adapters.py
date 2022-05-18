@@ -5,7 +5,7 @@ import typing
 from abc import ABC
 
 from codecov_cli.fallbacks import FallbackFieldEnum
-from helpers.git import parse_slug
+from codecov_cli.helpers.git import parse_slug
 
 class CIAdapterBase(ABC):
     def __init__(self):
@@ -190,6 +190,6 @@ def get_ci_adapter(provider_name):
         return CircleCICIAdapter()
     if provider_name == "githubactions":
         return GithubActionsCIAdapter()
-    if provider_name == "gitlab":
+    if provider_name == "gitlabCI":
         return GitlabCIAdapter()
     return None

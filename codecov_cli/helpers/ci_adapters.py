@@ -80,15 +80,14 @@ class GithubActionsCIAdapter(CIAdapterBase):
         if not pr:
             return commit
 
-        merge_commit_regex = re.compile("^[a-z0-9]{40} [a-z0-9]{40}$")
-
+        # actions/checkout should be run with fetch-depth > 1 or set to 0 for this to work
         completed_subprocess = subprocess.run(
-            ["git", "show", "--no-patch", "--format=%P"], capture_output=True
+            ["git", "rev-parse", "HEAD^@"], capture_output=True
         )
-        parent_hash = completed_subprocess.stdout.decode().strip()
 
-        if merge_commit_regex.search(parent_hash):
-            return parent_hash.split(" ")[1]
+        parents_hash = completed_subprocess.stdout.decode().strip().splitlines()
+        if len(parents_hash) == 2:
+            return parents_hash[1]
 
         return commit
 
@@ -97,7 +96,7 @@ class GithubActionsCIAdapter(CIAdapterBase):
         slug = self._get_slug()
         build_code = self._get_build_code()
 
-        if all(value for value in [server_url, slug, build_code]):
+        if server_url and slug and build_code:
             return f"{server_url}/{slug}/actions/runs/{build_code}"
 
         return None
@@ -117,7 +116,7 @@ class GithubActionsCIAdapter(CIAdapterBase):
         if not pr_ref:
             return None
 
-        match = re.search(r"/refs/pull/(\d+)/merge", pr_ref)
+        match = re.search(r"refs/pull/(\d+)/merge", pr_ref)
 
         if match is None:
             return None
@@ -138,7 +137,7 @@ class GithubActionsCIAdapter(CIAdapterBase):
         if not branch_ref:
             return None
 
-        match = re.search(r"/refs/heads/(.*)", branch_ref)
+        match = re.search(r"refs/heads/(.*)", branch_ref)
 
         if match is None:
             return None

@@ -78,6 +78,7 @@ class GithubActionsCIAdapter(CIAdapterBase):
         commit = os.getenv("GITHUB_SHA")
 
         if not pr:
+            print("not pr, returning this commit")
             return commit
 
         merge_commit_regex = re.compile("^[a-z0-9]{40} [a-z0-9]{40}$")
@@ -88,6 +89,8 @@ class GithubActionsCIAdapter(CIAdapterBase):
         parent_hash = completed_subprocess.stdout.decode().strip()
 
         if merge_commit_regex.search(parent_hash):
+            h = parent_hash.split(" ")[1]
+            print(f"returning parent commit {h}")
             return parent_hash.split(" ")[1]
 
         return commit

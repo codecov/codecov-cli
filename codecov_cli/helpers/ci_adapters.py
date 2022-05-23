@@ -105,7 +105,7 @@ class GithubActionsCIAdapter(CIAdapterBase):
         )
         
         print(completed_subprocess.returncode)
-        print(completed_subprocess.stderr)
+        print(completed_subprocess.stdout)
         print(completed_subprocess.stderr)
         parents_hash = completed_subprocess.stdout.decode().strip().splitlines()
         print(f"parent hash {parents_hash}")

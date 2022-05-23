@@ -124,7 +124,7 @@ class GithubActionsCIAdapter(CIAdapterBase):
             print("GITHUB_REF is fine")
             return None
 
-        match = re.search(r"/refs/pull/(\d+)/merge", pr_ref)
+        match = re.search(r"refs/pull/(\d+)/merge", pr_ref)
 
         if match is None:
             print("doesn't match")
@@ -146,7 +146,7 @@ class GithubActionsCIAdapter(CIAdapterBase):
         if not branch_ref:
             return None
 
-        match = re.search(r"/refs/heads/(.*)", branch_ref)
+        match = re.search(r"refs/heads/(.*)", branch_ref)
 
         if match is None:
             return None

@@ -49,6 +49,9 @@ jobs:
     - name: Test with pytest
       run: |
         poetry run pytest --cov
+    - name: show git log
+      run: |
+        git log
     - name: Dogfooding codecov-cli. Use codecov-cli to upload to codecov
       run: |
         poetry run codecov --auto-load-params-from githubactions do-upload -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage

@@ -2,12 +2,12 @@ import os
 import shutil
 import subprocess
 from glob import iglob
-from pathlib import Path
-
+import pathlib
+import typing
 
 class Pycoverage(object):
-    def __init__(self, project_root=None):
-        self.project_root = project_root or os.getcwd()
+    def __init__(self, project_root: typing.Optional[pathlib.Path] = None):
+        self.project_root = project_root or pathlib.Path(os.getcwd())
 
     def run_preparation(self, collector):
         print("Running coverage.py plugin...")
@@ -31,7 +31,7 @@ class Pycoverage(object):
             print("aborting coverage.py plugin...")
             return
 
-        coverage_data_directory = Path(path_to_coverage_data).parent
+        coverage_data_directory = pathlib.Path(path_to_coverage_data).parent
         self._generate_XML_report(coverage_data_directory)
 
         print("aborting coverage.py plugin...")

@@ -82,10 +82,10 @@ class GithubActionsCIAdapter(CIAdapterBase):
 
         
         completed_subprocess = subprocess.run(
-            ["git", "rev-parse", "HEAD^2"], capture_output=True
+            ["git", "rev-parse", "HEAD^@"], capture_output=True
         )
         
-        parents_hash = completed_subprocess.stdout.decode().strip().splitlines()
+        parents_hash = completed_subprocess.stdout.decode().strip()
         print(parents_hash)
         if len(parents_hash) == 2:
             h = parents_hash[1]

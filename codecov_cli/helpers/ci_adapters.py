@@ -113,11 +113,13 @@ class GithubActionsCIAdapter(CIAdapterBase):
 
     def _get_pull_request_number(self):
         if not os.getenv("GITHUB_HEAD_REF"):
+            print("GITHUB_HEAD_REF is fine")
             return None
 
         pr_ref = os.getenv("GITHUB_REF")
 
         if not pr_ref:
+            print("GITHUB_REF is fine")
             return None
 
         match = re.search(r"/refs/pull/(\d+)/merge", pr_ref)
@@ -126,7 +128,7 @@ class GithubActionsCIAdapter(CIAdapterBase):
             return None
 
         pr = match.group(1)
-
+        print(f"pr number is {pr}")
         return pr or None
 
     def _get_slug(self):

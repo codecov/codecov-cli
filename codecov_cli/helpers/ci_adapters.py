@@ -86,7 +86,7 @@ class GithubActionsCIAdapter(CIAdapterBase):
         )
         
         parents_hash = completed_subprocess.stdout.decode().strip().splitlines()
-        
+        print(parents_hash)
         if len(parents_hash) == 2:
             h = parents_hash[1]
             return h

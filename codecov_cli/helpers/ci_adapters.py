@@ -119,7 +119,7 @@ class GithubActionsCIAdapter(CIAdapterBase):
             return None
 
         pr_ref = os.getenv("GITHUB_REF")
-
+        print(pr_ref)
         if not pr_ref:
             print("GITHUB_REF is fine")
             return None
@@ -127,6 +127,7 @@ class GithubActionsCIAdapter(CIAdapterBase):
         match = re.search(r"/refs/pull/(\d+)/merge", pr_ref)
 
         if match is None:
+            print("doesn't match")
             return None
 
         pr = match.group(1)

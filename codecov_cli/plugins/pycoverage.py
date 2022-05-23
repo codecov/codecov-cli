@@ -3,8 +3,9 @@ import pathlib
 import shutil
 import subprocess
 import typing
-import click
 from glob import iglob
+
+import click
 
 
 class Pycoverage(object):

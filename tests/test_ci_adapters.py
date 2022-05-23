@@ -155,13 +155,14 @@ class TestCircleCI(object):
 
 
 class GithubActionsEnvEnum(str, Enum):
-        GITHUB_SHA = "GITHUB_SHA"
-        GITHUB_SERVER_URL = "GITHUB_SERVER_URL"
-        GITHUB_RUN_ID = "GITHUB_RUN_ID"
-        GITHUB_WORKFLOW = "GITHUB_WORKFLOW"
-        GITHUB_HEAD_REF = "GITHUB_HEAD_REF"
-        GITHUB_REF = "GITHUB_REF"
-        GITHUB_REPOSITORY = "GITHUB_REPOSITORY"
+    GITHUB_SHA = "GITHUB_SHA"
+    GITHUB_SERVER_URL = "GITHUB_SERVER_URL"
+    GITHUB_RUN_ID = "GITHUB_RUN_ID"
+    GITHUB_WORKFLOW = "GITHUB_WORKFLOW"
+    GITHUB_HEAD_REF = "GITHUB_HEAD_REF"
+    GITHUB_REF = "GITHUB_REF"
+    GITHUB_REPOSITORY = "GITHUB_REPOSITORY"
+
 
 class TestGithubActions(object):
     @pytest.fixture
@@ -178,58 +179,79 @@ class TestGithubActions(object):
 
     def test_commit_sha_in_merge_commit_and_parents_hash_len_is_2(self, mocker, os_env):
         mocker.patch.dict(os.environ, {GithubActionsEnvEnum.GITHUB_SHA: "1234"})
-        mocker.patch.object(GithubActionsCIAdapter, "_get_pull_request_number").return_value = "random_pr_number"
-        
+        mocker.patch.object(
+            GithubActionsCIAdapter, "_get_pull_request_number"
+        ).return_value = "random_pr_number"
+
         fake_subprocess = mocker.MagicMock()
         mocker.patch(
             "codecov_cli.helpers.ci_adapters.subprocess.run",
             return_value=fake_subprocess,
         )
-        
+
         fake_subprocess.stdout = b"aa74b3ff0411086ee37e7a78f1b62984d7759077\n20e1219371dff308fd910b206f47fdf250621abf"
         assert (
             GithubActionsCIAdapter().get_fallback_value(FallbackFieldEnum.commit_sha)
             == "20e1219371dff308fd910b206f47fdf250621abf"
         )
-        
-    def test_commit_sha_in_merge_commit_and_parents_hash_len_is_not_2(self, mocker, os_env):
+
+    def test_commit_sha_in_merge_commit_and_parents_hash_len_is_not_2(
+        self, mocker, os_env
+    ):
         mocker.patch.dict(os.environ, {GithubActionsEnvEnum.GITHUB_SHA: "1234"})
-        mocker.patch.object(GithubActionsCIAdapter, "_get_pull_request_number").return_value = "random_pr_number"
-        
+        mocker.patch.object(
+            GithubActionsCIAdapter, "_get_pull_request_number"
+        ).return_value = "random_pr_number"
+
         fake_subprocess = mocker.MagicMock()
         mocker.patch(
             "codecov_cli.helpers.ci_adapters.subprocess.run",
             return_value=fake_subprocess,
         )
-        
+
         fake_subprocess.stdout = b"commit\nparents\nnumber\nis_not_equal_to_2"
         assert (
             GithubActionsCIAdapter().get_fallback_value(FallbackFieldEnum.commit_sha)
             == "1234"
         )
 
-
     @pytest.mark.parametrize(
         "env_dict,slug,build_code,expected",
         [
             ({}, None, None, None),
-            ({GithubActionsEnvEnum.GITHUB_SERVER_URL: "https://hello.org"}, None, None, None),
-            ({GithubActionsEnvEnum.GITHUB_SERVER_URL: "https://hello.org"}, "a/b", None, None),
-            ({GithubActionsEnvEnum.GITHUB_SERVER_URL: "https://hello.org"}, "a/b", "123", "https://hello.org/a/b/actions/runs/123"),
+            (
+                {GithubActionsEnvEnum.GITHUB_SERVER_URL: "https://hello.org"},
+                None,
+                None,
+                None,
+            ),
+            (
+                {GithubActionsEnvEnum.GITHUB_SERVER_URL: "https://hello.org"},
+                "a/b",
+                None,
+                None,
+            ),
+            (
+                {GithubActionsEnvEnum.GITHUB_SERVER_URL: "https://hello.org"},
+                "a/b",
+                "123",
+                "https://hello.org/a/b/actions/runs/123",
+            ),
         ],
     )
     def test_build_url(self, env_dict, slug, build_code, expected, mocker, os_env):
         mocker.patch.dict(os.environ, env_dict)
         mocker.patch.object(GithubActionsCIAdapter, "_get_slug").return_value = slug
-        mocker.patch.object(GithubActionsCIAdapter, "_get_build_code").return_value = build_code
+        mocker.patch.object(
+            GithubActionsCIAdapter, "_get_build_code"
+        ).return_value = build_code
 
         actual = GithubActionsCIAdapter().get_fallback_value(
             FallbackFieldEnum.build_url
         )
 
         assert actual == expected
-        
-        
+
     @pytest.mark.parametrize(
         "env_dict,expected",
         [
@@ -245,8 +267,7 @@ class TestGithubActions(object):
         )
 
         assert actual == expected
-        
-        
+
     @pytest.mark.parametrize(
         "env_dict,expected",
         [
@@ -266,9 +287,27 @@ class TestGithubActions(object):
         [
             ({}, None),
             ({GithubActionsEnvEnum.GITHUB_HEAD_REF: "aa"}, None),
-            ({GithubActionsEnvEnum.GITHUB_HEAD_REF: "aa", GithubActionsEnvEnum.GITHUB_REF: "doesn't_match"}, None),
-            ({GithubActionsEnvEnum.GITHUB_HEAD_REF: "aa", GithubActionsEnvEnum.GITHUB_REF: "refs/pull//merge"}, None),
-            ({GithubActionsEnvEnum.GITHUB_HEAD_REF: "aa", GithubActionsEnvEnum.GITHUB_REF: "refs/pull/44/merge"}, "44"),
+            (
+                {
+                    GithubActionsEnvEnum.GITHUB_HEAD_REF: "aa",
+                    GithubActionsEnvEnum.GITHUB_REF: "doesn't_match",
+                },
+                None,
+            ),
+            (
+                {
+                    GithubActionsEnvEnum.GITHUB_HEAD_REF: "aa",
+                    GithubActionsEnvEnum.GITHUB_REF: "refs/pull//merge",
+                },
+                None,
+            ),
+            (
+                {
+                    GithubActionsEnvEnum.GITHUB_HEAD_REF: "aa",
+                    GithubActionsEnvEnum.GITHUB_REF: "refs/pull/44/merge",
+                },
+                "44",
+            ),
         ],
     )
     def test_pull_request_number(self, env_dict, expected, mocker, os_env):
@@ -279,7 +318,6 @@ class TestGithubActions(object):
             )
             == expected
         )
-
 
     @pytest.mark.parametrize(
         "env_dict,expected",
@@ -293,9 +331,7 @@ class TestGithubActions(object):
         actual = GithubActionsCIAdapter().get_fallback_value(FallbackFieldEnum.slug)
 
         assert actual == expected
-        
-        
-    
+
     @pytest.mark.parametrize(
         "env_dict,expected",
         [
@@ -304,7 +340,6 @@ class TestGithubActions(object):
             ({GithubActionsEnvEnum.GITHUB_REF: r"doesn't_match"}, None),
             ({GithubActionsEnvEnum.GITHUB_REF: r"/refs/heads/"}, None),
             ({GithubActionsEnvEnum.GITHUB_REF: r"/refs/heads/abc"}, "abc"),
-            
         ],
     )
     def test_branch(self, env_dict, expected, mocker, os_env):

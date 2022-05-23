@@ -101,7 +101,7 @@ class GithubActionsCIAdapter(CIAdapterBase):
         print(completed_subprocess.stdout)
         
         completed_subprocess = subprocess.run(
-            ["git", "rev-parse", "HEAD^1"], capture_output=True
+            ["git", "rev-list", "HEAD"], capture_output=True
         )
         
         print(completed_subprocess.returncode)

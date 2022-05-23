@@ -1,9 +1,10 @@
 import os
+import pathlib
 import shutil
 import subprocess
-from glob import iglob
-import pathlib
 import typing
+from glob import iglob
+
 
 class Pycoverage(object):
     def __init__(self, project_root: typing.Optional[pathlib.Path] = None):
@@ -24,7 +25,6 @@ class Pycoverage(object):
             iglob(os.path.join(self.project_root, "**/.coverage.*"), recursive=True),
             None,
         )
-
 
         if path_to_coverage_data is None:
             print("No coverage data found.")

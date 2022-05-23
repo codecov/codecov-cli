@@ -74,7 +74,9 @@ class GithubActionsCIAdapter(CIAdapterBase):
     # https://docs.github.com/en/actions/learn-github-actions/environment-variables
 
     def _get_commit_sha(self):
+        print("Calling get pr num")
         pr = self._get_pull_request_number()
+        print("after get pr num")
         commit = os.getenv("GITHUB_SHA")
 
         if not pr:

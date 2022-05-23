@@ -83,18 +83,17 @@ class GithubActionsCIAdapter(CIAdapterBase):
             print("not pr, returning this commit")
             return commit
 
-        merge_commit_regex = re.compile("^[a-z0-9]{40} [a-z0-9]{40}$")
 
         completed_subprocess = subprocess.run(
-            ["git", "show", "--no-patch", "--format=%P"], capture_output=True
+            ["git", "rev-parse", "HEAD^@"], capture_output=True
         )
-        parent_hash = completed_subprocess.stdout.decode().strip()
-        print(f"parent hash {parent_hash}")
+        parents_hash = completed_subprocess.stdout.decode().strip().splitlines()
+        print(f"parent hash {parents_hash}")
         
-        if merge_commit_regex.search(parent_hash):
-            h = parent_hash.split(" ")[1]
+        if len(parents_hash) == 2:
+            h = parents_hash[1]
             print(f"returning parent commit {h}")
-            return parent_hash.split(" ")[1]
+            return h
 
 
         print("just retruning commit at the end")

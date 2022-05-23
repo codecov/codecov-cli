@@ -84,9 +84,21 @@ class GithubActionsCIAdapter(CIAdapterBase):
             return commit
 
 
+
+
+        completed_subprocess = subprocess.run(
+            ["pwd"], capture_output=True, cwd=os.getcwd()
+        )
+        print(completed_subprocess.stdout)
+        completed_subprocess = subprocess.run(
+            ["which", "codecov"], capture_output=True, cwd=os.getcwd()
+        )
+        print(completed_subprocess.stdout)
+        
         completed_subprocess = subprocess.run(
             ["git", "rev-parse", "HEAD^@"], capture_output=True, cwd=os.getcwd()
         )
+        
         print(completed_subprocess.returncode)
         print(completed_subprocess.stderr)
         print(completed_subprocess.stderr)

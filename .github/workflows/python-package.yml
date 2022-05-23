@@ -55,7 +55,7 @@ jobs:
     - name: Dogfooding codecov-cli. Use codecov-cli to upload to codecov
       run: |
         poetry run codecov --auto-load-params-from githubactions do-upload -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage
-    - name: Upload to codecov
-      run: |
-        pip install codecov
-        codecov -t ${{ secrets.CODECOV_TOKEN }} -F python${{ matrix.python-version }}
+    # - name: Upload to codecov
+    #   run: |
+    #     pip install codecov
+    #     codecov -t ${{ secrets.CODECOV_TOKEN }} -F python${{ matrix.python-version }}

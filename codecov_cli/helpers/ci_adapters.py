@@ -89,7 +89,8 @@ class GithubActionsCIAdapter(CIAdapterBase):
             ["git", "show", "--no-patch", "--format=%P"], capture_output=True
         )
         parent_hash = completed_subprocess.stdout.decode().strip()
-
+        print(parent_hash)
+        
         if merge_commit_regex.search(parent_hash):
             h = parent_hash.split(" ")[1]
             print(f"returning parent commit {h}")

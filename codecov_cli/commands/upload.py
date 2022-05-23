@@ -1,6 +1,7 @@
 import os
 import pathlib
 import typing
+import uuid
 
 import click
 
@@ -55,6 +56,13 @@ def _turn_env_vars_into_dict(ctx, params, value):
     cls=CodecovOption,
     fallback_field=FallbackFieldEnum.job_code,
 )
+@click.option(
+    "-t",
+    "--token",
+    help="Codecov upload token",
+    type=click.UUID,
+    envvar="CODECOV_TOKEN",
+)
 @click.option("--env-var", "env_vars", multiple=True, callback=_turn_env_vars_into_dict)
 @click.option("--flag", "flags", multiple=True, default=[])
 @click.option("--plugin", "plugin_names", multiple=True, default=["gcov"])
@@ -72,6 +80,7 @@ def do_upload(
     name: typing.Optional[str],
     network_root_folder: pathlib.Path,
     coverage_files_search_folder: pathlib.Path,
+    token: typing.Optional[uuid.UUID],
     plugin_names: typing.List[str],
 ):
     versioning_system = ctx.obj["versioning_system"]
@@ -88,6 +97,7 @@ def do_upload(
             network_root_folder=network_root_folder,
             coverage_files_search_folder=coverage_files_search_folder,
             plugin_names=plugin_names,
+            token=token,
         )
     )
     do_upload_logic(
@@ -103,4 +113,5 @@ def do_upload(
         network_root_folder=network_root_folder,
         coverage_files_search_folder=coverage_files_search_folder,
         plugin_names=plugin_names,
+        token=token,
     )

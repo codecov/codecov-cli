@@ -74,49 +74,24 @@ class GithubActionsCIAdapter(CIAdapterBase):
     # https://docs.github.com/en/actions/learn-github-actions/environment-variables
 
     def _get_commit_sha(self):
-        print("Calling get pr num")
         pr = self._get_pull_request_number()
-        print("after get pr num")
         commit = os.getenv("GITHUB_SHA")
 
         if not pr:
-            print("not pr, returning this commit")
             return commit
 
-
-
-
-        completed_subprocess = subprocess.run(
-            ["pwd"], capture_output=True
-        )
-        print(completed_subprocess.stdout)
-        completed_subprocess = subprocess.run(
-            ["which", "codecov"], capture_output=True
-        )
-        print(completed_subprocess.stdout)
-        
-        completed_subprocess = subprocess.run(
-            ["git", "status"], capture_output=True
-        )
-        print(completed_subprocess.stdout)
         
         completed_subprocess = subprocess.run(
             ["git", "rev-parse", "HEAD^2"], capture_output=True
         )
         
-        print(completed_subprocess.returncode)
-        print(completed_subprocess.stdout)
-        print(completed_subprocess.stderr)
         parents_hash = completed_subprocess.stdout.decode().strip().splitlines()
-        print(f"parent hash {parents_hash}")
         
         if len(parents_hash) == 2:
             h = parents_hash[1]
-            print(f"returning parent commit {h}")
             return h
 
 
-        print("just retruning commit at the end")
         return commit
 
     def _get_build_url(self):

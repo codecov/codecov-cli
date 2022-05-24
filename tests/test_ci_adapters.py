@@ -338,8 +338,8 @@ class TestGithubActions(object):
             ({}, None),
             ({GithubActionsEnvEnum.GITHUB_HEAD_REF: "random"}, "random"),
             ({GithubActionsEnvEnum.GITHUB_REF: r"doesn't_match"}, None),
-            ({GithubActionsEnvEnum.GITHUB_REF: r"/refs/heads/"}, None),
-            ({GithubActionsEnvEnum.GITHUB_REF: r"/refs/heads/abc"}, "abc"),
+            ({GithubActionsEnvEnum.GITHUB_REF: r"refs/heads/"}, None),
+            ({GithubActionsEnvEnum.GITHUB_REF: r"refs/heads/abc"}, "abc"),
         ],
     )
     def test_branch(self, env_dict, expected, mocker, os_env):

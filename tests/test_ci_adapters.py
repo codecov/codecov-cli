@@ -165,7 +165,7 @@ class GithubActionsEnvEnum(str, Enum):
 
 
 class TestGithubActions(object):
-    def test_commit_sha_if_not_in_merge_commit(self, mocker, os_env):
+    def test_commit_sha_if_not_in_merge_commit(self, mocker):
         mocker.patch.dict(
             os.environ, {GithubActionsEnvEnum.GITHUB_SHA: "1234"}, clear=True
         )
@@ -174,7 +174,7 @@ class TestGithubActions(object):
             == "1234"
         )
 
-    def test_commit_sha_in_merge_commit_and_parents_hash_len_is_2(self, mocker, os_env):
+    def test_commit_sha_in_merge_commit_and_parents_hash_len_is_2(self, mocker):
         mocker.patch.dict(
             os.environ, {GithubActionsEnvEnum.GITHUB_SHA: "1234"}, clear=True
         )
@@ -194,9 +194,7 @@ class TestGithubActions(object):
             == "20e1219371dff308fd910b206f47fdf250621abf"
         )
 
-    def test_commit_sha_in_merge_commit_and_parents_hash_len_is_not_2(
-        self, mocker, os_env
-    ):
+    def test_commit_sha_in_merge_commit_and_parents_hash_len_is_not_2(self, mocker):
         mocker.patch.dict(
             os.environ, {GithubActionsEnvEnum.GITHUB_SHA: "1234"}, clear=True
         )
@@ -240,7 +238,7 @@ class TestGithubActions(object):
             ),
         ],
     )
-    def test_build_url(self, env_dict, slug, build_code, expected, mocker, os_env):
+    def test_build_url(self, env_dict, slug, build_code, expected, mocker):
         mocker.patch.dict(os.environ, env_dict, clear=True)
         mocker.patch.object(GithubActionsCIAdapter, "_get_slug").return_value = slug
         mocker.patch.object(
@@ -260,7 +258,7 @@ class TestGithubActions(object):
             ({GithubActionsEnvEnum.GITHUB_RUN_ID: "random"}, "random"),
         ],
     )
-    def test_build_code(self, env_dict, expected, mocker, os_env):
+    def test_build_code(self, env_dict, expected, mocker):
         mocker.patch.dict(os.environ, env_dict, clear=True)
 
         actual = GithubActionsCIAdapter().get_fallback_value(
@@ -276,7 +274,7 @@ class TestGithubActions(object):
             ({GithubActionsEnvEnum.GITHUB_WORKFLOW: "random"}, "random"),
         ],
     )
-    def test_job_code(self, env_dict, expected, mocker, os_env):
+    def test_job_code(self, env_dict, expected, mocker):
         mocker.patch.dict(os.environ, env_dict, clear=True)
 
         actual = GithubActionsCIAdapter().get_fallback_value(FallbackFieldEnum.job_code)
@@ -311,7 +309,7 @@ class TestGithubActions(object):
             ),
         ],
     )
-    def test_pull_request_number(self, env_dict, expected, mocker, os_env):
+    def test_pull_request_number(self, env_dict, expected, mocker):
         mocker.patch.dict(os.environ, env_dict, clear=True)
         assert (
             GithubActionsCIAdapter().get_fallback_value(
@@ -327,7 +325,7 @@ class TestGithubActions(object):
             ({GithubActionsEnvEnum.GITHUB_REPOSITORY: "random"}, "random"),
         ],
     )
-    def test_slug(self, env_dict, expected, mocker, os_env):
+    def test_slug(self, env_dict, expected, mocker):
         mocker.patch.dict(os.environ, env_dict, clear=True)
         actual = GithubActionsCIAdapter().get_fallback_value(FallbackFieldEnum.slug)
 
@@ -343,14 +341,14 @@ class TestGithubActions(object):
             ({GithubActionsEnvEnum.GITHUB_REF: r"refs/heads/abc"}, "abc"),
         ],
     )
-    def test_branch(self, env_dict, expected, mocker, os_env):
+    def test_branch(self, env_dict, expected, mocker):
         mocker.patch.dict(os.environ, env_dict, clear=True)
         assert (
             GithubActionsCIAdapter().get_fallback_value(FallbackFieldEnum.branch)
             == expected
         )
 
-    def test_get_service(self, mocker, os_env):
+    def test_get_service(self, mocker):
         assert (
             GithubActionsCIAdapter().get_fallback_value(FallbackFieldEnum.service)
             == "github-actions"

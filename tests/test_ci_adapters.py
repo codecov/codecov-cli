@@ -166,14 +166,18 @@ class GithubActionsEnvEnum(str, Enum):
 
 class TestGithubActions(object):
     def test_commit_sha_if_not_in_merge_commit(self, mocker, os_env):
-        mocker.patch.dict(os.environ, {GithubActionsEnvEnum.GITHUB_SHA: "1234"}, clear=True)
+        mocker.patch.dict(
+            os.environ, {GithubActionsEnvEnum.GITHUB_SHA: "1234"}, clear=True
+        )
         assert (
             GithubActionsCIAdapter().get_fallback_value(FallbackFieldEnum.commit_sha)
             == "1234"
         )
 
     def test_commit_sha_in_merge_commit_and_parents_hash_len_is_2(self, mocker, os_env):
-        mocker.patch.dict(os.environ, {GithubActionsEnvEnum.GITHUB_SHA: "1234"}, clear=True)
+        mocker.patch.dict(
+            os.environ, {GithubActionsEnvEnum.GITHUB_SHA: "1234"}, clear=True
+        )
         mocker.patch.object(
             GithubActionsCIAdapter, "_get_pull_request_number"
         ).return_value = "random_pr_number"
@@ -193,7 +197,9 @@ class TestGithubActions(object):
     def test_commit_sha_in_merge_commit_and_parents_hash_len_is_not_2(
         self, mocker, os_env
     ):
-        mocker.patch.dict(os.environ, {GithubActionsEnvEnum.GITHUB_SHA: "1234"}, clear=True)
+        mocker.patch.dict(
+            os.environ, {GithubActionsEnvEnum.GITHUB_SHA: "1234"}, clear=True
+        )
         mocker.patch.object(
             GithubActionsCIAdapter, "_get_pull_request_number"
         ).return_value = "random_pr_number"

@@ -151,6 +151,7 @@ class GithubActionsCIAdapter(CIAdapterBase):
 
 
 class GitlabCIAdapter(CIAdapterBase):
+    # https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
     def _get_commit_sha(self):
         return (
             os.getenv("CI_MERGE_REQUEST_SOURCE_BRANCH_SHA")
@@ -165,14 +166,20 @@ class GitlabCIAdapter(CIAdapterBase):
         return os.getenv("CI_BUILD_ID") or os.getenv("CI_JOB_ID")
 
     def _get_job_code(self):
-        return None
+        return os.getenv("CI_JOB_ID")
 
     def _get_pull_request_number(self):
-        return None
+        return os.getenv("CI_MERGE_REQUEST_ID")
 
     def _get_slug(self):
         if slug := os.getenv("CI_PROJECT_PATH"):
             return slug
+
+        owner = os.getenv("CI_PROJECT_NAMESPACE")
+        project_name = os.getenv("CI_PROJECT_NAME")
+
+        if owner and project_name:
+            return f"{owner}/{project_name}"
 
         remote_address = os.getenv("CI_BUILD_REPO") or os.getenv("CI_REPOSITORY_URL")
 

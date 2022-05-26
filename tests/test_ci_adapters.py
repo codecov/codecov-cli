@@ -17,13 +17,13 @@ class TestCISelector(object):
         assert get_ci_adapter("random ci adapter name") is None
 
     def test_returns_circleCI(self):
-        assert type(get_ci_adapter("circleci")) is CircleCICIAdapter
+        assert isinstance(get_ci_adapter("circleci"), CircleCICIAdapter)
 
     def test_returns_githubactions(self):
-        assert type(get_ci_adapter("githubactions")) is GithubActionsCIAdapter
+        assert isinstance(get_ci_adapter("githubactions"), GithubActionsCIAdapter)
 
     def test_returns_gitlabCI(self):
-        assert type(get_ci_adapter("gitlabCI")) is GitlabCIAdapter
+        assert isinstance(get_ci_adapter("gitlabCI"), GitlabCIAdapter)
 
 
 class CircleCIEnvEnum(str, Enum):

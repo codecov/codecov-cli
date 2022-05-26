@@ -143,7 +143,7 @@ class TestCircleCI(object):
         actual = CircleCICIAdapter().get_fallback_value(FallbackFieldEnum.branch)
         assert actual == expected
 
-    def test_raises_value_error_if_unvalid_field(self):
+    def test_raises_value_error_if_invalid_field(self):
         with pytest.raises(ValueError) as ex:
             CircleCICIAdapter().get_fallback_value("some random key x 123")
 

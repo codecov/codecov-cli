@@ -95,20 +95,32 @@ class TestPycoverage(object):
         )
 
     def test_run_preparation_creates_reports_in_root_dir(
-        self, mocked_generator, tmp_path
+        self, mocked_generator, tmp_path, mocker
     ):
 
+        mocker.patch(
+            "codecov_cli.plugins.pycoverage.search_files", return_value=iter([])
+        )
         Pycoverage(tmp_path).run_preparation(None)
         assert not (tmp_path / "coverage.xml").exists()
         mocked_generator.not_called()
 
         (tmp_path / ".coverage").touch()
+
+        mocker.patch(
+            "codecov_cli.plugins.pycoverage.search_files",
+            return_value=iter([(tmp_path / ".coverage")]),
+        )
         Pycoverage(tmp_path).run_preparation(None)
         assert (tmp_path / "coverage.xml").exists()
 
     def test_run_preparation_creates_reports_in_sub_dirs(
-        self, mocked_generator, tmp_path
+        self, mocked_generator, tmp_path, mocker
     ):
+        mocker.patch(
+            "codecov_cli.plugins.pycoverage.search_files",
+            return_value=iter([(tmp_path / "sub" / ".coverage")]),
+        )
 
         (tmp_path / "sub").mkdir()
         (tmp_path / "sub" / ".coverage").touch()

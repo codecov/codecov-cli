@@ -7,6 +7,8 @@ from glob import iglob
 
 import click
 
+from codecov_cli.helpers.folder_searcher import globs_to_regex, search_files
+
 
 class Pycoverage(object):
     def __init__(self, project_root: typing.Optional[pathlib.Path] = None):
@@ -20,11 +22,11 @@ class Pycoverage(object):
             click.echo("aborting coverage.py plugin...")
             return
 
-        # This might need optimization
+        patterns_regex = globs_to_regex([".coverage", ".coverage.*"])
         path_to_coverage_data = next(
-            iglob(os.path.join(self.project_root, "**/.coverage"), recursive=True), None
-        ) or next(
-            iglob(os.path.join(self.project_root, "**/.coverage.*"), recursive=True),
+            search_files(
+                self.project_root, [], patterns_regex, filename_exclude_regex=None
+            ),
             None,
         )
 

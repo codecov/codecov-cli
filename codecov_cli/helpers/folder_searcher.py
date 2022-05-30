@@ -12,7 +12,7 @@ def search_files(
     *,
     filename_exclude_regex: typing.Optional[typing.Pattern],
 ) -> typing.Generator[pathlib.Path, None, None]:
-    pass
+    yield from ()
 
 
 def globs_to_regex(patterns: typing.List[str]) -> typing.Pattern:

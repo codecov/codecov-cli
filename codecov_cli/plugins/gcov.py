@@ -6,25 +6,55 @@ import typing
 from fnmatch import fnmatch
 from itertools import chain
 
+import click
+
+from codecov_cli.helpers.folder_searcher import globs_to_regex, search_files
+
 
 class GcovPlugin(object):
     def __init__(
         self,
         project_root: typing.Optional[pathlib.Path] = None,
-        patterns_to_include: typing.List[str] = [],
-        patterns_to_ignore: typing.List[str] = [],
-        extra_arguments: typing.List[str] = [],
+        patterns_to_include: typing.Optional[typing.List[str]] = None,
+        patterns_to_ignore: typing.Optional[typing.List[str]] = None,
+        folders_to_ignore: typing.Optional[typing.List[str]] = None,
+        extra_arguments: typing.Optional[typing.List[str]] = None,
     ):
         self.project_root = project_root or pathlib.Path(os.getcwd())
-        self.patterns_to_include = patterns_to_include
-        self.patterns_to_ignore = patterns_to_ignore
-        self.extra_arguments = extra_arguments
+        self.patterns_to_include = patterns_to_include or []
+        self.patterns_to_ignore = patterns_to_ignore or []
+        self.folders_to_ignore = folders_to_ignore or []
+        self.extra_arguments = extra_arguments or []
 
     def run_preparation(self, collector):
-        if shutil.which("gcov") is None:
-            return None
+        click.echo("Running gcov plugin...")
 
-        matched_paths = self._get_matched_paths()
+        if shutil.which("gcov") is None:
+            click.echo("gcov is not installed or can't be found.")
+            click.echo("aborting gcov plugin...")
+            return
+
+        filename_include_regex = globs_to_regex(["*.gcno", *self.patterns_to_include])
+        filename_exclude_regex = globs_to_regex(self.patterns_to_ignore)
+
+        matched_paths = [
+            str(path)
+            for path in search_files(
+                self.project_root,
+                self.folders_to_ignore,
+                filename_include_regex,
+                filename_exclude_regex=filename_exclude_regex,
+            )
+        ]
+
+        if not matched_paths:
+            click.echo("No gcov data found.")
+            click.echo("aborting gcov plugin...")
+            return
+
+        click.echo("Running gcov on the following list of files:")
+        for path in matched_paths:
+            click.echo(path)
 
         s = subprocess.run(
             ["gcov", "-pb", *self.extra_arguments, *matched_paths],
@@ -32,29 +62,5 @@ class GcovPlugin(object):
             capture_output=True,
         )
 
+        click.echo("aborting gcov plugin...")
         return s
-
-    def _get_matched_paths(self):
-        # This method might need a lot of optimization
-
-        unfiltered_matched_paths = chain(
-            *(
-                self.project_root.rglob(pattern)
-                for pattern in ["*.gcno", *self.patterns_to_include]
-            )
-        )
-
-        # !This is not accurate since fnmatch doesn't use the same rules for globbing as glob.glob or Path.glob
-        # !This will result in some weird pattern matching like this one
-        # path = Path("codecov-dev/a/b/hello.json")
-        # fnmatch(path, "codecov-*.json") => True
-
-        should_ignore = lambda path: any(
-            fnmatch(path, pattern) for pattern in self.patterns_to_ignore
-        )
-
-        matched_paths = (
-            path for path in unfiltered_matched_paths if not should_ignore(path)
-        )
-
-        return matched_paths

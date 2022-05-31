@@ -31,9 +31,7 @@ class TestGcov(object):
         mock = MagicMock()
         mock.stdout = b"File 'main.c'\nLines executed:0.00% of 11\nBranches executed:0.00% of 4\nTaken at least once:0.00% of 4\nCalls executed:0.00% of 5\nCreating 'main.c.gcov'\n\nLines executed:0.00% of 11"
 
-        mocker.patch(
-            "codecov_cli.plugins.gcov.subprocess.run", return_value=mock
-        )
+        mocker.patch("codecov_cli.plugins.gcov.subprocess.run", return_value=mock)
 
         res = GcovPlugin(tmp_path).run_preparation(collector=None)
 

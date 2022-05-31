@@ -18,7 +18,7 @@ def search_files(
 def globs_to_regex(patterns: typing.List[str]) -> typing.Optional[typing.Pattern]:
     """
     Converts a list of glob patterns to a combined ORed regex
-    
+
     Parameters:
         patterns (List[str]): a list of globs, possibly empty
 
@@ -28,6 +28,6 @@ def globs_to_regex(patterns: typing.List[str]) -> typing.Optional[typing.Pattern
     # if patterns is an empty list, avoid returning re.compile("") since it matches everything
     if not patterns:
         return None
-    
+
     regex_str = ["(" + translate(pattern) + ")" for pattern in patterns]
     return re.compile("|".join(regex_str))

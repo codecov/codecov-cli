@@ -10,6 +10,9 @@ import click
 from codecov_cli.helpers.folder_searcher import globs_to_regex, search_files
 
 
+coverage_files_regex = globs_to_regex([".coverage", ".coverage.*"])
+
+
 class Pycoverage(object):
     def __init__(self, project_root: typing.Optional[pathlib.Path] = None):
         self.project_root = project_root or pathlib.Path(os.getcwd())
@@ -22,10 +25,9 @@ class Pycoverage(object):
             click.echo("aborting coverage.py plugin...")
             return
 
-        patterns_regex = globs_to_regex([".coverage", ".coverage.*"])
         path_to_coverage_data = next(
             search_files(
-                self.project_root, [], patterns_regex, filename_exclude_regex=None
+                self.project_root, [], coverage_files_regex, filename_exclude_regex=None
             ),
             None,
         )
@@ -40,16 +42,16 @@ class Pycoverage(object):
 
         click.echo("aborting coverage.py plugin...")
 
-    def _generate_XML_report(self, dir):
+    def _generate_XML_report(self, dir: pathlib.Path):
         """Generates up-to-date XML report in the given directory"""
 
         # the following if conditions avoid creating dummy .coverage file
 
-        if next(iglob(os.path.join(dir, ".coverage.*")), None) is not None:
+        if next(iglob(str(dir / ".coverage.*")), None) is not None:
             click.echo(f"Running coverage combine -a in {dir}")
             subprocess.run(["coverage", "combine", "-a"], cwd=dir)
 
-        if os.path.exists(os.path.join(dir, ".coverage")):
+        if os.path.exists(str((dir / ".coverage"))):
             click.echo(f"Generating coverage.xml report in {dir}")
             completed_process = subprocess.run(
                 ["coverage", "xml", "-i"], cwd=dir, capture_output=True

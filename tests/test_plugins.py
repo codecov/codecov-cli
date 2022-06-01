@@ -81,8 +81,7 @@ class TestPycoverage(object):
 
     @pytest.fixture
     def mocked_generator(self, mocker):
-        def generate_XML_report_side_effect(*args, **kwargs):
-            working_dir = args[0]
+        def generate_XML_report_side_effect(working_dir, *args, **kwargs):
             working_dir = pathlib.Path(
                 working_dir
             )  # make sure it is of type Path not strings to avoid exceptions

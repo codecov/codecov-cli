@@ -9,7 +9,6 @@ import click
 
 from codecov_cli.helpers.folder_searcher import globs_to_regex, search_files
 
-
 coverage_files_regex = globs_to_regex([".coverage", ".coverage.*"])
 
 

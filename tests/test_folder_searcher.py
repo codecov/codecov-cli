@@ -1,6 +1,8 @@
 import re
 
-from codecov_cli.helpers.folder_searcher import search_files
+import pytest
+
+from codecov_cli.helpers.folder_searcher import globs_to_regex, search_files
 
 
 def test_search_files(tmp_path):
@@ -105,3 +107,74 @@ def test_search_files_with_exclude_regex(tmp_path):
             tmp_path, [], search_for, filename_exclude_regex=re.compile(r".*\.py")
         )
     )
+
+
+@pytest.mark.parametrize(
+    "patterns,should_match,shouldnt_match",
+    [
+        (
+            ["*coverage*.*"],
+            [
+                "coverage.",
+                "abc-coverage.xyz",
+                "coverage.abc",
+                "coverage-abc.xyz",
+                "abc-coverage.",
+                "ccoverage.abc",
+                "ijk-coverage.abc.xyz",
+            ],
+            ["hoverage.", "xyz-coverage-abc"],
+        ),
+        (
+            ["*.codecov.*", "codecov.*"],
+            [
+                ".codecov.",
+                "codecov.",
+                "abc.codecov.xyz",
+                "abc.codecov.",
+                "codecov.abc",
+            ],
+            ["codecov"],
+        ),
+        (
+            ["?.coverage", "??.coverage", "abc"],
+            ["a.coverage", "ab.coverage", "abc"],
+            [".coverage", "abc.coverage", "abcz"],
+        ),
+        (
+            ["[a-f]coverage", "[h-w]coverage"],
+            ["acoverage", "ccoverage", "hcoverage", "ncoverage", "wcoverage"],
+            ["gcoverage", "zcoverage", "coverage"],
+        ),
+        (["[!c-f]coverage"], ["acoverage"], ["coverage", "ccoverage"]),
+        (
+            ["lcov.info", "cover.out", "gcov.info", "jacoco*.xml", "luacov.report.out"],
+            [
+                "lcov.info",
+                "cover.out",
+                "gcov.info",
+                "jacoco.xml",
+                "jacocoabc.xml",
+                "luacov.report.out",
+            ],
+            [],
+        ),
+    ],
+)
+def test_globs_to_regex_matches_expected_files(patterns, should_match, shouldnt_match):
+    regex = globs_to_regex(patterns)
+
+    # assert all(regex.match(file_name) for file_name in should_match)
+    # assert all(not regex.match(file_name) for file_name in shouldnt_match)
+
+    for file_name in should_match:
+        assert regex.match(file_name)
+
+    for file_name in shouldnt_match:
+        assert not regex.match(file_name)
+
+
+def test_globs_to_regex_returns_none_if_patterns_empty():
+    regex = globs_to_regex([])
+
+    assert regex is None

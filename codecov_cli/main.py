@@ -30,7 +30,7 @@ def cli(
 ):
     ctx.obj["ci_adapter"] = get_ci_adapter(auto_load_params_from)
     ctx.obj["versioning_system"] = get_versioning_system()
-    ctx.obj["codecov_yml"] = (
+    ctx.obj["codecov_yaml"] = (
         yaml.safe_load(codecov_yml_path.read())
         if codecov_yml_path is not None
         else None

@@ -84,6 +84,8 @@ def do_upload(
     plugin_names: typing.List[str],
 ):
     versioning_system = ctx.obj["versioning_system"]
+    codecov_yaml = ctx.obj["codecov_yaml"] or {}
+    cli_config = codecov_yaml.get("cli", {})
     print(
         dict(
             commit_sha=commit_sha,
@@ -101,6 +103,7 @@ def do_upload(
         )
     )
     do_upload_logic(
+        cli_config,
         versioning_system,
         commit_sha=commit_sha,
         report_code=report_code,

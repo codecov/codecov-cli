@@ -127,6 +127,7 @@ class UploadSender(object):
 
 
 def do_upload_logic(
+    cli_config: typing.Dict,
     versioning_system: VersioningSystemInterface,
     *,
     commit_sha: str,
@@ -142,7 +143,7 @@ def do_upload_logic(
     plugin_names: typing.List[str],
     token: uuid.UUID,
 ):
-    preparation_plugins = select_preparation_plugins(plugin_names)
+    preparation_plugins = select_preparation_plugins(cli_config, plugin_names)
     coverage_file_selector = select_coverage_file_finder()
     network_finder = select_network_finder(versioning_system)
     collector = UploadCollector(

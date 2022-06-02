@@ -50,7 +50,7 @@ class Pycoverage(object):
             click.echo(f"Running coverage combine -a in {dir}")
             subprocess.run(["coverage", "combine", "-a"], cwd=dir)
 
-        if os.path.exists(str((dir / ".coverage"))):
+        if (dir / ".coverage").exists():
             click.echo(f"Generating coverage.xml report in {dir}")
             completed_process = subprocess.run(
                 ["coverage", "xml", "-i"], cwd=dir, capture_output=True

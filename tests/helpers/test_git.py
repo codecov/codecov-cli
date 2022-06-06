@@ -18,3 +18,18 @@ from codecov_cli.helpers import git
 )
 def test_parse_slug_valid_address(address, slug):
     assert git.parse_slug(address) == slug
+
+
+@pytest.mark.parametrize(
+    "address",
+    [
+        ("https://github.com/codecov"),
+        ("https://github.com/codecov.git"),
+        ("git@github.com:codecov"),
+        ("git@github.com:codecov.git"),
+        ("https://www.google.com"),
+        ("random string")
+    ],
+)
+def test_parse_slug_invalid_address(address):
+    assert git.parse_slug(address) is None

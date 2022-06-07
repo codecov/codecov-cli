@@ -48,6 +48,10 @@ class GitVersioningSystem(VersioningSystemInterface):
         self, root_folder: typing.Optional[Path] = None
     ) -> typing.List[str]:
         dir_to_use = root_folder or self.get_network_root()
+        if dir_to_use is None:
+            raise ValueError("Can't determine root folder")
+        
+        
         res = subprocess.run(
             ["git", "-C", str(dir_to_use), "ls-files"], capture_output=True
         )

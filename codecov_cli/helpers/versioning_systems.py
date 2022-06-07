@@ -31,9 +31,6 @@ class GitVersioningSystem(VersioningSystemInterface):
     def is_available(cls):
         return True
 
-    def __init__(self, lookup_directory: typing.Optional[Path] = None):
-        self.lookup_directory = lookup_directory or self.get_network_root()
-
     def get_fallback_value(self, fallback_field: FallbackFieldEnum):
         if fallback_field == FallbackFieldEnum.commit_sha:
             p = subprocess.run(["git", "log", "-1", "--format=%H"], capture_output=True)
@@ -47,16 +44,25 @@ class GitVersioningSystem(VersioningSystemInterface):
             return Path(p.stdout.decode().rstrip())
         return None
 
-    def list_relevant_files(self, directory: typing.Optional[Path] = None):
-        dir_to_use = directory or self.lookup_directory
-
-        if dir_to_use is None:
-            raise ValueError("Couldn't determine lookup directory")
-
+    def list_relevant_files(
+        self, root_folder: typing.Optional[Path] = None
+    ) -> typing.List[str]:
+        dir_to_use = root_folder or self.get_network_root()
+        print(dir_to_use)
         res = subprocess.run(
             ["git", "-C", str(dir_to_use), "ls-files"], capture_output=True
         )
-        return res.stdout.decode().split()
+
+        adjust_file_name = (
+            lambda filename: filename[1:-1]
+            if filename.startswith('"') and filename.endswith('"')
+            else filename
+        )
+
+        return [
+            adjust_file_name(filename)
+            for filename in res.stdout.decode("unicode_escape").splitlines()
+        ]
 
 
 class NoVersioningSystem(VersioningSystemInterface):

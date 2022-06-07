@@ -1,0 +1,25 @@
+from unittest.mock import MagicMock
+
+import pytest
+
+from codecov_cli.helpers.versioning_systems import GitVersioningSystem
+
+
+class TestGitVersioningSystem(object):
+    def test_list_relevant_files_returns_correct_network_files(self, mocker, tmp_path):
+        mocked_subprocess = MagicMock()
+        mocker.patch(
+            "codecov_cli.helpers.versioning_systems.subprocess.run",
+            return_value=mocked_subprocess,
+        )
+        mocked_subprocess.stdout = b'a.txt\nb.txt\n"a\\nb.txt"\nc.txt\nd.txt'
+
+        vs = GitVersioningSystem()
+
+        assert vs.list_relevant_files(tmp_path) == [
+            "a.txt",
+            "b.txt",
+            "a\\nb.txt",
+            "c.txt",
+            "d.txt",
+        ]

@@ -48,7 +48,6 @@ class GitVersioningSystem(VersioningSystemInterface):
         self, root_folder: typing.Optional[Path] = None
     ) -> typing.List[str]:
         dir_to_use = root_folder or self.get_network_root()
-        print(dir_to_use)
         res = subprocess.run(
             ["git", "-C", str(dir_to_use), "ls-files"], capture_output=True
         )
@@ -61,7 +60,7 @@ class GitVersioningSystem(VersioningSystemInterface):
 
         return [
             adjust_file_name(filename)
-            for filename in res.stdout.decode("unicode_escape").splitlines()
+            for filename in res.stdout.decode("unicode_escape").strip().split()
         ]
 
 

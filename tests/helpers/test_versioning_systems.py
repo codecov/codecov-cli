@@ -12,7 +12,9 @@ class TestGitVersioningSystem(object):
             "codecov_cli.helpers.versioning_systems.subprocess.run",
             return_value=mocked_subprocess,
         )
-        mocked_subprocess.stdout = b'a.txt\nb.txt\n"a\\nb.txt"\nc.txt\nd.txt'
+
+        # git ls-files diplays a single \n as \\\\n
+        mocked_subprocess.stdout = b'a.txt\nb.txt\n"a\\\\nb.txt"\nc.txt\nd.txt'
 
         vs = GitVersioningSystem()
 

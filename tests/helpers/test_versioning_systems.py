@@ -25,7 +25,7 @@ class TestGitVersioningSystem(object):
             "c.txt",
             "d.txt",
         ]
-        
+
     def test_list_relevant_files_fails_if_no_root_is_found(self, mocker):
         mocker.patch(
             "codecov_cli.helpers.versioning_systems.GitVersioningSystem.get_network_root",

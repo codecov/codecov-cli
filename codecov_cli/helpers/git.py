@@ -1,7 +1,7 @@
 import re
 from urllib.parse import urlparse
 
-slug_regex = re.compile("[^/\s]+\/[^/\s]+$")
+slug_regex = re.compile(r"[^/\s]+\/[^/\s]+$")
 
 
 def parse_slug(remote_repo_url: str):
@@ -14,20 +14,22 @@ def parse_slug(remote_repo_url: str):
     """
     parsed_url = urlparse(remote_repo_url)
 
-    slug = parsed_url.path
+    path_to_parse = parsed_url.path
 
     try:
-        if slug.endswith(".git"):
-            slug = slug.rsplit(".git", 1)[0]
-        if slug.startswith("git@"):
-            slug = slug.split(":", 1)[1]
+        if path_to_parse.endswith("/"):
+            path_to_parse = path_to_parse.rsplit("/", 1)[0]
+        if path_to_parse.endswith(".git"):
+            path_to_parse = path_to_parse.rsplit(".git", 1)[0]
+        if ":" in path_to_parse:
+            path_to_parse = path_to_parse.split(":", 1)[1]
 
-        if slug.startswith("/"):
-            slug = slug[1:]
+        if path_to_parse.startswith("/"):
+            path_to_parse = path_to_parse[1:]
     except IndexError:
         return None
-    
-    if not slug_regex.match(slug):
+
+    if not slug_regex.match(path_to_parse):
         return None
 
-    return slug
+    return path_to_parse

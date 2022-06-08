@@ -17,7 +17,20 @@ class TestUploadSender(object):
         upload_collection = UploadCollectionResult(["1", "apple.py", "3"], [], [])
         random_token = uuid.UUID("f359afb9-8a2a-42ab-a448-c3d267ff495b")
         random_sha = "845548c6b95223f12e8317a1820705f64beaf69e"
-        return (upload_collection, random_token, random_sha)
+        named_upload_data = {
+            "name": "name",
+            "branch": "branch",
+            "tag": "tag",
+            "slug": "slug",
+            "pull_request_number": "pr",
+            "build_code": "build_code",
+            "build_url": "build_url",
+            "job_code": "job_code",
+            "flags": "flags",
+            "service": "service",
+        }
+
+        return (upload_collection, random_token, random_sha, named_upload_data)
 
     @pytest.fixture
     def mocked_responses(self):
@@ -44,13 +57,24 @@ class TestUploadSender(object):
     def test_upload_sender_post_called_with_right_parameters(
         self, fake_upload_data, mocked_responses, mocked_post, mocked_put
     ):
-        (upload_collection, random_token, random_sha) = fake_upload_data
+        (
+            upload_collection,
+            random_token,
+            random_sha,
+            named_upload_data,
+        ) = fake_upload_data
 
         headers = {"X-Upload-Token": random_token.hex}
         params = {
             "package": f"codecov-cli/{codecov_cli_version}",
             "commit": random_sha,
+            **named_upload_data,
         }
+
+        # rename query params keys since they are not the same as send_upload_data parameters
+        params["build"] = params.pop("build_code")
+        params["pr"] = params.pop("pull_request_number")
+        params["job"] = params.pop("job_code")
 
         mocked_post.match = [
             matchers.query_param_matcher(params),
@@ -58,13 +82,13 @@ class TestUploadSender(object):
         ]
 
         sender = UploadSender().send_upload_data(
-            upload_collection, random_sha, random_token, {}
+            upload_collection, random_sha, random_token, {}, **named_upload_data
         )
 
         assert len(mocked_responses.calls) == 2
 
         post_req_made = mocked_responses.calls[0].request
-
+        assert True
         assert post_req_made.url.split("?")[0] == "https://codecov.io/upload/v4"
         assert dict(parse.parse_qsl(parse.urlsplit(post_req_made.url).query)) == params
         assert (
@@ -74,10 +98,15 @@ class TestUploadSender(object):
     def test_upload_sender_put_called_with_right_parameters(
         self, fake_upload_data, mocked_responses, mocked_post, mocked_put
     ):
-        (upload_collection, random_token, random_sha) = fake_upload_data
+        (
+            upload_collection,
+            random_token,
+            random_sha,
+            named_upload_data,
+        ) = fake_upload_data
 
         sender = UploadSender().send_upload_data(
-            upload_collection, random_sha, random_token, {}
+            upload_collection, random_sha, random_token, {}, **named_upload_data
         )
 
         assert len(mocked_responses.calls) == 2
@@ -88,10 +117,15 @@ class TestUploadSender(object):
     def test_upload_sender_result_success(
         self, fake_upload_data, mocked_responses, mocked_post, mocked_put
     ):
-        (upload_collection, random_token, random_sha) = fake_upload_data
+        (
+            upload_collection,
+            random_token,
+            random_sha,
+            named_upload_data,
+        ) = fake_upload_data
 
         sender = UploadSender().send_upload_data(
-            upload_collection, random_sha, random_token, {}
+            upload_collection, random_sha, random_token, {}, **named_upload_data
         )
 
         # default status for both put and post is 200
@@ -102,12 +136,17 @@ class TestUploadSender(object):
     def test_upload_sender_result_fail_post_400(
         self, fake_upload_data, mocked_responses, mocked_post
     ):
-        (upload_collection, random_token, random_sha) = fake_upload_data
+        (
+            upload_collection,
+            random_token,
+            random_sha,
+            named_upload_data,
+        ) = fake_upload_data
 
         mocked_post.status = 400
 
         sender = UploadSender().send_upload_data(
-            upload_collection, random_sha, random_token, {}
+            upload_collection, random_sha, random_token, {}, **named_upload_data
         )
 
         assert len(mocked_responses.calls) == 1
@@ -119,12 +158,17 @@ class TestUploadSender(object):
     def test_upload_sender_result_fail_put_400(
         self, fake_upload_data, mocked_responses, mocked_post, mocked_put
     ):
-        (upload_collection, random_token, random_sha) = fake_upload_data
+        (
+            upload_collection,
+            random_token,
+            random_sha,
+            named_upload_data,
+        ) = fake_upload_data
 
         mocked_put.status = 400
 
         sender = UploadSender().send_upload_data(
-            upload_collection, random_sha, random_token, {}
+            upload_collection, random_sha, random_token, {}, **named_upload_data
         )
 
         assert len(mocked_responses.calls) == 2
@@ -136,7 +180,12 @@ class TestUploadSender(object):
     def test_upload_sender_http_error_with_invalid_sha(
         self, fake_upload_data, mocked_responses, mocked_post
     ):
-        (upload_collection, random_token, random_sha) = fake_upload_data
+        (
+            upload_collection,
+            random_token,
+            random_sha,
+            named_upload_data,
+        ) = fake_upload_data
 
         random_sha = "invalid"
 
@@ -144,7 +193,7 @@ class TestUploadSender(object):
         mocked_post.status = 400
 
         sender = UploadSender().send_upload_data(
-            upload_collection, random_sha, random_token, {}
+            upload_collection, random_sha, random_token, {}, **named_upload_data
         )
 
         assert sender.error is not None

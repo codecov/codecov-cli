@@ -30,23 +30,30 @@ def test_do_upload_logic_happy_path(mocker):
     )
     cli_config = {}
     versioning_system = mocker.MagicMock()
+    ci_adapter = mocker.MagicMock()
+    ci_adapter.get_fallback_value.return_value = "service"
     runner = CliRunner()
     with runner.isolation() as outstreams:
         res = do_upload_logic(
             cli_config,
             versioning_system,
+            ci_adapter,
             commit_sha="commit_sha",
             report_code="report_code",
             build_code="build_code",
-            build_url=None,
-            job_code=None,
+            build_url="build_url",
+            job_code="job_code",
             env_vars=None,
             flags=None,
-            name=None,
+            name="name",
             network_root_folder=None,
             coverage_files_search_folder=None,
             plugin_names=["first_plugin", "another", "forth"],
             token="token",
+            branch="branch",
+            slug="slug",
+            tag="tag",
+            pull_request_number="pr",
         )
     out_bytes = outstreams[0].getvalue().decode().splitlines()
     assert out_bytes == [
@@ -61,5 +68,18 @@ def test_do_upload_logic_happy_path(mocker):
     mock_select_network_finder.assert_called_with(versioning_system)
     mock_generate_upload_data.assert_called_with()
     mock_send_upload_data.assert_called_with(
-        mock_generate_upload_data.return_value, "commit_sha", "token", None
+        mock_generate_upload_data.return_value,
+        "commit_sha",
+        "token",
+        None,
+        "name",
+        "branch",
+        "tag",
+        "slug",
+        "pr",
+        "build_code",
+        "build_url",
+        "job_code",
+        None,
+        "service",
     )

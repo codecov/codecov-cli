@@ -4,6 +4,8 @@ from pathlib import Path
 
 import click
 
+from codecov_cli.fallbacks import FallbackFieldEnum
+from codecov_cli.helpers.ci_adapters import CIAdapterBase
 from codecov_cli.helpers.coverage_file_finder import select_coverage_file_finder
 from codecov_cli.helpers.network_finder import select_network_finder
 from codecov_cli.helpers.upload_sender import UploadSender
@@ -15,6 +17,7 @@ from codecov_cli.upload_collector import UploadCollector
 def do_upload_logic(
     cli_config: typing.Dict,
     versioning_system: VersioningSystemInterface,
+    ci_adapter: CIAdapterBase,
     *,
     commit_sha: str,
     report_code: str,
@@ -28,6 +31,10 @@ def do_upload_logic(
     coverage_files_search_folder: Path,
     plugin_names: typing.List[str],
     token: uuid.UUID,
+    branch: typing.Optional[str],
+    tag: typing.Optional[str],
+    slug: typing.Optional[str],
+    pull_request_number: typing.Optional[str],
 ):
     preparation_plugins = select_preparation_plugins(cli_config, plugin_names)
     coverage_file_selector = select_coverage_file_finder()
@@ -37,7 +44,27 @@ def do_upload_logic(
     )
     upload_data = collector.generate_upload_data()
     sender = UploadSender()
-    sending_result = sender.send_upload_data(upload_data, commit_sha, token, env_vars)
+    service = (
+        ci_adapter.get_fallback_value(FallbackFieldEnum.service)
+        if ci_adapter is not None
+        else None
+    )
+    sending_result = sender.send_upload_data(
+        upload_data,
+        commit_sha,
+        token,
+        env_vars,
+        name,
+        branch,
+        tag,
+        slug,
+        pull_request_number,
+        build_code,
+        build_url,
+        job_code,
+        flags,
+        service,
+    )
     if sending_result.warnings:
         number_warnings = len(sending_result.warnings)
         pluralization = "warnings" if number_warnings > 1 else "warning"

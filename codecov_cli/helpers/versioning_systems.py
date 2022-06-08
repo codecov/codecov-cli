@@ -24,8 +24,14 @@ class GitVersioningSystem(VersioningSystemInterface):
         if fallback_field == FallbackFieldEnum.commit_sha:
             p = subprocess.run(["git", "log", "-1", "--format=%H"], capture_output=True)
             if p.stdout:
-                return p.stdout.decode().strip()
+                return p.stdout.decode().rstrip()
 
+        return None
+
+    def get_network_root(self):
+        p = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True)
+        if p.stdout:
+            return Path(p.stdout.decode().rstrip())
         return None
 
     def list_relevant_files(self):

@@ -1,11 +1,23 @@
 import subprocess
+import typing
 from pathlib import Path
 
 from codecov_cli.fallbacks import FallbackFieldEnum
 
 
 class VersioningSystemInterface(object):
-    pass
+    def get_fallback_value(
+        self, fallback_field: FallbackFieldEnum
+    ) -> typing.Optional[str]:
+        pass
+
+    def get_network_root(self) -> typing.Optional[Path]:
+        pass
+
+    def list_relevant_files(
+        self, directory: typing.Optional[Path] = None
+    ) -> typing.List[str]:
+        pass
 
 
 def get_versioning_system() -> VersioningSystemInterface:
@@ -32,11 +44,27 @@ class GitVersioningSystem(VersioningSystemInterface):
             return Path(p.stdout.decode().rstrip())
         return None
 
-    def list_relevant_files(self):
+    def list_relevant_files(
+        self, root_folder: typing.Optional[Path] = None
+    ) -> typing.List[str]:
+        dir_to_use = root_folder or self.get_network_root()
+        if dir_to_use is None:
+            raise ValueError("Can't determine root folder")
+
         res = subprocess.run(
-            ["git", "-C", str(self.folder_name), "ls-files"], capture_output=True
+            ["git", "-C", str(dir_to_use), "ls-files"], capture_output=True
         )
-        return res.stdout.decode().split()
+
+        adjust_file_name = (
+            lambda filename: filename[1:-1]
+            if filename.startswith('"') and filename.endswith('"')
+            else filename
+        )
+
+        return [
+            adjust_file_name(filename)
+            for filename in res.stdout.decode("unicode_escape").strip().split()
+        ]
 
 
 class NoVersioningSystem(VersioningSystemInterface):

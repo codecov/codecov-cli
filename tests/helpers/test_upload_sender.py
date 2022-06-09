@@ -87,7 +87,6 @@ class TestUploadSender(object):
         assert len(mocked_responses.calls) == 2
 
         post_req_made = mocked_responses.calls[0].request
-        assert True
         assert post_req_made.url.split("?")[0] == "https://codecov.io/upload/v4"
         assert dict(parse.parse_qsl(parse.urlsplit(post_req_made.url).query)) == params
         assert (

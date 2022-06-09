@@ -52,7 +52,6 @@ def test_do_upload_logic_happy_path(mocker):
             token="token",
             branch="branch",
             slug="slug",
-            tag="tag",
             pull_request_number="pr",
         )
     out_bytes = outstreams[0].getvalue().decode().splitlines()
@@ -74,7 +73,6 @@ def test_do_upload_logic_happy_path(mocker):
         None,
         "name",
         "branch",
-        "tag",
         "slug",
         "pr",
         "build_code",

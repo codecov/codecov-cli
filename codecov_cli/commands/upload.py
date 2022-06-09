@@ -77,12 +77,6 @@ def _turn_env_vars_into_dict(ctx, params, value):
     fallback_field=FallbackFieldEnum.branch,
 )
 @click.option(
-    "-T",
-    "--tag",
-    help="Specify the tag manually",
-)
-@click.option(
-    "-r",
     "--slug",
     cls=CodecovOption,
     fallback_field=FallbackFieldEnum.slug,
@@ -91,7 +85,6 @@ def _turn_env_vars_into_dict(ctx, params, value):
     show_default="The value of CODECOV_SLUG environment variable",
 )
 @click.option(
-    "-P",
     "--pull-request-number",
     help="Specify the pull request number mannually. Used to override pre-existing CI environment variables",
     cls=CodecovOption,
@@ -116,7 +109,6 @@ def do_upload(
     token: typing.Optional[uuid.UUID],
     plugin_names: typing.List[str],
     branch: typing.Optional[str],
-    tag: typing.Optional[str],
     slug: typing.Optional[str],
     pull_request_number: typing.Optional[str],
 ):
@@ -139,7 +131,6 @@ def do_upload(
             plugin_names=plugin_names,
             token=token,
             branch=branch,
-            tag=tag,
             slug=slug,
             pull_request_number=pull_request_number,
         )
@@ -161,7 +152,6 @@ def do_upload(
         plugin_names=plugin_names,
         token=token,
         branch=branch,
-        tag=tag,
         slug=slug,
         pull_request_number=pull_request_number,
     )

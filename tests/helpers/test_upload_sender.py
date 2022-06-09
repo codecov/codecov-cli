@@ -20,7 +20,6 @@ class TestUploadSender(object):
         named_upload_data = {
             "name": "name",
             "branch": "branch",
-            "tag": "tag",
             "slug": "slug",
             "pull_request_number": "pr",
             "build_code": "build_code",

@@ -32,7 +32,6 @@ def do_upload_logic(
     plugin_names: typing.List[str],
     token: uuid.UUID,
     branch: typing.Optional[str],
-    tag: typing.Optional[str],
     slug: typing.Optional[str],
     pull_request_number: typing.Optional[str],
 ):
@@ -56,7 +55,6 @@ def do_upload_logic(
         env_vars,
         name,
         branch,
-        tag,
         slug,
         pull_request_number,
         build_code,

@@ -90,8 +90,6 @@ class UploadCollector(object):
                 if fnmatch(filename, glob):
                     result.append(self._get_file_fixer(filename, fix_patterns))
                     break
-        for item in result:
-            print(item, "\n")
 
         return result
 

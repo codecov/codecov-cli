@@ -3,6 +3,7 @@ import typing
 from pathlib import Path
 
 from codecov_cli.fallbacks import FallbackFieldEnum
+from codecov_cli.helpers.git import parse_slug
 
 
 class VersioningSystemInterface(object):
@@ -36,6 +37,7 @@ class GitVersioningSystem(VersioningSystemInterface):
             p = subprocess.run(["git", "log", "-1", "--format=%H"], capture_output=True)
             if p.stdout:
                 return p.stdout.decode().rstrip()
+
         return None
 
     def get_network_root(self):

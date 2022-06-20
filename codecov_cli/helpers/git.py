@@ -1,23 +1,31 @@
-def parse_slug(address: str):
-    """Extracts a slug from git based urls"""
+import re
+from urllib.parse import urlparse
 
+slug_regex = re.compile(r"[^/\s]+\/[^/\s]+$")
+
+
+def parse_slug(remote_repo_url: str):
     """
-    URL examples:
-        origin    https://github.com/codecov/codecov-cli.git (fetch)
-        https://github.com/codecov/codecov-cli.git
-        origin  git@github.com:codecov/codecov-cli.git (fetch)
-        git@github.com:codecov/codecov-cli.git
+    Extracts a slug from git remote urls. returns None if the url is invalid
+
+    Examples:
+    - https://github.com/codecov/codecov-cli.git returns codecov/codecov-cli
+    - git@github.com:codecov/codecov-cli.git returns codecov/codecov-cli
     """
-    if "http" in address:
-        try:
-            return address.split("//")[1].split("/", 1)[1].split(".git")[0]
-        except IndexError:
-            raise ValueError("Argument address is not a valid address")
+    parsed_url = urlparse(remote_repo_url)
 
-    if "@" in address:
-        try:
-            return address.split(":")[1].split(".git")[0]
-        except IndexError:
-            raise ValueError("Argument address is not a valid address")
+    path_to_parse = parsed_url.path
 
-    raise ValueError("Argument address is not a valid address")
+    if path_to_parse.endswith("/"):
+        path_to_parse = path_to_parse.rsplit("/", 1)[0]
+    if path_to_parse.endswith(".git"):
+        path_to_parse = path_to_parse.rsplit(".git", 1)[0]
+    if ":" in path_to_parse:
+        path_to_parse = path_to_parse.split(":", 1)[1]
+    if path_to_parse.startswith("/"):
+        path_to_parse = path_to_parse[1:]
+
+    if not slug_regex.match(path_to_parse):
+        return None
+
+    return path_to_parse

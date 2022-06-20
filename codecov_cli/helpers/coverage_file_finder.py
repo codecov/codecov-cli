@@ -153,7 +153,7 @@ folders_to_ignore = [
     "node_modules",
     "venv",
     "venvs",
-    "virtualen",
+    "virtualenv",
     "virtualenvs",
     ".circleci",
     "jspm_packages",

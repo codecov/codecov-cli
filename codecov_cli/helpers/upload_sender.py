@@ -36,12 +36,31 @@ class UploadSender(object):
         commit_sha: str,
         token: uuid.UUID,
         env_vars: typing.Dict[str, str],
+        name: typing.Optional[str] = None,
+        branch: typing.Optional[str] = None,
+        slug: typing.Optional[str] = None,
+        pull_request_number: typing.Optional[str] = None,
+        build_code: typing.Optional[str] = None,
+        build_url: typing.Optional[str] = None,
+        job_code: typing.Optional[str] = None,
+        flags: typing.List[str] = None,
+        service: typing.Optional[str] = None,
     ) -> UploadSendingResult:
 
         params = {
             "package": f"codecov-cli/{codecov_cli_version}",
             "commit": commit_sha,
+            "build": build_code,
+            "build_url": build_url,
+            "branch": branch,
+            "name": name,
+            "slug": slug,
+            "service": service,
+            "flags": flags,
+            "pr": pull_request_number,
+            "job": job_code,
         }
+
         headers = {"X-Upload-Token": token.hex}
 
         resp = requests.post(

@@ -169,7 +169,7 @@ class GitlabCIAdapter(CIAdapterBase):
         return os.getenv("CI_JOB_ID")
 
     def _get_pull_request_number(self):
-        return os.getenv("CI_MERGE_REQUEST_ID")
+        return os.getenv("CI_MERGE_REQUEST_IID")
 
     def _get_slug(self):
         if slug := os.getenv("CI_PROJECT_PATH"):

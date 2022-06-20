@@ -371,7 +371,7 @@ class GitlabCIEnvEnum(str, Enum):
     CI_BUILD_ID = "CI_BUILD_ID"
     CI_JOB_URL = "CI_JOB_URL"
     CI_COMMIT_SHA = "CI_COMMIT_SHA"
-    CI_MERGE_REQUEST_ID = "CI_MERGE_REQUEST_ID"
+    CI_MERGE_REQUEST_IID = "CI_MERGE_REQUEST_IID"
     CI_PROJECT_NAMESPACE = "CI_PROJECT_NAMESPACE"
     CI_PROJECT_NAME = "CI_PROJECT_NAME"
 
@@ -439,7 +439,7 @@ class TestGitlabCI(object):
         "env_dict,expected",
         [
             ({}, None),
-            ({GitlabCIEnvEnum.CI_MERGE_REQUEST_ID: "1234"}, "1234"),
+            ({GitlabCIEnvEnum.CI_MERGE_REQUEST_IID: "1234"}, "1234"),
         ],
     )
     def test_pull_request_number(self, env_dict, expected, mocker):
@@ -477,11 +477,6 @@ class TestGitlabCI(object):
         mocker.patch.dict(
             os.environ,
             env_dict,
-        )
-
-        mocker.patch(
-            f"codecov_cli.helpers.ci_adapters.parse_slug",
-            return_value="codecov/codecov-cli",
         )
 
         assert GitlabCIAdapter().get_fallback_value(FallbackFieldEnum.slug) == expected

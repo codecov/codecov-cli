@@ -5,7 +5,7 @@ from pathlib import Path
 import click
 
 from codecov_cli.fallbacks import FallbackFieldEnum
-from codecov_cli.helpers.ci_adapters import CIAdapterBase
+from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
 from codecov_cli.helpers.coverage_file_finder import select_coverage_file_finder
 from codecov_cli.helpers.network_finder import select_network_finder
 from codecov_cli.helpers.upload_sender import UploadSender

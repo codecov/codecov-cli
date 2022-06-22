@@ -188,7 +188,7 @@ class TestGithubActions(object):
 
         fake_subprocess = mocker.MagicMock()
         mocker.patch(
-            "codecov_cli.helpers.ci_adapters.subprocess.run",
+            "codecov_cli.helpers.ci_adapters.github_actions.subprocess.run",
             return_value=fake_subprocess,
         )
 
@@ -208,7 +208,7 @@ class TestGithubActions(object):
 
         fake_subprocess = mocker.MagicMock()
         mocker.patch(
-            "codecov_cli.helpers.ci_adapters.subprocess.run",
+            "codecov_cli.helpers.ci_adapters.github_actions.subprocess.run",
             return_value=fake_subprocess,
         )
 

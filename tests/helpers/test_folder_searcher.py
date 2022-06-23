@@ -113,7 +113,7 @@ def test_search_files_with_exclude_regex(tmp_path):
     "patterns,should_match,shouldnt_match",
     [
         (
-            ["*coverage*.*"],
+            ["*coverage*.*", ""],
             [
                 "coverage.",
                 "abc-coverage.xyz",
@@ -126,7 +126,7 @@ def test_search_files_with_exclude_regex(tmp_path):
             ["hoverage.", "xyz-coverage-abc"],
         ),
         (
-            ["*.codecov.*", "codecov.*"],
+            ["*.codecov.*", "codecov.*", "", ""],
             [
                 ".codecov.",
                 "codecov.",

@@ -129,7 +129,8 @@ class GithubActionsCIAdapter(CIAdapterBase):
         return os.getenv("GITHUB_REPOSITORY")
 
     def _get_branch(self):
-        if branch := os.getenv("GITHUB_HEAD_REF"):
+        branch = os.getenv("GITHUB_HEAD_REF")
+        if branch:
             return branch
 
         branch_ref = os.getenv("GITHUB_REF")

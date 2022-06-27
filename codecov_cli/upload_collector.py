@@ -101,16 +101,14 @@ class UploadCollector(object):
         fixed_lines_with_reason = set()
         eof = None
 
-        with open(filename, "r", encoding="utf-8") as f:
+        with open(filename, "r") as f:
             for lineno, line_content in enumerate(f):
                 if any(
                     pattern.match(line_content)
                     for pattern in fix_patterns_to_apply.with_reason
                 ):
                     fixed_lines_with_reason.add((lineno + 1, line_content))
-                    continue
-
-                if any(
+                elif any(
                     pattern.match(line_content)
                     for pattern in fix_patterns_to_apply.without_reason
                 ):

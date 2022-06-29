@@ -122,14 +122,21 @@ def test_search_files_with_multipart_excluded_regex_with_filename(tmp_path):
         relevant_filepath = tmp_path / f
         relevant_filepath.parent.mkdir(parents=True, exist_ok=True)
         relevant_filepath.touch()
-        
-    expected_results = sorted([tmp_path / "report.xml", tmp_path / "path/to/report.xml"])
+
+    expected_results = sorted(
+        [tmp_path / "report.xml", tmp_path / "path/to/report.xml"]
+    )
     assert expected_results == sorted(
         search_files(
-            tmp_path, [], search_for, filename_exclude_regex=None, multipart_exclude_regex=multipart_exclude_regex)
+            tmp_path,
+            [],
+            search_for,
+            filename_exclude_regex=None,
+            multipart_exclude_regex=multipart_exclude_regex,
         )
-    
-    
+    )
+
+
 def test_search_files_with_multipart_excluded_regex_with_foldername(tmp_path):
     multipart_exclude_regex = re.compile(r"js\/generated\/coverage")
     search_for = re.compile(r"report\.xml")
@@ -145,13 +152,24 @@ def test_search_files_with_multipart_excluded_regex_with_foldername(tmp_path):
         relevant_filepath = tmp_path / f
         relevant_filepath.parent.mkdir(parents=True, exist_ok=True)
         relevant_filepath.touch()
-        
-    expected_results = sorted([tmp_path / "report.xml", tmp_path / "path/to/report.xml", tmp_path / "js/generated/report.xml"])
+
+    expected_results = sorted(
+        [
+            tmp_path / "report.xml",
+            tmp_path / "path/to/report.xml",
+            tmp_path / "js/generated/report.xml",
+        ]
+    )
     assert expected_results == sorted(
         search_files(
-            tmp_path, [], search_for, filename_exclude_regex=None, multipart_exclude_regex=multipart_exclude_regex)
+            tmp_path,
+            [],
+            search_for,
+            filename_exclude_regex=None,
+            multipart_exclude_regex=multipart_exclude_regex,
         )
-    
+    )
+
 
 @pytest.mark.parametrize(
     "patterns,should_match,shouldnt_match",

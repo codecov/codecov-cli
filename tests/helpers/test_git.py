@@ -22,6 +22,10 @@ from codecov_cli.helpers import git
             "https://username-codecov@bitbucket.org/username-codecov/fasdf.git.git.git",
             "username-codecov/fasdf.git.git",
         ),
+        (
+            "https://gitlab-ci-token:[MASKED]@gitlab.com/abc_xyz/testing_env_vars.git",
+            "abc_xyz/testing_env_vars",
+        ),
         ("git@github.com:codecov/codecov-cli.git/", "codecov/codecov-cli"),
         ("git@gitlab.com:gitlab-org/gitlab.git", "gitlab-org/gitlab"),
         ("git@github.com:gitcodecov/codecov-cli", "gitcodecov/codecov-cli"),

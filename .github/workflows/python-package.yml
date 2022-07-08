@@ -17,14 +17,13 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install poetry
-          poetry install -v
+          pip install black==22.3.0 isort==5.10.1
       - name: Check linting with black
         run: |
-          poetry run black --check .
+          black --check .
       - name: Check imports order with isort
         run: |
-          poetry run isort --check .
+          isort --check --profile=black .
 
 
   build:
@@ -37,6 +36,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 2
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
@@ -44,14 +45,14 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install poetry
-        poetry install -v
+        python setup.py develop
+        pip install -r requirements.txt
     - name: Test with pytest
       run: |
-        poetry run pytest --cov
+        pytest --cov
     - name: Dogfooding codecov-cli. Use codecov-cli to upload to codecov
       run: |
-        poetry run codecov --auto-load-params-from githubactions do-upload -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage
+        codecovcli --auto-load-params-from githubactions do-upload -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag cli${{ matrix.python-version }}
     - name: Upload to codecov
       run: |
         pip install codecov

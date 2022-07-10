@@ -26,31 +26,34 @@ named_upload_data = {
 }
 
 
+@pytest.fixture
+def mocked_responses():
+    with responses.RequestsMock() as rsps:
+        yield rsps
+
+
+@pytest.fixture
+def mocked_legacy_upload_endpoint(mocked_responses):
+    resp = responses.Response(
+        responses.POST,
+        "https://codecov.io/upload/v4",
+        body="https://resulturl.com\nhttps://puturl.com",
+        status=200,
+    )
+    mocked_responses.add(resp)
+    yield resp
+
+
+@pytest.fixture
+def mocker_storage_server(mocked_responses):
+    resp = responses.Response(responses.PUT, "https://puturl.com", status=200)
+    mocked_responses.add(resp)
+    yield resp
+
+
 class TestUploadSender(object):
-    @pytest.fixture
-    def mocked_responses(self):
-        with responses.RequestsMock() as rsps:
-            yield rsps
-
-    @pytest.fixture
-    def mocked_post(self, mocked_responses):
-        resp = responses.Response(
-            responses.POST,
-            "https://codecov.io/upload/v4",
-            body="https://resulturl.com\nhttps://puturl.com",
-            status=200,
-        )
-        mocked_responses.add(resp)
-        yield resp
-
-    @pytest.fixture
-    def mocked_put(self, mocked_responses):
-        resp = responses.Response(responses.PUT, "https://puturl.com", status=200)
-        mocked_responses.add(resp)
-        yield resp
-
     def test_upload_sender_post_called_with_right_parameters(
-        self, mocked_responses, mocked_post, mocked_put
+        self, mocked_responses, mocked_legacy_upload_endpoint, mocker_storage_server
     ):
         headers = {"X-Upload-Token": random_token.hex}
         params = {
@@ -64,14 +67,16 @@ class TestUploadSender(object):
         params["pr"] = params.pop("pull_request_number")
         params["job"] = params.pop("job_code")
 
-        mocked_post.match = [
+        mocked_legacy_upload_endpoint.match = [
             matchers.query_param_matcher(params),
             matchers.header_matcher(headers),
         ]
 
-        sender = UploadSender().send_upload_data(
+        sending_result = UploadSender().send_upload_data(
             upload_collection, random_sha, random_token, {}, **named_upload_data
         )
+        assert sending_result.error is None
+        assert sending_result.warnings == []
 
         assert len(mocked_responses.calls) == 2
 
@@ -83,11 +88,13 @@ class TestUploadSender(object):
         )  # test dict is a subset of the other
 
     def test_upload_sender_put_called_with_right_parameters(
-        self, mocked_responses, mocked_post, mocked_put
+        self, mocked_responses, mocked_legacy_upload_endpoint, mocker_storage_server
     ):
-        sender = UploadSender().send_upload_data(
+        sending_result = UploadSender().send_upload_data(
             upload_collection, random_sha, random_token, {}, **named_upload_data
         )
+        assert sending_result.error is None
+        assert sending_result.warnings == []
 
         assert len(mocked_responses.calls) == 2
 
@@ -95,7 +102,7 @@ class TestUploadSender(object):
         assert put_req_mad.url == "https://puturl.com/"
 
     def test_upload_sender_result_success(
-        self, mocked_responses, mocked_post, mocked_put
+        self, mocked_responses, mocked_legacy_upload_endpoint, mocker_storage_server
     ):
         sender = UploadSender().send_upload_data(
             upload_collection, random_sha, random_token, {}, **named_upload_data
@@ -106,8 +113,10 @@ class TestUploadSender(object):
         assert sender.error is None
         assert not sender.warnings
 
-    def test_upload_sender_result_fail_post_400(self, mocked_responses, mocked_post):
-        mocked_post.status = 400
+    def test_upload_sender_result_fail_post_400(
+        self, mocked_responses, mocked_legacy_upload_endpoint
+    ):
+        mocked_legacy_upload_endpoint.status = 400
 
         sender = UploadSender().send_upload_data(
             upload_collection, random_sha, random_token, {}, **named_upload_data
@@ -120,9 +129,9 @@ class TestUploadSender(object):
         assert sender.warnings is not None
 
     def test_upload_sender_result_fail_put_400(
-        self, mocked_responses, mocked_post, mocked_put
+        self, mocked_responses, mocked_legacy_upload_endpoint, mocker_storage_server
     ):
-        mocked_put.status = 400
+        mocker_storage_server.status = 400
 
         sender = UploadSender().send_upload_data(
             upload_collection, random_sha, random_token, {}, **named_upload_data
@@ -135,12 +144,12 @@ class TestUploadSender(object):
         assert sender.warnings is not None
 
     def test_upload_sender_http_error_with_invalid_sha(
-        self, mocked_responses, mocked_post
+        self, mocked_responses, mocked_legacy_upload_endpoint
     ):
         random_sha = "invalid"
 
-        mocked_post.body = "Invalid request parameters"
-        mocked_post.status = 400
+        mocked_legacy_upload_endpoint.body = "Invalid request parameters"
+        mocked_legacy_upload_endpoint.status = 400
 
         sender = UploadSender().send_upload_data(
             upload_collection, random_sha, random_token, {}, **named_upload_data

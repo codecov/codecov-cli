@@ -34,11 +34,27 @@ def _turn_env_vars_into_dict(ctx, params, value):
     show_default="Current working directory",
 )
 @click.option(
-    "--coverage-files-search-folder",
+    "--coverage-files-search-root-folder",
     help="Folder where to search for coverage files",
     type=click.Path(path_type=pathlib.Path),
     default=pathlib.Path.cwd,
     show_default="Current Working Directory",
+)
+@click.option(
+    "--coverage-files-search-exclude-folder",
+    "coverage_files_search_exclude_folders",
+    help="Folders where to search for coverage files",
+    type=click.Path(path_type=pathlib.Path),
+    multiple=True,
+    default=None,
+)
+@click.option(
+    "--coverage-files-search-direct-file",
+    "coverage_files_search_explicitly_listed_files",
+    help="Explicit files to upload",
+    type=click.Path(path_type=pathlib.Path),
+    multiple=True,
+    default=None,
 )
 @click.option(
     "--build-code",
@@ -62,7 +78,7 @@ def _turn_env_vars_into_dict(ctx, params, value):
     help="Codecov upload token",
     type=click.UUID,
     envvar="CODECOV_TOKEN",
-    show_default="The value of CODECOV_TOKEN environment variable",
+    required=True,
 )
 @click.option(
     "-n",
@@ -72,7 +88,7 @@ def _turn_env_vars_into_dict(ctx, params, value):
 @click.option(
     "-B",
     "--branch",
-    help="Specify the branch manually. Used to override pre-existing CI environment variables",
+    help="Branch to which this commit belongs to",
     cls=CodecovOption,
     fallback_field=FallbackFieldEnum.branch,
 )
@@ -82,7 +98,6 @@ def _turn_env_vars_into_dict(ctx, params, value):
     fallback_field=FallbackFieldEnum.slug,
     help="owner/repo slug used instead of the private repo token in Self-hosted",
     envvar="CODECOV_SLUG",
-    show_default="The value of CODECOV_SLUG environment variable",
 )
 @click.option(
     "--pull-request-number",
@@ -105,7 +120,9 @@ def do_upload(
     flags: typing.List[str],
     name: typing.Optional[str],
     network_root_folder: pathlib.Path,
-    coverage_files_search_folder: pathlib.Path,
+    coverage_files_search_root_folder: pathlib.Path,
+    coverage_files_search_exclude_folders: typing.List[pathlib.Path],
+    coverage_files_search_explicitly_listed_files: typing.List[pathlib.Path],
     token: typing.Optional[uuid.UUID],
     plugin_names: typing.List[str],
     branch: typing.Optional[str],
@@ -127,7 +144,9 @@ def do_upload(
             flags=flags,
             name=name,
             network_root_folder=network_root_folder,
-            coverage_files_search_folder=coverage_files_search_folder,
+            coverage_files_search_root_folder=coverage_files_search_root_folder,
+            coverage_files_search_exclude_folders=coverage_files_search_exclude_folders,
+            coverage_files_search_explicitly_listed_files=coverage_files_search_explicitly_listed_files,
             plugin_names=plugin_names,
             token=token,
             branch=branch,
@@ -148,7 +167,9 @@ def do_upload(
         flags=flags,
         name=name,
         network_root_folder=network_root_folder,
-        coverage_files_search_folder=coverage_files_search_folder,
+        coverage_files_search_root_folder=coverage_files_search_root_folder,
+        coverage_files_search_exclude_folders=coverage_files_search_exclude_folders,
+        coverage_files_search_explicitly_listed_files=coverage_files_search_explicitly_listed_files,
         plugin_names=plugin_names,
         token=token,
         branch=branch,

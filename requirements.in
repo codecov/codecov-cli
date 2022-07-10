@@ -1,4 +1,6 @@
+click
 pytest
 pytest-cov
 pytest-mock
+pyyaml
 responses

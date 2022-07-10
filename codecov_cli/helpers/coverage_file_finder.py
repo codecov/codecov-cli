@@ -130,7 +130,7 @@ coverage_files_excluded_patterns = [
 ]
 
 
-folders_to_ignore = [
+default_folders_to_ignore = [
     "vendor",
     "bower_components",
     ".egg-info*",
@@ -162,8 +162,11 @@ folders_to_ignore = [
 
 
 class CoverageFileFinder(object):
-    def __init__(self, project_root: Path = None):
+    def __init__(
+        self, project_root: Path = None, folders_to_ignore: typing.List[str] = None
+    ):
         self.project_root = project_root or Path(os.getcwd())
+        self.folders_to_ignore = folders_to_ignore or []
 
     def find_coverage_files(self) -> typing.List[UploadCollectionResultFile]:
         regex_patterns_to_include = globs_to_regex(coverage_files_patterns)
@@ -171,13 +174,15 @@ class CoverageFileFinder(object):
 
         coverage_files_paths = search_files(
             self.project_root,
-            folders_to_ignore,
-            regex_patterns_to_include,
+            default_folders_to_ignore + self.folders_to_ignore,
+            filename_include_regex=regex_patterns_to_include,
             filename_exclude_regex=regex_patterns_to_exclude,
         )
 
         return [UploadCollectionResultFile(path) for path in coverage_files_paths]
 
 
-def select_coverage_file_finder():
-    return CoverageFileFinder()
+def select_coverage_file_finder(
+    root_folder_to_search, folders_to_ignore, explicitly_listed_files
+):
+    return CoverageFileFinder(root_folder_to_search, folders_to_ignore)

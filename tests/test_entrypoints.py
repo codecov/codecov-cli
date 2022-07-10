@@ -47,7 +47,9 @@ def test_do_upload_logic_happy_path(mocker):
             flags=None,
             name="name",
             network_root_folder=None,
-            coverage_files_search_folder=None,
+            coverage_files_search_root_folder=None,
+            coverage_files_search_exclude_folders=None,
+            coverage_files_search_explicitly_listed_files=None,
             plugin_names=["first_plugin", "another", "forth"],
             token="token",
             branch="branch",
@@ -56,14 +58,14 @@ def test_do_upload_logic_happy_path(mocker):
         )
     out_bytes = outstreams[0].getvalue().decode().splitlines()
     assert out_bytes == [
-        "Upload process had 1 warning",
-        "Warning 1: somewarningmessage",
+        "info: Upload process had 1 warning",
+        "warning: Warning 1: somewarningmessage",
     ]
     assert res == UploadSender.send_upload_data.return_value
     mock_select_preparation_plugins.assert_called_with(
         cli_config, ["first_plugin", "another", "forth"]
     )
-    mock_select_coverage_file_finder.assert_called_with()
+    mock_select_coverage_file_finder.assert_called_with(None, None, None)
     mock_select_network_finder.assert_called_with(versioning_system)
     mock_generate_upload_data.assert_called_with()
     mock_send_upload_data.assert_called_with(

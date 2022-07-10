@@ -1,8 +1,11 @@
+import logging
 import typing
 
 import click
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
+
+logger = logging.getLogger("codecovcli")
 
 
 @click.command()
@@ -27,4 +30,4 @@ def create_commit(
     ctx, commit_sha: str, parent_sha: typing.Optional[str], pr: typing.Optional[int]
 ):
     for x in range(10):
-        click.echo(f"Hello {commit_sha}!")
+        logger.info(f"Hello {commit_sha}!")

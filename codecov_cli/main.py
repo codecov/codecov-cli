@@ -1,3 +1,4 @@
+import logging
 import pathlib
 import typing
 
@@ -8,7 +9,10 @@ from codecov_cli.commands.commit import create_commit
 from codecov_cli.commands.report import create_report
 from codecov_cli.commands.upload import do_upload
 from codecov_cli.helpers.ci_adapters import get_ci_adapter
+from codecov_cli.helpers.logging_utils import ClickHandler, ColorFormatter
 from codecov_cli.helpers.versioning_systems import get_versioning_system
+
+logger = logging.getLogger("codecovcli")
 
 
 @click.group()
@@ -28,6 +32,11 @@ def cli(
     codecov_yml_path: pathlib.Path,
     enterprise_url: str,
 ):
+    ch = ClickHandler()
+    ch.setFormatter(ColorFormatter())
+    logger.addHandler(ch)
+    logger.propagate = False
+    logger.setLevel(logging.DEBUG)
     ctx.obj["ci_adapter"] = get_ci_adapter(auto_load_params_from)
     ctx.obj["versioning_system"] = get_versioning_system()
     ctx.obj["codecov_yaml"] = (

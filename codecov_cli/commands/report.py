@@ -1,6 +1,10 @@
+import logging
+
 import click
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
+
+logger = logging.getLogger("codecovcli")
 
 
 @click.command()
@@ -16,4 +20,4 @@ from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
 @click.pass_context
 def create_report(ctx, commit_sha: str, code: str):
     for x in range(10):
-        click.echo(f"Hello {commit_sha}!")
+        logger.info(f"Hello {commit_sha}!")

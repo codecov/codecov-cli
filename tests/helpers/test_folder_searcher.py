@@ -27,7 +27,9 @@ def test_search_files(tmp_path):
         ]
     )
     assert expected_results == sorted(
-        search_files(tmp_path, [], search_for, filename_exclude_regex=None)
+        search_files(
+            tmp_path, [], filename_include_regex=search_for, filename_exclude_regex=None
+        )
     )
 
 
@@ -57,7 +59,12 @@ def test_search_files_with_folder_exclusion(tmp_path):
         ]
     )
     assert expected_results == sorted(
-        search_files(tmp_path, ["to"], search_for, filename_exclude_regex=None)
+        search_files(
+            tmp_path,
+            ["to"],
+            filename_include_regex=search_for,
+            filename_exclude_regex=None,
+        )
     )
 
 
@@ -84,7 +91,9 @@ def test_search_files_combined_regex(tmp_path):
         ]
     )
     assert expected_results == sorted(
-        search_files(tmp_path, [], search_for, filename_exclude_regex=None)
+        search_files(
+            tmp_path, [], filename_include_regex=search_for, filename_exclude_regex=None
+        )
     )
 
 
@@ -104,7 +113,10 @@ def test_search_files_with_exclude_regex(tmp_path):
     expected_results = sorted([tmp_path / "banana.txt", tmp_path / "path/to/banana.c"])
     assert expected_results == sorted(
         search_files(
-            tmp_path, [], search_for, filename_exclude_regex=re.compile(r".*\.py")
+            tmp_path,
+            [],
+            filename_include_regex=search_for,
+            filename_exclude_regex=re.compile(r".*\.py"),
         )
     )
 
@@ -130,7 +142,7 @@ def test_search_files_with_multipart_excluded_regex_with_filename(tmp_path):
         search_files(
             tmp_path,
             [],
-            search_for,
+            filename_include_regex=search_for,
             filename_exclude_regex=None,
             multipart_exclude_regex=multipart_exclude_regex,
         )
@@ -138,7 +150,7 @@ def test_search_files_with_multipart_excluded_regex_with_filename(tmp_path):
 
 
 def test_search_files_with_multipart_excluded_regex_with_foldername(tmp_path):
-    multipart_exclude_regex = re.compile(r"js\/generated\/coverage")
+    multipart_exclude_regex = re.compile(r".*js\/generated\/coverage")
     search_for = re.compile(r"report\.xml")
     filepaths = [
         "report.txt",
@@ -164,7 +176,7 @@ def test_search_files_with_multipart_excluded_regex_with_foldername(tmp_path):
         search_files(
             tmp_path,
             [],
-            search_for,
+            filename_include_regex=search_for,
             filename_exclude_regex=None,
             multipart_exclude_regex=multipart_exclude_regex,
         )

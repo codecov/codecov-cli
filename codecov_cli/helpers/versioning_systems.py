@@ -88,14 +88,10 @@ class GitVersioningSystem(VersioningSystemInterface):
             ["git", "-C", str(dir_to_use), "ls-files"], capture_output=True
         )
 
-        adjust_file_name = (
-            lambda filename: filename[1:-1]
+        return [
+            filename[1:-1]
             if filename.startswith('"') and filename.endswith('"')
             else filename
-        )
-
-        return [
-            adjust_file_name(filename)
             for filename in res.stdout.decode("unicode_escape").strip().split()
         ]
 

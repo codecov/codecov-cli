@@ -1,3 +1,4 @@
+import logging
 import os
 import pathlib
 import typing
@@ -7,6 +8,8 @@ import click
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
 from codecov_cli.services.upload import do_upload_logic
+
+logger = logging.getLogger("codecovcli")
 
 
 def _turn_env_vars_into_dict(ctx, params, value):
@@ -78,7 +81,6 @@ def _turn_env_vars_into_dict(ctx, params, value):
     help="Codecov upload token",
     type=click.UUID,
     envvar="CODECOV_TOKEN",
-    required=True,
 )
 @click.option(
     "-n",
@@ -133,26 +135,29 @@ def do_upload(
     codecov_yaml = ctx.obj["codecov_yaml"] or {}
     cli_config = codecov_yaml.get("cli", {})
     ci_adapter = ctx.obj.get("ci_adapter")
-    print(
-        dict(
-            commit_sha=commit_sha,
-            report_code=report_code,
-            build_code=build_code,
-            build_url=build_url,
-            job_code=job_code,
-            env_vars=env_vars,
-            flags=flags,
-            name=name,
-            network_root_folder=network_root_folder,
-            coverage_files_search_root_folder=coverage_files_search_root_folder,
-            coverage_files_search_exclude_folders=coverage_files_search_exclude_folders,
-            coverage_files_search_explicitly_listed_files=coverage_files_search_explicitly_listed_files,
-            plugin_names=plugin_names,
-            token=token,
-            branch=branch,
-            slug=slug,
-            pull_request_number=pull_request_number,
-        )
+    logger.debug(
+        "Starting upload processing",
+        extra=dict(
+            extra_log_attributes=dict(
+                commit_sha=commit_sha,
+                report_code=report_code,
+                build_code=build_code,
+                build_url=build_url,
+                job_code=job_code,
+                env_vars=env_vars,
+                flags=flags,
+                name=name,
+                network_root_folder=network_root_folder,
+                coverage_files_search_root_folder=coverage_files_search_root_folder,
+                coverage_files_search_exclude_folders=coverage_files_search_exclude_folders,
+                coverage_files_search_explicitly_listed_files=coverage_files_search_explicitly_listed_files,
+                plugin_names=plugin_names,
+                token="NOTOKEN" if not token else (str(token)[:1] + 18 * "*"),
+                branch=branch,
+                slug=slug,
+                pull_request_number=pull_request_number,
+            )
+        ),
     )
     do_upload_logic(
         cli_config,

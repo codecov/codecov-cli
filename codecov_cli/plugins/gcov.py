@@ -27,7 +27,10 @@ class GcovPlugin(object):
         self.extra_arguments = extra_arguments or []
 
     def run_preparation(self, collector) -> PreparationPluginReturn:
-        logger.info("Running gcov plugin...")
+        logger.debug(
+            "Running gcov plugin...",
+            extra=dict(extra_log_attributes=dict(banana="banana")),
+        )
 
         if shutil.which("gcov") is None:
             logger.warning("gcov is not installed or can't be found.")

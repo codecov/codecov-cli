@@ -45,7 +45,7 @@ def mocked_legacy_upload_endpoint(mocked_responses):
 
 
 @pytest.fixture
-def mocker_storage_server(mocked_responses):
+def mocked_storage_server(mocked_responses):
     resp = responses.Response(responses.PUT, "https://puturl.com", status=200)
     mocked_responses.add(resp)
     yield resp
@@ -53,7 +53,7 @@ def mocker_storage_server(mocked_responses):
 
 class TestUploadSender(object):
     def test_upload_sender_post_called_with_right_parameters(
-        self, mocked_responses, mocked_legacy_upload_endpoint, mocker_storage_server
+        self, mocked_responses, mocked_legacy_upload_endpoint, mocked_storage_server
     ):
         headers = {"X-Upload-Token": random_token.hex}
         params = {
@@ -88,7 +88,7 @@ class TestUploadSender(object):
         )  # test dict is a subset of the other
 
     def test_upload_sender_put_called_with_right_parameters(
-        self, mocked_responses, mocked_legacy_upload_endpoint, mocker_storage_server
+        self, mocked_responses, mocked_legacy_upload_endpoint, mocked_storage_server
     ):
         sending_result = UploadSender().send_upload_data(
             upload_collection, random_sha, random_token, {}, **named_upload_data
@@ -102,7 +102,7 @@ class TestUploadSender(object):
         assert put_req_mad.url == "https://puturl.com/"
 
     def test_upload_sender_result_success(
-        self, mocked_responses, mocked_legacy_upload_endpoint, mocker_storage_server
+        self, mocked_responses, mocked_legacy_upload_endpoint, mocked_storage_server
     ):
         sender = UploadSender().send_upload_data(
             upload_collection, random_sha, random_token, {}, **named_upload_data
@@ -129,9 +129,9 @@ class TestUploadSender(object):
         assert sender.warnings is not None
 
     def test_upload_sender_result_fail_put_400(
-        self, mocked_responses, mocked_legacy_upload_endpoint, mocker_storage_server
+        self, mocked_responses, mocked_legacy_upload_endpoint, mocked_storage_server
     ):
-        mocker_storage_server.status = 400
+        mocked_storage_server.status = 400
 
         sender = UploadSender().send_upload_data(
             upload_collection, random_sha, random_token, {}, **named_upload_data

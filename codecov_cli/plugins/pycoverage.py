@@ -6,12 +6,11 @@ import subprocess
 import typing
 from glob import iglob
 
-logger = logging.getLogger("codecovcli")
-
 from codecov_cli.helpers.folder_searcher import globs_to_regex, search_files
 from codecov_cli.plugins.types import PreparationPluginReturn
 
 coverage_files_regex = globs_to_regex([".coverage", ".coverage.*"])
+logger = logging.getLogger("codecovcli")
 
 
 class Pycoverage(object):
@@ -19,10 +18,10 @@ class Pycoverage(object):
         self.project_root = project_root or pathlib.Path(os.getcwd())
 
     def run_preparation(self, collector) -> PreparationPluginReturn:
-        logger.info("Running coverage.py plugin...")
+        logger.debug("Running coverage.py plugin...")
 
         if shutil.which("coverage") is None:
-            logger.info("coverage.py is not installed or can't be found.")
+            logger.warning("coverage.py is not installed or can't be found.")
             logger.info("aborting coverage.py plugin...")
             return
 
@@ -37,8 +36,7 @@ class Pycoverage(object):
         )
 
         if path_to_coverage_data is None:
-            logger.info("No coverage data found.")
-            logger.info("aborting coverage.py plugin...")
+            logger.warning("No coverage data found to transform")
             return
 
         coverage_data_directory = pathlib.Path(path_to_coverage_data).parent

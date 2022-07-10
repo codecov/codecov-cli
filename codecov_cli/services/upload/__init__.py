@@ -7,12 +7,12 @@ import click
 
 from codecov_cli.fallbacks import FallbackFieldEnum
 from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
-from codecov_cli.helpers.coverage_file_finder import select_coverage_file_finder
-from codecov_cli.helpers.network_finder import select_network_finder
-from codecov_cli.helpers.upload_sender import UploadSender
 from codecov_cli.helpers.versioning_systems import VersioningSystemInterface
 from codecov_cli.plugins import select_preparation_plugins
-from codecov_cli.upload_collector import UploadCollector
+from codecov_cli.services.upload.coverage_file_finder import select_coverage_file_finder
+from codecov_cli.services.upload.network_finder import select_network_finder
+from codecov_cli.services.upload.upload_collector import UploadCollector
+from codecov_cli.services.upload.upload_sender import UploadSender
 
 logger = logging.getLogger("codecovcli")
 

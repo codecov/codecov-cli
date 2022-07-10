@@ -5,8 +5,8 @@ import uuid
 
 import click
 
-from codecov_cli.entrypoints import do_upload_logic
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
+from codecov_cli.services.upload import do_upload_logic
 
 
 def _turn_env_vars_into_dict(ctx, params, value):

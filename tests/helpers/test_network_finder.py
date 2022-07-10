@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from codecov_cli.helpers.network_finder import NetworkFinder
+from codecov_cli.services.upload.network_finder import NetworkFinder
 
 
 def test_find_files(mocker, tmp_path):

@@ -1,15 +1,14 @@
 from pathlib import Path
 
-import pytest
-
-from codecov_cli.helpers.coverage_file_finder import CoverageFileFinder
+from codecov_cli.services.upload.coverage_file_finder import CoverageFileFinder
 from codecov_cli.types import UploadCollectionResultFile
 
 
 class TestCoverageFileFinder(object):
     def test_find_coverage_files_mocked_search_files(self, mocker):
         mocker.patch(
-            "codecov_cli.helpers.coverage_file_finder.search_files", return_value=[]
+            "codecov_cli.services.upload.coverage_file_finder.search_files",
+            return_value=[],
         )
         assert CoverageFileFinder().find_coverage_files() == []
 
@@ -19,7 +18,7 @@ class TestCoverageFileFinder(object):
         ]
 
         mocker.patch(
-            "codecov_cli.helpers.coverage_file_finder.search_files",
+            "codecov_cli.services.upload.coverage_file_finder.search_files",
             return_value=coverage_files_paths,
         )
 

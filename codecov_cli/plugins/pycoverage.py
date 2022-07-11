@@ -22,7 +22,6 @@ class Pycoverage(object):
 
         if shutil.which("coverage") is None:
             logger.warning("coverage.py is not installed or can't be found.")
-            logger.info("aborting coverage.py plugin...")
             return
 
         path_to_coverage_data = next(

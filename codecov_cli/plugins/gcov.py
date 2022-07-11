@@ -29,12 +29,10 @@ class GcovPlugin(object):
     def run_preparation(self, collector) -> PreparationPluginReturn:
         logger.debug(
             "Running gcov plugin...",
-            extra=dict(extra_log_attributes=dict(banana="banana")),
         )
 
         if shutil.which("gcov") is None:
             logger.warning("gcov is not installed or can't be found.")
-            logger.warning("aborting gcov plugin...")
             return
 
         filename_include_regex = globs_to_regex(["*.gcno", *self.patterns_to_include])
@@ -52,8 +50,6 @@ class GcovPlugin(object):
 
         if not matched_paths:
             logger.warning("No gcov data found.")
-            # assert False
-            logger.warning("aborting gcov plugin...")
             return
 
         logger.warning("Running gcov on the following list of files:")
@@ -65,6 +61,4 @@ class GcovPlugin(object):
             cwd=self.project_root,
             capture_output=True,
         )
-
-        logger.warning("aborting gcov plugin...")
         return PreparationPluginReturn(success=True, messages=[s.stdout])

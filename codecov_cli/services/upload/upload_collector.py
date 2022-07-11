@@ -88,12 +88,12 @@ class UploadCollector(object):
         for filename in network:
             for glob, fix_patterns in file_regex_patterns.items():
                 if fnmatch(filename, glob):
-                    result.append(self._get_file_fixer(filename, fix_patterns))
+                    result.append(self._get_file_fixes(filename, fix_patterns))
                     break
 
         return result
 
-    def _get_file_fixer(
+    def _get_file_fixes(
         self, filename: str, fix_patterns_to_apply: fix_patterns_to_apply
     ) -> UploadCollectionResultFileFixer:
         path = pathlib.Path(filename)

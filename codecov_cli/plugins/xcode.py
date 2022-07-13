@@ -9,7 +9,7 @@ from codecov_cli.plugins.types import PreparationPluginReturn
 logger = logging.getLogger("codecovcli")
 
 
-class GcovPlugin(object):
+class XcodePlugin(object):
     def __init__(
         self,
         derived_data_folder: typing.Optional[pathlib.Path] = None,

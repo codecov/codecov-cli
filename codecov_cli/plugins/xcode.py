@@ -16,12 +16,13 @@ class XcodePlugin(object):
         xp: typing.Optional[pathlib.Path] = None,
     ):
         self.derived_data_folder = derived_data_folder or pathlib.Path(
-            "$HOME/Library/Developer/Xcode/DerivedData"
-        )
+            "~/Library/Developer/Xcode/DerivedData"
+        ).expanduser()
         self.xp = xp or ""
 
     def run_preparation(self, collector) -> PreparationPluginReturn:
         logger.debug("Running xcode plugin...")
+        logger.debug(f"DerivedData folder: {self.derived_data_folder}")
 
         filename_include_regex = globs_to_regex(["*.profdata"])
 

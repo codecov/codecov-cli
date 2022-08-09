@@ -5,6 +5,7 @@ import click
 
 from codecov_cli.plugins.gcov import GcovPlugin
 from codecov_cli.plugins.pycoverage import Pycoverage
+from codecov_cli.plugins.xcode import XcodePlugin
 
 
 class NoopPlugin(object):
@@ -40,6 +41,8 @@ def _get_plugin(cli_config, plugin_name):
         return GcovPlugin()
     if plugin_name == "pycoverage":
         return Pycoverage()
+    if plugin_name == "xcode":
+        return XcodePlugin()
     if cli_config and plugin_name in cli_config.get("plugins", {}):
         return _load_plugin_from_yaml(cli_config["plugins"][plugin_name])
     click.secho(f"Unable to find plugin {plugin_name}", fg="magenta", err=True)

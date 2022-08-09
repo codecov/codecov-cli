@@ -109,7 +109,9 @@ def _turn_env_vars_into_dict(ctx, params, value):
 )
 @click.option("--env-var", "env_vars", multiple=True, callback=_turn_env_vars_into_dict)
 @click.option("--flag", "flags", multiple=True, default=[])
-@click.option("--plugin", "plugin_names", multiple=True, default=["xcode", "gcov", "pycoverage"])
+@click.option(
+    "--plugin", "plugin_names", multiple=True, default=["xcode", "gcov", "pycoverage"]
+)
 @click.pass_context
 def do_upload(
     ctx: click.Context,

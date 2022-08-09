@@ -15,9 +15,10 @@ class XcodePlugin(object):
         derived_data_folder: typing.Optional[pathlib.Path] = None,
         xp: typing.Optional[pathlib.Path] = None,
     ):
-        self.derived_data_folder = derived_data_folder or pathlib.Path(
-            "~/Library/Developer/Xcode/DerivedData"
-        ).expanduser()
+        self.derived_data_folder = (
+            derived_data_folder
+            or pathlib.Path("~/Library/Developer/Xcode/DerivedData").expanduser()
+        )
         self.xp = xp or ""
 
     def run_preparation(self, collector) -> PreparationPluginReturn:

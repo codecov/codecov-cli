@@ -64,12 +64,11 @@ def search_files(
                 dir_path = pathlib.Path(dirpath) / directory
                 if not this_is_excluded(dir_path) and this_is_included(dir_path):
                     yield dir_path
-            return
-
-        for single_filename in filenames:
-            file_path = pathlib.Path(dirpath) / single_filename
-            if not this_is_excluded(file_path) and this_is_included(file_path):
-                yield file_path
+        else:
+            for single_filename in filenames:
+                file_path = pathlib.Path(dirpath) / single_filename
+                if not this_is_excluded(file_path) and this_is_included(file_path):
+                    yield file_path
 
 
 def globs_to_regex(patterns: typing.List[str]) -> typing.Optional[typing.Pattern]:

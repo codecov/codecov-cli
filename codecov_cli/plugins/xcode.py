@@ -62,7 +62,7 @@ class XcodePlugin(object):
                     folder_to_search=pathlib.Path(build_dir),
                     folders_to_ignore=[],
                     filename_include_regex=filename_include_regex,
-                    search_for_directories=True
+                    search_for_directories=True,
                 )
             ]
             for dir_path in matched_dir_paths:

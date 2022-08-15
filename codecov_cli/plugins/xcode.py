@@ -92,3 +92,5 @@ class XcodePlugin(object):
                     # 0 = success
                     if s.returncode != 0:
                         logger.warning(f"llvm-cov failed to produce results for {dest}")
+                    else:
+                        logger.info("Generated coverage.txt files successfully")

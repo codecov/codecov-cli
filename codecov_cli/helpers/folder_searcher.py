@@ -36,7 +36,7 @@ def search_files(
     filename_exclude_regex: typing.Optional[typing.Pattern] = None,
     multipart_include_regex: typing.Optional[typing.Pattern] = None,
     multipart_exclude_regex: typing.Optional[typing.Pattern] = None,
-    search_folders: bool = False
+    search_for_directories: bool = False
 ) -> typing.Generator[pathlib.Path, None, None]:
     this_is_included = functools.partial(
         _is_included, filename_include_regex, multipart_include_regex
@@ -59,11 +59,12 @@ def search_files(
             # This is the documented way of doing this on python docs
             dirnames.remove(directory)
 
-        if search_folders:
+        if search_for_directories:
             for directory in dirnames:
                 dir_path = pathlib.Path(dirpath) / directory
                 if not this_is_excluded(dir_path) and this_is_included(dir_path):
                     yield dir_path
+            return
 
         for single_filename in filenames:
             file_path = pathlib.Path(dirpath) / single_filename

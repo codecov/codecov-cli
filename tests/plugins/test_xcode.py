@@ -21,3 +21,19 @@ class TestXcode(object):
         print(output)
         assert "Running swift coverage on the following list of files:" in output
         assert f"{dir}/cov_data.profdata" in output
+
+    def test_swift_cov(self, tmp_path, capsys, mocker):
+        dir_path = tmp_path / "Build/folder.app/folder"
+        dir_path.parent.mkdir(parents=True, exist_ok=True)
+        dir_path.touch()
+        mock = mocker.MagicMock(
+            stdout=b"   11|      1|public func sayHello() {12|      1|    print('Hello!')13|      1|}",
+            returncode=0,
+        )
+        mocker.patch("codecov_cli.plugins.xcode.subprocess.run", return_value=mock)
+        XcodePlugin().swiftcov(dir_path, "")
+        file_path = pathlib.Path("folder.app.coverage.txt")
+        assert file_path.is_file()
+        output = capsys.readouterr().err
+        assert " + Building reports for folder app" in output
+        assert "Generated coverage.txt files successfully"

@@ -1,9 +1,9 @@
 import logging
+import os
 import pathlib
+import re
 import subprocess
 import typing
-import os
-import re
 
 from codecov_cli.helpers.folder_searcher import globs_to_regex, search_files
 from codecov_cli.plugins.types import PreparationPluginReturn

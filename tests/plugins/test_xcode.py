@@ -1,4 +1,5 @@
 import pathlib
+
 from codecov_cli.plugins.xcode import XcodePlugin
 
 

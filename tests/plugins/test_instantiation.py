@@ -1,7 +1,7 @@
 from codecov_cli.plugins import (
     GcovPlugin,
-    XcodePlugin,
     NoopPlugin,
+    XcodePlugin,
     _get_plugin,
     _load_plugin_from_yaml,
     select_preparation_plugins,

@@ -2,6 +2,8 @@ import logging
 import pathlib
 import subprocess
 import typing
+import os
+import re
 
 from codecov_cli.helpers.folder_searcher import globs_to_regex, search_files
 from codecov_cli.plugins.types import PreparationPluginReturn
@@ -15,10 +17,10 @@ class XcodePlugin(object):
         derived_data_folder: typing.Optional[pathlib.Path] = None,
         xp: typing.Optional[pathlib.Path] = None,
     ):
-        self.derived_data_folder = (
-            derived_data_folder
-            or pathlib.Path("~/Library/Developer/Xcode/DerivedData").expanduser()
-        )
+        self.derived_data_folder = pathlib.Path(
+            derived_data_folder or "~/Library/Developer/Xcode/DerivedData"
+        ).expanduser()
+
         self.xp = xp or ""
 
     def run_preparation(self, collector) -> PreparationPluginReturn:
@@ -35,7 +37,6 @@ class XcodePlugin(object):
                 filename_include_regex=filename_include_regex,
             )
         ]
-
         if not matched_paths:
             logger.warning("No swift data found.")
             return
@@ -44,9 +45,49 @@ class XcodePlugin(object):
         for path in matched_paths:
             logger.warning(path)
 
-        s = subprocess.run(
-            ["swiftcov", self.xp, *matched_paths],
-            cwd=self.derived_data_folder,
-            capture_output=True,
-        )
-        return PreparationPluginReturn(success=True, messages=[s.stdout])
+        for path in matched_paths:
+            self.swiftcov(path, self.xp)
+
+        return PreparationPluginReturn(success=True, messages="")
+
+    def swiftcov(self, path, xp: str):
+        dir = os.path.dirname(path)
+        build_dir = pathlib.Path(re.sub("(Build).*", "Build", dir))
+
+        for type in ["app", "framework", "xctest"]:
+            filename_include_regex = globs_to_regex([f"*.{type}"])
+            matched_dir_paths = [
+                str(path)
+                for path in search_files(
+                    folder_to_search=pathlib.Path(build_dir),
+                    folders_to_ignore=[],
+                    filename_include_regex=filename_include_regex,
+                )
+            ]
+            for dir_path in matched_dir_paths:
+                proj = pathlib.Path(dir_path).stem
+                if xp == "" or xp.lower() in proj.lower():
+                    logger.info(f"+ Building reports for {proj} {type}")
+                    file_path = pathlib.Path(pathlib.Path(dir_path) / proj)
+                    dest = (
+                        file_path
+                        if file_path.is_file()
+                        else pathlib.Path(f"{dir_path}/Contents/MacOS/{proj}")
+                    )
+                    output_file_name = f"{proj}.{type}.coverage.txt".replace(" ", "")
+                    output_file = open(output_file_name, "w")
+                    s = subprocess.run(
+                        [
+                            "xcrun",
+                            "llvm-cov",
+                            "show",
+                            "-instr-profile",
+                            path,
+                            str(dest),
+                        ],
+                        cwd=os.getcwd(),
+                        stdout=output_file,
+                    )
+                    # 0 = success
+                    if s.returncode != 0:
+                        logger.warning(f"llvm-cov failed to produce results for {dest}")

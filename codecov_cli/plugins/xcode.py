@@ -51,8 +51,8 @@ class XcodePlugin(object):
         return PreparationPluginReturn(success=True, messages="")
 
     def swiftcov(self, path, xp: str):
-        dir = os.path.dirname(path)
-        build_dir = pathlib.Path(re.sub("(Build).*", "Build", dir))
+        directory = os.path.dirname(path)
+        build_dir = pathlib.Path(re.sub("(Build).*", "Build", directory))
 
         for type in ["app", "framework", "xctest"]:
             filename_include_regex = globs_to_regex([f"*.{type}"])
@@ -66,13 +66,14 @@ class XcodePlugin(object):
                 )
             ]
             for dir_path in matched_dir_paths:
+                # proj name without extension
                 proj = pathlib.Path(dir_path).stem
-                if xp == "" or xp.lower() in proj.lower():
+                if xp == "" or (xp.lower() in proj.lower()):
                     logger.info(f"+ Building reports for {proj} {type}")
-                    file_path = pathlib.Path(pathlib.Path(dir_path) / proj)
+                    proj_path = pathlib.Path(pathlib.Path(dir_path) / proj)
                     dest = (
-                        file_path
-                        if file_path.is_file()
+                        proj_path
+                        if proj_path.is_file()
                         else pathlib.Path(f"{dir_path}/Contents/MacOS/{proj}")
                     )
                     output_file_name = f"{proj}.{type}.coverage.txt".replace(" ", "")

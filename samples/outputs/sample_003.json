@@ -1,0 +1,22 @@
+{
+    "result": {
+        "empty_lines": [
+            4
+        ],
+        "executable_lines": [],
+        "functions": [
+            {
+                "identifier": "myFunction",
+                "start_line": 1,
+                "end_line": 3,
+                "code_hash": "7c4b5655b5fd47e70e28fb937d373131",
+                "complexity_metrics": {}
+            }
+        ],
+        "number_lines": 4,
+        "hash": "edf4c56a9c9da3751090df58b7b16986",
+        "filename": "samples/inputs/sample_003.js",
+        "language": "javascript"
+    },
+    "error": null
+}

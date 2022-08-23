@@ -1,0 +1,230 @@
+{
+    "result": {
+        "language": "python",
+        "empty_lines": [
+            2,
+            3,
+            7,
+            16,
+            19,
+            30
+        ],
+        "functions": [
+            {
+                "identifier": "simple_function",
+                "start_line": 4,
+                "end_line": 6,
+                "code_hash": "1a1dc91c907325c69271ddf0c944bc72",
+                "complexity_metrics": {
+                    "conditions": 0,
+                    "mccabe_cyclomatic_complexity": 1,
+                    "returns": 0,
+                    "max_nested_conditional": 0
+                }
+            },
+            {
+                "identifier": "some_more_if_stuff",
+                "start_line": 8,
+                "end_line": 15,
+                "code_hash": "185e915ce3fad97e21abb0254ee32025",
+                "complexity_metrics": {
+                    "conditions": 1,
+                    "mccabe_cyclomatic_complexity": 2,
+                    "returns": 1,
+                    "max_nested_conditional": 1
+                }
+            },
+            {
+                "identifier": "single_line_minecraft",
+                "start_line": 17,
+                "end_line": 18,
+                "code_hash": "7774dc121a6529cc15c1329c146f9762",
+                "complexity_metrics": {
+                    "conditions": 0,
+                    "mccabe_cyclomatic_complexity": 1,
+                    "returns": 0,
+                    "max_nested_conditional": 0
+                }
+            }
+        ],
+        "hash": "97be1c2949c8f328b8ba5673eba21a84",
+        "number_lines": 30,
+        "statements": [
+            [
+                9,
+                {
+                    "line_surety_ancestorship": null,
+                    "start_column": 4,
+                    "line_hash": "1525f05c652918d69acc9976af0cb37f",
+                    "len": 5,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                10,
+                {
+                    "line_surety_ancestorship": 9,
+                    "start_column": 8,
+                    "line_hash": "0a4e7295535700d22a11e40ed8fe627f",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                12,
+                {
+                    "line_surety_ancestorship": 11,
+                    "start_column": 8,
+                    "line_hash": "4238fbba8f053f6c417b0357a0b2a412",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                14,
+                {
+                    "line_surety_ancestorship": null,
+                    "start_column": 8,
+                    "line_hash": "ff83581ce4652f5a6150e9aee4c6547d",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                15,
+                {
+                    "line_surety_ancestorship": 9,
+                    "start_column": 4,
+                    "line_hash": "227461e6069f437b852b5bd42c5ecca4",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                18,
+                {
+                    "line_surety_ancestorship": 18,
+                    "start_column": 4,
+                    "line_hash": "d425c55d57cd55fcab081d411d30c5a4",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                18,
+                {
+                    "line_surety_ancestorship": 18,
+                    "start_column": 10,
+                    "line_hash": "3d0c61d74c33371ec374cbae9f4012bf",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                18,
+                {
+                    "line_surety_ancestorship": 18,
+                    "start_column": 55,
+                    "line_hash": "43d34ad64db3d880365ea2adf0399513",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                20,
+                {
+                    "line_surety_ancestorship": 17,
+                    "start_column": 0,
+                    "line_hash": "ee1bace38dbc7056127a0b2ca939f6e4",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                21,
+                {
+                    "line_surety_ancestorship": 20,
+                    "start_column": 0,
+                    "line_hash": "1c7360fe4dbfd6c82d648b602a35f940",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                23,
+                {
+                    "line_surety_ancestorship": null,
+                    "start_column": 4,
+                    "line_hash": "9b739c42106ad4105eed93e323715461",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                25,
+                {
+                    "line_surety_ancestorship": null,
+                    "start_column": 4,
+                    "line_hash": "e85b0634f809d240608a26fcef99ad39",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                27,
+                {
+                    "line_surety_ancestorship": 26,
+                    "start_column": 0,
+                    "line_hash": "ee381d45ece7a50297d52ffd92180f21",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                28,
+                {
+                    "line_surety_ancestorship": 27,
+                    "start_column": 0,
+                    "line_hash": "8a278cc4cabd323e16eade3cc9a6b532",
+                    "len": 1,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                29,
+                {
+                    "line_surety_ancestorship": 28,
+                    "start_column": 4,
+                    "line_hash": "e85b0634f809d240608a26fcef99ad39",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ]
+        ],
+        "definition_lines": [
+            [
+                4,
+                2
+            ],
+            [
+                8,
+                7
+            ],
+            [
+                17,
+                1
+            ]
+        ],
+        "import_lines": [
+            [
+                1,
+                0
+            ],
+            [
+                18,
+                0
+            ]
+        ]
+    },
+    "error": null
+}

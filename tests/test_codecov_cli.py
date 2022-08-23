@@ -12,4 +12,6 @@ def test_existing_commands():
         "create-report-results",
         "do-upload",
         "get-report-results",
+        "label-analysis",
+        "static-analysis",
     ]

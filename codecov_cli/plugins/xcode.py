@@ -41,9 +41,10 @@ class XcodePlugin(object):
             logger.warning("No swift data found.")
             return
 
-        logger.warning("Running swift coverage on the following list of files:")
-        for path in matched_paths:
-            logger.warning(path)
+        logger.info(
+            "Running swift coverage on the following list of files:",
+            extra=dict(extra_log_attributes=dict(matched_paths=matched_paths)),
+        )
 
         for path in matched_paths:
             self.swiftcov(path, self.xp)

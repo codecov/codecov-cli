@@ -19,7 +19,6 @@ class TestXcode(object):
         (dir / "cov_data.profdata").touch()
         XcodePlugin(derived_data_folder=tmp_path).run_preparation(collector=None)
         output = capsys.readouterr().err.splitlines()
-        print(output)
         expected = (
             'info: Running swift coverage on the following list of files: --- {"matched_paths": ["'
             + f'{dir}/cov_data.profdata'

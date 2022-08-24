@@ -21,7 +21,7 @@ class TestXcode(object):
         output = capsys.readouterr().err.splitlines()
         expected = (
             'info: Running swift coverage on the following list of files: --- {"matched_paths": ["'
-            + f'{dir}/cov_data.profdata'
+            + f"{dir}/cov_data.profdata"
             + '"]}'
         )
         assert expected in output

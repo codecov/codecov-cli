@@ -1,10 +1,10 @@
-from fnmatch import translate
 import logging
 import os
 import pathlib
 import re
 import subprocess
 import typing
+from fnmatch import translate
 
 from codecov_cli.helpers.folder_searcher import globs_to_regex, search_files
 from codecov_cli.plugins.types import PreparationPluginReturn

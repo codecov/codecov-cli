@@ -8,20 +8,24 @@ class TestXcode(object):
         xcode_plugin = XcodePlugin(derived_data_folder=tmp_path).run_preparation(
             collector=None
         )
-        output = capsys.readouterr().err
+        output = capsys.readouterr().err.splitlines()
         assert xcode_plugin is None
-        assert f"DerivedData folder: {tmp_path}" in output
-        assert "No swift data found." in output
+        assert f"debug: DerivedData folder: {tmp_path}" in output
+        assert "warning: No swift data found." in output
 
     def test_swift_data_found(self, mocker, tmp_path, capsys):
         dir = tmp_path / "Build"
         dir.mkdir()
         (dir / "cov_data.profdata").touch()
         XcodePlugin(derived_data_folder=tmp_path).run_preparation(collector=None)
-        output = capsys.readouterr().err
+        output = capsys.readouterr().err.splitlines()
         print(output)
-        assert "Running swift coverage on the following list of files:" in output
-        assert f"{dir}/cov_data.profdata" in output
+        expected = (
+            'info: Running swift coverage on the following list of files: --- {"matched_paths": ["'
+            + f'{dir}/cov_data.profdata'
+            + '"]}'
+        )
+        assert expected in output
 
     def test_swift_cov(self, tmp_path, capsys, mocker):
         dir_path = tmp_path / "Build/folder.app/folder"

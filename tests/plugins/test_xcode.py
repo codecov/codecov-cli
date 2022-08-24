@@ -35,6 +35,6 @@ class TestXcode(object):
         XcodePlugin().swiftcov(dir_path, "")
         file_path = pathlib.Path("folder.app.coverage.txt")
         assert file_path.is_file()
-        output = capsys.readouterr().err
-        assert " + Building reports for folder app" in output
-        assert "Generated coverage.txt files successfully"
+        output = capsys.readouterr().err.splitlines()
+        assert "info: + Building reports for folder app" in output
+        assert "info: Generated folder.app.coverage.txt file successfully" in output

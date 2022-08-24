@@ -79,21 +79,23 @@ class XcodePlugin(object):
                         else pathlib.Path(f"{dir_path}/Contents/MacOS/{proj}")
                     )
                     output_file_name = f"{proj}.{type}.coverage.txt".replace(" ", "")
-                    output_file = open(output_file_name, "w")
-                    s = subprocess.run(
-                        [
-                            "xcrun",
-                            "llvm-cov",
-                            "show",
-                            "-instr-profile",
-                            path,
-                            str(dest),
-                        ],
-                        cwd=os.getcwd(),
-                        stdout=output_file,
-                    )
-                    # 0 = success
-                    if s.returncode != 0:
-                        logger.warning(f"llvm-cov failed to produce results for {dest}")
-                    else:
-                        logger.info("Generated coverage.txt files successfully")
+                    with open(output_file_name, "w") as output_file:
+                        s = subprocess.run(
+                            [
+                                "xcrun",
+                                "llvm-cov",
+                                "show",
+                                "-instr-profile",
+                                path,
+                                str(dest),
+                            ],
+                            cwd=os.getcwd(),
+                            stdout=output_file,
+                        )
+                        # 0 = success
+                        if s.returncode != 0:
+                            logger.warning(
+                                f"llvm-cov failed to produce results for {dest}"
+                            )
+                        else:
+                            logger.info("Generated coverage.txt files successfully")

@@ -1,3 +1,4 @@
+from fnmatch import translate
 import logging
 import os
 import pathlib
@@ -56,7 +57,7 @@ class XcodePlugin(object):
         build_dir = pathlib.Path(re.sub("(Build).*", "Build", directory))
 
         for type in ["app", "framework", "xctest"]:
-            filename_include_regex = globs_to_regex([f"*.{type}"])
+            filename_include_regex = re.compile(translate(f"*.{type}"))
             matched_dir_paths = [
                 str(path)
                 for path in search_files(

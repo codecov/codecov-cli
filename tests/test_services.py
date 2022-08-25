@@ -1,6 +1,10 @@
 from click.testing import CliRunner
 
-from codecov_cli.services.legacy_upload import UploadCollector, UploadSender, do_upload_logic
+from codecov_cli.services.legacy_upload import (
+    UploadCollector,
+    UploadSender,
+    do_upload_logic,
+)
 from codecov_cli.services.legacy_upload.upload_sender import (
     UploadSendingResult,
     UploadSendingResultWarning,

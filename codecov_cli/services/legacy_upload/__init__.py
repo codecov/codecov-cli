@@ -9,7 +9,9 @@ from codecov_cli.fallbacks import FallbackFieldEnum
 from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
 from codecov_cli.helpers.versioning_systems import VersioningSystemInterface
 from codecov_cli.plugins import select_preparation_plugins
-from codecov_cli.services.legacy_upload.coverage_file_finder import select_coverage_file_finder
+from codecov_cli.services.legacy_upload.coverage_file_finder import (
+    select_coverage_file_finder,
+)
 from codecov_cli.services.legacy_upload.network_finder import select_network_finder
 from codecov_cli.services.legacy_upload.upload_collector import UploadCollector
 from codecov_cli.services.legacy_upload.upload_sender import UploadSender

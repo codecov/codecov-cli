@@ -1,7 +1,7 @@
 from click.testing import CliRunner
 
-from codecov_cli.services.upload import UploadCollector, UploadSender, do_upload_logic
-from codecov_cli.services.upload.upload_sender import (
+from codecov_cli.services.legacy_upload import UploadCollector, UploadSender, do_upload_logic
+from codecov_cli.services.legacy_upload.upload_sender import (
     UploadSendingResult,
     UploadSendingResultWarning,
 )
@@ -9,13 +9,13 @@ from codecov_cli.services.upload.upload_sender import (
 
 def test_do_upload_logic_happy_path(mocker):
     mock_select_preparation_plugins = mocker.patch(
-        "codecov_cli.services.upload.select_preparation_plugins"
+        "codecov_cli.services.legacy_upload.select_preparation_plugins"
     )
     mock_select_coverage_file_finder = mocker.patch(
-        "codecov_cli.services.upload.select_coverage_file_finder"
+        "codecov_cli.services.legacy_upload.select_coverage_file_finder"
     )
     mock_select_network_finder = mocker.patch(
-        "codecov_cli.services.upload.select_network_finder"
+        "codecov_cli.services.legacy_upload.select_network_finder"
     )
     mock_generate_upload_data = mocker.patch.object(
         UploadCollector, "generate_upload_data"

@@ -7,7 +7,7 @@ import uuid
 import click
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
-from codecov_cli.services.upload import do_upload_logic
+from codecov_cli.services.legacy_upload import do_upload_logic
 
 logger = logging.getLogger("codecovcli")
 

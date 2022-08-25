@@ -1,3 +1,4 @@
+import json
 import typing
 import uuid
 from dataclasses import dataclass
@@ -35,6 +36,7 @@ class UploadSender(object):
         upload_data: UploadCollectionResult,
         commit_sha: str,
         token: uuid.UUID,
+        report_code: str,
         env_vars: typing.Dict[str, str],
         name: typing.Optional[str] = None,
         branch: typing.Optional[str] = None,
@@ -47,24 +49,18 @@ class UploadSender(object):
         service: typing.Optional[str] = None,
     ) -> UploadSendingResult:
 
-        params = {
-            "package": f"codecov-cli/{codecov_cli_version}",
-            "commit": commit_sha,
-            "build": build_code,
-            "build_url": build_url,
-            "branch": branch,
-            "name": name,
-            "slug": slug,
-            "service": service,
+        data = {
+            "ci_url": build_url,
             "flags": flags,
-            "pr": pull_request_number,
-            "job": job_code,
+            "env": env_vars,
+            "name": name,
         }
 
-        headers = {"X-Upload-Token": token.hex}
-
+        headers = {"Authorization": f"token {token.hex}"}
         resp = requests.post(
-            "https://codecov.io/upload/v4", headers=headers, params=params
+            f"http://localhost:8000/upload/{slug}/commits/{commit_sha}/reports/{report_code}/uploads",
+            headers=headers,
+            data=data,
         )
 
         if resp.status_code >= 400:
@@ -76,8 +72,9 @@ class UploadSender(object):
                 ),
                 warnings=[],
             )
+        resp_json_obj = json.loads(resp.text)
 
-        result_url, put_url = resp.text.split("\n")
+        put_url = resp_json_obj["raw_upload_location"]
 
         reports_payload = self._generate_payload(upload_data, env_vars)
         resp = requests.put(put_url, data=reports_payload)

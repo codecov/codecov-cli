@@ -12,7 +12,11 @@ class TestXcode(object):
     def act_like_xcrun_is_not_installed(self, mocker):
         mocker.patch("codecov_cli.plugins.xcode.shutil.which", return_value=None)
 
+    def act_like_xcrun_is_installed(self, mocker):
+        mocker.patch("codecov_cli.plugins.xcode.shutil.which", return_value=True)
+
     def test_no_swift_data_found(self, mocker, tmp_path, capsys):
+        self.act_like_xcrun_is_installed(mocker)
         xcode_plugin = XcodePlugin(derived_data_folder=tmp_path).run_preparation(
             collector=None
         )
@@ -30,6 +34,7 @@ class TestXcode(object):
         assert "xcrun is not installed or can't be found." in capsys.readouterr().err
 
     def test_swift_data_found(self, mocker, tmp_path, capsys):
+        self.act_like_xcrun_is_installed(mocker)
         dir = tmp_path / "Build"
         dir.mkdir()
         (dir / "cov_data.profdata").touch()

@@ -44,3 +44,24 @@ class UploadCollectionResult(object):
 class PreparationPluginInterface(object):
     def run_preparation(self) -> None:
         pass
+
+
+@dataclass
+class RequestResultWarning(object):
+    __slots__ = ("message",)
+    message: str
+
+
+@dataclass
+class RequestError(object):
+    __slots__ = ("code", "params", "description")
+    code: str
+    params: typing.Dict
+    description: str
+
+
+@dataclass
+class RequestResult(object):
+    __slots__ = ("error", "warnings")
+    error: typing.Optional[RequestError]
+    warnings: typing.List[RequestResultWarning]

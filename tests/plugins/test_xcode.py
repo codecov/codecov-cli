@@ -4,6 +4,14 @@ from codecov_cli.plugins.xcode import XcodePlugin
 
 
 class TestXcode(object):
+    def act_like_xcrun_ran_succesfully(self, proj, type):
+        output_filename = f"{proj}.{type}.coverage.txt"
+        result_file = open(output_filename, "w")
+        result_file.close()
+
+    def act_like_xcrun_is_not_installed(self, mocker):
+        mocker.patch("codecov_cli.plugins.xcode.shutil.which", return_value=None)
+
     def test_no_swift_data_found(self, mocker, tmp_path, capsys):
         xcode_plugin = XcodePlugin(derived_data_folder=tmp_path).run_preparation(
             collector=None
@@ -12,6 +20,14 @@ class TestXcode(object):
         assert xcode_plugin is None
         assert f"debug: DerivedData folder: {tmp_path}" in output
         assert "warning: No swift data found." in output
+
+    def test_run_preparation_xcrun_not_installed(self, mocker, tmp_path, capsys):
+        self.act_like_xcrun_is_not_installed(mocker)
+        assert (
+            XcodePlugin(derived_data_folder=tmp_path).run_preparation(collector=None)
+            is None
+        )
+        assert "xcrun is not installed or can't be found." in capsys.readouterr().err
 
     def test_swift_data_found(self, mocker, tmp_path, capsys):
         dir = tmp_path / "Build"
@@ -30,14 +46,11 @@ class TestXcode(object):
         dir_path = tmp_path / "Build/folder.app/folder"
         dir_path.parent.mkdir(parents=True, exist_ok=True)
         dir_path.touch()
-        mock = mocker.MagicMock(
-            stdout=b"   11|      1|public func sayHello() {12|      1|    print('Hello!')13|      1|}",
-            returncode=0,
+        mocked_subprocess = mocker.patch(
+            "codecov_cli.plugins.xcode.XcodePlugin.run_llvm_cov"
         )
-        mocker.patch("codecov_cli.plugins.xcode.subprocess.run", return_value=mock)
         XcodePlugin().swiftcov(dir_path, "")
+        self.act_like_xcrun_ran_succesfully("folder", "app")
         file_path = pathlib.Path("folder.app.coverage.txt")
         assert file_path.is_file()
-        output = capsys.readouterr().err.splitlines()
-        assert "info: + Building reports for folder app" in output
-        assert "info: Generated folder.app.coverage.txt file successfully" in output
+        mocked_subprocess.assert_called_once()

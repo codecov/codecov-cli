@@ -2,6 +2,7 @@ import logging
 import os
 import pathlib
 import re
+import shutil
 import subprocess
 import typing
 from fnmatch import translate
@@ -26,6 +27,11 @@ class XcodePlugin(object):
 
     def run_preparation(self, collector) -> PreparationPluginReturn:
         logger.debug("Running xcode plugin...")
+
+        if shutil.which("xcrun") is None:
+            logger.warning("xcrun is not installed or can't be found.")
+            return
+
         logger.debug(f"DerivedData folder: {self.derived_data_folder}")
 
         filename_include_regex = globs_to_regex(["*.profdata"])
@@ -79,25 +85,24 @@ class XcodePlugin(object):
                         else pathlib.Path(f"{dir_path}/Contents/MacOS/{proj}")
                     )
                     output_file_name = f"{proj}.{type}.coverage.txt".replace(" ", "")
-                    with open(output_file_name, "w") as output_file:
-                        s = subprocess.run(
-                            [
-                                "xcrun",
-                                "llvm-cov",
-                                "show",
-                                "-instr-profile",
-                                path,
-                                str(dest),
-                            ],
-                            cwd=os.getcwd(),
-                            stdout=output_file,
-                        )
-                        # 0 = success
-                        if s.returncode != 0:
-                            logger.warning(
-                                f"llvm-cov failed to produce results for {dest}"
-                            )
-                        else:
-                            logger.info(
-                                f"Generated {output_file_name} file successfully"
-                            )
+                    self.run_llvm_cov(output_file_name, path, dest)
+
+    def run_llvm_cov(self, output_file_name, path, dest):
+        with open(output_file_name, "w") as output_file:
+            s = subprocess.run(
+                [
+                    "xcrun",
+                    "llvm-cov",
+                    "show",
+                    "-instr-profile",
+                    path,
+                    str(dest),
+                ],
+                cwd=os.getcwd(),
+                stdout=output_file,
+            )
+            # 0 = success
+            if s.returncode != 0:
+                logger.warning(f"llvm-cov failed to produce results for {dest}")
+            else:
+                logger.info(f"Generated {output_file_name} file successfully")

@@ -58,7 +58,7 @@ class UploadSender(object):
 
         headers = {"Authorization": f"token {token.hex}"}
         resp = requests.post(
-            f"http://localhost:8000/upload/{slug}/commits/{commit_sha}/reports/{report_code}/uploads",
+            f"https://codecov.io/upload/{slug}/commits/{commit_sha}/reports/{report_code}/uploads",
             headers=headers,
             data=data,
         )

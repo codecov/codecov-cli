@@ -6,7 +6,7 @@ import responses
 from responses import matchers
 
 from codecov_cli import __version__ as codecov_cli_version
-from codecov_cli.services.upload.upload_sender import UploadSender
+from codecov_cli.services.legacy_upload.upload_sender import UploadSender
 from codecov_cli.types import UploadCollectionResult
 from tests.data import reports_examples
 
@@ -235,7 +235,7 @@ class TestPayloadGeneration(object):
     def test_format_coverage_file(self, mocker):
         fake_result_file = mocker.MagicMock()
         mocker.patch(
-            "codecov_cli.services.upload.upload_sender.UploadCollectionResultFile",
+            "codecov_cli.services.legacy_upload.upload_sender.UploadCollectionResultFile",
             return_value=fake_result_file,
         )
 
@@ -261,7 +261,7 @@ class TestPayloadGeneration(object):
     def test_generate_coverage_files_section(self, mocker):
 
         mocker.patch(
-            "codecov_cli.services.upload.UploadSender._format_coverage_file",
+            "codecov_cli.services.legacy_upload.UploadSender._format_coverage_file",
             side_effect=lambda file_bytes: file_bytes,
         )
 
@@ -282,15 +282,15 @@ class TestPayloadGeneration(object):
 
     def test_generate_payload_overall(self, mocker):
         mocker.patch(
-            "codecov_cli.services.upload.UploadSender._generate_env_vars_section",
+            "codecov_cli.services.legacy_upload.UploadSender._generate_env_vars_section",
             return_value=reports_examples.env_section,
         )
         mocker.patch(
-            "codecov_cli.services.upload.UploadSender._generate_network_section",
+            "codecov_cli.services.legacy_upload.UploadSender._generate_network_section",
             return_value=reports_examples.network_section,
         )
         mocker.patch(
-            "codecov_cli.services.upload.UploadSender._generate_coverage_files_section",
+            "codecov_cli.services.legacy_upload.UploadSender._generate_coverage_files_section",
             return_value=reports_examples.coverage_file_section_simple,
         )
 

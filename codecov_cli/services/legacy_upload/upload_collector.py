@@ -5,8 +5,8 @@ import uuid
 from collections import namedtuple
 from fnmatch import fnmatch
 
-from codecov_cli.services.upload.coverage_file_finder import CoverageFileFinder
-from codecov_cli.services.upload.network_finder import NetworkFinder
+from codecov_cli.services.legacy_upload.coverage_file_finder import CoverageFileFinder
+from codecov_cli.services.legacy_upload.network_finder import NetworkFinder
 from codecov_cli.types import (
     PreparationPluginInterface,
     UploadCollectionResult,

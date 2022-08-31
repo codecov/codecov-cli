@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from codecov_cli.services.upload.upload_collector import UploadCollector
+from codecov_cli.services.legacy_upload.upload_collector import UploadCollector
 
 
 def test_fix_kt_files():

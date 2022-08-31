@@ -1,299 +1,124 @@
-import uuid
-from urllib import parse
+import json
 
 import pytest
-import responses
-from responses import matchers
 
 from codecov_cli import __version__ as codecov_cli_version
-from codecov_cli.services.legacy_upload.upload_sender import UploadSender
-from codecov_cli.types import UploadCollectionResult
+from codecov_cli.services.upload.upload_sender import UploadSender
+from codecov_cli.types import UploadCollectionResult, UploadCollectionResultFileFixer
 from tests.data import reports_examples
 
-upload_collection = UploadCollectionResult(["1", "apple.py", "3"], [], [])
-random_token = uuid.UUID("f359afb9-8a2a-42ab-a448-c3d267ff495b")
-random_sha = "845548c6b95223f12e8317a1820705f64beaf69e"
-named_upload_data = {
-    "name": "name",
-    "branch": "branch",
-    "slug": "slug",
-    "pull_request_number": "pr",
-    "build_code": "build_code",
-    "build_url": "build_url",
-    "job_code": "job_code",
-    "flags": "flags",
-    "service": "service",
-}
-
 
 @pytest.fixture
-def mocked_responses():
-    with responses.RequestsMock() as rsps:
-        yield rsps
-
-
-@pytest.fixture
-def mocked_legacy_upload_endpoint(mocked_responses):
-    resp = responses.Response(
-        responses.POST,
-        "https://codecov.io/upload/v4",
-        body="https://resulturl.com\nhttps://puturl.com",
-        status=200,
+def mocked_coverage_file(mocker):
+    fake_result_file = mocker.MagicMock()
+    coverage_file_seperated = reports_examples.coverage_file_section_simple.split(
+        b"\n", 1
     )
-    mocked_responses.add(resp)
-    yield resp
+    fake_result_file.get_filename.return_value = coverage_file_seperated[0][
+        len(b"# path=") :
+    ].strip()
+    fake_result_file.get_content.return_value = coverage_file_seperated[1][
+        : -len(b"\n<<<<<< EOF\n")
+    ]
+    return fake_result_file
 
 
 @pytest.fixture
-def mocked_storage_server(mocked_responses):
-    resp = responses.Response(responses.PUT, "https://puturl.com", status=200)
-    mocked_responses.add(resp)
-    yield resp
-
-
-class TestUploadSender(object):
-    def test_upload_sender_post_called_with_right_parameters(
-        self, mocked_responses, mocked_legacy_upload_endpoint, mocked_storage_server
-    ):
-        headers = {"X-Upload-Token": random_token.hex}
-        params = {
-            "package": f"codecov-cli/{codecov_cli_version}",
-            "commit": random_sha,
-            **named_upload_data,
-        }
-
-        # rename query params keys since they are not the same as send_upload_data parameters
-        params["build"] = params.pop("build_code")
-        params["pr"] = params.pop("pull_request_number")
-        params["job"] = params.pop("job_code")
-
-        mocked_legacy_upload_endpoint.match = [
-            matchers.query_param_matcher(params),
-            matchers.header_matcher(headers),
-        ]
-
-        sending_result = UploadSender().send_upload_data(
-            upload_collection, random_sha, random_token, {}, **named_upload_data
-        )
-        assert sending_result.error is None
-        assert sending_result.warnings == []
-
-        assert len(mocked_responses.calls) == 2
-
-        post_req_made = mocked_responses.calls[0].request
-        assert post_req_made.url.split("?")[0] == "https://codecov.io/upload/v4"
-        assert dict(parse.parse_qsl(parse.urlsplit(post_req_made.url).query)) == params
-        assert (
-            post_req_made.headers.items() >= headers.items()
-        )  # test dict is a subset of the other
-
-    def test_upload_sender_put_called_with_right_parameters(
-        self, mocked_responses, mocked_legacy_upload_endpoint, mocked_storage_server
-    ):
-        sending_result = UploadSender().send_upload_data(
-            upload_collection, random_sha, random_token, {}, **named_upload_data
-        )
-        assert sending_result.error is None
-        assert sending_result.warnings == []
-
-        assert len(mocked_responses.calls) == 2
-
-        put_req_mad = mocked_responses.calls[1].request
-        assert put_req_mad.url == "https://puturl.com/"
-
-    def test_upload_sender_result_success(
-        self, mocked_responses, mocked_legacy_upload_endpoint, mocked_storage_server
-    ):
-        sender = UploadSender().send_upload_data(
-            upload_collection, random_sha, random_token, {}, **named_upload_data
-        )
-
-        # default status for both put and post is 200
-
-        assert sender.error is None
-        assert not sender.warnings
-
-    def test_upload_sender_result_fail_post_400(
-        self, mocked_responses, mocked_legacy_upload_endpoint
-    ):
-        mocked_legacy_upload_endpoint.status = 400
-
-        sender = UploadSender().send_upload_data(
-            upload_collection, random_sha, random_token, {}, **named_upload_data
-        )
-
-        assert len(mocked_responses.calls) == 1
-        assert sender.error is not None
-        assert "400" in sender.error.code
-
-        assert sender.warnings is not None
-
-    def test_upload_sender_result_fail_put_400(
-        self, mocked_responses, mocked_legacy_upload_endpoint, mocked_storage_server
-    ):
-        mocked_storage_server.status = 400
-
-        sender = UploadSender().send_upload_data(
-            upload_collection, random_sha, random_token, {}, **named_upload_data
-        )
-
-        assert len(mocked_responses.calls) == 2
-        assert sender.error is not None
-        assert "400" in sender.error.code
-
-        assert sender.warnings is not None
-
-    def test_upload_sender_http_error_with_invalid_sha(
-        self, mocked_responses, mocked_legacy_upload_endpoint
-    ):
-        random_sha = "invalid"
-
-        mocked_legacy_upload_endpoint.body = "Invalid request parameters"
-        mocked_legacy_upload_endpoint.status = 400
-
-        sender = UploadSender().send_upload_data(
-            upload_collection, random_sha, random_token, {}, **named_upload_data
-        )
-
-        assert sender.error is not None
-        assert "HTTP Error 400" in sender.error.code
-        assert "Invalid request parameters" in sender.error.description
+def mocked_upload_data(mocked_coverage_file):
+    network_files = [
+        "./codecov.yaml",
+        "Makefile",
+        "awesome/__init__.py",
+        "awesome/code_fib.py",
+        "dev.sh",
+    ]
+    coverage_files = [mocked_coverage_file, mocked_coverage_file]
+    path_fixers = [
+        UploadCollectionResultFileFixer(
+            "SwiftExample/AppDelegate.swift", None, None, None
+        ),
+        UploadCollectionResultFileFixer("SwiftExample/Hello.swift", None, None, None),
+        UploadCollectionResultFileFixer(
+            "SwiftExample/ViewController.swift", None, None, None
+        ),
+    ]
+    return UploadCollectionResult(network_files, coverage_files, path_fixers)
 
 
 class TestPayloadGeneration(object):
-    def test_generate_env_vars_section(self):
-        terminator = b"<<<<<< ENV"
-
-        expected_without_terminator = b"""var1=value1
-        var2=value2
-        abc=valbc
-        """
-
-        env_vars = {"var1": "value1", "var2": "value2", "var3": None, "abc": "valbc"}
-
-        actual_lines = UploadSender()._generate_env_vars_section(env_vars).split(b"\n")
-        assert terminator in actual_lines
-
-        # lines might not be in the same order since env_vars is a dict. lines' order doesn't matter, only last (non-empty) line must be terminator
-
-        expected_lines_without_terminator = {
-            line.strip() for line in expected_without_terminator.split(b"\n")
+    def test_generate_payload_overall(self, mocked_upload_data):
+        actual_report = UploadSender()._generate_payload(mocked_upload_data, None)
+        expected_report = {
+            "path_fixes": {
+                "format": "legacy",
+                "value": [
+                    "SwiftExample/AppDelegate.swift",
+                    "SwiftExample/Hello.swift",
+                    "SwiftExample/ViewController.swift",
+                ],
+            },
+            "network_files": [
+                "./codecov.yaml",
+                "Makefile",
+                "awesome/__init__.py",
+                "awesome/code_fib.py",
+                "dev.sh",
+            ],
+            "coverage_files": [
+                {
+                    "filename": "flagtwo.coverage.xml",
+                    "format": "base64+compressed",
+                    "data": "eJzdVctymzAU3ecrVPYg4hrHkyHOTDfddtM1I8SNUQsSo3vx4+8rngE7pIs6M21ZMNyHzpHOPUD8fCoLdgCLyugn7z4IPfa8u4ulcTmxB5ZaoWXuW0Hw5LliFwP6bQdk8+RBFKpLSVNWBZwUnduwUBoGkGDTxROMz+GQ6hEilyBVApIoK7evTRhuolW42m4jt3rc7zqIgrW3u2Puij/5PvsKGhqajKVnNhwiqM6PLCeq8JHzMWlBZJRDZiQGyjDfn8B8EeggjB5XWXEM9oryOq0RrDSaQFPgDunwUrBUW8GPkPJSIIHlOTWw3Gk78vnhOsgoe+VBU1sJ2EWTzI5/dxTIKVdib6wVpUH+zZofIAm5LBQ05AcOJ9FI7Fdnyo2Oeb+6A+cz9LgS8qfbw5SsT10N+N3BbT2mRemexRHQlOC9AragshCIU5p55XdkL6qAGT5PEqUVJYkb4eVe1g/3w26mXdfcLX8JTqUM+UK5Nd/btbHOckXovOhY69INvXlcwuMLgDFvhbidQNJkkLyo9Fqgh2iQZ9rzD8rTJ2fu5b19/9DQ0WrQiNynBj/Mzi36oplv7eM3ijfzXXeS5p50Y07oaK7MN1X1ou/DDRj+Fe/nRCdsv9OLQ7/o+S9f0DF0LfH4S9z9Ar0cTD8=",
+                    "labels": "",
+                },
+                {
+                    "filename": "flagtwo.coverage.xml",
+                    "format": "base64+compressed",
+                    "data": "eJzdVctymzAU3ecrVPYg4hrHkyHOTDfddtM1I8SNUQsSo3vx4+8rngE7pIs6M21ZMNyHzpHOPUD8fCoLdgCLyugn7z4IPfa8u4ulcTmxB5ZaoWXuW0Hw5LliFwP6bQdk8+RBFKpLSVNWBZwUnduwUBoGkGDTxROMz+GQ6hEilyBVApIoK7evTRhuolW42m4jt3rc7zqIgrW3u2Puij/5PvsKGhqajKVnNhwiqM6PLCeq8JHzMWlBZJRDZiQGyjDfn8B8EeggjB5XWXEM9oryOq0RrDSaQFPgDunwUrBUW8GPkPJSIIHlOTWw3Gk78vnhOsgoe+VBU1sJ2EWTzI5/dxTIKVdib6wVpUH+zZofIAm5LBQ05AcOJ9FI7Fdnyo2Oeb+6A+cz9LgS8qfbw5SsT10N+N3BbT2mRemexRHQlOC9AragshCIU5p55XdkL6qAGT5PEqUVJYkb4eVe1g/3w26mXdfcLX8JTqUM+UK5Nd/btbHOckXovOhY69INvXlcwuMLgDFvhbidQNJkkLyo9Fqgh2iQZ9rzD8rTJ2fu5b19/9DQ0WrQiNynBj/Mzi36oplv7eM3ijfzXXeS5p50Y07oaK7MN1X1ou/DDRj+Fe/nRCdsv9OLQ7/o+S9f0DF0LfH4S9z9Ar0cTD8=",
+                    "labels": "",
+                },
+            ],
+            "metadata": {},
         }
-        actual_lines_without_terminator = {
-            line for line in actual_lines if line != terminator
+        assert actual_report == json.dumps(expected_report).encode()
+
+    def test_generate_empty_payload_overall(self):
+        actual_report = UploadSender()._generate_payload(
+            UploadCollectionResult([], [], []), None
+        )
+        expected_report = {
+            "path_fixes": {
+                "format": "legacy",
+                "value": [],
+            },
+            "network_files": [],
+            "coverage_files": [],
+            "metadata": {},
         }
+        assert actual_report == json.dumps(expected_report).encode()
 
-        assert expected_lines_without_terminator == actual_lines_without_terminator
-
+    def test_formatting_file_coverage_info(self, mocker, mocked_coverage_file):
+        format, formatted_content = UploadSender()._get_format_info(
+            mocked_coverage_file
+        )
+        assert format == "base64+compressed"
         assert (
-            actual_lines[-2] == terminator
-        )  # assuming that there will alawys be a new line after terminator
-
-    def test_generate_env_vars_section_empty_result(self):
-        env_vars = {"var1": None}
-        assert UploadSender()._generate_env_vars_section(env_vars) == b""
-
-    def test_generate_network_section(self):
-        network_files = [
-            "./codecov.yaml",
-            "Makefile",
-            "awesome/__init__.py",
-            "awesome/code_fib.py",
-            "dev.sh",
-            "tests/__init__.py",
-            "tests/test_number_two.py",
-            "tests/test_sample.py",
-            "unit.coverage.xml",
-        ]
-
-        expected_network_section = b"""./codecov.yaml
-                                    Makefile
-                                    awesome/__init__.py
-                                    awesome/code_fib.py
-                                    dev.sh
-                                    tests/__init__.py
-                                    tests/test_number_two.py
-                                    tests/test_sample.py
-                                    unit.coverage.xml
-                                    <<<<<< network
-                                    """
-
-        upload_data = UploadCollectionResult(network_files, [], [])
-
-        actual_network_section = UploadSender()._generate_network_section(upload_data)
-
-        assert [line.strip() for line in expected_network_section.split(b"\n")] == [
-            line for line in actual_network_section.split(b"\n")
-        ]
-
-    def test_generate_network_section_empty_result(self):
-        assert (
-            UploadSender()._generate_network_section(UploadCollectionResult([], [], []))
-            == b""
+            formatted_content
+            == "eJzdVctymzAU3ecrVPYg4hrHkyHOTDfddtM1I8SNUQsSo3vx4+8rngE7pIs6M21ZMNyHzpHOPUD8fCoLdgCLyugn7z4IPfa8u4ulcTmxB5ZaoWXuW0Hw5LliFwP6bQdk8+RBFKpLSVNWBZwUnduwUBoGkGDTxROMz+GQ6hEilyBVApIoK7evTRhuolW42m4jt3rc7zqIgrW3u2Puij/5PvsKGhqajKVnNhwiqM6PLCeq8JHzMWlBZJRDZiQGyjDfn8B8EeggjB5XWXEM9oryOq0RrDSaQFPgDunwUrBUW8GPkPJSIIHlOTWw3Gk78vnhOsgoe+VBU1sJ2EWTzI5/dxTIKVdib6wVpUH+zZofIAm5LBQ05AcOJ9FI7Fdnyo2Oeb+6A+cz9LgS8qfbw5SsT10N+N3BbT2mRemexRHQlOC9AragshCIU5p55XdkL6qAGT5PEqUVJYkb4eVe1g/3w26mXdfcLX8JTqUM+UK5Nd/btbHOckXovOhY69INvXlcwuMLgDFvhbidQNJkkLyo9Fqgh2iQZ9rzD8rTJ2fu5b19/9DQ0WrQiNynBj/Mzi36oplv7eM3ijfzXXeS5p50Y07oaK7MN1X1ou/DDRj+Fe/nRCdsv9OLQ7/o+S9f0DF0LfH4S9z9Ar0cTD8="
         )
 
-    def test_format_coverage_file(self, mocker):
-        fake_result_file = mocker.MagicMock()
+    def test_coverage_file_format(self, mocker, mocked_coverage_file):
         mocker.patch(
-            "codecov_cli.services.legacy_upload.upload_sender.UploadCollectionResultFile",
-            return_value=fake_result_file,
+            "codecov_cli.services.upload.upload_sender.UploadSender._get_format_info",
+            return_value=("base64+compressed", "encoded_file_data"),
         )
-
-        coverage_file_seperated = reports_examples.coverage_file_section_simple.split(
-            b"\n", 1
+        json_formatted_coverage_file = UploadSender()._format_coverage_file(
+            mocked_coverage_file
         )
-
-        fake_result_file.get_filename.return_value = coverage_file_seperated[0][
-            len(b"# path=") :
-        ].strip()
-        fake_result_file.get_content.return_value = coverage_file_seperated[1][
-            : -len(b"\n<<<<<< EOF\n")
-        ]
-        actual_coverage_file_section = UploadSender()._format_coverage_file(
-            fake_result_file
-        )
-
-        assert (
-            actual_coverage_file_section
-            == reports_examples.coverage_file_section_simple
-        )
-
-    def test_generate_coverage_files_section(self, mocker):
-
-        mocker.patch(
-            "codecov_cli.services.legacy_upload.UploadSender._format_coverage_file",
-            side_effect=lambda file_bytes: file_bytes,
-        )
-
-        coverage_files = [
-            reports_examples.coverage_file_section_simple,
-            reports_examples.coverage_file_section_simple,
-            reports_examples.coverage_file_section_small,
-            reports_examples.coverage_file_section_simple,
-        ]
-
-        actual_section = UploadSender()._generate_coverage_files_section(
-            UploadCollectionResult([], coverage_files, [])
-        )
-
-        expected_section = b"".join(coverage_files)
-
-        assert actual_section == expected_section
-
-    def test_generate_payload_overall(self, mocker):
-        mocker.patch(
-            "codecov_cli.services.legacy_upload.UploadSender._generate_env_vars_section",
-            return_value=reports_examples.env_section,
-        )
-        mocker.patch(
-            "codecov_cli.services.legacy_upload.UploadSender._generate_network_section",
-            return_value=reports_examples.network_section,
-        )
-        mocker.patch(
-            "codecov_cli.services.legacy_upload.UploadSender._generate_coverage_files_section",
-            return_value=reports_examples.coverage_file_section_simple,
-        )
-
-        actual_report = UploadSender()._generate_payload(None, None)
-
-        assert actual_report == reports_examples.env_network_coverage_sections
+        print(json_formatted_coverage_file["data"])
+        assert json_formatted_coverage_file == {
+            "filename": mocked_coverage_file.get_filename().decode(),
+            "format": "base64+compressed",
+            "data": "encoded_file_data",
+            "labels": "",
+        }

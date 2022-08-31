@@ -1,12 +1,17 @@
+import base64
 import json
+import logging
 import typing
 import uuid
+import zlib
 from dataclasses import dataclass
 
 import requests
 
 from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.types import UploadCollectionResult, UploadCollectionResultFile
+
+logger = logging.getLogger("codecovcli")
 
 
 @dataclass
@@ -94,42 +99,37 @@ class UploadSender(object):
     def _generate_payload(
         self, upload_data: UploadCollectionResult, env_vars: typing.Dict[str, str]
     ) -> bytes:
-        env_vars_section = self._generate_env_vars_section(env_vars)
-        network_section = self._generate_network_section(upload_data)
-        coverage_files_section = self._generate_coverage_files_section(upload_data)
+        network_files = upload_data.network
+        payload = {
+            "path_fixes": {
+                "format": "legacy",
+                "value": self._get_file_fixers(upload_data),
+            },
+            "network_files": network_files if network_files is not None else [],
+            "coverage_files": self._get_coverage_files(upload_data),
+            "metadata": {},
+        }
+        json_data = json.dumps(payload)
+        return json_data.encode()
 
-        return b"".join([env_vars_section, network_section, coverage_files_section])
+    def _get_file_fixers(self, upload_data: UploadCollectionResult):
+        return [str(file_fixer.path) for file_fixer in upload_data.file_fixes]
 
-    def _generate_env_vars_section(self, env_vars) -> bytes:
-        filtered_env_vars = {
-            key: value for key, value in env_vars.items() if value is not None
+    def _get_coverage_files(self, upload_data: UploadCollectionResult):
+        return [self._format_coverage_file(file) for file in upload_data.coverage_files]
+
+    def _format_coverage_file(self, file: UploadCollectionResultFile):
+        format, formatted_content = self._get_format_info(file)
+        return {
+            "filename": file.get_filename().decode(),
+            "format": format,
+            "data": formatted_content,
+            "labels": "",
         }
 
-        if not filtered_env_vars:
-            return b""
-
-        env_vars_section = "".join(
-            f"{env_var}={value}\n" for env_var, value in filtered_env_vars.items()
-        )
-        return env_vars_section.encode() + b"<<<<<< ENV\n"
-
-    def _generate_network_section(self, upload_data: UploadCollectionResult) -> bytes:
-        network_files = upload_data.network
-
-        if not network_files:
-            return b""
-
-        network_files_section = "".join(file + "\n" for file in network_files)
-        return network_files_section.encode() + b"<<<<<< network\n"
-
-    def _generate_coverage_files_section(self, upload_data: UploadCollectionResult):
-        return b"".join(
-            self._format_coverage_file(file) for file in upload_data.coverage_files
-        )
-
-    def _format_coverage_file(self, file: UploadCollectionResultFile) -> bytes:
-        header = b"# path=" + file.get_filename() + b"\n"
-        file_content = file.get_content() + b"\n"
-        file_end = b"<<<<<< EOF\n"
-
-        return header + file_content + file_end
+    def _get_format_info(self, file: UploadCollectionResultFile):
+        format = "base64+compressed"
+        formatted_content = (
+            base64.b64encode(zlib.compress((file.get_content())))
+        ).decode()
+        return format, formatted_content

@@ -73,8 +73,7 @@ def mocked_coverage_file(mocker):
     return fake_result_file
 
 
-@pytest.fixture
-def mocked_upload_data(mocked_coverage_file):
+def get_fake_upload_collection_result(mocked_coverage_file):
     network_files = [
         "./codecov.yaml",
         "Makefile",
@@ -195,8 +194,10 @@ class TestUploadSender(object):
 
 
 class TestPayloadGeneration(object):
-    def test_generate_payload_overall(self, mocked_upload_data):
-        actual_report = UploadSender()._generate_payload(mocked_upload_data, None)
+    def test_generate_payload_overall(self, mocked_coverage_file):
+        actual_report = UploadSender()._generate_payload(
+            get_fake_upload_collection_result(mocked_coverage_file), None
+        )
         expected_report = {
             "path_fixes": {
                 "format": "legacy",

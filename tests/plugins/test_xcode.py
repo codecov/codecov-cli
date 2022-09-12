@@ -1,11 +1,13 @@
 import pathlib
+from functools import partial
 
 from codecov_cli.plugins.xcode import XcodePlugin
 
 
 class TestXcode(object):
-    def act_like_xcrun_ran_succesfully(self, proj, type):
-        output_filename = f"{proj}.{type}.coverage.txt"
+    def act_like_xcrun_ran_succesfully(self, output_filename):
+        # xcrun llvm-cov saves the output in a new created file
+        # opening the file with write permission creates it if it does not exist
         result_file = open(output_filename, "w")
         result_file.close()
 
@@ -52,10 +54,26 @@ class TestXcode(object):
         dir_path.parent.mkdir(parents=True, exist_ok=True)
         dir_path.touch()
         mocked_subprocess = mocker.patch(
-            "codecov_cli.plugins.xcode.XcodePlugin.run_llvm_cov"
+            "codecov_cli.plugins.xcode.XcodePlugin.run_llvm_cov",
+            side_effect=(
+                lambda output_file_name, path, dest: partial(
+                    self.act_like_xcrun_ran_succesfully, output_file_name
+                )
+            ),
         )
         XcodePlugin().swiftcov(dir_path, "")
-        self.act_like_xcrun_ran_succesfully("folder", "app")
-        file_path = pathlib.Path("folder.app.coverage.txt")
-        assert file_path.is_file()
         mocked_subprocess.assert_called_once()
+
+    def test_run_llvm_cov(self, mocker):
+        mocked_subprocess = mocker.patch(
+            "codecov_cli.plugins.xcode.subprocess.run",
+            return_value=mocker.MagicMock(returncode=0),
+        )
+        XcodePlugin().run_llvm_cov(
+            output_file_name="llvm-output-test",
+            path=mocker.MagicMock(),
+            dest=mocker.MagicMock(),
+        )
+        mocked_subprocess.assert_called_once()
+        file_path = pathlib.Path("llvm-output-test")
+        assert file_path.is_file()

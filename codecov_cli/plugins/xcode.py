@@ -98,7 +98,6 @@ class XcodePlugin(object):
                     path,
                     str(dest),
                 ],
-                cwd=os.getcwd(),
                 stdout=output_file,
             )
             # 0 = success

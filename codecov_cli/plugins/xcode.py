@@ -17,13 +17,15 @@ class XcodePlugin(object):
     def __init__(
         self,
         derived_data_folder: typing.Optional[pathlib.Path] = None,
-        xp: typing.Optional[pathlib.Path] = None,
+        app_name: typing.Optional[pathlib.Path] = None,
     ):
         self.derived_data_folder = pathlib.Path(
             derived_data_folder or "~/Library/Developer/Xcode/DerivedData"
         ).expanduser()
 
-        self.xp = xp or ""
+        # this is to speed up processing and to build reports for the project being tested,
+        # if empty the plugin will build reports for every xcode project it finds
+        self.app_name = app_name or ""
 
     def run_preparation(self, collector) -> PreparationPluginReturn:
         logger.debug("Running xcode plugin...")
@@ -54,11 +56,11 @@ class XcodePlugin(object):
         )
 
         for path in matched_paths:
-            self.swiftcov(path, self.xp)
+            self.swiftcov(path, self.app_name)
 
         return PreparationPluginReturn(success=True, messages="")
 
-    def swiftcov(self, path, xp: str):
+    def swiftcov(self, path, app_name: str):
         directory = os.path.dirname(path)
         build_dir = pathlib.Path(re.sub("(Build).*", "Build", directory))
 
@@ -76,7 +78,7 @@ class XcodePlugin(object):
             for dir_path in matched_dir_paths:
                 # proj name without extension
                 proj = pathlib.Path(dir_path).stem
-                if xp == "" or (xp.lower() in proj.lower()):
+                if app_name == "" or (app_name.lower() in proj.lower()):
                     logger.info(f"+ Building reports for {proj} {type}")
                     proj_path = pathlib.Path(pathlib.Path(dir_path) / proj)
                     dest = (

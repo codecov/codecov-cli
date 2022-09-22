@@ -1,6 +1,7 @@
 from codecov_cli.plugins import (
     GcovPlugin,
     NoopPlugin,
+    XcodePlugin,
     _get_plugin,
     _load_plugin_from_yaml,
     select_preparation_plugins,
@@ -44,6 +45,11 @@ def test_load_plugin_from_yaml_bad_parameters(mocker):
 def test_get_plugin_gcov():
     res = _get_plugin({}, "gcov")
     assert isinstance(res, GcovPlugin)
+
+
+def test_get_plugin_xcode():
+    res = _get_plugin({}, "xcode")
+    assert isinstance(res, XcodePlugin)
 
 
 def test_select_preparation_plugins(mocker):

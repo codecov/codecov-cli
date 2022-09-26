@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 import requests
 
@@ -9,7 +10,13 @@ logger = logging.getLogger("codecovcli")
 
 class CommitSender(object):
     def send_commit_data(
-        self, commit_sha: str, parent_sha: str, pr: str, branch: str, slug: str
+        self,
+        commit_sha: str,
+        parent_sha: str,
+        pr: str,
+        branch: str,
+        slug: str,
+        token: uuid.UUID,
     ):
         data = {
             "commitid": commit_sha,
@@ -17,7 +24,7 @@ class CommitSender(object):
             "pullid": pr,
             "branch": branch,
         }
-        headers = {}
+        headers = {"Authorization": f"token {token.hex}"}
 
         resp = requests.post(
             f"https://codecov.io/upload/{slug}/commits", headers=headers, data=data

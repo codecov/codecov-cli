@@ -1,5 +1,6 @@
 import logging
 import typing
+import uuid
 
 import click
 
@@ -41,6 +42,13 @@ logger = logging.getLogger("codecovcli")
     help="owner/repo slug used instead of the private repo token in Self-hosted",
     envvar="CODECOV_SLUG",
 )
+@click.option(
+    "-t",
+    "--token",
+    help="Codecov upload token",
+    type=click.UUID,
+    envvar="CODECOV_TOKEN",
+)
 @click.pass_context
 def create_commit(
     ctx,
@@ -49,6 +57,7 @@ def create_commit(
     pr: typing.Optional[int],
     branch: typing.Optional[str],
     slug: typing.Optional[str],
+    token: typing.Optional[uuid.UUID],
 ):
     logger.debug(
         "Starting create commit process",
@@ -59,7 +68,8 @@ def create_commit(
                 pr=pr,
                 branch=branch,
                 slug=slug,
+                token=token,
             )
         ),
     )
-    create_commit_logic(commit_sha, parent_sha, pr)
+    create_commit_logic(commit_sha, parent_sha, pr, branch, slug, token)

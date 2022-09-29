@@ -1,3 +1,5 @@
+import uuid
+
 from click.testing import CliRunner
 
 from codecov_cli.services.commit import CommitSender, create_commit_logic
@@ -21,6 +23,7 @@ def test_commit_command_with_warnings(mocker):
             pr="pr_num",
             branch="branch",
             slug="owner/repo",
+            token="token",
         )
 
     out_bytes = outstreams[0].getvalue().decode().splitlines()
@@ -35,6 +38,7 @@ def test_commit_command_with_warnings(mocker):
         pr="pr_num",
         branch="branch",
         slug="owner::::repo",
+        token="token",
     )
 
 
@@ -59,6 +63,7 @@ def test_commit_command_with_error(mocker):
             pr="pr_num",
             branch="branch",
             slug="owner/repo",
+            token="token",
         )
 
     out_bytes = outstreams[0].getvalue().decode().splitlines()
@@ -70,6 +75,7 @@ def test_commit_command_with_error(mocker):
         pr="pr_num",
         branch="branch",
         slug="owner::::repo",
+        token="token",
     )
 
 
@@ -79,7 +85,10 @@ def test_commit_sender_200(mocker):
         return_value=mocker.MagicMock(status_code=200),
     )
     sender = CommitSender()
-    res = sender.send_commit_data("commit_sha", "parent_sha", "pr", "branch", "slug")
+    token = uuid.uuid4()
+    res = sender.send_commit_data(
+        "commit_sha", "parent_sha", "pr", "branch", "slug", token
+    )
     assert res.error is None
     assert res.warnings == []
     mocked_response.assert_called_once()
@@ -91,7 +100,10 @@ def test_commit_sender_403(mocker):
         return_value=mocker.MagicMock(status_code=403, text="Permission denied"),
     )
     sender = CommitSender()
-    res = sender.send_commit_data("commit_sha", "parent_sha", "pr", "branch", "slug")
+    token = uuid.uuid4()
+    res = sender.send_commit_data(
+        "commit_sha", "parent_sha", "pr", "branch", "slug", token
+    )
     assert res.error == RequestError(
         code="HTTP Error 403",
         description="Permission denied",

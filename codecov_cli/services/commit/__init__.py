@@ -1,5 +1,6 @@
 import logging
 import typing
+import uuid
 
 from codecov_cli.helpers.encoder import encode_slug
 
@@ -14,6 +15,7 @@ def create_commit_logic(
     pr: typing.Optional[str],
     branch: typing.Optional[str],
     slug: typing.Optional[str],
+    token: uuid.UUID,
 ):
     encoded_slug = encode_slug(slug)
     sender = CommitSender()
@@ -23,6 +25,7 @@ def create_commit_logic(
         pr=pr,
         branch=branch,
         slug=encoded_slug,
+        token=token,
     )
 
     if sending_result.warnings:

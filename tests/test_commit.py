@@ -24,6 +24,7 @@ def test_commit_command_with_warnings(mocker):
             branch="branch",
             slug="owner/repo",
             token="token",
+            service="service",
         )
 
     out_bytes = outstreams[0].getvalue().decode().splitlines()
@@ -39,6 +40,7 @@ def test_commit_command_with_warnings(mocker):
         branch="branch",
         slug="owner::::repo",
         token="token",
+        service="service",
     )
 
 
@@ -64,6 +66,7 @@ def test_commit_command_with_error(mocker):
             branch="branch",
             slug="owner/repo",
             token="token",
+            service="service",
         )
 
     out_bytes = outstreams[0].getvalue().decode().splitlines()
@@ -76,6 +79,7 @@ def test_commit_command_with_error(mocker):
         branch="branch",
         slug="owner::::repo",
         token="token",
+        service="service",
     )
 
 
@@ -87,7 +91,13 @@ def test_commit_sender_200(mocker):
     sender = CommitSender()
     token = uuid.uuid4()
     res = sender.send_commit_data(
-        "commit_sha", "parent_sha", "pr", "branch", "slug", token
+        "commit_sha",
+        "parent_sha",
+        "pr",
+        "branch",
+        "slug",
+        token,
+        "service",
     )
     assert res.error is None
     assert res.warnings == []
@@ -102,7 +112,7 @@ def test_commit_sender_403(mocker):
     sender = CommitSender()
     token = uuid.uuid4()
     res = sender.send_commit_data(
-        "commit_sha", "parent_sha", "pr", "branch", "slug", token
+        "commit_sha", "parent_sha", "pr", "branch", "slug", token, "service"
     )
     assert res.error == RequestError(
         code="HTTP Error 403",

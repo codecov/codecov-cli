@@ -16,6 +16,7 @@ def create_commit_logic(
     branch: typing.Optional[str],
     slug: typing.Optional[str],
     token: uuid.UUID,
+    service: typing.Optional[str],
 ):
     encoded_slug = encode_slug(slug)
     sender = CommitSender()
@@ -26,6 +27,7 @@ def create_commit_logic(
         branch=branch,
         slug=encoded_slug,
         token=token,
+        service=service,
     )
 
     if sending_result.warnings:

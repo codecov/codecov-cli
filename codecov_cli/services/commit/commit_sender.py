@@ -17,6 +17,7 @@ class CommitSender(object):
         branch: str,
         slug: str,
         token: uuid.UUID,
+        service: str,
     ):
         data = {
             "commitid": commit_sha,
@@ -27,7 +28,9 @@ class CommitSender(object):
         headers = {"Authorization": f"token {token.hex}"}
 
         resp = requests.post(
-            f"https://codecov.io/upload/{slug}/commits", headers=headers, data=data
+            f"https://codecov.io/upload/{service}/{slug}/commits",
+            headers=headers,
+            data=data,
         )
 
         if resp.status_code >= 400:

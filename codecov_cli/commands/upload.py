@@ -112,6 +112,7 @@ def _turn_env_vars_into_dict(ctx, params, value):
 @click.option(
     "--plugin", "plugin_names", multiple=True, default=["xcode", "gcov", "pycoverage"]
 )
+@click.option("--use-new-uploader", "is_using_new_uploader", default=False)
 @click.pass_context
 def do_upload(
     ctx: click.Context,
@@ -132,6 +133,7 @@ def do_upload(
     branch: typing.Optional[str],
     slug: typing.Optional[str],
     pull_request_number: typing.Optional[str],
+    is_using_new_uploader: bool,
 ):
     versioning_system = ctx.obj["versioning_system"]
     codecov_yaml = ctx.obj["codecov_yaml"] or {}
@@ -182,4 +184,5 @@ def do_upload(
         branch=branch,
         slug=slug,
         pull_request_number=pull_request_number,
+        is_using_new_uploader=is_using_new_uploader,
     )

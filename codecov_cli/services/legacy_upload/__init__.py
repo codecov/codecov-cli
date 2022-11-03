@@ -14,7 +14,8 @@ from codecov_cli.services.legacy_upload.coverage_file_finder import (
 )
 from codecov_cli.services.legacy_upload.network_finder import select_network_finder
 from codecov_cli.services.legacy_upload.upload_collector import UploadCollector
-from codecov_cli.services.legacy_upload.upload_sender import UploadSender
+from codecov_cli.services.legacy_upload.upload_sender import LegacyUploadSender
+from codecov_cli.services.upload.upload_sender import UploadSender
 
 logger = logging.getLogger("codecovcli")
 
@@ -41,6 +42,7 @@ def do_upload_logic(
     branch: typing.Optional[str],
     slug: typing.Optional[str],
     pull_request_number: typing.Optional[str],
+    is_using_new_uploader: bool = False,
 ):
     preparation_plugins = select_preparation_plugins(cli_config, plugin_names)
     coverage_file_selector = select_coverage_file_finder(
@@ -53,7 +55,10 @@ def do_upload_logic(
         preparation_plugins, network_finder, coverage_file_selector
     )
     upload_data = collector.generate_upload_data()
-    sender = UploadSender()
+    if is_using_new_uploader:
+        sender = UploadSender()
+    else:
+        sender = LegacyUploadSender()
     service = (
         ci_adapter.get_fallback_value(FallbackFieldEnum.service)
         if ci_adapter is not None
@@ -64,6 +69,7 @@ def do_upload_logic(
         commit_sha,
         token,
         env_vars,
+        report_code,
         name,
         branch,
         slug,

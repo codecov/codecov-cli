@@ -6,6 +6,7 @@ import responses
 from responses import matchers
 
 from codecov_cli import __version__ as codecov_cli_version
+from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.services.upload.upload_sender import UploadSender
 from codecov_cli.types import UploadCollectionResult, UploadCollectionResultFileFixer
 from tests.data import reports_examples
@@ -18,7 +19,7 @@ named_upload_data = {
     "env_vars": {},
     "name": "name",
     "branch": "branch",
-    "slug": "slug",
+    "slug": "org/repo",
     "pull_request_number": "pr",
     "build_code": "build_code",
     "build_url": "build_url",
@@ -41,9 +42,10 @@ def mocked_responses():
 
 @pytest.fixture
 def mocked_legacy_upload_endpoint(mocked_responses):
+    encoded_slug = encode_slug(named_upload_data["slug"])
     resp = responses.Response(
         responses.POST,
-        f"https://codecov.io/upload/{named_upload_data['slug']}/commits/{random_sha}/reports/{named_upload_data['report_code']}/uploads",
+        f"https://codecov.io/upload/{named_upload_data['service']}/{encoded_slug}/commits/{random_sha}/reports/{named_upload_data['report_code']}/uploads",
         status=200,
         json={"raw_upload_location": "https://puturl.com"},
     )
@@ -114,9 +116,10 @@ class TestUploadSender(object):
         assert len(mocked_responses.calls) == 2
 
         post_req_made = mocked_responses.calls[0].request
+        encoded_slug = encode_slug(named_upload_data["slug"])
         assert (
             post_req_made.url
-            == f"https://codecov.io/upload/{named_upload_data['slug']}/commits/{random_sha}/reports/{named_upload_data['report_code']}/uploads"
+            == f"https://codecov.io/upload/{named_upload_data['service']}/{encoded_slug}/commits/{random_sha}/reports/{named_upload_data['report_code']}/uploads"
         )
         assert (
             post_req_made.headers.items() >= headers.items()

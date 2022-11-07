@@ -9,6 +9,7 @@ from dataclasses import dataclass
 import requests
 
 from codecov_cli import __version__ as codecov_cli_version
+from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.types import UploadCollectionResult, UploadCollectionResultFile
 
 
@@ -60,8 +61,9 @@ class UploadSender(object):
         }
 
         headers = {"Authorization": f"token {token.hex}"}
+        encoded_slug = encode_slug(slug)
         resp = requests.post(
-            f"https://codecov.io/upload/{slug}/commits/{commit_sha}/reports/{report_code}/uploads",
+            f"https://codecov.io/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads",
             headers=headers,
             data=data,
         )

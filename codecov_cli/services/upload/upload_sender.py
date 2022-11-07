@@ -64,11 +64,11 @@ class UploadSender(object):
 
         headers = {"Authorization": f"token {token.hex}"}
         encoded_slug = encode_slug(slug)
-        logger.debug(
-            f"sending requesto to https://codecov.io/upload/github/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads"
-        )
+        url = f"https://api.codecov.io/upload/github/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads"
+
+        logger.debug(f"sending request to {url}")
         resp = requests.post(
-            f"https://codecov.io/upload/github/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads",
+            url,
             headers=headers,
             data=data,
         )

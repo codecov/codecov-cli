@@ -12,6 +12,8 @@ from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.types import UploadCollectionResult, UploadCollectionResultFile
 
+logger = logging.getLogger("codecovcli")
+
 
 @dataclass
 class UploadSendingResultWarning(object):
@@ -62,6 +64,9 @@ class UploadSender(object):
 
         headers = {"Authorization": f"token {token.hex}"}
         encoded_slug = encode_slug(slug)
+        logger.debug(
+            f"sending requesto to https://codecov.io/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads"
+        )
         resp = requests.post(
             f"https://codecov.io/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads",
             headers=headers,
@@ -78,7 +83,7 @@ class UploadSender(object):
                 warnings=[],
             )
         resp_json_obj = json.loads(resp.text)
-
+        logger.debug("Got the upload location successfully")
         put_url = resp_json_obj["raw_upload_location"]
 
         reports_payload = self._generate_payload(upload_data, env_vars)

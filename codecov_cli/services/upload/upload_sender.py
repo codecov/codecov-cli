@@ -9,28 +9,12 @@ from dataclasses import dataclass
 import requests
 
 from codecov_cli import __version__ as codecov_cli_version
-from codecov_cli.types import UploadCollectionResult, UploadCollectionResultFile
-
-
-@dataclass
-class UploadSendingResultWarning(object):
-    __slots__ = ("message",)
-    message: str
-
-
-@dataclass
-class UploadSendingError(object):
-    __slots__ = ("code", "params", "description")
-    code: str
-    params: typing.Dict
-    description: str
-
-
-@dataclass
-class UploadSendingResult(object):
-    __slots__ = ("error", "warnings")
-    error: typing.Optional[UploadSendingError]
-    warnings: typing.List[UploadSendingResultWarning]
+from codecov_cli.types import (
+    RequestError,
+    RequestResult,
+    UploadCollectionResult,
+    UploadCollectionResultFile,
+)
 
 
 class UploadSender(object):
@@ -50,7 +34,7 @@ class UploadSender(object):
         job_code: typing.Optional[str] = None,
         flags: typing.List[str] = None,
         service: typing.Optional[str] = None,
-    ) -> UploadSendingResult:
+    ) -> RequestResult:
 
         data = {
             "ci_url": build_url,
@@ -67,8 +51,8 @@ class UploadSender(object):
         )
 
         if resp.status_code >= 400:
-            return UploadSendingResult(
-                error=UploadSendingError(
+            return RequestResult(
+                error=RequestError(
                     code=f"HTTP Error {resp.status_code}",
                     description=resp.text,
                     params={},
@@ -83,8 +67,8 @@ class UploadSender(object):
         resp = requests.put(put_url, data=reports_payload)
 
         if resp.status_code >= 400:
-            return UploadSendingResult(
-                error=UploadSendingError(
+            return RequestResult(
+                error=RequestError(
                     code=f"HTTP Error {resp.status_code}",
                     description=resp.text,
                     params={},
@@ -92,7 +76,7 @@ class UploadSender(object):
                 warnings=[],
             )
 
-        return UploadSendingResult(error=None, warnings=[])
+        return RequestResult(error=None, warnings=[])
 
     def _generate_payload(
         self, upload_data: UploadCollectionResult, env_vars: typing.Dict[str, str]

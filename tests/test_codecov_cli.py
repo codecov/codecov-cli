@@ -10,4 +10,5 @@ def test_existing_commands():
         "create-commit",
         "create-report",
         "do-upload",
+        "label-analysis",
     ]

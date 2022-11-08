@@ -6,6 +6,7 @@ import click
 import yaml
 
 from codecov_cli.commands.commit import create_commit
+from codecov_cli.commands.labelanalysis import label_analysis
 from codecov_cli.commands.report import create_report
 from codecov_cli.commands.upload import do_upload
 from codecov_cli.helpers.ci_adapters import get_ci_adapter
@@ -45,6 +46,7 @@ def cli(
 cli.add_command(do_upload)
 cli.add_command(create_commit)
 cli.add_command(create_report)
+cli.add_command(label_analysis)
 
 
 def run():

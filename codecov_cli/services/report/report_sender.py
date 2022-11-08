@@ -2,6 +2,7 @@ import logging
 
 import requests
 
+from codecov_cli.helpers.request import send_post_request
 from codecov_cli.types import RequestError, RequestResult
 
 logger = logging.getLogger("codecovcli")
@@ -12,31 +13,6 @@ class ReportSender(object):
         data = {"code": code}
         headers = {}
 
-        resp = requests.post(
-            f"https://codecov.io/upload/{slug}/commits/{commit_sha}/reports",
-            headers=headers,
-            data=data,
-        )
-
-        if resp.status_code >= 400:
-            logger.info(f"{resp}")
-            return RequestResult(
-                error=RequestError(
-                    code=f"HTTP Error {resp.status_code}",
-                    description=resp.text,
-                    params={},
-                ),
-                warnings=[],
-            )
-
-        logger.debug(
-            "Finished creating report process successfully",
-            extra=dict(
-                extra_log_attributes=dict(
-                    commit_sha=commit_sha,
-                    code=code,
-                    slug=slug,
-                )
-            ),
-        )
-        return RequestResult(error=None, warnings=[])
+        url = f"https://codecov.io/upload/{slug}/commits/{commit_sha}/reports"
+        resp = send_post_request(url=url, headers=headers, data=data)
+        return resp

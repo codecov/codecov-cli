@@ -38,6 +38,8 @@ def test_report_command_with_warnings(mocker):
         return_value=RequestResult(
             error=None,
             warnings=[RequestResultWarning(message="somewarningmessage")],
+            status_code=200,
+            text="",
         ),
     )
     runner = CliRunner()
@@ -71,6 +73,8 @@ def test_report_command_with_error(mocker):
                 description="Permission denied",
                 params={},
             ),
+            status_code=403,
+            text="",
             warnings=[],
         ),
     )

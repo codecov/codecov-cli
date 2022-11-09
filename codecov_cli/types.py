@@ -62,6 +62,8 @@ class RequestError(object):
 
 @dataclass
 class RequestResult(object):
-    __slots__ = ("error", "warnings")
+    __slots__ = ("error", "warnings", "status_code", "text")
     error: typing.Optional[RequestError]
     warnings: typing.List[RequestResultWarning]
+    status_code: int
+    text: str

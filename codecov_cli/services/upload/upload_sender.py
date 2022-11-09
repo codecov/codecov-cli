@@ -9,28 +9,12 @@ from dataclasses import dataclass
 import requests
 
 from codecov_cli import __version__ as codecov_cli_version
-from codecov_cli.types import UploadCollectionResult, UploadCollectionResultFile
-
-
-@dataclass
-class UploadSendingResultWarning(object):
-    __slots__ = ("message",)
-    message: str
-
-
-@dataclass
-class UploadSendingError(object):
-    __slots__ = ("code", "params", "description")
-    code: str
-    params: typing.Dict
-    description: str
-
-
-@dataclass
-class UploadSendingResult(object):
-    __slots__ = ("error", "warnings")
-    error: typing.Optional[UploadSendingError]
-    warnings: typing.List[UploadSendingResultWarning]
+from codecov_cli.helpers.request import send_post_request, send_put_request
+from codecov_cli.types import (
+    RequestResult,
+    UploadCollectionResult,
+    UploadCollectionResultFile,
+)
 
 
 class UploadSender(object):
@@ -50,7 +34,7 @@ class UploadSender(object):
         job_code: typing.Optional[str] = None,
         flags: typing.List[str] = None,
         service: typing.Optional[str] = None,
-    ) -> UploadSendingResult:
+    ) -> RequestResult:
 
         data = {
             "ci_url": build_url,
@@ -60,39 +44,17 @@ class UploadSender(object):
         }
 
         headers = {"Authorization": f"token {token.hex}"}
-        resp = requests.post(
-            f"https://codecov.io/upload/{slug}/commits/{commit_sha}/reports/{report_code}/uploads",
-            headers=headers,
-            data=data,
-        )
+        url = f"https://codecov.io/upload/{slug}/commits/{commit_sha}/reports/{report_code}/uploads"
+        resp = send_post_request(url=url, data=data, headers=headers)
 
         if resp.status_code >= 400:
-            return UploadSendingResult(
-                error=UploadSendingError(
-                    code=f"HTTP Error {resp.status_code}",
-                    description=resp.text,
-                    params={},
-                ),
-                warnings=[],
-            )
+            return resp
+
         resp_json_obj = json.loads(resp.text)
-
         put_url = resp_json_obj["raw_upload_location"]
-
         reports_payload = self._generate_payload(upload_data, env_vars)
-        resp = requests.put(put_url, data=reports_payload)
-
-        if resp.status_code >= 400:
-            return UploadSendingResult(
-                error=UploadSendingError(
-                    code=f"HTTP Error {resp.status_code}",
-                    description=resp.text,
-                    params={},
-                ),
-                warnings=[],
-            )
-
-        return UploadSendingResult(error=None, warnings=[])
+        resp = send_put_request(put_url, data=reports_payload)
+        return resp
 
     def _generate_payload(
         self, upload_data: UploadCollectionResult, env_vars: typing.Dict[str, str]

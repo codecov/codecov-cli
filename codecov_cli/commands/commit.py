@@ -49,6 +49,12 @@ logger = logging.getLogger("codecovcli")
     type=click.UUID,
     envvar="CODECOV_TOKEN",
 )
+@click.option(
+    "--service",
+    cls=CodecovOption,
+    fallback_field=FallbackFieldEnum.service,
+    help="Specify the service provider of the repo e.g. github",
+)
 @click.pass_context
 def create_commit(
     ctx,
@@ -58,6 +64,7 @@ def create_commit(
     branch: typing.Optional[str],
     slug: typing.Optional[str],
     token: typing.Optional[uuid.UUID],
+    service: typing.Optional[str],
 ):
     logger.debug(
         "Starting create commit process",
@@ -69,7 +76,8 @@ def create_commit(
                 branch=branch,
                 slug=slug,
                 token=token,
+                service=service,
             )
         ),
     )
-    create_commit_logic(commit_sha, parent_sha, pr, branch, slug, token)
+    create_commit_logic(commit_sha, parent_sha, pr, branch, slug, token, service)

@@ -25,6 +25,7 @@ def test_commit_command_with_warnings(mocker):
             branch="branch",
             slug="owner/repo",
             token="token",
+            service="service",
         )
 
     out_bytes = outstreams[0].getvalue().decode().splitlines()
@@ -40,6 +41,7 @@ def test_commit_command_with_warnings(mocker):
         branch="branch",
         slug="owner::::repo",
         token="token",
+        service="service",
     )
 
 
@@ -66,6 +68,7 @@ def test_commit_command_with_error(mocker):
             branch="branch",
             slug="owner/repo",
             token="token",
+            service="service",
         )
 
     out_bytes = outstreams[0].getvalue().decode().splitlines()
@@ -78,6 +81,7 @@ def test_commit_command_with_error(mocker):
         branch="branch",
         slug="owner::::repo",
         token="token",
+        service="service",
     )
 
 
@@ -87,7 +91,9 @@ def test_commit_sender_200(mocker):
         return_value=mocker.MagicMock(status_code=200),
     )
     token = uuid.uuid4()
-    res = send_commit_data("commit_sha", "parent_sha", "pr", "branch", "slug", token)
+    res = send_commit_data(
+        "commit_sha", "parent_sha", "pr", "branch", "slug", token, "service"
+    )
     assert res.error is None
     assert res.warnings == []
     mocked_response.assert_called_once()
@@ -99,7 +105,9 @@ def test_commit_sender_403(mocker):
         return_value=mocker.MagicMock(status_code=403, text="Permission denied"),
     )
     token = uuid.uuid4()
-    res = send_commit_data("commit_sha", "parent_sha", "pr", "branch", "slug", token)
+    res = send_commit_data(
+        "commit_sha", "parent_sha", "pr", "branch", "slug", token, "service"
+    )
     assert res.error == RequestError(
         code="HTTP Error 403",
         description="Permission denied",

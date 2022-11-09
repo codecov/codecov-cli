@@ -15,6 +15,7 @@ def create_commit_logic(
     branch: typing.Optional[str],
     slug: typing.Optional[str],
     token: uuid.UUID,
+    service: typing.Optional[str],
 ):
     encoded_slug = encode_slug(slug)
     sending_result = send_commit_data(
@@ -24,6 +25,7 @@ def create_commit_logic(
         branch=branch,
         slug=encoded_slug,
         token=token,
+        service=service,
     )
 
     if sending_result.warnings:
@@ -39,7 +41,7 @@ def create_commit_logic(
     return sending_result
 
 
-def send_commit_data(commit_sha, parent_sha, pr, branch, slug, token):
+def send_commit_data(commit_sha, parent_sha, pr, branch, slug, token, service):
     data = {
         "commitid": commit_sha,
         "parent_commit_id": parent_sha,
@@ -47,5 +49,5 @@ def send_commit_data(commit_sha, parent_sha, pr, branch, slug, token):
         "branch": branch,
     }
     headers = {"Authorization": f"token {token.hex}"}
-    url = f"https://codecov.io/upload/{slug}/commits"
+    url = f"https://api.codecov.io/upload/{service}/{slug}/commits"
     return send_post_request(url=url, data=data, headers=headers)

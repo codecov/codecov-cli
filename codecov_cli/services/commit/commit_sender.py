@@ -27,7 +27,9 @@ class CommitSender(object):
         headers = {"Authorization": f"token {token.hex}"}
 
         resp = requests.post(
-            f"https://codecov.io/upload/{slug}/commits", headers=headers, data=data
+            f"https://api.codecov.io/upload/github/{slug}/commits",
+            headers=headers,
+            data=data,
         )
 
         if resp.status_code >= 400:

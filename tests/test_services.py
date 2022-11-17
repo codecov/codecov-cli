@@ -1,8 +1,8 @@
 from click.testing import CliRunner
 
 from codecov_cli.services.legacy_upload import (
+    LegacyUploadSender,
     UploadCollector,
-    UploadSender,
     do_upload_logic,
 )
 from codecov_cli.services.legacy_upload.upload_sender import (
@@ -25,7 +25,7 @@ def test_do_upload_logic_happy_path(mocker):
         UploadCollector, "generate_upload_data"
     )
     mock_send_upload_data = mocker.patch.object(
-        UploadSender,
+        LegacyUploadSender,
         "send_upload_data",
         return_value=UploadSendingResult(
             error=None,
@@ -65,7 +65,7 @@ def test_do_upload_logic_happy_path(mocker):
         "info: Upload process had 1 warning",
         "warning: Warning 1: somewarningmessage",
     ]
-    assert res == UploadSender.send_upload_data.return_value
+    assert res == LegacyUploadSender.send_upload_data.return_value
     mock_select_preparation_plugins.assert_called_with(
         cli_config, ["first_plugin", "another", "forth"]
     )
@@ -77,6 +77,7 @@ def test_do_upload_logic_happy_path(mocker):
         "commit_sha",
         "token",
         None,
+        "report_code",
         "name",
         "branch",
         "slug",

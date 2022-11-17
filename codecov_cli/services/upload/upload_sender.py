@@ -9,6 +9,7 @@ from dataclasses import dataclass
 import requests
 
 from codecov_cli import __version__ as codecov_cli_version
+from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.helpers.request import send_post_request, send_put_request
 from codecov_cli.types import (
     RequestResult,
@@ -23,8 +24,8 @@ class UploadSender(object):
         upload_data: UploadCollectionResult,
         commit_sha: str,
         token: uuid.UUID,
-        report_code: str,
         env_vars: typing.Dict[str, str],
+        report_code: str,
         name: typing.Optional[str] = None,
         branch: typing.Optional[str] = None,
         slug: typing.Optional[str] = None,
@@ -44,7 +45,8 @@ class UploadSender(object):
         }
 
         headers = {"Authorization": f"token {token.hex}"}
-        url = f"https://codecov.io/upload/{slug}/commits/{commit_sha}/reports/{report_code}/uploads"
+        encoded_slug = encode_slug(slug)
+        url = f"https://api.codecov.io/upload/github/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads"
         resp = send_post_request(url=url, data=data, headers=headers)
 
         if resp.status_code >= 400:

@@ -29,13 +29,14 @@ class UploadSendingResult(object):
     warnings: typing.List[UploadSendingResultWarning]
 
 
-class UploadSender(object):
+class LegacyUploadSender(object):
     def send_upload_data(
         self,
         upload_data: UploadCollectionResult,
         commit_sha: str,
         token: uuid.UUID,
         env_vars: typing.Dict[str, str],
+        report_code: str = None,
         name: typing.Optional[str] = None,
         branch: typing.Optional[str] = None,
         slug: typing.Optional[str] = None,

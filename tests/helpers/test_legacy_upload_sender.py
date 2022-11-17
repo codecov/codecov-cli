@@ -6,7 +6,7 @@ import responses
 from responses import matchers
 
 from codecov_cli import __version__ as codecov_cli_version
-from codecov_cli.services.legacy_upload.upload_sender import UploadSender
+from codecov_cli.services.legacy_upload.upload_sender import LegacyUploadSender
 from codecov_cli.types import UploadCollectionResult
 from tests.data import reports_examples
 
@@ -72,7 +72,7 @@ class TestUploadSender(object):
             matchers.header_matcher(headers),
         ]
 
-        sending_result = UploadSender().send_upload_data(
+        sending_result = LegacyUploadSender().send_upload_data(
             upload_collection, random_sha, random_token, {}, **named_upload_data
         )
         assert sending_result.error is None
@@ -90,7 +90,7 @@ class TestUploadSender(object):
     def test_upload_sender_put_called_with_right_parameters(
         self, mocked_responses, mocked_legacy_upload_endpoint, mocked_storage_server
     ):
-        sending_result = UploadSender().send_upload_data(
+        sending_result = LegacyUploadSender().send_upload_data(
             upload_collection, random_sha, random_token, {}, **named_upload_data
         )
         assert sending_result.error is None
@@ -104,7 +104,7 @@ class TestUploadSender(object):
     def test_upload_sender_result_success(
         self, mocked_responses, mocked_legacy_upload_endpoint, mocked_storage_server
     ):
-        sender = UploadSender().send_upload_data(
+        sender = LegacyUploadSender().send_upload_data(
             upload_collection, random_sha, random_token, {}, **named_upload_data
         )
 
@@ -118,7 +118,7 @@ class TestUploadSender(object):
     ):
         mocked_legacy_upload_endpoint.status = 400
 
-        sender = UploadSender().send_upload_data(
+        sender = LegacyUploadSender().send_upload_data(
             upload_collection, random_sha, random_token, {}, **named_upload_data
         )
 
@@ -133,7 +133,7 @@ class TestUploadSender(object):
     ):
         mocked_storage_server.status = 400
 
-        sender = UploadSender().send_upload_data(
+        sender = LegacyUploadSender().send_upload_data(
             upload_collection, random_sha, random_token, {}, **named_upload_data
         )
 
@@ -151,7 +151,7 @@ class TestUploadSender(object):
         mocked_legacy_upload_endpoint.body = "Invalid request parameters"
         mocked_legacy_upload_endpoint.status = 400
 
-        sender = UploadSender().send_upload_data(
+        sender = LegacyUploadSender().send_upload_data(
             upload_collection, random_sha, random_token, {}, **named_upload_data
         )
 
@@ -171,7 +171,9 @@ class TestPayloadGeneration(object):
 
         env_vars = {"var1": "value1", "var2": "value2", "var3": None, "abc": "valbc"}
 
-        actual_lines = UploadSender()._generate_env_vars_section(env_vars).split(b"\n")
+        actual_lines = (
+            LegacyUploadSender()._generate_env_vars_section(env_vars).split(b"\n")
+        )
         assert terminator in actual_lines
 
         # lines might not be in the same order since env_vars is a dict. lines' order doesn't matter, only last (non-empty) line must be terminator
@@ -191,7 +193,7 @@ class TestPayloadGeneration(object):
 
     def test_generate_env_vars_section_empty_result(self):
         env_vars = {"var1": None}
-        assert UploadSender()._generate_env_vars_section(env_vars) == b""
+        assert LegacyUploadSender()._generate_env_vars_section(env_vars) == b""
 
     def test_generate_network_section(self):
         network_files = [
@@ -220,7 +222,9 @@ class TestPayloadGeneration(object):
 
         upload_data = UploadCollectionResult(network_files, [], [])
 
-        actual_network_section = UploadSender()._generate_network_section(upload_data)
+        actual_network_section = LegacyUploadSender()._generate_network_section(
+            upload_data
+        )
 
         assert [line.strip() for line in expected_network_section.split(b"\n")] == [
             line for line in actual_network_section.split(b"\n")
@@ -228,7 +232,9 @@ class TestPayloadGeneration(object):
 
     def test_generate_network_section_empty_result(self):
         assert (
-            UploadSender()._generate_network_section(UploadCollectionResult([], [], []))
+            LegacyUploadSender()._generate_network_section(
+                UploadCollectionResult([], [], [])
+            )
             == b""
         )
 
@@ -249,7 +255,7 @@ class TestPayloadGeneration(object):
         fake_result_file.get_content.return_value = coverage_file_seperated[1][
             : -len(b"\n<<<<<< EOF\n")
         ]
-        actual_coverage_file_section = UploadSender()._format_coverage_file(
+        actual_coverage_file_section = LegacyUploadSender()._format_coverage_file(
             fake_result_file
         )
 
@@ -261,7 +267,7 @@ class TestPayloadGeneration(object):
     def test_generate_coverage_files_section(self, mocker):
 
         mocker.patch(
-            "codecov_cli.services.legacy_upload.UploadSender._format_coverage_file",
+            "codecov_cli.services.legacy_upload.LegacyUploadSender._format_coverage_file",
             side_effect=lambda file_bytes: file_bytes,
         )
 
@@ -272,7 +278,7 @@ class TestPayloadGeneration(object):
             reports_examples.coverage_file_section_simple,
         ]
 
-        actual_section = UploadSender()._generate_coverage_files_section(
+        actual_section = LegacyUploadSender()._generate_coverage_files_section(
             UploadCollectionResult([], coverage_files, [])
         )
 
@@ -282,18 +288,18 @@ class TestPayloadGeneration(object):
 
     def test_generate_payload_overall(self, mocker):
         mocker.patch(
-            "codecov_cli.services.legacy_upload.UploadSender._generate_env_vars_section",
+            "codecov_cli.services.legacy_upload.LegacyUploadSender._generate_env_vars_section",
             return_value=reports_examples.env_section,
         )
         mocker.patch(
-            "codecov_cli.services.legacy_upload.UploadSender._generate_network_section",
+            "codecov_cli.services.legacy_upload.LegacyUploadSender._generate_network_section",
             return_value=reports_examples.network_section,
         )
         mocker.patch(
-            "codecov_cli.services.legacy_upload.UploadSender._generate_coverage_files_section",
+            "codecov_cli.services.legacy_upload.LegacyUploadSender._generate_coverage_files_section",
             return_value=reports_examples.coverage_file_section_simple,
         )
 
-        actual_report = UploadSender()._generate_payload(None, None)
+        actual_report = LegacyUploadSender()._generate_payload(None, None)
 
         assert actual_report == reports_examples.env_network_coverage_sections

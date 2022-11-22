@@ -3,8 +3,7 @@ import typing
 import uuid
 
 from codecov_cli.helpers.encoder import encode_slug
-
-from .commit_sender import CommitSender
+from codecov_cli.helpers.request import send_post_request
 
 logger = logging.getLogger("codecovcli")
 
@@ -16,16 +15,17 @@ def create_commit_logic(
     branch: typing.Optional[str],
     slug: typing.Optional[str],
     token: uuid.UUID,
+    service: typing.Optional[str],
 ):
     encoded_slug = encode_slug(slug)
-    sender = CommitSender()
-    sending_result = sender.send_commit_data(
+    sending_result = send_commit_data(
         commit_sha=commit_sha,
         parent_sha=parent_sha,
         pr=pr,
         branch=branch,
         slug=encoded_slug,
         token=token,
+        service=service,
     )
 
     if sending_result.warnings:
@@ -39,3 +39,15 @@ def create_commit_logic(
     if sending_result.error is not None:
         logger.error(f"Commit creating failed: {sending_result.error.description}")
     return sending_result
+
+
+def send_commit_data(commit_sha, parent_sha, pr, branch, slug, token, service):
+    data = {
+        "commitid": commit_sha,
+        "parent_commit_id": parent_sha,
+        "pullid": pr,
+        "branch": branch,
+    }
+    headers = {"Authorization": f"token {token.hex}"}
+    url = f"https://api.codecov.io/upload/{service}/{slug}/commits"
+    return send_post_request(url=url, data=data, headers=headers)

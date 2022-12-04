@@ -57,3 +57,39 @@ jobs:
       run: |
         pip install codecov
         codecov -t ${{ secrets.CODECOV_TOKEN }} -F python${{ matrix.python-version }}
+
+
+  create_release:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build executable with pyinstaller 
+      run: |
+        pip install pyinstaller
+        pyinstaller -F codecov_cli/main.py
+    - name: read version
+      id: get_version
+      run: |
+        version=$(python setup.py --version)
+        echo "version=$version"
+        echo "version=$version" >> $GITHUB_OUTPUT
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ steps.get_version.outputs.version }}
+        release_name: Release v${{ steps.get_version.outputs.version }}
+        draft: true
+    - name: Upload release assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_name: pyinstaller-main-v${{ steps.get_version.outputs.version }}
+        asset_path: ./dist/main
+        asset_content_type: application/octet-stream
+    

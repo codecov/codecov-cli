@@ -51,3 +51,7 @@ cli.add_command(get_report_results)
 
 def run():
     cli(obj={})
+
+
+if __name__ == "__main__":
+    run()

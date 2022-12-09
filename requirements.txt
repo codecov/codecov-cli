@@ -6,7 +6,7 @@
 #
 attrs==21.4.0
     # via pytest
-certifi==2022.6.15
+certifi==2022.12.7
     # via requests
 charset-normalizer==2.1.0
     # via requests
@@ -42,9 +42,7 @@ requests==2.28.1
 responses==0.21.0
     # via -r requirements.in
 tomli==2.0.1
-    # via
-    #   coverage
-    #   pytest
+    # via pytest
 urllib3==1.26.10
     # via
     #   requests

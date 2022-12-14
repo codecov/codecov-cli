@@ -6,9 +6,9 @@ import click
 import yaml
 
 from codecov_cli.commands.commit import create_commit
+from codecov_cli.commands.create_report_result import create_report_results
 from codecov_cli.commands.get_report_results import get_report_results
 from codecov_cli.commands.report import create_report
-from codecov_cli.commands.create_report_result import create_report_results
 from codecov_cli.commands.upload import do_upload
 from codecov_cli.helpers.ci_adapters import get_ci_adapter
 from codecov_cli.helpers.logging_utils import configure_logger

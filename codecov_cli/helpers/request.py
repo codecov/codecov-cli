@@ -1,4 +1,5 @@
 import logging
+
 import requests
 
 from codecov_cli.types import RequestError, RequestResult

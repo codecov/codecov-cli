@@ -1,12 +1,12 @@
-from unittest.mock import patch
 import uuid
+from unittest.mock import patch
 
 from click.testing import CliRunner
 
 from codecov_cli.services.report import (
     create_report_results_logic,
-    send_reports_result_request,
     send_reports_result_get_request,
+    send_reports_result_request,
 )
 from codecov_cli.types import RequestError, RequestResult, RequestResultWarning
 

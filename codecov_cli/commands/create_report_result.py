@@ -4,7 +4,7 @@ import uuid
 import click
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
-from codecov_cli.services.report import get_report_results_logic
+from codecov_cli.services.report import create_report_results_logic
 
 logger = logging.getLogger("codecovcli")
 
@@ -42,7 +42,7 @@ logger = logging.getLogger("codecovcli")
     envvar="CODECOV_TOKEN",
 )
 @click.pass_context
-def get_report_results(
+def create_report_results(
     ctx,
     commit_sha: str,
     code: str,
@@ -51,11 +51,11 @@ def get_report_results(
     token: uuid.UUID,
 ):
     logger.debug(
-        "Getting report results",
+        "Creating report results",
         extra=dict(
             extra_log_attributes=dict(
                 commit_sha=commit_sha, code=code, slug=slug, service=service
             )
         ),
     )
-    get_report_results_logic(commit_sha, code, slug, service, token)
+    create_report_results_logic(commit_sha, code, slug, service, token)

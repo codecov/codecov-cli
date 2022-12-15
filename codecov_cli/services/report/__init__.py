@@ -92,7 +92,7 @@ def send_reports_result_get_request(
             logger.info(response_content.get("result")["message"])
             return response_obj
         else:
-            logger.info("Please try again later.")
+            logger.error("Please try again later.")
             return response_obj
         time.sleep(5)
         time_elapsed += 5

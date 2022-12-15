@@ -174,6 +174,24 @@ def test_get_report_results_200_error(mocker, capsys):
     )
 
 
+def test_get_report_results_200_undefined_state(mocker, capsys):
+    mocked_response = mocker.patch(
+        "codecov_cli.services.report.requests.get",
+        return_value=mocker.MagicMock(
+            status_code=200, text='{"state": "undefined_state", "result": {}}'
+        ),
+    )
+    token = uuid.uuid4()
+    res = send_reports_result_get_request(
+        "commit_sha", "report_code", "encoded_slug", "service", token
+    )
+    output = capsys.readouterr().err.splitlines()
+    assert res.error is None
+    assert res.warnings == []
+    mocked_response.assert_called_once()
+    assert "error: Please try again later." in output
+
+
 def test_get_report_results_401(mocker, capsys):
     mocked_response = mocker.patch(
         "codecov_cli.services.report.requests.get",

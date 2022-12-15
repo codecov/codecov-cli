@@ -8,7 +8,7 @@ import requests
 
 from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.helpers.request import (
-    log_warnings_and_errors,
+    log_warnings_and_errors_if_any,
     request_result,
     send_post_request,
 )
@@ -32,16 +32,7 @@ def create_report_logic(
         slug=encoded_slug,
     )
 
-    if sending_result.warnings:
-        number_warnings = len(sending_result.warnings)
-        pluralization = "s" if number_warnings > 1 else ""
-        logger.info(
-            f"Report creating process had {number_warnings} warning{pluralization}",
-        )
-        for ind, w in enumerate(sending_result.warnings):
-            logger.warning(f"Warning {ind + 1}: {w.message}")
-    if sending_result.error is not None:
-        logger.error(f"Report creating failed: {sending_result.error.description}")
+    log_warnings_and_errors_if_any(sending_result, "Report creating")
     return sending_result
 
 
@@ -57,18 +48,7 @@ def create_report_results_logic(
         token=token,
     )
 
-    if sending_result.warnings:
-        number_warnings = len(sending_result.warnings)
-        pluralization = "s" if number_warnings > 1 else ""
-        logger.info(
-            f"Report results creating process had {number_warnings} warning{pluralization}",
-        )
-        for ind, w in enumerate(sending_result.warnings):
-            logger.warning(f"Warning {ind + 1}: {w.message}")
-    if sending_result.error is not None:
-        logger.error(
-            f"Report results creating failed: {sending_result.error.description}"
-        )
+    log_warnings_and_errors_if_any(sending_result, "Report results creating")
     return sending_result
 
 
@@ -91,7 +71,7 @@ def send_reports_result_get_request(
 
         # if response_status is 400 and higher
         if response_obj.error:
-            log_warnings_and_errors(response_obj, "Getting report results")
+            log_warnings_and_errors_if_any(response_obj, "Getting report results")
             return response_obj
 
         state = response_content.get("state")

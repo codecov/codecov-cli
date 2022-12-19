@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 import click
 
@@ -27,16 +28,32 @@ logger = logging.getLogger("codecovcli")
     envvar="CODECOV_SLUG",
     required=True,
 )
+@click.option(
+    "--service",
+    help="Git service provider, e.g. github",
+    cls=CodecovOption,
+    fallback_field=FallbackFieldEnum.service,
+)
+@click.option(
+    "-t",
+    "--token",
+    help="Codecov upload token",
+    type=click.UUID,
+    envvar="CODECOV_TOKEN",
+)
 @click.pass_context
-def create_report(ctx, commit_sha: str, code: str, slug: str):
+def create_report(
+    ctx, commit_sha: str, code: str, slug: str, service: str, token: uuid.UUID
+):
     logger.debug(
         "Starting create report process",
         extra=dict(
             extra_log_attributes=dict(
-                commit_sha=commit_sha,
-                code=code,
-                slug=slug,
+                commit_sha=commit_sha, code=code, slug=slug, service=service
             )
         ),
     )
-    create_report_logic(commit_sha, code, slug)
+    res = create_report_logic(commit_sha, code, slug, service, token)
+    if not res.error:
+        logger.info("Finished creating report successfully")
+        logger.info(res.text)

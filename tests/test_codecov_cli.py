@@ -11,4 +11,5 @@ def test_existing_commands():
         "create-report",
         "do-upload",
         "get-report-results",
+        "pr-base-picking",
     ]

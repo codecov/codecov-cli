@@ -5,6 +5,7 @@ import typing
 import click
 import yaml
 
+from codecov_cli.commands.base_picking import pr_base_picking
 from codecov_cli.commands.commit import create_commit
 from codecov_cli.commands.report import create_report
 from codecov_cli.commands.report_result import get_report_results
@@ -47,6 +48,7 @@ cli.add_command(do_upload)
 cli.add_command(create_commit)
 cli.add_command(create_report)
 cli.add_command(get_report_results)
+cli.add_command(pr_base_picking)
 
 
 def run():

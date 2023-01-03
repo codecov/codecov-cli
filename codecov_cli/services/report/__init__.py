@@ -32,7 +32,7 @@ def create_report_logic(
 def send_create_report_request(commit_sha, code, service, token, encoded_slug):
     data = {"code": code}
     headers = {"Authorization": f"token {token.hex}"}
-    url = f"http://localhost:8000/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports"
+    url = f"https://api.codecov.io/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports"
     return send_post_request(url=url, headers=headers, data=data)
 
 

@@ -55,5 +55,7 @@ def create_report(
     )
     res = create_report_logic(commit_sha, code, slug, service, token)
     if not res.error:
-        logger.info("Finished creating report successfully")
-        logger.info(res.text)
+        logger.info(
+            "Finished creating report successfully",
+            extra=dict(extra_log_attributes=dict(response=res.text)),
+        )

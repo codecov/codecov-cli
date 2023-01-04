@@ -82,7 +82,7 @@ def send_reports_result_get_request(
                     extra_log_attributes=dict(
                         response_status_code=response_obj.status_code,
                         state=response_content.get("state"),
-                        result = response_content.get("result")
+                        result=response_content.get("result"),
                     )
                 ),
             )

@@ -129,9 +129,8 @@ def test_get_report_results_200_completed(mocker, capsys):
     assert res.error is None
     assert res.warnings == []
     mocked_response.assert_called_once()
-    assert "info: Finished processing report results" in output
-    assert "info: failure" in output
-    assert "info: 33.33% of diff hit (target 77.77%)" in output
+    assert 'info: Finished processing report results --- {"state": "failure", "message": "33.33% of diff hit (target 77.77%)"}' in output
+
 
 
 @patch("codecov_cli.services.report.MAX_TIME_FRAME", 5)
@@ -169,7 +168,7 @@ def test_get_report_results_200_error(mocker, capsys):
     assert res.warnings == []
     mocked_response.assert_called_once()
     assert (
-        "error: An error occured while processing the report. Please try again later."
+        'error: An error occured while processing the report. Please try again later. --- {"response_status_code": 200, "state": "error", "result": {}}'
         in output
     )
 

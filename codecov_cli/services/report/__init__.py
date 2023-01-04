@@ -79,17 +79,26 @@ def send_reports_result_get_request(
             logger.error(
                 "An error occured while processing the report. Please try again later.",
                 extra=dict(
-                    response_status_code=response_obj.status_code,
-                    text=response_obj.text,
+                    extra_log_attributes=dict(
+                        response_status_code=response_obj.status_code,
+                        state=response_content.get("state"),
+                        result = response_content.get("result")
+                    )
                 ),
             )
             return response_obj
         elif state == "pending":
             logger.info("Report with the given code is still being processed.")
         elif state == "completed":
-            logger.info("Finished processing report results")
-            logger.info(response_content.get("result")["state"])
-            logger.info(response_content.get("result")["message"])
+            logger.info(
+                "Finished processing report results",
+                extra=dict(
+                    extra_log_attributes=dict(
+                        state=response_content.get("result")["state"],
+                        message=response_content.get("result")["message"],
+                    )
+                ),
+            )
             return response_obj
         else:
             logger.error("Please try again later.")

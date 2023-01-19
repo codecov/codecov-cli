@@ -13,27 +13,27 @@ from codecov_cli.helpers.request import (
     send_post_request,
 )
 
-from .report_sender import ReportSender
 
 logger = logging.getLogger("codecovcli")
 MAX_TIME_FRAME = 60
 
 
 def create_report_logic(
-    commit_sha: str,
-    code: str,
-    slug: str,
+    commit_sha: str, code: str, slug: str, service: str, token: uuid.UUID
 ):
     encoded_slug = encode_slug(slug)
-    sender = ReportSender()
-    sending_result = sender.send_report_data(
-        commit_sha=commit_sha,
-        code=code,
-        slug=encoded_slug,
+    sending_result = send_create_report_request(
+        commit_sha, code, service, token, encoded_slug
     )
-
     log_warnings_and_errors_if_any(sending_result, "Report creating")
     return sending_result
+
+
+def send_create_report_request(commit_sha, code, service, token, encoded_slug):
+    data = {"code": code}
+    headers = {"Authorization": f"token {token.hex}"}
+    url = f"https://api.codecov.io/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports"
+    return send_post_request(url=url, headers=headers, data=data)
 
 
 def create_report_results_logic(
@@ -54,7 +54,7 @@ def create_report_results_logic(
 
 def send_reports_result_request(commit_sha, report_code, encoded_slug, service, token):
     headers = {"Authorization": f"token {token.hex}"}
-    url = f"https://codecov.io/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/results"
+    url = f"https://api.codecov.io/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/results"
     return send_post_request(url=url, headers=headers)
 
 
@@ -62,7 +62,7 @@ def send_reports_result_get_request(
     commit_sha, report_code, encoded_slug, service, token
 ):
     headers = {"Authorization": f"token {token.hex}"}
-    url = f"https://codecov.io/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/results"
+    url = f"https://api.codecov.io/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/results"
     time_elapsed = 0
     while time_elapsed < MAX_TIME_FRAME:
         resp = requests.get(url=url, headers=headers)

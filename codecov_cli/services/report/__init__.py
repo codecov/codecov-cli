@@ -14,7 +14,7 @@ from codecov_cli.helpers.request import (
 )
 
 logger = logging.getLogger("codecovcli")
-MAX_TIME_FRAME = 60
+MAX_NUMBER_TRIES = 3
 
 
 def create_report_logic(
@@ -62,8 +62,8 @@ def send_reports_result_get_request(
 ):
     headers = {"Authorization": f"token {token.hex}"}
     url = f"https://api.codecov.io/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/results"
-    time_elapsed = 0
-    while time_elapsed < MAX_TIME_FRAME:
+    number_tries = 0
+    while number_tries < MAX_NUMBER_TRIES:
         resp = requests.get(url=url, headers=headers)
         response_obj = request_result(resp)
         response_content = json.loads(response_obj.text)
@@ -73,7 +73,7 @@ def send_reports_result_get_request(
             log_warnings_and_errors_if_any(response_obj, "Getting report results")
             return response_obj
 
-        state = response_content.get("state")
+        state = response_content.get("state").lower()
         if state == "error":
             logger.error(
                 "An error occured while processing the report. Please try again later.",
@@ -103,5 +103,5 @@ def send_reports_result_get_request(
             logger.error("Please try again later.")
             return response_obj
         time.sleep(5)
-        time_elapsed += 5
+        number_tries += 1
     return response_obj

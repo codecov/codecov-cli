@@ -135,7 +135,7 @@ def test_get_report_results_200_completed(mocker, capsys):
     )
 
 
-@patch("codecov_cli.services.report.MAX_TIME_FRAME", 5)
+@patch("codecov_cli.services.report.MAX_NUMBER_TRIES", 1)
 def test_get_report_results_200_pending(mocker, capsys):
     mocked_response = mocker.patch(
         "codecov_cli.services.report.requests.get",

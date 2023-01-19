@@ -13,7 +13,6 @@ from codecov_cli.helpers.request import (
     send_post_request,
 )
 
-
 logger = logging.getLogger("codecovcli")
 MAX_TIME_FRAME = 60
 

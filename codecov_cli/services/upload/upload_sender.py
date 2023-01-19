@@ -1,14 +1,10 @@
 import base64
 import json
-import logging
 import typing
 import uuid
 import zlib
-from dataclasses import dataclass
+from typing import Any, Dict
 
-import requests
-
-from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.helpers.request import send_post_request, send_put_request
 from codecov_cli.types import (
@@ -74,8 +70,33 @@ class UploadSender(object):
         json_data = json.dumps(payload)
         return json_data.encode()
 
-    def _get_file_fixers(self, upload_data: UploadCollectionResult):
-        return [str(file_fixer.path) for file_fixer in upload_data.file_fixes]
+    def _get_file_fixers(
+        self, upload_data: UploadCollectionResult
+    ) -> Dict[str, Dict[str, Any]]:
+        """
+        Returns file/path fixes in the following format:
+
+        {
+            {path}: {
+                "eof": int(eof_line),
+                "lines": {set_of_lines},
+            },
+        }
+        """
+        file_fixers = {}
+        for file_fixer in upload_data.file_fixes:
+            fixed_lines_with_reason = set(
+                [fixer[0] for fixer in file_fixer.fixed_lines_with_reason]
+            )
+            total_fixed_lines = list(
+                file_fixer.fixed_lines_without_reason.union(fixed_lines_with_reason)
+            )
+            file_fixers[file_fixer.path] = {
+                "eof": file_fixer.eof,
+                "lines": total_fixed_lines,
+            }
+
+        return file_fixers
 
     def _get_coverage_files(self, upload_data: UploadCollectionResult):
         return [self._format_coverage_file(file) for file in upload_data.coverage_files]

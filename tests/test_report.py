@@ -1,4 +1,5 @@
 import uuid
+
 from click.testing import CliRunner
 
 from codecov_cli.services.report import create_report_logic, send_create_report_request

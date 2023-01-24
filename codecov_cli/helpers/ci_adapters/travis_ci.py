@@ -10,7 +10,7 @@ class TravisCIAdapter(CIAdapterBase):
         return os.getenv("TRAVIS_PULL_REQUEST_SHA") or os.getenv("TRAVIS_COMMIT")
 
     def _get_build_url(self):
-        return None
+        return os.getenv("TRAVIS_BUILD_WEB_URL")
 
     def _get_build_code(self):
         return os.getenv("TRAVIS_JOB_NUMBER")
@@ -19,7 +19,9 @@ class TravisCIAdapter(CIAdapterBase):
         return os.getenv("TRAVIS_JOB_ID")
 
     def _get_pull_request_number(self):
-        return os.getenv("TRAVIS_PULL_REQUEST")
+        # The pull request number if the current job is a pull request, “false” if it’s not a pull request.
+        pr_num = os.getenv("TRAVIS_PULL_REQUEST")
+        return pr_num if pr_num != "false" else None
 
     def _get_slug(self):
         return os.getenv("TRAVIS_REPO_SLUG")

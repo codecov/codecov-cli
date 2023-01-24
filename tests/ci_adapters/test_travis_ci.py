@@ -83,6 +83,7 @@ class TestTravisCIAdapter(object):
         [
             ({}, None),
             ({TravisEnvEnum.TRAVIS_PULL_REQUEST: "123"}, "123"),
+            ({TravisEnvEnum.TRAVIS_PULL_REQUEST: "false"}, None),
         ],
     )
     def test_pull_request_number(self, env_dict, expected, mocker):

@@ -1,11 +1,7 @@
-import os
-from enum import Enum
-
-import pytest
-
-from codecov_cli.fallbacks import FallbackFieldEnum
 from codecov_cli.helpers.ci_adapters import (
     AppveyorCIAdapter,
+    BitbucketAdapter,
+    BitriseCIAdapter,
     CircleCICIAdapter,
     GithubActionsCIAdapter,
     GitlabCIAdapter,
@@ -26,6 +22,12 @@ class TestCISelector(object):
 
     def test_returns_gitlabCI(self):
         assert isinstance(get_ci_adapter("gitlabCI"), GitlabCIAdapter)
+
+    def test_returns_bitbucket(self):
+        assert isinstance(get_ci_adapter("bitbucket"), BitbucketAdapter)
+
+    def test_returns_bitrise(self):
+        assert isinstance(get_ci_adapter("bitrise"), BitriseCIAdapter)
 
     def test_returns_appveyor(self):
         assert isinstance(get_ci_adapter("appveyor"), AppveyorCIAdapter)

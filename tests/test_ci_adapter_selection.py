@@ -7,6 +7,7 @@ from codecov_cli.fallbacks import FallbackFieldEnum
 from codecov_cli.helpers.ci_adapters import (
     AppveyorCIAdapter,
     CircleCICIAdapter,
+    DroneCIAdapter,
     GithubActionsCIAdapter,
     GitlabCIAdapter,
     HerokuCIAdapter,
@@ -32,3 +33,6 @@ class TestCISelector(object):
 
     def test_returns_herokuci(self):
         assert isinstance(get_ci_adapter("heroku"), HerokuCIAdapter)
+
+    def test_returns_droneci(self):
+        assert isinstance(get_ci_adapter("droneci"), DroneCIAdapter)

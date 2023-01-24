@@ -1,11 +1,6 @@
-import os
-from enum import Enum
-
-import pytest
-
-from codecov_cli.fallbacks import FallbackFieldEnum
 from codecov_cli.helpers.ci_adapters import (
     AppveyorCIAdapter,
+    BuildkiteAdapter,
     CircleCICIAdapter,
     GithubActionsCIAdapter,
     GitlabCIAdapter,
@@ -32,3 +27,6 @@ class TestCISelector(object):
 
     def test_returns_herokuci(self):
         assert isinstance(get_ci_adapter("heroku"), HerokuCIAdapter)
+
+    def test_returns_buildkite(self):
+        assert isinstance(get_ci_adapter("buildkite"), BuildkiteAdapter)

@@ -1,4 +1,5 @@
 from codecov_cli.helpers.ci_adapters.appveyor_ci import AppveyorCIAdapter
+from codecov_cli.helpers.ci_adapters.buildkite import BuildkiteAdapter
 from codecov_cli.helpers.ci_adapters.circleci import CircleCICIAdapter
 from codecov_cli.helpers.ci_adapters.github_actions import GithubActionsCIAdapter
 from codecov_cli.helpers.ci_adapters.gitlab_ci import GitlabCIAdapter
@@ -16,4 +17,6 @@ def get_ci_adapter(provider_name):
         return AppveyorCIAdapter()
     if provider_name == "heroku":
         return HerokuCIAdapter()
+    if provider_name == "buildkite":
+        return BuildkiteAdapter()
     return None

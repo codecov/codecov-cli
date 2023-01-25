@@ -9,6 +9,7 @@ from codecov_cli.helpers.ci_adapters import (
     CircleCICIAdapter,
     GithubActionsCIAdapter,
     GitlabCIAdapter,
+    HerokuCIAdapter,
     TravisCIAdapter,
     get_ci_adapter,
 )
@@ -29,6 +30,9 @@ class TestCISelector(object):
 
     def test_returns_appveyor(self):
         assert isinstance(get_ci_adapter("appveyor"), AppveyorCIAdapter)
+
+    def test_returns_herokuci(self):
+        assert isinstance(get_ci_adapter("heroku"), HerokuCIAdapter)
 
     def test_returns_travis(self):
         assert isinstance(get_ci_adapter("travis"), TravisCIAdapter)

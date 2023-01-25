@@ -11,6 +11,7 @@ from codecov_cli.helpers.ci_adapters.gitlab_ci import GitlabCIAdapter
 from codecov_cli.helpers.ci_adapters.heroku import HerokuCIAdapter
 from codecov_cli.helpers.ci_adapters.jenkins import JenkinsAdapter
 from codecov_cli.helpers.ci_adapters.local import LocalAdapter
+from codecov_cli.helpers.ci_adapters.teamcity import TeamcityAdapter
 from codecov_cli.helpers.ci_adapters.woodpeckerci import WoodpeckerCIAdapter
 
 
@@ -31,6 +32,8 @@ def get_ci_adapter(provider_name):
         return LocalAdapter()
     if provider_name == "woodpecker":
         return WoodpeckerCIAdapter()
+    if provider_name == "teamcity":
+        return TeamcityAdapter()
     if provider_name == "heroku":
         return HerokuCIAdapter()
     if provider_name == "droneci":

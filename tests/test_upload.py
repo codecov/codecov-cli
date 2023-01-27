@@ -12,4 +12,4 @@ def test_upload_missing_commit_sha(mocker):
     runner = CliRunner()
     result = runner.invoke(cli, ["do-upload"], obj={})
     assert result.exit_code != 0
-    assert "Missing option '--commit-sha'" in result.output
+    assert "Missing option '-C' / '--sha' / '--commit-sha'" in result.output

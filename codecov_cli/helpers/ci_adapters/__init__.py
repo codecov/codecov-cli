@@ -2,6 +2,7 @@ from codecov_cli.helpers.ci_adapters.appveyor_ci import AppveyorCIAdapter
 from codecov_cli.helpers.ci_adapters.azure_pipelines import AzurePipelinesCIAdapter
 from codecov_cli.helpers.ci_adapters.buildkite import BuildkiteAdapter
 from codecov_cli.helpers.ci_adapters.circleci import CircleCICIAdapter
+from codecov_cli.helpers.ci_adapters.cirrus_ci import CirrusCIAdapter
 from codecov_cli.helpers.ci_adapters.github_actions import GithubActionsCIAdapter
 from codecov_cli.helpers.ci_adapters.gitlab_ci import GitlabCIAdapter
 from codecov_cli.helpers.ci_adapters.heroku import HerokuCIAdapter
@@ -25,4 +26,6 @@ def get_ci_adapter(provider_name):
         return AzurePipelinesCIAdapter()
     if provider_name == "jenkins":
         return JenkinsAdapter()
+    if provider_name == "cirrusci":
+        return CirrusCIAdapter()
     return None

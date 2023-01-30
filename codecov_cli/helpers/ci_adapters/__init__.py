@@ -1,4 +1,6 @@
 from codecov_cli.helpers.ci_adapters.appveyor_ci import AppveyorCIAdapter
+from codecov_cli.helpers.ci_adapters.azure_pipelines import AzurePipelinesCIAdapter
+from codecov_cli.helpers.ci_adapters.buildkite import BuildkiteAdapter
 from codecov_cli.helpers.ci_adapters.circleci import CircleCICIAdapter
 from codecov_cli.helpers.ci_adapters.droneci import DroneCIAdapter
 from codecov_cli.helpers.ci_adapters.github_actions import GithubActionsCIAdapter
@@ -19,4 +21,8 @@ def get_ci_adapter(provider_name):
         return HerokuCIAdapter()
     if provider_name == "droneci":
         return DroneCIAdapter()
+    if provider_name == "buildkite":
+        return BuildkiteAdapter()
+    if provider_name == "azurepipelines":
+        return AzurePipelinesCIAdapter()
     return None

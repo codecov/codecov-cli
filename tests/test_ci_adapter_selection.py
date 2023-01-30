@@ -1,5 +1,6 @@
 from codecov_cli.helpers.ci_adapters import (
     AppveyorCIAdapter,
+    AWSCodeBuildCIAdapter,
     AzurePipelinesCIAdapter,
     BuildkiteAdapter,
     CircleCICIAdapter,
@@ -42,3 +43,6 @@ class TestCISelector(object):
 
     def test_returns_cirrusci(self):
         assert isinstance(get_ci_adapter("cirrusci"), CirrusCIAdapter)
+
+    def test_returns_codebuild(self):
+        assert isinstance(get_ci_adapter("codebuild"), AWSCodeBuildCIAdapter)

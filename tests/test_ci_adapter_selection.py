@@ -7,6 +7,7 @@ from codecov_cli.helpers.ci_adapters import (
     GithubActionsCIAdapter,
     GitlabCIAdapter,
     HerokuCIAdapter,
+    JenkinsAdapter,
     get_ci_adapter,
 )
 
@@ -38,3 +39,6 @@ class TestCISelector(object):
 
     def test_returns_azurepipelines(self):
         assert isinstance(get_ci_adapter("azurepipelines"), AzurePipelinesCIAdapter)
+
+    def test_returns_jenkins(self):
+        assert isinstance(get_ci_adapter("jenkins"), JenkinsAdapter)

@@ -1,6 +1,8 @@
 from codecov_cli.helpers.ci_adapters import (
     AppveyorCIAdapter,
     AzurePipelinesCIAdapter,
+    BitbucketAdapter,
+    BitriseCIAdapter,
     BuildkiteAdapter,
     CircleCICIAdapter,
     CirrusCIAdapter,
@@ -27,6 +29,12 @@ class TestCISelector(object):
 
     def test_returns_gitlabCI(self):
         assert isinstance(get_ci_adapter("gitlabCI"), GitlabCIAdapter)
+
+    def test_returns_bitbucket(self):
+        assert isinstance(get_ci_adapter("bitbucket"), BitbucketAdapter)
+
+    def test_returns_bitrise(self):
+        assert isinstance(get_ci_adapter("bitrise"), BitriseCIAdapter)
 
     def test_returns_appveyor(self):
         assert isinstance(get_ci_adapter("appveyor"), AppveyorCIAdapter)

@@ -9,6 +9,7 @@ from codecov_cli.helpers.ci_adapters import (
     GitlabCIAdapter,
     HerokuCIAdapter,
     JenkinsAdapter,
+    LocalAdapter,
     WoodpeckerCIAdapter,
     get_ci_adapter,
 )
@@ -29,6 +30,9 @@ class TestCISelector(object):
 
     def test_returns_appveyor(self):
         assert isinstance(get_ci_adapter("appveyor"), AppveyorCIAdapter)
+
+    def test_returns_local(self):
+        assert isinstance(get_ci_adapter("local"), LocalAdapter)
 
     def test_returns_woodpecker(self):
         assert isinstance(get_ci_adapter("woodpecker"), WoodpeckerCIAdapter)

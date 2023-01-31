@@ -4,6 +4,7 @@ from codecov_cli.helpers.ci_adapters import (
     BuildkiteAdapter,
     CircleCICIAdapter,
     CirrusCIAdapter,
+    DroneCIAdapter,
     GithubActionsCIAdapter,
     GitlabCIAdapter,
     HerokuCIAdapter,
@@ -30,6 +31,9 @@ class TestCISelector(object):
 
     def test_returns_herokuci(self):
         assert isinstance(get_ci_adapter("heroku"), HerokuCIAdapter)
+
+    def test_returns_droneci(self):
+        assert isinstance(get_ci_adapter("droneci"), DroneCIAdapter)
 
     def test_returns_buildkite(self):
         assert isinstance(get_ci_adapter("buildkite"), BuildkiteAdapter)

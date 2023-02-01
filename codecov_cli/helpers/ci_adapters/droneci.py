@@ -5,6 +5,9 @@ from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
 
 class DroneCIAdapter(CIAdapterBase):
     # https://docs.drone.io/pipeline/environment/reference/
+    def detect(self) -> bool:
+        return bool(os.getenv("DRONE"))
+
     def _get_branch(self):
         return os.getenv("DRONE_BRANCH")
 

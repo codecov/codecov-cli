@@ -16,9 +16,22 @@ class WoodpeckerEnvEnum(str, Enum):
     CI_REPO = "CI_REPO"
     CI_COMMIT_PULL_REQUEST = "CI_COMMIT_PULL_REQUEST"
     CI_JOB_NUMBER = "CI_JOB_NUMBER"
+    CI = "CI"
 
 
 class TestWoodpecker(object):
+    @pytest.mark.parametrize(
+        "env_dict,expected",
+        [
+            ({}, False),
+            ({WoodpeckerEnvEnum.CI: "woodpecker"}, True),
+            ({WoodpeckerEnvEnum.CI: "true"}, False),
+        ],
+    )
+    def test_detect(self, env_dict, expected, mocker):
+        mocker.patch.dict(os.environ, env_dict, expected)
+        assert WoodpeckerCIAdapter().detect() == expected
+
     @pytest.mark.parametrize(
         "env_dict,expected",
         [

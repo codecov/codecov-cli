@@ -7,6 +7,9 @@ class JenkinsAdapter(CIAdapterBase):
     # https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#using-environment-variables
     # https://www.jenkins.io/doc/book/pipeline/multibranch/
 
+    def detect(self) -> bool:
+        return bool(os.getenv("JENKINS_URL"))
+
     def _get_commit_sha(self):
         return None
 

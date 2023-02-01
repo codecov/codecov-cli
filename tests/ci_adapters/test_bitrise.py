@@ -13,9 +13,26 @@ class BitriseEnvEnum(str, Enum):
     BITRISE_BUILD_NUMBER = "BITRISE_BUILD_NUMBER"
     BITRISE_BUILD_URL = "BITRISE_BUILD_URL"
     GIT_CLONE_COMMIT_HASH = "GIT_CLONE_COMMIT_HASH"
+    CI = "CI"
+    BITRISE_IO = "BITRISE_IO"
 
 
 class TestBitrise(object):
+    @pytest.mark.parametrize(
+        "env_dict,expected",
+        [
+            ({}, False),
+            (
+                {BitriseEnvEnum.CI: "true", BitriseEnvEnum.BITRISE_IO: "true"},
+                True,
+            ),
+        ],
+    )
+    def test_detect(self, env_dict, expected, mocker):
+        mocker.patch.dict(os.environ, env_dict)
+        actual = BitriseCIAdapter().detect()
+        assert actual == expected
+
     @pytest.mark.parametrize(
         "env_dict,expected",
         [

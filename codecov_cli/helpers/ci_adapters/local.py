@@ -1,9 +1,16 @@
 import os
+import subprocess
 
 from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
 
+SUCCESS = 0
+
 
 class LocalAdapter(CIAdapterBase):
+    def detect(self) -> bool:
+        s = subprocess.run(["git", "help"], capture_output=True)
+        return s.returncode == SUCCESS
+
     def _get_branch(self):
         return os.getenv("GIT_BRANCH") or os.getenv("BRANCH_NAME")
 

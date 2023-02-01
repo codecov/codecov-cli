@@ -15,9 +15,24 @@ class GithubActionsEnvEnum(str, Enum):
     GITHUB_HEAD_REF = "GITHUB_HEAD_REF"
     GITHUB_REF = "GITHUB_REF"
     GITHUB_REPOSITORY = "GITHUB_REPOSITORY"
+    GITHUB_ACTIONS = "GITHUB_ACTIONS"
 
 
 class TestGithubActions(object):
+    @pytest.mark.parametrize(
+        "env_dict,expected",
+        [
+            (
+                {GithubActionsEnvEnum.GITHUB_ACTIONS: "true"},
+                True,
+            ),
+        ],
+    )
+    def test_detect(self, env_dict, expected, mocker):
+        mocker.patch.dict(os.environ, env_dict)
+        actual = GithubActionsCIAdapter().detect()
+        assert actual == expected
+
     def test_commit_sha_if_not_in_merge_commit(self, mocker):
         mocker.patch.dict(
             os.environ, {GithubActionsEnvEnum.GITHUB_SHA: "1234"}, clear=True

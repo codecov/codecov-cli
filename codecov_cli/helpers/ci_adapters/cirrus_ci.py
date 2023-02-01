@@ -5,6 +5,8 @@ from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
 
 class CirrusCIAdapter(CIAdapterBase):
     # https://cirrus-ci.org/guide/writing-tasks/#environment-variables
+    def detect(self) -> bool:
+        return bool(os.getenv("CIRRUS_CI"))
 
     def _get_branch(self):
         return os.getenv("CIRRUS_BRANCH")

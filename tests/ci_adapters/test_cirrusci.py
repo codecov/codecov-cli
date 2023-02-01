@@ -14,9 +14,25 @@ class CirrusEnvEnum(str, Enum):
     CIRRUS_REPO_FULL_NAME = "CIRRUS_REPO_FULL_NAME"
     CIRRUS_PR = "CIRRUS_PR"
     CIRRUS_TASK_ID = "CIRRUS_TASK_ID"
+    CIRRUS_CI = "CIRRUS_CI"
 
 
 class TestCirrus(object):
+    @pytest.mark.parametrize(
+        "env_dict,expected",
+        [
+            ({}, False),
+            (
+                {CirrusEnvEnum.CIRRUS_CI: "true"},
+                True,
+            ),
+        ],
+    )
+    def test_detect(self, env_dict, expected, mocker):
+        mocker.patch.dict(os.environ, env_dict)
+        actual = CirrusCIAdapter().detect()
+        assert actual == expected
+
     @pytest.mark.parametrize(
         "env_dict,expected",
         [

@@ -16,9 +16,25 @@ class BuildkiteEnvEnum(str, Enum):
     BUILDKITE_PIPELINE_SLUG = "BUILDKITE_PIPELINE_SLUG"
     BUILDKITE_PULL_REQUEST = "BUILDKITE_PULL_REQUEST"
     BUILDKITE_JOB_ID = "BUILDKITE_JOB_ID"
+    BUILDKITE = "BUILDKITE"
 
 
 class TestBuildkite(object):
+    @pytest.mark.parametrize(
+        "env_dict,expected",
+        [
+            ({}, False),
+            (
+                {BuildkiteEnvEnum.BUILDKITE: "true"},
+                True,
+            ),
+        ],
+    )
+    def test_detect(self, env_dict, expected, mocker):
+        mocker.patch.dict(os.environ, env_dict)
+        actual = BuildkiteAdapter().detect()
+        assert actual == expected
+
     @pytest.mark.parametrize(
         "env_dict,expected",
         [

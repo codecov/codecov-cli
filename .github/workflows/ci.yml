@@ -48,11 +48,8 @@ jobs:
         pytest --cov
     - name: Dogfooding codecov-cli. Use codecov-cli to upload to codecov
       run: |
-        codecovcli --auto-load-params-from githubactions do-upload -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag cli3.10
-    - name: Upload to codecov
-      run: |
-        pip install codecov
-        codecov -t ${{ secrets.CODECOV_TOKEN }} -F python3.10
+        codecovcli do-upload -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag cli3.10
+
 
 
   create_release:

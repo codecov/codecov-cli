@@ -1,3 +1,5 @@
+import os
+
 from codecov_cli.helpers.ci_adapters import (
     AppveyorCIAdapter,
     AzurePipelinesCIAdapter,
@@ -62,3 +64,11 @@ class TestCISelector(object):
 
     def test_returns_cirrusci(self):
         assert isinstance(get_ci_adapter("cirrusci"), CirrusCIAdapter)
+
+    def test_auto_return_gh_actions(self, mocker):
+        mocker.patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}, clear=True)
+        assert isinstance(get_ci_adapter(), GithubActionsCIAdapter)
+
+    def test_auto_return_circle_ci(self, mocker):
+        mocker.patch.dict(os.environ, {"CIRCLECI": "true", "CI": "true"}, clear=True)
+        assert isinstance(get_ci_adapter(), CircleCICIAdapter)

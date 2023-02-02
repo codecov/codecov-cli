@@ -1,3 +1,5 @@
+import logging
+
 from codecov_cli.helpers.ci_adapters.appveyor_ci import AppveyorCIAdapter
 from codecov_cli.helpers.ci_adapters.azure_pipelines import AzurePipelinesCIAdapter
 from codecov_cli.helpers.ci_adapters.bitbucket_ci import BitbucketAdapter
@@ -13,34 +15,63 @@ from codecov_cli.helpers.ci_adapters.jenkins import JenkinsAdapter
 from codecov_cli.helpers.ci_adapters.local import LocalAdapter
 from codecov_cli.helpers.ci_adapters.woodpeckerci import WoodpeckerCIAdapter
 
+logger = logging.getLogger("codecovcli")
 
-def get_ci_adapter(provider_name):
-    if provider_name == "circleci":
-        return CircleCICIAdapter()
-    if provider_name == "githubactions":
-        return GithubActionsCIAdapter()
-    if provider_name == "gitlabCI":
-        return GitlabCIAdapter()
-    if provider_name == "bitbucket":
-        return BitbucketAdapter()
-    if provider_name == "bitrise":
-        return BitriseCIAdapter()
-    if provider_name == "appveyor":
-        return AppveyorCIAdapter()
-    if provider_name == "local":
-        return LocalAdapter()
-    if provider_name == "woodpecker":
-        return WoodpeckerCIAdapter()
-    if provider_name == "heroku":
-        return HerokuCIAdapter()
-    if provider_name == "droneci":
-        return DroneCIAdapter()
-    if provider_name == "buildkite":
-        return BuildkiteAdapter()
-    if provider_name == "azurepipelines":
-        return AzurePipelinesCIAdapter()
-    if provider_name == "jenkins":
-        return JenkinsAdapter()
-    if provider_name == "cirrusci":
-        return CirrusCIAdapter()
+
+def get_ci_adapter(provider_name: str = None):
+    if provider_name:
+        for provider in get_ci_providers_list():
+            if provider_name == "circleci":
+                return CircleCICIAdapter()
+            if provider_name == "githubactions":
+                return GithubActionsCIAdapter()
+            if provider_name == "gitlabCI":
+                return GitlabCIAdapter()
+            if provider_name == "bitbucket":
+                return BitbucketAdapter()
+            if provider_name == "bitrise":
+                return BitriseCIAdapter()
+            if provider_name == "appveyor":
+                return AppveyorCIAdapter()
+            if provider_name == "local":
+                return LocalAdapter()
+            if provider_name == "woodpecker":
+                return WoodpeckerCIAdapter()
+            if provider_name == "heroku":
+                return HerokuCIAdapter()
+            if provider_name == "droneci":
+                return DroneCIAdapter()
+            if provider_name == "buildkite":
+                return BuildkiteAdapter()
+            if provider_name == "azurepipelines":
+                return AzurePipelinesCIAdapter()
+            if provider_name == "jenkins":
+                return JenkinsAdapter()
+            if provider_name == "cirrusci":
+                return CirrusCIAdapter()
+    else:
+        for provider in get_ci_providers_list():
+            if provider.detect():
+                logger.info(f"Found ci service {provider._get_service()}")
+                return provider
     return None
+
+
+def get_ci_providers_list():
+    return [
+        CircleCICIAdapter(),
+        GithubActionsCIAdapter(),
+        GitlabCIAdapter(),
+        BitbucketAdapter(),
+        BitriseCIAdapter(),
+        AppveyorCIAdapter(),
+        WoodpeckerCIAdapter(),
+        HerokuCIAdapter(),
+        DroneCIAdapter(),
+        BuildkiteAdapter(),
+        AzurePipelinesCIAdapter(),
+        JenkinsAdapter(),
+        CirrusCIAdapter(),
+        # local adapter should always be the last one
+        LocalAdapter(),
+    ]

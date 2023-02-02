@@ -44,6 +44,7 @@ def do_upload_logic(
     slug: typing.Optional[str],
     pull_request_number: typing.Optional[str],
     is_using_new_uploader: bool = False,
+    fail_on_error: bool = False
 ):
     preparation_plugins = select_preparation_plugins(cli_config, plugin_names)
     coverage_file_selector = select_coverage_file_finder(
@@ -81,5 +82,5 @@ def do_upload_logic(
         flags,
         service,
     )
-    log_warnings_and_errors_if_any(sending_result, "Upload")
+    log_warnings_and_errors_if_any(sending_result, "Upload", fail_on_error)
     return sending_result

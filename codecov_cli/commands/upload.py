@@ -18,7 +18,10 @@ def _turn_env_vars_into_dict(ctx, params, value):
 
 @click.command()
 @click.option(
+    "-C",
+    "--sha",
     "--commit-sha",
+    "commit_sha",
     help="Commit SHA (with 40 chars)",
     cls=CodecovOption,
     fallback_field=FallbackFieldEnum.commit_sha,
@@ -37,13 +40,17 @@ def _turn_env_vars_into_dict(ctx, params, value):
     show_default="Current working directory",
 )
 @click.option(
+    "-s",
+    "--dir",
     "--coverage-files-search-root-folder",
+    "coverage_files_search_root_folder",
     help="Folder where to search for coverage files",
     type=click.Path(path_type=pathlib.Path),
     default=pathlib.Path.cwd,
     show_default="Current Working Directory",
 )
 @click.option(
+    "--exclude",
     "--coverage-files-search-exclude-folder",
     "coverage_files_search_exclude_folders",
     help="Folders where to search for coverage files",
@@ -52,6 +59,8 @@ def _turn_env_vars_into_dict(ctx, params, value):
     default=None,
 )
 @click.option(
+    "-f",
+    "--file",
     "--coverage-files-search-direct-file",
     "coverage_files_search_explicitly_listed_files",
     help="Explicit files to upload",
@@ -60,12 +69,17 @@ def _turn_env_vars_into_dict(ctx, params, value):
     default=None,
 )
 @click.option(
+    "-b",
+    "--build",
     "--build-code",
+    "build_code",
     cls=CodecovOption,
+    help="Specify the build number manually",
     fallback_field=FallbackFieldEnum.build_code,
 )
 @click.option(
     "--build-url",
+    "build_url",
     cls=CodecovOption,
     help="The URL of the build where this is running",
     fallback_field=FallbackFieldEnum.build_url,
@@ -95,20 +109,40 @@ def _turn_env_vars_into_dict(ctx, params, value):
     fallback_field=FallbackFieldEnum.branch,
 )
 @click.option(
+    "-r",
     "--slug",
+    "slug",
     cls=CodecovOption,
     fallback_field=FallbackFieldEnum.slug,
     help="owner/repo slug used instead of the private repo token in Self-hosted",
     envvar="CODECOV_SLUG",
 )
 @click.option(
+    "-P",
+    "--pr",
     "--pull-request-number",
+    "pull_request_number",
     help="Specify the pull request number mannually. Used to override pre-existing CI environment variables",
     cls=CodecovOption,
     fallback_field=FallbackFieldEnum.pull_request_number,
 )
-@click.option("--env-var", "env_vars", multiple=True, callback=_turn_env_vars_into_dict)
-@click.option("--flag", "flags", multiple=True, default=[])
+@click.option(
+    "-e",
+    "--env",
+    "--env-var",
+    "env_vars",
+    multiple=True,
+    callback=_turn_env_vars_into_dict,
+    help="Specify environment variables to be included with this build.",
+)
+@click.option(
+    "-F",
+    "--flag",
+    "flags",
+    multiple=True,
+    default=[],
+    help="Flag the upload to group coverage metrics. Multiple flags allowed.",
+)
 @click.option(
     "--plugin", "plugin_names", multiple=True, default=["xcode", "gcov", "pycoverage"]
 )

@@ -14,6 +14,7 @@ from codecov_cli.helpers.ci_adapters import (
     HerokuCIAdapter,
     JenkinsAdapter,
     LocalAdapter,
+    TeamcityAdapter,
     WoodpeckerCIAdapter,
     get_ci_adapter,
 )
@@ -46,6 +47,9 @@ class TestCISelector(object):
 
     def test_returns_woodpecker(self):
         assert isinstance(get_ci_adapter("woodpecker"), WoodpeckerCIAdapter)
+
+    def test_returns_teamcity(self):
+        assert isinstance(get_ci_adapter("teamcity"), TeamcityAdapter)
 
     def test_returns_herokuci(self):
         assert isinstance(get_ci_adapter("heroku"), HerokuCIAdapter)

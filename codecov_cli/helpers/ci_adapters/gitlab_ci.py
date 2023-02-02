@@ -6,6 +6,9 @@ from codecov_cli.helpers.git import parse_slug
 
 class GitlabCIAdapter(CIAdapterBase):
     # https://docs.gitlab.com/ee/ci/variables/predefined_variables.html
+    def detect(self) -> bool:
+        return bool(os.getenv("GITLAB_CI"))
+
     def _get_commit_sha(self):
         return (
             os.getenv("CI_MERGE_REQUEST_SOURCE_BRANCH_SHA")

@@ -5,6 +5,8 @@ from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
 
 class WoodpeckerCIAdapter(CIAdapterBase):
     # https://woodpecker-ci.org/docs/usage/environment
+    def detect(self) -> bool:
+        return os.getenv("CI") == "woodpecker"
 
     def _get_branch(self):
         return os.getenv("CI_COMMIT_SOURCE_BRANCH") or os.getenv("CI_COMMIT_BRANCH")

@@ -14,9 +14,22 @@ class DroneCIEnvEnum(str, Enum):
     DRONE_COMMIT_SHA = "DRONE_COMMIT_SHA"
     DRONE_REPO = "DRONE_REPO"
     DRONE_PULL_REQUEST = "DRONE_PULL_REQUEST"
+    DRONE = "DRONE"
 
 
 class TestDroneCI(object):
+    @pytest.mark.parametrize(
+        "env_dict,expected",
+        [
+            ({}, False),
+            ({DroneCIEnvEnum.DRONE: "true"}, True),
+        ],
+    )
+    def test_detect(self, env_dict, expected, mocker):
+        mocker.patch.dict(os.environ, env_dict)
+        actual = DroneCIAdapter().detect()
+        assert actual == expected
+
     @pytest.mark.parametrize(
         "env_dict,expected",
         [

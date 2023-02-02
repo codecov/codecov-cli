@@ -14,6 +14,22 @@ class LocalEnvEnum(str, Enum):
 
 
 class TestLocalAdapter(object):
+    def test_detect(self, mocker):
+        mocked_subprocess = mocker.patch(
+            "codecov_cli.helpers.ci_adapters.local.subprocess.run",
+            return_value=mocker.MagicMock(returncode=0),
+        )
+        assert LocalAdapter().detect()
+        mocked_subprocess.assert_called_once()
+
+    def test_detect_git_not_installed(self, mocker):
+        mocked_subprocess = mocker.patch(
+            "codecov_cli.helpers.ci_adapters.local.subprocess.run",
+            return_value=mocker.MagicMock(returncode=1),
+        )
+        assert LocalAdapter().detect() == False
+        mocked_subprocess.assert_called_once()
+
     @pytest.mark.parametrize(
         "env_dict,expected",
         [

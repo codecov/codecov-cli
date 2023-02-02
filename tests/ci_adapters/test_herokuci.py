@@ -11,9 +11,28 @@ class HerokuCIEnvEnum(str, Enum):
     HEROKU_TEST_RUN_BRANCH = "HEROKU_TEST_RUN_BRANCH"
     HEROKU_TEST_RUN_COMMIT_VERSION = "HEROKU_TEST_RUN_COMMIT_VERSION"
     HEROKU_TEST_RUN_ID = "HEROKU_TEST_RUN_ID"
+    CI = "CI"
 
 
 class TestHerokuCI(object):
+    @pytest.mark.parametrize(
+        "env_dict,expected",
+        [
+            ({}, False),
+            (
+                {
+                    HerokuCIEnvEnum.CI: "true",
+                    HerokuCIEnvEnum.HEROKU_TEST_RUN_BRANCH: "123",
+                },
+                True,
+            ),
+        ],
+    )
+    def test_detect(self, env_dict, expected, mocker):
+        mocker.patch.dict(os.environ, env_dict)
+        actual = HerokuCIAdapter().detect()
+        assert actual == expected
+
     @pytest.mark.parametrize(
         "env_dict,expected",
         [

@@ -5,6 +5,8 @@ from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
 
 class CircleCICIAdapter(CIAdapterBase):
     # https://circleci.com/docs/2.0/env-vars/#built-in-environment-variables
+    def detect(self) -> bool:
+        return bool(os.getenv("CI")) and bool(os.getenv("CIRCLECI"))
 
     def _get_commit_sha(self):
         return os.getenv("CIRCLE_SHA1")

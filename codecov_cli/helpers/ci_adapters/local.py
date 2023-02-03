@@ -34,3 +34,6 @@ class LocalAdapter(CIAdapterBase):
 
     def _get_job_code(self):
         return None
+
+    def get_service_name(self):
+        return "Local"

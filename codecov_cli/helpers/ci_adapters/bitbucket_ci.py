@@ -37,3 +37,6 @@ class BitbucketAdapter(CIAdapterBase):
 
     def _get_service(self):
         return "bitbucket"
+
+    def get_service_name(self):
+        return "Bitbucket"

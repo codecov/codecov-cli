@@ -51,3 +51,6 @@ class GitlabCIAdapter(CIAdapterBase):
 
     def _get_service(self):
         return "gitlab"
+
+    def get_service_name(self):
+        return "GitlabCI"

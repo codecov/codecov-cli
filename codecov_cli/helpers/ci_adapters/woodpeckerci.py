@@ -31,3 +31,6 @@ class WoodpeckerCIAdapter(CIAdapterBase):
 
     def _get_job_code(self):
         return os.getenv("CI_JOB_NUMBER")
+
+    def get_service_name(self):
+        return "Woodpecker"

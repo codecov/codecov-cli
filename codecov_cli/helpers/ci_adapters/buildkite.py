@@ -40,3 +40,6 @@ class BuildkiteAdapter(CIAdapterBase):
 
     def _get_job_code(self):
         return os.getenv("BUILDKITE_JOB_ID")
+
+    def get_service_name(self):
+        return "BuildKite"

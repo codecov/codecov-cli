@@ -49,3 +49,6 @@ class AppveyorCIAdapter(CIAdapterBase):
 
     def _get_service(self):
         return "appveyor"
+
+    def get_service_name(self):
+        return "AppVeyor"

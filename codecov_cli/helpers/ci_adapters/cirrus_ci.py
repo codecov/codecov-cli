@@ -31,3 +31,6 @@ class CirrusCIAdapter(CIAdapterBase):
 
     def _get_job_code(self):
         return os.getenv("CIRRUS_TASK_ID")
+
+    def get_service_name(self):
+        return "CirrusCI"

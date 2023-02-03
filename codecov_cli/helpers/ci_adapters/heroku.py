@@ -31,3 +31,6 @@ class HerokuCIAdapter(CIAdapterBase):
 
     def _get_pull_request_number(self):
         return None
+
+    def get_service_name(self):
+        return "Heroku"

@@ -33,3 +33,6 @@ class JenkinsAdapter(CIAdapterBase):
 
     def _get_service(self):
         return "jenkins"
+
+    def get_service_name(self):
+        return "Jenkins"

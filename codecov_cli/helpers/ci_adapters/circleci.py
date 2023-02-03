@@ -42,3 +42,6 @@ class CircleCICIAdapter(CIAdapterBase):
 
     def _get_service(self):
         return "circleci"
+
+    def get_service_name(self):
+        return "CircleCI"

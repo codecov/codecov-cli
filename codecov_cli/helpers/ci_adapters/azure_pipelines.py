@@ -37,3 +37,6 @@ class AzurePipelinesCIAdapter(CIAdapterBase):
 
     def _get_service(self):
         return "azure_pipelines"
+
+    def get_service_name(self):
+        return "AzurePipelines"

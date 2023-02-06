@@ -15,8 +15,8 @@ from codecov_cli.helpers.ci_adapters import (
     JenkinsAdapter,
     LocalAdapter,
     TeamcityAdapter,
-    WoodpeckerCIAdapter,
     TravisCIAdapter,
+    WoodpeckerCIAdapter,
     get_ci_adapter,
 )
 

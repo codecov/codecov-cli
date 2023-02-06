@@ -18,9 +18,35 @@ class TravisEnvEnum(str, Enum):
     TRAVIS_PULL_REQUEST_SHA = "TRAVIS_PULL_REQUEST_SHA"
     TRAVIS_PULL_REQUEST_BRANCH = "TRAVIS_PULL_REQUEST_BRANCH"
     TRAVIS_JOB_ID = "TRAVIS_JOB_ID"
+    CI = "CI"
+    TRAVIS = "TRAVIS"
+    SHIPPABLE = "SHIPPABLE"
 
 
 class TestTravisCIAdapter(object):
+    @pytest.mark.parametrize(
+        "env_dict,expected",
+        [
+            ({}, False),
+            (
+                {TravisEnvEnum.CI: "true", TravisEnvEnum.TRAVIS: "true"},
+                True,
+            ),
+            (
+                {
+                    TravisEnvEnum.CI: "true",
+                    TravisEnvEnum.TRAVIS: "true",
+                    TravisEnvEnum.SHIPPABLE: "true",
+                },
+                False,
+            ),
+        ],
+    )
+    def test_detect(self, env_dict, expected, mocker):
+        mocker.patch.dict(os.environ, env_dict)
+        actual = TravisCIAdapter().detect()
+        assert actual == expected
+
     @pytest.mark.parametrize(
         "env_dict,expected",
         [

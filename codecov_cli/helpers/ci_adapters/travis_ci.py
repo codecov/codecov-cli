@@ -5,6 +5,12 @@ from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
 
 class TravisCIAdapter(CIAdapterBase):
     # https://docs.travis-ci.com/user/environment-variables/#default-environment-variables
+    def detect(self) -> bool:
+        return (
+            bool(os.getenv("CI"))
+            and bool(os.getenv("TRAVIS"))
+            and not bool(os.getenv("SHIPPABLE"))
+        )
 
     def _get_commit_sha(self):
         return os.getenv("TRAVIS_PULL_REQUEST_SHA") or os.getenv("TRAVIS_COMMIT")
@@ -33,3 +39,6 @@ class TravisCIAdapter(CIAdapterBase):
 
     def _get_service(self):
         return "travis"
+
+    def get_service_name(self):
+        return "Travis"

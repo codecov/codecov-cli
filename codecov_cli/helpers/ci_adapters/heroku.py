@@ -5,6 +5,8 @@ from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
 
 class HerokuCIAdapter(CIAdapterBase):
     # https://devcenter.heroku.com/articles/heroku-ci#immutable-environment-variables
+    def detect(self) -> bool:
+        return bool(os.getenv("CI")) and bool(os.getenv("HEROKU_TEST_RUN_BRANCH"))
 
     def _get_branch(self):
         return os.getenv("HEROKU_TEST_RUN_BRANCH")
@@ -29,3 +31,6 @@ class HerokuCIAdapter(CIAdapterBase):
 
     def _get_pull_request_number(self):
         return None
+
+    def get_service_name(self):
+        return "Heroku"

@@ -23,6 +23,21 @@ class TestAzurePipelines(object):
     @pytest.mark.parametrize(
         "env_dict,expected",
         [
+            ({}, False),
+            (
+                {AzurePipelinesEnvEnum.SYSTEM_TEAMFOUNDATIONCOLLECTIONURI: "1234"},
+                True,
+            ),
+        ],
+    )
+    def test_detect(self, env_dict, expected, mocker):
+        mocker.patch.dict(os.environ, env_dict)
+        actual = AzurePipelinesCIAdapter().detect()
+        assert actual == expected
+
+    @pytest.mark.parametrize(
+        "env_dict,expected",
+        [
             ({}, None),
             (
                 {AzurePipelinesEnvEnum.BUILD_SOURCEVERSION: "123456789000111"},

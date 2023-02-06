@@ -4,126 +4,116 @@ from enum import Enum
 import pytest
 
 from codecov_cli.fallbacks import FallbackFieldEnum
-from codecov_cli.helpers.ci_adapters.bitbucket_ci import BitbucketAdapter
+from codecov_cli.helpers.ci_adapters.cirrus_ci import CirrusCIAdapter
 
 
-class BitbucketEnvEnum(str, Enum):
-    BITBUCKET_BUILD_NUMBER = "BITBUCKET_BUILD_NUMBER"
-    BITBUCKET_BRANCH = "BITBUCKET_BRANCH"
-    BITBUCKET_PR_ID = "BITBUCKET_PR_ID"
-    BITBUCKET_COMMIT = "BITBUCKET_COMMIT"
-    BITBUCKET_REPO_FULL_NAME = "BITBUCKET_REPO_FULL_NAME"
-    CI = "CI"
+class CirrusEnvEnum(str, Enum):
+    CIRRUS_BRANCH = "CIRRUS_BRANCH"
+    CIRRUS_BUILD_ID = "CIRRUS_BUILD_ID"
+    CIRRUS_CHANGE_IN_REPO = "CIRRUS_CHANGE_IN_REPO"
+    CIRRUS_REPO_FULL_NAME = "CIRRUS_REPO_FULL_NAME"
+    CIRRUS_PR = "CIRRUS_PR"
+    CIRRUS_TASK_ID = "CIRRUS_TASK_ID"
+    CIRRUS_CI = "CIRRUS_CI"
 
 
-class TestBitbucket(object):
+class TestCirrus(object):
     @pytest.mark.parametrize(
         "env_dict,expected",
         [
             ({}, False),
             (
-                {
-                    BitbucketEnvEnum.CI: "true",
-                    BitbucketEnvEnum.BITBUCKET_BUILD_NUMBER: "123",
-                },
+                {CirrusEnvEnum.CIRRUS_CI: "true"},
                 True,
             ),
         ],
     )
     def test_detect(self, env_dict, expected, mocker):
         mocker.patch.dict(os.environ, env_dict)
-        actual = BitbucketAdapter().detect()
-
+        actual = CirrusCIAdapter().detect()
         assert actual == expected
 
     @pytest.mark.parametrize(
         "env_dict,expected",
         [
             ({}, None),
-            ({BitbucketEnvEnum.BITBUCKET_COMMIT: "123456789000"}, None),
-            ({BitbucketEnvEnum.BITBUCKET_COMMIT: "123456789000111"}, "123456789000111"),
+            (
+                {CirrusEnvEnum.CIRRUS_CHANGE_IN_REPO: "some_random_sha"},
+                "some_random_sha",
+            ),
         ],
     )
     def test_commit_sha(self, env_dict, expected, mocker):
         mocker.patch.dict(os.environ, env_dict)
-        actual = BitbucketAdapter().get_fallback_value(FallbackFieldEnum.commit_sha)
-
+        actual = CirrusCIAdapter().get_fallback_value(FallbackFieldEnum.commit_sha)
         assert actual == expected
 
     def test_build_url(self):
-        assert (
-            BitbucketAdapter().get_fallback_value(FallbackFieldEnum.build_url) is None
-        )
+        assert CirrusCIAdapter().get_fallback_value(FallbackFieldEnum.build_url) is None
 
     @pytest.mark.parametrize(
         "env_dict,expected",
         [
             ({}, None),
-            ({BitbucketEnvEnum.BITBUCKET_BUILD_NUMBER: "123"}, "123"),
+            ({CirrusEnvEnum.CIRRUS_BUILD_ID: "123"}, "123"),
         ],
     )
     def test_build_code(self, env_dict, expected, mocker):
         mocker.patch.dict(os.environ, env_dict)
-        actual = BitbucketAdapter().get_fallback_value(FallbackFieldEnum.build_code)
-
+        actual = CirrusCIAdapter().get_fallback_value(FallbackFieldEnum.build_code)
         assert actual == expected
 
     @pytest.mark.parametrize(
         "env_dict,expected",
         [
             ({}, None),
-            ({BitbucketEnvEnum.BITBUCKET_BUILD_NUMBER: "123"}, "123"),
+            ({CirrusEnvEnum.CIRRUS_TASK_ID: "123"}, "123"),
         ],
     )
     def test_job_code(self, env_dict, expected, mocker):
         mocker.patch.dict(os.environ, env_dict)
-        actual = BitbucketAdapter().get_fallback_value(FallbackFieldEnum.job_code)
-
+        actual = CirrusCIAdapter().get_fallback_value(FallbackFieldEnum.job_code)
         assert actual == expected
 
     @pytest.mark.parametrize(
         "env_dict,expected",
         [
             ({}, None),
-            ({BitbucketEnvEnum.BITBUCKET_PR_ID: "123"}, "123"),
+            ({CirrusEnvEnum.CIRRUS_PR: "123"}, "123"),
         ],
     )
     def test_pull_request_number(self, env_dict, expected, mocker):
         mocker.patch.dict(os.environ, env_dict)
-        actual = BitbucketAdapter().get_fallback_value(
+        actual = CirrusCIAdapter().get_fallback_value(
             FallbackFieldEnum.pull_request_number
         )
-
         assert actual == expected
 
     @pytest.mark.parametrize(
         "env_dict,expected",
         [
             ({}, None),
-            ({BitbucketEnvEnum.BITBUCKET_REPO_FULL_NAME: "abc"}, "abc"),
+            ({CirrusEnvEnum.CIRRUS_REPO_FULL_NAME: "123"}, "123"),
         ],
     )
     def test_slug(self, env_dict, expected, mocker):
         mocker.patch.dict(os.environ, env_dict)
-        actual = BitbucketAdapter().get_fallback_value(FallbackFieldEnum.slug)
-
+        actual = CirrusCIAdapter().get_fallback_value(FallbackFieldEnum.slug)
         assert actual == expected
 
     @pytest.mark.parametrize(
         "env_dict,expected",
         [
             ({}, None),
-            ({BitbucketEnvEnum.BITBUCKET_BRANCH: "abc"}, "abc"),
+            ({CirrusEnvEnum.CIRRUS_BRANCH: "branch"}, "branch"),
         ],
     )
     def test_branch(self, env_dict, expected, mocker):
         mocker.patch.dict(os.environ, env_dict)
-        actual = BitbucketAdapter().get_fallback_value(FallbackFieldEnum.branch)
-
+        actual = CirrusCIAdapter().get_fallback_value(FallbackFieldEnum.branch)
         assert actual == expected
 
     def test_service(self):
         assert (
-            BitbucketAdapter().get_fallback_value(FallbackFieldEnum.service)
-            == "bitbucket"
+            CirrusCIAdapter().get_fallback_value(FallbackFieldEnum.service) == "cirrus"
         )

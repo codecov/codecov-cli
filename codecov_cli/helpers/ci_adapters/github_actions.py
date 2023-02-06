@@ -7,6 +7,8 @@ from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
 
 class GithubActionsCIAdapter(CIAdapterBase):
     # https://docs.github.com/en/actions/learn-github-actions/environment-variables
+    def detect(self) -> bool:
+        return bool(os.getenv("GITHUB_ACTIONS"))
 
     def _get_commit_sha(self):
         pr = self._get_pull_request_number()
@@ -83,3 +85,6 @@ class GithubActionsCIAdapter(CIAdapterBase):
 
     def _get_service(self):
         return "github-actions"
+
+    def get_service_name(self):
+        return "GithubActions"

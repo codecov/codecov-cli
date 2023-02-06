@@ -22,9 +22,21 @@ class GitlabCIEnvEnum(str, Enum):
     CI_MERGE_REQUEST_IID = "CI_MERGE_REQUEST_IID"
     CI_PROJECT_NAMESPACE = "CI_PROJECT_NAMESPACE"
     CI_PROJECT_NAME = "CI_PROJECT_NAME"
+    GITLAB_CI = "GITLAB_CI"
 
 
 class TestGitlabCI(object):
+    @pytest.mark.parametrize(
+        "env_dict,expected",
+        [
+            ({}, False),
+            ({GitlabCIEnvEnum.GITLAB_CI: "true"}, True),
+        ],
+    )
+    def test_detect(self, env_dict, expected, mocker):
+        mocker.patch.dict(os.environ, env_dict, expected)
+        assert GitlabCIAdapter().detect() == expected
+
     @pytest.mark.parametrize(
         "env_dict,expected",
         [

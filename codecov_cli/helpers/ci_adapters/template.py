@@ -6,6 +6,13 @@ from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
 class TemplateAdapter(CIAdapterBase):
     # link for env variables
 
+    def detect(self) -> bool:
+        """
+        Detects if this CI provider is being used
+        Returns bool
+        """
+        return False
+
     def _get_branch(self):
         """
         Determine the branch of the repository based on envs
@@ -59,6 +66,13 @@ class TemplateAdapter(CIAdapterBase):
     def _get_pull_request_number(self):
         """
         Determine the PR number, based on envs
+        Returns: string
+        """
+        return None
+
+    def get_service_name(self):
+        """
+        The CI Service name that gets displayed when running the uploader
         Returns: string
         """
         return None

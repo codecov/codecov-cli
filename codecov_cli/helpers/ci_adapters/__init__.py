@@ -21,36 +21,9 @@ logger = logging.getLogger("codecovcli")
 
 def get_ci_adapter(provider_name: str = None):
     if provider_name:
-        if provider_name == "circleci":
-            return CircleCICIAdapter()
-        if provider_name == "githubactions":
-            return GithubActionsCIAdapter()
-        if provider_name == "gitlabCI":
-            return GitlabCIAdapter()
-        if provider_name == "bitbucket":
-            return BitbucketAdapter()
-        if provider_name == "bitrise":
-            return BitriseCIAdapter()
-        if provider_name == "appveyor":
-            return AppveyorCIAdapter()
-        if provider_name == "local":
-            return LocalAdapter()
-        if provider_name == "woodpecker":
-            return WoodpeckerCIAdapter()
-        if provider_name == "teamcity":
-            return TeamcityAdapter()
-        if provider_name == "heroku":
-            return HerokuCIAdapter()
-        if provider_name == "droneci":
-            return DroneCIAdapter()
-        if provider_name == "buildkite":
-            return BuildkiteAdapter()
-        if provider_name == "azurepipelines":
-            return AzurePipelinesCIAdapter()
-        if provider_name == "jenkins":
-            return JenkinsAdapter()
-        if provider_name == "cirrusci":
-            return CirrusCIAdapter()
+        for provider in get_ci_providers_list():
+            if provider.get_service_name().lower() == provider_name.lower():
+                return provider
     else:
         for provider in get_ci_providers_list():
             if provider.detect():

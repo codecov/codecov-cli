@@ -14,6 +14,7 @@ from codecov_cli.helpers.ci_adapters.heroku import HerokuCIAdapter
 from codecov_cli.helpers.ci_adapters.jenkins import JenkinsAdapter
 from codecov_cli.helpers.ci_adapters.local import LocalAdapter
 from codecov_cli.helpers.ci_adapters.teamcity import TeamcityAdapter
+from codecov_cli.helpers.ci_adapters.travis_ci import TravisCIAdapter
 from codecov_cli.helpers.ci_adapters.woodpeckerci import WoodpeckerCIAdapter
 
 logger = logging.getLogger("codecovcli")
@@ -48,6 +49,7 @@ def get_ci_providers_list():
         JenkinsAdapter(),
         CirrusCIAdapter(),
         TeamcityAdapter(),
+        TravisCIAdapter(),
         # local adapter should always be the last one
         LocalAdapter(),
     ]

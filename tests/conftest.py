@@ -8,15 +8,21 @@ logger = logging.getLogger("codecovcli")
 
 
 def pytest_configure():
-    ch = ClickHandler()
-    ch.setFormatter(ColorFormatter())
-    logger.addHandler(ch)
+    # This if exists to avoid an issue where extra handlers would be added by tests that use runner.invoke()
+    # Which would cause subsequent tests to failed due to repeated log lines
+    if not logger.hasHandlers():
+        ch = ClickHandler()
+        ch.setFormatter(ColorFormatter())
+        logger.addHandler(ch)
     logger.propagate = False
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
 
 
 @pytest.fixture
-def make_sure_logger_has_only_1_handler():
-    if len(logger.handlers) > 1:
-        handler_to_keep = logger.handlers[0]
-        logger.handlers = [handler_to_keep]
+def use_verbose_option():
+    # Before the test we set logging to DEBUG
+    logger.setLevel(logging.DEBUG)
+    # Let the test run
+    yield
+    # After the test set logging back to INFO
+    logger.setLevel(logging.INFO)

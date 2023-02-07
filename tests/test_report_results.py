@@ -11,9 +11,7 @@ from codecov_cli.services.report import (
 from codecov_cli.types import RequestError, RequestResult, RequestResultWarning
 
 
-def test_report_results_command_with_warnings(
-    mocker, make_sure_logger_has_only_1_handler
-):
+def test_report_results_command_with_warnings(mocker):
     mock_send_reports_result_request = mocker.patch(
         "codecov_cli.services.report.send_reports_result_request",
         return_value=RequestResult(
@@ -48,7 +46,7 @@ def test_report_results_command_with_warnings(
     )
 
 
-def test_report_results_command_with_error(mocker, make_sure_logger_has_only_1_handler):
+def test_report_results_command_with_error(mocker):
     mock_send_reports_result_request = mocker.patch(
         "codecov_cli.services.report.send_reports_result_request",
         return_value=RequestResult(

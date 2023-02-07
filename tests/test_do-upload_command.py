@@ -34,4 +34,5 @@ def test_upload_raise_Z_option(mocker):
         cli, ["do-upload", "--fail-on-error", "--use-new-uploader=True"], obj={}
     )
     upload_sender.assert_called
+    assert "error: Upload failed: Unauthorized" in result.output.splitlines()
     assert str(result) == "<Result SystemExit(1)>"

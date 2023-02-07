@@ -153,6 +153,13 @@ def _turn_env_vars_into_dict(ctx, params, value):
     is_flag=True,
     help="Exit with non-zero code in case of error uploading.",
 )
+@click.option(
+    "-d",
+    "--dry-run",
+    "dry_run",
+    is_flag=True,
+    help="Don't upload files to Codecov",
+)
 @click.option("--use-new-uploader", "is_using_new_uploader", default=False)
 @click.pass_context
 def do_upload(
@@ -176,6 +183,7 @@ def do_upload(
     pull_request_number: typing.Optional[str],
     is_using_new_uploader: bool,
     fail_on_error: bool,
+    dry_run: bool,
 ):
     versioning_system = ctx.obj["versioning_system"]
     codecov_yaml = ctx.obj["codecov_yaml"] or {}
@@ -228,4 +236,5 @@ def do_upload(
         pull_request_number=pull_request_number,
         is_using_new_uploader=is_using_new_uploader,
         fail_on_error=fail_on_error,
+        dry_run=dry_run,
     )

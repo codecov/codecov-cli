@@ -1,3 +1,4 @@
+import logging
 import typing
 from importlib import import_module
 
@@ -7,6 +8,8 @@ from codecov_cli.plugins.gcov import GcovPlugin
 from codecov_cli.plugins.pycoverage import Pycoverage
 from codecov_cli.plugins.xcode import XcodePlugin
 
+logger = logging.getLogger("codecovcli")
+
 
 class NoopPlugin(object):
     def run_preparation(self, collector):
@@ -14,7 +17,14 @@ class NoopPlugin(object):
 
 
 def select_preparation_plugins(cli_config: typing.Dict, plugin_names: typing.List[str]):
-    return [_get_plugin(cli_config, p) for p in plugin_names]
+    plugins = [_get_plugin(cli_config, p) for p in plugin_names]
+    logger.debug(
+        "Selected preparation plugins",
+        extra=dict(
+            extra_log_attributes=dict(selected_plugins=list(map(type, plugins)))
+        ),
+    )
+    return plugins
 
 
 def _load_plugin_from_yaml(plugin_dict: typing.Dict):

@@ -63,6 +63,7 @@ def do_upload_logic(
         sender = UploadSender()
     else:
         sender = LegacyUploadSender()
+    logger.debug(f"Selected uploader to use: {type(sender)}")
     service = (
         ci_adapter.get_fallback_value(FallbackFieldEnum.service)
         if ci_adapter is not None

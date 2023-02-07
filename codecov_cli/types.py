@@ -14,6 +14,9 @@ class UploadCollectionResultFile(object):
         with open(self.path, "rb") as f:
             return f.read()
 
+    def __repr__(self) -> str:
+        return str(self.path)
+
     def __eq__(self, other):
         if not isinstance(other, UploadCollectionResultFile):
             return False

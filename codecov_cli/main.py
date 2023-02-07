@@ -30,14 +30,16 @@ logger = logging.getLogger("codecovcli")
     type=click.Path(path_type=pathlib.Path),
 )
 @click.option("--enterprise-url")
+@click.option("-v", "--verbose", "verbose", help="Use verbose logging", is_flag=True)
 @click.pass_context
 def cli(
     ctx: click.Context,
     auto_load_params_from: typing.Optional[str],
     codecov_yml_path: pathlib.Path,
     enterprise_url: str,
+    verbose: bool = False,
 ):
-    configure_logger(logger)
+    configure_logger(logger, log_level=(logging.DEBUG if verbose else logging.INFO))
     ctx.obj["ci_adapter"] = get_ci_adapter(auto_load_params_from)
     ctx.obj["versioning_system"] = get_versioning_system()
     ctx.obj["codecov_yaml"] = (
@@ -45,6 +47,10 @@ def cli(
         if codecov_yml_path is not None
         else None
     )
+    if ctx.obj["codecov_yaml"]:
+        logger.debug(f"Using codecov_yaml from {codecov_yml_path}")
+    else:
+        logger.debug("No codecov_yaml found")
 
 
 cli.add_command(do_upload)

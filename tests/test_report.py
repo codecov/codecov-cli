@@ -35,9 +35,7 @@ def test_send_create_report_request_403(mocker):
     mocked_response.assert_called_once()
 
 
-def test_create_report_command_with_warnings(
-    mocker, make_sure_logger_has_only_1_handler
-):
+def test_create_report_command_with_warnings(mocker):
     mocked_send_request = mocker.patch(
         "codecov_cli.services.report.send_create_report_request",
         return_value=RequestResult(
@@ -77,7 +75,7 @@ def test_create_report_command_with_warnings(
     )
 
 
-def test_create_report_command_with_error(mocker, make_sure_logger_has_only_1_handler):
+def test_create_report_command_with_error(mocker):
     mock_send_report_data = mocker.patch(
         "codecov_cli.services.report.send_create_report_request",
         return_value=RequestResult(

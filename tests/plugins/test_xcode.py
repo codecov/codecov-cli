@@ -19,7 +19,7 @@ class TestXcode(object):
     def act_like_xcrun_is_installed(self, mocker):
         mocker.patch("codecov_cli.plugins.xcode.shutil.which", return_value=True)
 
-    def test_no_swift_data_found(self, mocker, tmp_path, capsys):
+    def test_no_swift_data_found(self, mocker, tmp_path, capsys, use_verbose_option):
         self.act_like_xcrun_is_installed(mocker)
         xcode_plugin = XcodePlugin(derived_data_folder=tmp_path).run_preparation(
             collector=None

@@ -1,3 +1,5 @@
+import logging
+
 from click.testing import CliRunner
 
 from codecov_cli.services.legacy_upload import (
@@ -12,7 +14,7 @@ from codecov_cli.services.legacy_upload.upload_sender import (
 from codecov_cli.types import RequestResult
 
 
-def test_do_upload_logic_happy_path(mocker):
+def test_do_upload_logic_happy_path(mocker, make_sure_logger_has_only_1_handler):
     mock_select_preparation_plugins = mocker.patch(
         "codecov_cli.services.legacy_upload.select_preparation_plugins"
     )
@@ -91,7 +93,7 @@ def test_do_upload_logic_happy_path(mocker):
     )
 
 
-def test_do_upload_logic_dry_run(mocker):
+def test_do_upload_logic_dry_run(mocker, make_sure_logger_has_only_1_handler):
     mock_select_preparation_plugins = mocker.patch(
         "codecov_cli.services.legacy_upload.select_preparation_plugins"
     )
@@ -138,19 +140,19 @@ def test_do_upload_logic_dry_run(mocker):
             dry_run=True,
         )
     out_bytes = outstreams[0].getvalue().decode().splitlines()
+    mock_select_coverage_file_finder.assert_called_with(None, None, None)
+    mock_select_network_finder.assert_called_with(versioning_system)
+    assert mock_generate_upload_data.call_count == 1
+    assert mock_send_upload_data.call_count == 0
+    mock_select_preparation_plugins.assert_called_with(
+        cli_config, ["first_plugin", "another", "forth"]
+    )
     assert out_bytes == [
         "info: dry-run option activated. NOT sending data to Codecov.",
     ]
-    assert mock_send_upload_data.call_count == 0
     assert res == RequestResult(
         error=None,
         warnings=None,
         status_code=200,
         text="Data NOT sent to Codecov because of dry-run option",
     )
-    mock_select_preparation_plugins.assert_called_with(
-        cli_config, ["first_plugin", "another", "forth"]
-    )
-    mock_select_coverage_file_finder.assert_called_with(None, None, None)
-    mock_select_network_finder.assert_called_with(versioning_system)
-    mock_generate_upload_data.assert_called_with()

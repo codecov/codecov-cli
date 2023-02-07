@@ -21,8 +21,9 @@ def pytest_configure():
 @pytest.fixture
 def use_verbose_option():
     # Before the test we set logging to DEBUG
+    prev_level = logger.level
     logger.setLevel(logging.DEBUG)
     # Let the test run
     yield
     # After the test set logging back to INFO
-    logger.setLevel(logging.INFO)
+    logger.setLevel(prev_level)

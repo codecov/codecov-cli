@@ -11,7 +11,7 @@ logger = logging.getLogger("codecovcli")
 
 class VersioningSystemInterface(object):
     def __repr__(self) -> str:
-        return type(self)
+        return str(type(self))
 
     def get_fallback_value(
         self, fallback_field: FallbackFieldEnum

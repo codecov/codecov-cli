@@ -1,12 +1,18 @@
+import logging
 import subprocess
 import typing
 from pathlib import Path
 
 from codecov_cli.fallbacks import FallbackFieldEnum
-from codecov_cli.helpers.git import parse_slug, parse_git_service
+from codecov_cli.helpers.git import parse_git_service, parse_slug
+
+logger = logging.getLogger("codecovcli")
 
 
 class VersioningSystemInterface(object):
+    def __repr__(self) -> str:
+        return str(type(self))
+
     def get_fallback_value(
         self, fallback_field: FallbackFieldEnum
     ) -> typing.Optional[str]:
@@ -24,6 +30,7 @@ class VersioningSystemInterface(object):
 def get_versioning_system() -> VersioningSystemInterface:
     for klass in [GitVersioningSystem, NoVersioningSystem]:
         if klass.is_available():
+            logger.debug(f"versioning system found: {klass}")
             return klass()
 
 

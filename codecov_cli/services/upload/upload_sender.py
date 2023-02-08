@@ -31,7 +31,7 @@ class UploadSender(object):
         job_code: typing.Optional[str] = None,
         flags: typing.List[str] = None,
         ci_service: typing.Optional[str] = None,
-        git_service: typing.Optional[str] = None
+        git_service: typing.Optional[str] = None,
     ) -> RequestResult:
 
         data = {

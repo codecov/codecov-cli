@@ -26,7 +26,7 @@ named_upload_data = {
     "job_code": "job_code",
     "flags": "flags",
     "ci_service": "ci_service",
-    "git_service": "github"
+    "git_service": "github",
 }
 request_data = {
     "ci_url": "build_url",

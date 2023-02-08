@@ -1,7 +1,7 @@
 import logging
 import re
-from urllib.parse import urlparse
 from enum import Enum
+from urllib.parse import urlparse
 
 slug_regex = re.compile(r"[^/\s]+\/[^/\s]+$")
 

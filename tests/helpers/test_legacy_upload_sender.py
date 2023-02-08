@@ -23,7 +23,7 @@ named_upload_data = {
     "job_code": "job_code",
     "flags": "flags",
     "ci_service": "ci_service",
-    "git_service": "git_service"
+    "git_service": "git_service",
 }
 
 

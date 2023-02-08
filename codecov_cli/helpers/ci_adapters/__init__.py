@@ -14,6 +14,7 @@ from codecov_cli.helpers.ci_adapters.heroku import HerokuCIAdapter
 from codecov_cli.helpers.ci_adapters.jenkins import JenkinsAdapter
 from codecov_cli.helpers.ci_adapters.local import LocalAdapter
 from codecov_cli.helpers.ci_adapters.teamcity import TeamcityAdapter
+from codecov_cli.helpers.ci_adapters.travis_ci import TravisCIAdapter
 from codecov_cli.helpers.ci_adapters.woodpeckerci import WoodpeckerCIAdapter
 
 logger = logging.getLogger("codecovcli")
@@ -23,12 +24,14 @@ def get_ci_adapter(provider_name: str = None):
     if provider_name:
         for provider in get_ci_providers_list():
             if provider.get_service_name().lower() == provider_name.lower():
+                logger.debug(f"Using ci service from provider name: {provider_name}")
                 return provider
     else:
         for provider in get_ci_providers_list():
             if provider.detect():
-                logger.info(f"Found ci service {provider._get_service()}")
+                logger.info(f"ci service found: {provider._get_service()}")
                 return provider
+    logger.warning("No ci adapter found")
     return None
 
 
@@ -48,6 +51,7 @@ def get_ci_providers_list():
         JenkinsAdapter(),
         CirrusCIAdapter(),
         TeamcityAdapter(),
+        TravisCIAdapter(),
         # local adapter should always be the last one
         LocalAdapter(),
     ]

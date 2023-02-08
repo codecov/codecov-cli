@@ -97,6 +97,6 @@ class CIAdapterBase(ABC):
         Returns: string
         """
         raise NotImplementedError("`get_service_name()` must be implemented.")
-    
+
     def _get_git_service(self):
         return None

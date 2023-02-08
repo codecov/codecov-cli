@@ -22,7 +22,8 @@ named_upload_data = {
     "build_url": "build_url",
     "job_code": "job_code",
     "flags": "flags",
-    "service": "service",
+    "ci_service": "ci_service",
+    "git_service": "git_service"
 }
 
 
@@ -66,7 +67,8 @@ class TestUploadSender(object):
         params["build"] = params.pop("build_code")
         params["pr"] = params.pop("pull_request_number")
         params["job"] = params.pop("job_code")
-
+        params["service"] = params.pop("ci_service")
+        params.pop("git_service")
         mocked_legacy_upload_endpoint.match = [
             matchers.query_param_matcher(params),
             matchers.header_matcher(headers),

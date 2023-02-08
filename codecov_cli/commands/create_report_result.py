@@ -4,6 +4,7 @@ import uuid
 import click
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
+from codecov_cli.helpers.git import GitService
 from codecov_cli.services.report import create_report_results_logic
 
 logger = logging.getLogger("codecovcli")
@@ -29,10 +30,10 @@ logger = logging.getLogger("codecovcli")
     required=True,
 )
 @click.option(
-    "--service",
-    help="Git service provider, e.g. github",
+    "--git-service",
     cls=CodecovOption,
-    fallback_field=FallbackFieldEnum.service,
+    fallback_field=FallbackFieldEnum.git_service,
+    type=click.Choice(service.value for service in GitService),
 )
 @click.option(
     "-t",
@@ -47,15 +48,15 @@ def create_report_results(
     commit_sha: str,
     code: str,
     slug: str,
-    service: str,
+    git_service: str,
     token: uuid.UUID,
 ):
     logger.debug(
         "Creating report results",
         extra=dict(
             extra_log_attributes=dict(
-                commit_sha=commit_sha, code=code, slug=slug, service=service
+                commit_sha=commit_sha, code=code, slug=slug, service=git_service
             )
         ),
     )
-    create_report_results_logic(commit_sha, code, slug, service, token)
+    create_report_results_logic(commit_sha, code, slug, git_service, token)

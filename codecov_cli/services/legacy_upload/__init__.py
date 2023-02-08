@@ -44,6 +44,7 @@ def do_upload_logic(
     slug: typing.Optional[str],
     pull_request_number: typing.Optional[str],
     is_using_new_uploader: bool = False,
+    git_service: typing.Optional[str],
 ):
     preparation_plugins = select_preparation_plugins(cli_config, plugin_names)
     coverage_file_selector = select_coverage_file_finder(
@@ -60,7 +61,7 @@ def do_upload_logic(
         sender = UploadSender()
     else:
         sender = LegacyUploadSender()
-    service = (
+    ci_service = (
         ci_adapter.get_fallback_value(FallbackFieldEnum.service)
         if ci_adapter is not None
         else None
@@ -79,7 +80,8 @@ def do_upload_logic(
         build_url,
         job_code,
         flags,
-        service,
+        ci_service,
+        git_service
     )
     log_warnings_and_errors_if_any(sending_result, "Upload")
     return sending_result

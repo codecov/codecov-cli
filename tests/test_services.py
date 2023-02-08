@@ -36,6 +36,7 @@ def test_do_upload_logic_happy_path(mocker):
     versioning_system = mocker.MagicMock()
     ci_adapter = mocker.MagicMock()
     ci_adapter.get_fallback_value.return_value = "service"
+    versioning_system.get_fallback_value.return_value = "git_service"
     runner = CliRunner()
     with runner.isolation() as outstreams:
         res = do_upload_logic(
@@ -59,6 +60,7 @@ def test_do_upload_logic_happy_path(mocker):
             branch="branch",
             slug="slug",
             pull_request_number="pr",
+            git_service="git_service"
         )
     out_bytes = outstreams[0].getvalue().decode().splitlines()
     assert out_bytes == [
@@ -87,4 +89,5 @@ def test_do_upload_logic_happy_path(mocker):
         "job_code",
         None,
         "service",
+        "git_service"
     )

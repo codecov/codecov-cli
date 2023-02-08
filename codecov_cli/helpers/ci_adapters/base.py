@@ -16,6 +16,7 @@ class CIAdapterBase(ABC):
             FallbackFieldEnum.service: self._get_service,
             FallbackFieldEnum.pull_request_number: self._get_pull_request_number,
             FallbackFieldEnum.job_code: self._get_job_code,
+            FallbackFieldEnum.git_service: self._get_git_service,
         }
 
     def get_fallback_value(
@@ -96,3 +97,6 @@ class CIAdapterBase(ABC):
         Returns: string
         """
         raise NotImplementedError("`get_service_name()` must be implemented.")
+    
+    def _get_git_service(self):
+        return None

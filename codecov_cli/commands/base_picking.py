@@ -5,8 +5,8 @@ import uuid
 import click
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
-from codecov_cli.helpers.encoder import slug_is_invalid
-from codecov_cli.helpers.request import send_put_request
+from codecov_cli.helpers.encoder import slug_without_subgroups_is_invalid
+from codecov_cli.services.commit.base_picking import base_picking_logic
 
 logger = logging.getLogger("codecovcli")
 
@@ -66,30 +66,15 @@ def pr_base_picking(
         ),
     )
 
-    if slug_is_invalid(slug):
+    if slug_without_subgroups_is_invalid(slug):
         logger.error(
             "Slug is invalid. Slug should be in the form of owner_username/repo_name"
         )
         return
 
-    data = {
-        "user_provided_base_sha": base_sha,
-    }
-    headers = {"Authorization": f"token {token.hex}"}
-    url = f"https://api.codecov.io/api/v1/{service}/{slug}/pulls/{pr}"
-    sending_result = send_put_request(url=url, data=data, headers=headers)
-
-    if sending_result.warnings:
-        number_warnings = len(sending_result.warnings)
-        pluralization = "s" if number_warnings > 1 else ""
+    res = base_picking_logic(base_sha, pr, slug, token, service)
+    if not res.error:
         logger.info(
-            f"Base picking process had {number_warnings} warning{pluralization}",
+            "Base picking finished successfully",
+            extra=dict(extra_log_attributes=dict(response=res.text)),
         )
-        for ind, w in enumerate(sending_result.warnings):
-            logger.warning(f"Warning {ind + 1}: {w}")
-    if sending_result.error is not None:
-        logger.error(f"Base picking failed: {sending_result.error.description}")
-        return
-
-    logger.info("Base picking finished successfully")
-    logger.info(sending_result.text)

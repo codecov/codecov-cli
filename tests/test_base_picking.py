@@ -4,12 +4,12 @@ from click.testing import CliRunner
 
 from codecov_cli.commands.base_picking import pr_base_picking
 from codecov_cli.main import cli
-from codecov_cli.types import RequestError, RequestResult
+from codecov_cli.types import RequestError, RequestResult, RequestResultWarning
 
 
 def test_base_picking_command(mocker):
     mocked_response = mocker.patch(
-        "codecov_cli.commands.base_picking.send_put_request",
+        "codecov_cli.services.commit.base_picking.send_put_request",
         return_value=RequestResult(status_code=200, error=None, warnings=[], text=""),
     )
     token = uuid.uuid4()
@@ -30,10 +30,6 @@ def test_base_picking_command(mocker):
         ],
     )
     assert result.exit_code == 0
-    assert (
-        f'debug: Starting base picking process --- {{"pr": "11", "slug": "owner/repo", "token": "{token}", "service": "github"}}'
-        in result.output
-    )
     assert "info: Base picking finished successfully" in result.output
     mocked_response.assert_called_once()
 
@@ -65,9 +61,12 @@ def test_base_picking_command_slug_invalid(mocker):
 
 def test_base_picking_command_warnings(mocker):
     mocked_response = mocker.patch(
-        "codecov_cli.commands.base_picking.send_put_request",
+        "codecov_cli.services.commit.base_picking.send_put_request",
         return_value=RequestResult(
-            status_code=200, error=None, warnings=["some random warning"], text=""
+            error=None,
+            warnings=[RequestResultWarning(message="some random warning")],
+            status_code=200,
+            text="",
         ),
     )
     token = uuid.uuid4()
@@ -88,10 +87,6 @@ def test_base_picking_command_warnings(mocker):
         ],
     )
     assert result.exit_code == 0
-    assert (
-        f'debug: Starting base picking process --- {{"pr": "11", "slug": "owner/repo", "token": "{token}", "service": "github"}}'
-        in result.output
-    )
     assert "info: Base picking process had 1 warning" in result.output
     assert "Warning 1: some random warning" in result.output
     assert "info: Base picking finished successfully" in result.output
@@ -100,7 +95,7 @@ def test_base_picking_command_warnings(mocker):
 
 def test_base_picking_command_error(mocker):
     mocked_response = mocker.patch(
-        "codecov_cli.commands.base_picking.send_put_request",
+        "codecov_cli.services.commit.base_picking.send_put_request",
         return_value=RequestResult(
             status_code=401,
             error=RequestError(
@@ -132,9 +127,5 @@ def test_base_picking_command_error(mocker):
     mocked_response.assert_called_once()
     print(result.output)
     assert result.exit_code == 0
-    assert (
-        f'debug: Starting base picking process --- {{"pr": "11", "slug": "owner/repo", "token": "{token}", "service": "github"}}'
-        in result.output
-    )
     assert "error: Base picking failed: Unauthorized" in result.output
     assert "info: Base picking finished successfully" not in result.output

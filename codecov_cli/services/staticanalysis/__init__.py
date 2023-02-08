@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import typing
 from functools import partial
 from multiprocessing import Pool
 from pathlib import Path
@@ -9,7 +10,6 @@ import click
 import httpx
 import requests
 import yaml
-import typing
 
 from codecov_cli.services.staticanalysis.analyzers import get_best_analyzer
 from codecov_cli.services.staticanalysis.exceptions import AnalysisError

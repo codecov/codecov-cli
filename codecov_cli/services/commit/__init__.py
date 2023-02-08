@@ -3,7 +3,10 @@ import typing
 import uuid
 
 from codecov_cli.helpers.encoder import encode_slug
-from codecov_cli.helpers.request import send_post_request
+from codecov_cli.helpers.request import (
+    log_warnings_and_errors_if_any,
+    send_post_request,
+)
 
 logger = logging.getLogger("codecovcli")
 
@@ -28,16 +31,7 @@ def create_commit_logic(
         service=service,
     )
 
-    if sending_result.warnings:
-        number_warnings = len(sending_result.warnings)
-        pluralization = "s" if number_warnings > 1 else ""
-        logger.info(
-            f"Commit creating process had {number_warnings} warning{pluralization}",
-        )
-        for ind, w in enumerate(sending_result.warnings):
-            logger.warning(f"Warning {ind + 1}: {w.message}")
-    if sending_result.error is not None:
-        logger.error(f"Commit creating failed: {sending_result.error.description}")
+    log_warnings_and_errors_if_any(sending_result, "Commit creating")
     return sending_result
 
 

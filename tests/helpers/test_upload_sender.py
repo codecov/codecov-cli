@@ -86,11 +86,36 @@ def get_fake_upload_collection_result(mocked_coverage_file):
     coverage_files = [mocked_coverage_file, mocked_coverage_file]
     path_fixers = [
         UploadCollectionResultFileFixer(
-            "SwiftExample/AppDelegate.swift", None, None, None
+            path="SwiftExample/AppDelegate.swift",
+            fixed_lines_without_reason=set([1, 2, 3, 4, 9, 10, 11]),
+            fixed_lines_with_reason=set(
+                [
+                    (8, "// LCOV_EXCL_END\n"),
+                    (13, "// LCOV_EXCL_STOP\n"),
+                    (5, "// LCOV_EXCL_BEGIN\n"),
+                    (7, "// LCOV_EXCL_START\n"),
+                ]
+            ),
+            eof=15,
         ),
-        UploadCollectionResultFileFixer("SwiftExample/Hello.swift", None, None, None),
         UploadCollectionResultFileFixer(
-            "SwiftExample/ViewController.swift", None, None, None
+            path="SwiftExample/Hello.swift",
+            fixed_lines_without_reason=set([1, 3, 7, 9, 12, 14]),
+            fixed_lines_with_reason=set(
+                [
+                    (17, "    /*\n"),
+                    (22, "*/\n"),
+                ]
+            ),
+            eof=30,
+        ),
+        UploadCollectionResultFileFixer(
+            path="SwiftExample/ViewController.swift",
+            fixed_lines_without_reason=set(
+                [1, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 26]
+            ),
+            fixed_lines_with_reason=set([]),
+            eof=None,
         ),
     ]
     return UploadCollectionResult(network_files, coverage_files, path_fixers)
@@ -204,11 +229,40 @@ class TestPayloadGeneration(object):
         expected_report = {
             "path_fixes": {
                 "format": "legacy",
-                "value": [
-                    "SwiftExample/AppDelegate.swift",
-                    "SwiftExample/Hello.swift",
-                    "SwiftExample/ViewController.swift",
-                ],
+                "value": {
+                    "SwiftExample/AppDelegate.swift": {
+                        "eof": 15,
+                        "lines": [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 13],
+                    },
+                    "SwiftExample/Hello.swift": {
+                        "eof": 30,
+                        "lines": [1, 17, 3, 22, 7, 9, 12, 14],
+                    },
+                    "SwiftExample/ViewController.swift": {
+                        "eof": None,
+                        "lines": [
+                            1,
+                            4,
+                            5,
+                            6,
+                            7,
+                            9,
+                            10,
+                            11,
+                            12,
+                            13,
+                            14,
+                            15,
+                            16,
+                            17,
+                            18,
+                            19,
+                            20,
+                            22,
+                            26,
+                        ],
+                    },
+                },
             },
             "network_files": [
                 "./codecov.yaml",
@@ -242,7 +296,7 @@ class TestPayloadGeneration(object):
         expected_report = {
             "path_fixes": {
                 "format": "legacy",
-                "value": [],
+                "value": {},
             },
             "network_files": [],
             "coverage_files": [],

@@ -19,9 +19,26 @@ class AppveyorCIEnvEnum(str, Enum):
     APPVEYOR_REPO_COMMIT = "APPVEYOR_REPO_COMMIT"
     APPVEYOR_REPO_NAME = "APPVEYOR_REPO_NAME"
     APPVEYOR_URL = "APPVEYOR_URL"
+    CI = "CI"
+    APPVEYOR = "APPVEYOR"
 
 
 class TestAppveyorCI(object):
+    @pytest.mark.parametrize(
+        "env_dict,expected",
+        [
+            ({}, False),
+            (
+                {AppveyorCIEnvEnum.CI: "True", AppveyorCIEnvEnum.APPVEYOR: "True"},
+                True,
+            ),
+        ],
+    )
+    def test_detect(self, env_dict, expected, mocker):
+        mocker.patch.dict(os.environ, env_dict)
+        actual = AppveyorCIAdapter().detect()
+        assert actual == expected
+
     @pytest.mark.parametrize(
         "env_dict,expected",
         [

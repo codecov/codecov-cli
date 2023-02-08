@@ -9,6 +9,7 @@ def test_existing_commands():
     assert sorted(main.cli.commands.keys()) == [
         "create-commit",
         "create-report",
+        "create-report-results",
         "do-upload",
         "get-report-results",
         "pr-base-picking",

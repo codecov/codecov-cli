@@ -7,6 +7,7 @@ import click
 
 from codecov_cli.fallbacks import FallbackFieldEnum
 from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
+from codecov_cli.helpers.request import log_warnings_and_errors_if_any
 from codecov_cli.helpers.versioning_systems import VersioningSystemInterface
 from codecov_cli.plugins import select_preparation_plugins
 from codecov_cli.services.legacy_upload.coverage_file_finder import (
@@ -43,6 +44,7 @@ def do_upload_logic(
     slug: typing.Optional[str],
     pull_request_number: typing.Optional[str],
     is_using_new_uploader: bool = False,
+    fail_on_error: bool = False
 ):
     preparation_plugins = select_preparation_plugins(cli_config, plugin_names)
     coverage_file_selector = select_coverage_file_finder(
@@ -80,14 +82,5 @@ def do_upload_logic(
         flags,
         service,
     )
-    if sending_result.warnings:
-        number_warnings = len(sending_result.warnings)
-        pluralization = "s" if number_warnings > 1 else ""
-        logger.info(
-            f"Upload process had {number_warnings} warning{pluralization}",
-        )
-        for ind, w in enumerate(sending_result.warnings):
-            logger.warning(f"Warning {ind + 1}: {w.message}")
-    if sending_result.error is not None:
-        logger.error(f"Upload failed: {sending_result.error}")
+    log_warnings_and_errors_if_any(sending_result, "Upload", fail_on_error)
     return sending_result

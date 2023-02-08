@@ -4,7 +4,8 @@ import uuid
 import click
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
-from codecov_cli.services.report import create_report_logic
+from codecov_cli.helpers.encoder import encode_slug
+from codecov_cli.services.report import send_reports_result_get_request
 
 logger = logging.getLogger("codecovcli")
 
@@ -42,20 +43,27 @@ logger = logging.getLogger("codecovcli")
     envvar="CODECOV_TOKEN",
 )
 @click.pass_context
-def create_report(
-    ctx, commit_sha: str, code: str, slug: str, service: str, token: uuid.UUID
+def get_report_results(
+    ctx,
+    commit_sha: str,
+    code: str,
+    slug: str,
+    service: str,
+    token: uuid.UUID,
 ):
     logger.debug(
-        "Starting create report process",
+        "Getting report results",
         extra=dict(
             extra_log_attributes=dict(
                 commit_sha=commit_sha, code=code, slug=slug, service=service
             )
         ),
     )
-    res = create_report_logic(commit_sha, code, slug, service, token)
-    if not res.error:
-        logger.info(
-            "Finished creating report successfully",
-            extra=dict(extra_log_attributes=dict(response=res.text)),
-        )
+    encoded_slug = encode_slug(slug)
+    send_reports_result_get_request(
+        commit_sha=commit_sha,
+        report_code=code,
+        encoded_slug=encoded_slug,
+        service=service,
+        token=token,
+    )

@@ -1,28 +1,32 @@
+import uuid
+
 from click.testing import CliRunner
 
-from codecov_cli.services.report import ReportSender, create_report_logic
+from codecov_cli.services.report import create_report_logic, send_create_report_request
 from codecov_cli.types import RequestError, RequestResult, RequestResultWarning
 
 
-def test_report_sender_200(mocker):
+def test_send_create_report_request_200(mocker):
     mocked_response = mocker.patch(
-        "codecov_cli.services.report.report_sender.requests.post",
+        "codecov_cli.services.report.requests.post",
         return_value=mocker.MagicMock(status_code=200),
     )
-    sender = ReportSender()
-    res = sender.send_report_data("commit_sha", "code", "slug")
+    res = send_create_report_request(
+        "commit_sha", "code", "github", uuid.uuid4(), "slug"
+    )
     assert res.error is None
     assert res.warnings == []
     mocked_response.assert_called_once()
 
 
-def test_report_sender_403(mocker):
+def test_send_create_report_request_403(mocker):
     mocked_response = mocker.patch(
-        "codecov_cli.services.report.report_sender.requests.post",
+        "codecov_cli.services.report.requests.post",
         return_value=mocker.MagicMock(status_code=403, text="Permission denied"),
     )
-    sender = ReportSender()
-    res = sender.send_report_data("commit_sha", "code", "slug")
+    res = send_create_report_request(
+        "commit_sha", "code", "github", uuid.uuid4(), "slug"
+    )
     assert res.error == RequestError(
         code="HTTP Error 403",
         description="Permission denied",
@@ -31,10 +35,9 @@ def test_report_sender_403(mocker):
     mocked_response.assert_called_once()
 
 
-def test_report_command_with_warnings(mocker):
-    mock_send_report_data = mocker.patch.object(
-        ReportSender,
-        "send_report_data",
+def test_create_report_command_with_warnings(mocker):
+    mocked_send_request = mocker.patch(
+        "codecov_cli.services.report.send_create_report_request",
         return_value=RequestResult(
             error=None,
             warnings=[RequestResultWarning(message="somewarningmessage")],
@@ -48,6 +51,8 @@ def test_report_command_with_warnings(mocker):
             commit_sha="commit_sha",
             code="code",
             slug="owner/repo",
+            service="github",
+            token="token",
         )
 
     out_bytes = outstreams[0].getvalue().decode().splitlines()
@@ -55,18 +60,24 @@ def test_report_command_with_warnings(mocker):
         "info: Report creating process had 1 warning",
         "warning: Warning 1: somewarningmessage",
     ]
-    assert res == ReportSender.send_report_data.return_value
-    mock_send_report_data.assert_called_with(
-        commit_sha="commit_sha",
-        code="code",
-        slug="owner::::repo",
+    assert res == RequestResult(
+        error=None,
+        warnings=[RequestResultWarning(message="somewarningmessage")],
+        status_code=200,
+        text="",
+    )
+    mocked_send_request.assert_called_with(
+        "commit_sha",
+        "code",
+        "github",
+        "token",
+        "owner::::repo",
     )
 
 
-def test_report_command_with_error(mocker):
-    mock_send_report_data = mocker.patch.object(
-        ReportSender,
-        "send_report_data",
+def test_create_report_command_with_error(mocker):
+    mock_send_report_data = mocker.patch(
+        "codecov_cli.services.report.send_create_report_request",
         return_value=RequestResult(
             error=RequestError(
                 code="HTTP Error 403",
@@ -84,13 +95,26 @@ def test_report_command_with_error(mocker):
             commit_sha="commit_sha",
             code="code",
             slug="owner/repo",
+            service="github",
+            token="token",
         )
 
     out_bytes = outstreams[0].getvalue().decode().splitlines()
     assert out_bytes == ["error: Report creating failed: Permission denied"]
-    assert res == ReportSender.send_report_data.return_value
+    assert res == RequestResult(
+        error=RequestError(
+            code="HTTP Error 403",
+            description="Permission denied",
+            params={},
+        ),
+        status_code=403,
+        text="",
+        warnings=[],
+    )
     mock_send_report_data.assert_called_with(
-        commit_sha="commit_sha",
-        code="code",
-        slug="owner::::repo",
+        "commit_sha",
+        "code",
+        "github",
+        "token",
+        "owner::::repo",
     )

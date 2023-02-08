@@ -1,9 +1,11 @@
 import uuid
+from unittest.mock import patch
 
 from click.testing import CliRunner
 
 from codecov_cli.services.report import (
-    get_report_results_logic,
+    create_report_results_logic,
+    send_reports_result_get_request,
     send_reports_result_request,
 )
 from codecov_cli.types import RequestError, RequestResult, RequestResultWarning
@@ -21,7 +23,7 @@ def test_report_results_command_with_warnings(mocker):
     )
     runner = CliRunner()
     with runner.isolation() as outstreams:
-        res = get_report_results_logic(
+        res = create_report_results_logic(
             commit_sha="commit_sha",
             code="code",
             service="service",
@@ -60,7 +62,7 @@ def test_report_results_command_with_error(mocker):
     )
     runner = CliRunner()
     with runner.isolation() as outstreams:
-        res = get_report_results_logic(
+        res = create_report_results_logic(
             commit_sha="commit_sha",
             code="code",
             service="service",
@@ -109,3 +111,107 @@ def test_report_results_403(mocker):
         params={},
     )
     mocked_response.assert_called_once()
+
+
+def test_get_report_results_200_completed(mocker, capsys):
+    mocked_response = mocker.patch(
+        "codecov_cli.services.report.requests.get",
+        return_value=mocker.MagicMock(
+            status_code=200,
+            text='{"state": "completed", "result": {"state": "failure","message": "33.33% of diff hit (target 77.77%)"}}',
+        ),
+    )
+    token = uuid.uuid4()
+    res = send_reports_result_get_request(
+        "commit_sha", "report_code", "encoded_slug", "service", token
+    )
+    output = capsys.readouterr().err.splitlines()
+    assert res.error is None
+    assert res.warnings == []
+    mocked_response.assert_called_once()
+    assert (
+        'info: Finished processing report results --- {"state": "failure", "message": "33.33% of diff hit (target 77.77%)"}'
+        in output
+    )
+
+
+@patch("codecov_cli.services.report.MAX_NUMBER_TRIES", 1)
+def test_get_report_results_200_pending(mocker, capsys):
+    mocked_response = mocker.patch(
+        "codecov_cli.services.report.requests.get",
+        return_value=mocker.MagicMock(
+            status_code=200, text='{"state": "pending", "result": {}}'
+        ),
+    )
+    token = uuid.uuid4()
+    res = send_reports_result_get_request(
+        "commit_sha", "report_code", "encoded_slug", "service", token
+    )
+    output = capsys.readouterr().err.splitlines()
+    assert res.error is None
+    assert res.warnings == []
+    mocked_response.assert_called_once()
+    assert "info: Report with the given code is still being processed." in output
+
+
+def test_get_report_results_200_error(mocker, capsys):
+    mocked_response = mocker.patch(
+        "codecov_cli.services.report.requests.get",
+        return_value=mocker.MagicMock(
+            status_code=200, text='{"state": "error", "result": {}}'
+        ),
+    )
+    token = uuid.uuid4()
+    res = send_reports_result_get_request(
+        "commit_sha", "report_code", "encoded_slug", "service", token
+    )
+    output = capsys.readouterr().err.splitlines()
+    assert res.error is None
+    assert res.warnings == []
+    mocked_response.assert_called_once()
+    assert (
+        'error: An error occured while processing the report. Please try again later. --- {"response_status_code": 200, "state": "error", "result": {}}'
+        in output
+    )
+
+
+def test_get_report_results_200_undefined_state(mocker, capsys):
+    mocked_response = mocker.patch(
+        "codecov_cli.services.report.requests.get",
+        return_value=mocker.MagicMock(
+            status_code=200, text='{"state": "undefined_state", "result": {}}'
+        ),
+    )
+    token = uuid.uuid4()
+    res = send_reports_result_get_request(
+        "commit_sha", "report_code", "encoded_slug", "service", token
+    )
+    output = capsys.readouterr().err.splitlines()
+    assert res.error is None
+    assert res.warnings == []
+    mocked_response.assert_called_once()
+    assert "error: Please try again later." in output
+
+
+def test_get_report_results_401(mocker, capsys):
+    mocked_response = mocker.patch(
+        "codecov_cli.services.report.requests.get",
+        return_value=mocker.MagicMock(
+            status_code=401, text='{"detail": "Invalid token."}'
+        ),
+    )
+    token = uuid.uuid4()
+    res = send_reports_result_get_request(
+        "commit_sha", "report_code", "encoded_slug", "service", token
+    )
+    output = capsys.readouterr().err.splitlines()
+    assert res.error == RequestError(
+        code="HTTP Error 401",
+        description='{"detail": "Invalid token."}',
+        params={},
+    )
+    mocked_response.assert_called_once()
+    print(output)
+    assert (
+        'error: Getting report results failed: {"detail": "Invalid token."}' in output
+    )

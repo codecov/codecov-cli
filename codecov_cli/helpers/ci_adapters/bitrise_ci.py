@@ -4,6 +4,11 @@ from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
 
 
 class BitriseCIAdapter(CIAdapterBase):
+    # https://devcenter.bitrise.io/en/references/available-environment-variables.html
+
+    def detect(self) -> bool:
+        return bool(os.getenv("CI")) and bool(os.getenv("BITRISE_IO"))
+
     def _get_commit_sha(self):
         return os.getenv("GIT_CLONE_COMMIT_HASH")
 
@@ -27,3 +32,6 @@ class BitriseCIAdapter(CIAdapterBase):
 
     def _get_service(self):
         return "bitrise"
+
+    def get_service_name(self):
+        return "Bitrise"

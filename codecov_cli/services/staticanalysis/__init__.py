@@ -9,6 +9,7 @@ import click
 import httpx
 import requests
 import yaml
+import typing
 
 from codecov_cli.services.staticanalysis.analyzers import get_best_analyzer
 from codecov_cli.services.staticanalysis.exceptions import AnalysisError
@@ -21,24 +22,15 @@ from codecov_cli.services.staticanalysis.types import (
 logger = logging.getLogger("codecovcli")
 
 
-def get_config(folder):
-    try:
-        config_file = next(folder.glob("codecov.yml"))
-        with config_file.open() as file:
-            return yaml.safe_load(file.read()).get("staticanalyzer", {})
-    except StopIteration:
-        return None
-
-
 async def run_analysis_entrypoint(
+    config: typing.Optional[typing.Dict],
     folder: Path,
-    numberprocesses: int,
+    numberprocesses: typing.Optional[int],
     pattern,
     commit: str,
     token: str,
     should_force: bool,
 ):
-    config = get_config(folder)
     ff = select_file_finder(config)
     files = list(ff.find_files(folder, pattern))
     logger.info(f"Running the analyzer on {len(files)} files")

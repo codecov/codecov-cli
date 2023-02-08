@@ -114,3 +114,4 @@ class TestXcode(object):
         mocked_subprocess.assert_called_once()
         file_path = pathlib.Path("llvm-output-test")
         assert file_path.is_file()
+        file_path.unlink()

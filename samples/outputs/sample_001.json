@@ -1,0 +1,645 @@
+{
+    "result": {
+        "language": "python",
+        "empty_lines": [
+            4,
+            5,
+            29,
+            30,
+            40,
+            44,
+            45,
+            52,
+            68,
+            70,
+            73,
+            77,
+            79,
+            80,
+            90,
+            91,
+            94
+        ],
+        "functions": [
+            {
+                "identifier": "cachorro",
+                "start_line": 6,
+                "end_line": 28,
+                "code_hash": "db9381c668f1584b27dc833680ae266a",
+                "complexity_metrics": {
+                    "conditions": 6,
+                    "mccabe_cyclomatic_complexity": 7,
+                    "returns": 2,
+                    "max_nested_conditional": 4
+                }
+            },
+            {
+                "identifier": "cachorro::inner_function",
+                "start_line": 26,
+                "end_line": 27,
+                "code_hash": "5c5027b0eeeb1723459967e0f9c7712f",
+                "complexity_metrics": {
+                    "conditions": 0,
+                    "mccabe_cyclomatic_complexity": 1,
+                    "returns": 1,
+                    "max_nested_conditional": 0
+                }
+            },
+            {
+                "identifier": "Super::itsbanana",
+                "start_line": 32,
+                "end_line": 39,
+                "code_hash": "9bd770f4422f434d97af03823f3463b4",
+                "complexity_metrics": {
+                    "conditions": 0,
+                    "mccabe_cyclomatic_complexity": 1,
+                    "returns": 1,
+                    "max_nested_conditional": 0
+                }
+            },
+            {
+                "identifier": "Super::ma_ha",
+                "start_line": 41,
+                "end_line": 43,
+                "code_hash": "b225fc0f7b55436214abff3cc8c5788f",
+                "complexity_metrics": {
+                    "conditions": 0,
+                    "mccabe_cyclomatic_complexity": 1,
+                    "returns": 1,
+                    "max_nested_conditional": 0
+                }
+            },
+            {
+                "identifier": "ifsandbuts",
+                "start_line": 46,
+                "end_line": 51,
+                "code_hash": "2c24ab20333eccfb811c513da7b7f744",
+                "complexity_metrics": {
+                    "conditions": 1,
+                    "mccabe_cyclomatic_complexity": 2,
+                    "returns": 2,
+                    "max_nested_conditional": 1
+                }
+            },
+            {
+                "identifier": "forsandstuff",
+                "start_line": 53,
+                "end_line": 67,
+                "code_hash": "12c133c08fdb0c6d2fb8bda5038d1db5",
+                "complexity_metrics": {
+                    "conditions": 4,
+                    "mccabe_cyclomatic_complexity": 5,
+                    "returns": 2,
+                    "max_nested_conditional": 2
+                }
+            },
+            {
+                "identifier": "single_line",
+                "start_line": 69,
+                "end_line": 69,
+                "code_hash": "3bc8e173a68e60bfbbf5c803364978c9",
+                "complexity_metrics": {
+                    "conditions": 0,
+                    "mccabe_cyclomatic_complexity": 1,
+                    "returns": 1,
+                    "max_nested_conditional": 0
+                }
+            },
+            {
+                "identifier": "comma_at_end",
+                "start_line": 71,
+                "end_line": 72,
+                "code_hash": "b5618bd016f37fdc38fb74ca50928e0e",
+                "complexity_metrics": {
+                    "conditions": 0,
+                    "mccabe_cyclomatic_complexity": 1,
+                    "returns": 0,
+                    "max_nested_conditional": 0
+                }
+            },
+            {
+                "identifier": "decorated_function",
+                "start_line": 75,
+                "end_line": 76,
+                "code_hash": "24783c02c077a761096042c452884bbb",
+                "complexity_metrics": {
+                    "conditions": 0,
+                    "mccabe_cyclomatic_complexity": 1,
+                    "returns": 1,
+                    "max_nested_conditional": 0
+                }
+            },
+            {
+                "identifier": "unusual_function",
+                "start_line": 81,
+                "end_line": 89,
+                "code_hash": "a2b6e9fe390f6e929e915dae72fb0401",
+                "complexity_metrics": {
+                    "conditions": 0,
+                    "mccabe_cyclomatic_complexity": 1,
+                    "returns": 1,
+                    "max_nested_conditional": 0
+                }
+            }
+        ],
+        "hash": "d45a1f52ab9295333974fda38802a54e",
+        "number_lines": 94,
+        "statements": [
+            [
+                7,
+                {
+                    "line_surety_ancestorship": null,
+                    "start_column": 4,
+                    "line_hash": "fd352b68bf83391284e044021cab0339",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                8,
+                {
+                    "line_surety_ancestorship": 7,
+                    "start_column": 4,
+                    "line_hash": "88d7001fc977f83efe9054835dc258af",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                9,
+                {
+                    "line_surety_ancestorship": 8,
+                    "start_column": 4,
+                    "line_hash": "ad0dba6a89b8cf2824c709af30a820c0",
+                    "len": 8,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                17,
+                {
+                    "line_surety_ancestorship": 9,
+                    "start_column": 8,
+                    "line_hash": "ac72661cd10d3afbb4f1a3e66bfa239a",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                18,
+                {
+                    "line_surety_ancestorship": 9,
+                    "start_column": 4,
+                    "line_hash": "9e995630307ae25a5f2e9373f4fc99ab",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                19,
+                {
+                    "line_surety_ancestorship": 18,
+                    "start_column": 4,
+                    "line_hash": "3dad28281778d5ef4b7a78c7bc7a6b09",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                20,
+                {
+                    "line_surety_ancestorship": 19,
+                    "start_column": 4,
+                    "line_hash": "a6760d08be5e84a3edfc4b498961a7b9",
+                    "len": 5,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                21,
+                {
+                    "line_surety_ancestorship": 20,
+                    "start_column": 8,
+                    "line_hash": "dbc6dcfa2de8729a9d78b7c3a2edecd1",
+                    "len": 3,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                22,
+                {
+                    "line_surety_ancestorship": 21,
+                    "start_column": 12,
+                    "line_hash": "a7b4b5d62d05cd3a0a15334e3edd18df",
+                    "len": 2,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                23,
+                {
+                    "line_surety_ancestorship": 22,
+                    "start_column": 16,
+                    "line_hash": "f0865b9cac1ea1c2edec78d77b5f1283",
+                    "len": 1,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                24,
+                {
+                    "line_surety_ancestorship": 23,
+                    "start_column": 20,
+                    "line_hash": "ad5a249343db66d92e23b6d38252c4bb",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                25,
+                {
+                    "line_surety_ancestorship": 21,
+                    "start_column": 8,
+                    "line_hash": "8fa95562691118a5156fb56ebef53997",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                27,
+                {
+                    "line_surety_ancestorship": null,
+                    "start_column": 8,
+                    "line_hash": "5c5027b0eeeb1723459967e0f9c7712f",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                28,
+                {
+                    "line_surety_ancestorship": 26,
+                    "start_column": 4,
+                    "line_hash": "9ee3fa93a2061184a0f3b3fcd3adc043",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                33,
+                {
+                    "line_surety_ancestorship": null,
+                    "start_column": 8,
+                    "line_hash": "a96e1d9f2c6bd14f08fd70f1504044ae",
+                    "len": 3,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                37,
+                {
+                    "line_surety_ancestorship": 33,
+                    "start_column": 8,
+                    "line_hash": "5ec8cb22b2ae5ad57344f2b1fcfbc905",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                38,
+                {
+                    "line_surety_ancestorship": 37,
+                    "start_column": 8,
+                    "line_hash": "f9771f42931c1ca51f5958791976cedf",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                39,
+                {
+                    "line_surety_ancestorship": 38,
+                    "start_column": 8,
+                    "line_hash": "b7b3f88e6262607d331597d4ee0f752d",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                42,
+                {
+                    "line_surety_ancestorship": null,
+                    "start_column": 8,
+                    "line_hash": "3bc8e173a68e60bfbbf5c803364978c9",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                43,
+                {
+                    "line_surety_ancestorship": 42,
+                    "start_column": 8,
+                    "line_hash": "c45e5356ebb73e68b2a3277c58db3cfb",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                47,
+                {
+                    "line_surety_ancestorship": null,
+                    "start_column": 4,
+                    "line_hash": "2cd846c62474f70be3291ce24c1bcf6a",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                48,
+                {
+                    "line_surety_ancestorship": 47,
+                    "start_column": 4,
+                    "line_hash": "fa1cb3c028be782b34302fe7aaf8785c",
+                    "len": 2,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                49,
+                {
+                    "line_surety_ancestorship": 48,
+                    "start_column": 8,
+                    "line_hash": "ae85a94c1e6f0983f500fb2355bff826",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                50,
+                {
+                    "line_surety_ancestorship": 49,
+                    "start_column": 8,
+                    "line_hash": "61e5513229ba3d53a09d057769ac99cc",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                51,
+                {
+                    "line_surety_ancestorship": 48,
+                    "start_column": 4,
+                    "line_hash": "93fc8d6795e9469d56dc6397d5c350ed",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                54,
+                {
+                    "line_surety_ancestorship": null,
+                    "start_column": 4,
+                    "line_hash": "fc5d9d43c5d58df1cf63bcf7e5f83321",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                55,
+                {
+                    "line_surety_ancestorship": 54,
+                    "start_column": 4,
+                    "line_hash": "98857eef2f0d137602d08d7267b64006",
+                    "len": 10,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                56,
+                {
+                    "line_surety_ancestorship": 55,
+                    "start_column": 8,
+                    "line_hash": "6da90f7c156cd83ef16a53a66fd4ef5b",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                57,
+                {
+                    "line_surety_ancestorship": 56,
+                    "start_column": 8,
+                    "line_hash": "f5beb8a40cd310c9b7117ff659482a6f",
+                    "len": 2,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                58,
+                {
+                    "line_surety_ancestorship": 57,
+                    "start_column": 12,
+                    "line_hash": "08318e122a6fea26b5dc4ae9aa3427d7",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                60,
+                {
+                    "line_surety_ancestorship": 57,
+                    "start_column": 8,
+                    "line_hash": "d583b9af545e2c0624bbaa9f474ba495",
+                    "len": 1,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                62,
+                {
+                    "line_surety_ancestorship": 60,
+                    "start_column": 8,
+                    "line_hash": "b6285123506d9de4a4f0ba251c0e1007",
+                    "len": 1,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                63,
+                {
+                    "line_surety_ancestorship": 62,
+                    "start_column": 12,
+                    "line_hash": "e70c4df10ef0983b9c8c31bd06b2a2c3",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                64,
+                {
+                    "line_surety_ancestorship": 62,
+                    "start_column": 8,
+                    "line_hash": "4ed3c71b088897bbc5d07fc57eb14dd1",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                65,
+                {
+                    "line_surety_ancestorship": 64,
+                    "start_column": 8,
+                    "line_hash": "a1424cb9c1c1ebb145b80d8aab15e260",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                66,
+                {
+                    "line_surety_ancestorship": 55,
+                    "start_column": 4,
+                    "line_hash": "49bac43854dd9293aa68137ebcfa9b27",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                67,
+                {
+                    "line_surety_ancestorship": 66,
+                    "start_column": 4,
+                    "line_hash": "e70c4df10ef0983b9c8c31bd06b2a2c3",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                69,
+                {
+                    "line_surety_ancestorship": null,
+                    "start_column": 19,
+                    "line_hash": "3bc8e173a68e60bfbbf5c803364978c9",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                72,
+                {
+                    "line_surety_ancestorship": null,
+                    "start_column": 4,
+                    "line_hash": "b5618bd016f37fdc38fb74ca50928e0e",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                76,
+                {
+                    "line_surety_ancestorship": null,
+                    "start_column": 4,
+                    "line_hash": "24783c02c077a761096042c452884bbb",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                89,
+                {
+                    "line_surety_ancestorship": null,
+                    "start_column": 4,
+                    "line_hash": "a2b6e9fe390f6e929e915dae72fb0401",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                92,
+                {
+                    "line_surety_ancestorship": 81,
+                    "start_column": 0,
+                    "line_hash": "28843aa26684eaaf2e49b2e71bbac680",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ],
+            [
+                93,
+                {
+                    "line_surety_ancestorship": 92,
+                    "start_column": 0,
+                    "line_hash": "6b7afbc0233c9849ee9f4234455e10fb",
+                    "len": 0,
+                    "extra_connected_lines": []
+                }
+            ]
+        ],
+        "definition_lines": [
+            [
+                6,
+                22
+            ],
+            [
+                26,
+                1
+            ],
+            [
+                31,
+                12
+            ],
+            [
+                32,
+                7
+            ],
+            [
+                41,
+                2
+            ],
+            [
+                46,
+                5
+            ],
+            [
+                53,
+                14
+            ],
+            [
+                69,
+                0
+            ],
+            [
+                71,
+                1
+            ],
+            [
+                74,
+                2
+            ],
+            [
+                75,
+                1
+            ],
+            [
+                81,
+                8
+            ]
+        ],
+        "import_lines": [
+            [
+                1,
+                0
+            ],
+            [
+                2,
+                0
+            ],
+            [
+                3,
+                0
+            ]
+        ]
+    },
+    "error": null
+}

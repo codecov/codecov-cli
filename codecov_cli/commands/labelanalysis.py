@@ -87,7 +87,9 @@ class ThisRunner(object):
         return [
             x
             for x in subprocess.run(
-                ["python", "-m", "pytest", "-q", "--collect-only"], capture_output=True
+                ["python", "-m", "pytest", "-q", "--collect-only"],
+                capture_output=True,
+                check=True,
             )
             .stdout.decode()
             .split()
@@ -103,9 +105,11 @@ class ThisRunner(object):
         )
         all_labels = set(all_labels)
         all_labels = [x.rsplit("[", 1)[0] if "[" in x else x for x in all_labels]
-        pprint.pprint(all_labels)
         # Not safe from the customer perspective, in general, probably.
         # This is just to check it working
         command_array.extend(all_labels)
-        print(command_array)
-        subprocess.run(command_array)
+        logger.info(
+            "Running Pytest command",
+            extra=dict(extra_log_attributes=dict(command_array=command_array)),
+        )
+        subprocess.run(command_array, check=True)

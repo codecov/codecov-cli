@@ -12,6 +12,7 @@ from codecov_cli.services.legacy_upload.upload_sender import (
     UploadSendingResultWarning,
 )
 from codecov_cli.types import RequestResult
+from tests.test_helpers import parse_outstreams_into_log_lines
 
 
 def test_do_upload_logic_happy_path(mocker):
@@ -63,11 +64,12 @@ def test_do_upload_logic_happy_path(mocker):
             slug="slug",
             pull_request_number="pr",
         )
-    out_bytes = outstreams[0].getvalue().decode().splitlines()
+    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
-        "info: Upload process had 1 warning",
-        "warning: Warning 1: somewarningmessage",
+        ("info", "Upload process had 1 warning"),
+        ("warning", "Warning 1: somewarningmessage"),
     ]
+
     assert res == LegacyUploadSender.send_upload_data.return_value
     mock_select_preparation_plugins.assert_called_with(
         cli_config, ["first_plugin", "another", "forth"]
@@ -139,7 +141,7 @@ def test_do_upload_logic_dry_run(mocker):
             pull_request_number="pr",
             dry_run=True,
         )
-    out_bytes = outstreams[0].getvalue().decode().splitlines()
+    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     mock_select_coverage_file_finder.assert_called_with(None, None, None)
     mock_select_network_finder.assert_called_with(versioning_system)
     assert mock_generate_upload_data.call_count == 1
@@ -148,7 +150,7 @@ def test_do_upload_logic_dry_run(mocker):
         cli_config, ["first_plugin", "another", "forth"]
     )
     assert out_bytes == [
-        "info: dry-run option activated. NOT sending data to Codecov.",
+        ("info", "dry-run option activated. NOT sending data to Codecov.")
     ]
     assert res == RequestResult(
         error=None,
@@ -196,14 +198,17 @@ def test_do_upload_logic_verbose(mocker, use_verbose_option):
             pull_request_number="pr",
             dry_run=True,
         )
-    out_bytes = outstreams[0].getvalue().decode().splitlines()
+    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
-        "debug: Selected uploader to use: <class "
-        "'codecov_cli.services.legacy_upload.upload_sender.LegacyUploadSender'>",
-        "info: dry-run option activated. NOT sending data to Codecov.",
-        'debug: Process Upload complete. --- {"result": "RequestResult(error=None, '
-        "warnings=None, status_code=200, text='Data NOT sent to Codecov because of "
-        "dry-run option')\"}",
+        (
+            "debug",
+            "Selected uploader to use: <class 'codecov_cli.services.legacy_upload.upload_sender.LegacyUploadSender'>",
+        ),
+        ("info", "dry-run option activated. NOT sending data to Codecov."),
+        (
+            "debug",
+            'Process Upload complete. --- {"result": "RequestResult(error=None, warnings=None, status_code=200, text=\'Data NOT sent to Codecov because of dry-run option\')"}',
+        ),
     ]
     assert res == RequestResult(
         error=None,

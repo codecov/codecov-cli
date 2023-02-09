@@ -4,6 +4,7 @@ from functools import partial
 import pytest
 
 from codecov_cli.plugins.xcode import XcodePlugin
+from tests.test_helpers import parse_outstreams_into_log_lines
 
 
 class TestXcode(object):
@@ -24,10 +25,10 @@ class TestXcode(object):
         xcode_plugin = XcodePlugin(derived_data_folder=tmp_path).run_preparation(
             collector=None
         )
-        output = capsys.readouterr().err.splitlines()
+        output = parse_outstreams_into_log_lines(capsys.readouterr().err)
         assert xcode_plugin is None
-        assert f"debug: DerivedData folder: {tmp_path}" in output
-        assert "warning: No swift data found." in output
+        assert ("debug", f"DerivedData folder: {tmp_path}") in output
+        assert ("warning", "No swift data found.") in output
 
     def test_run_preparation_xcrun_not_installed(self, mocker, tmp_path, capsys):
         self.act_like_xcrun_is_not_installed(mocker)
@@ -43,11 +44,12 @@ class TestXcode(object):
         dir.mkdir()
         (dir / "cov_data.profdata").touch()
         XcodePlugin(derived_data_folder=tmp_path).run_preparation(collector=None)
-        output = capsys.readouterr().err.splitlines()
+        output = parse_outstreams_into_log_lines(capsys.readouterr().err)
         expected = (
-            'info: Running swift coverage on the following list of files: --- {"matched_paths": ["'
+            "info",
+            'Running swift coverage on the following list of files: --- {"matched_paths": ["'
             + f"{dir}/cov_data.profdata"
-            + '"]}'
+            + '"]}',
         )
         assert expected in output
 

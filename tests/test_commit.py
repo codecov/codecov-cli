@@ -4,6 +4,7 @@ from click.testing import CliRunner
 
 from codecov_cli.services.commit import create_commit_logic, send_commit_data
 from codecov_cli.types import RequestError, RequestResult, RequestResultWarning
+from tests.test_helpers import parse_outstreams_into_log_lines
 
 
 def test_commit_command_with_warnings(mocker):
@@ -28,10 +29,10 @@ def test_commit_command_with_warnings(mocker):
             service="service",
         )
 
-    out_bytes = outstreams[0].getvalue().decode().splitlines()
+    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
-        "info: Commit creating process had 1 warning",
-        "warning: Warning 1: somewarningmessage",
+        ("info", "Commit creating process had 1 warning"),
+        ("warning", "Warning 1: somewarningmessage"),
     ]
     assert res == mock_send_commit_data.return_value
     mock_send_commit_data.assert_called_with(
@@ -71,8 +72,8 @@ def test_commit_command_with_error(mocker):
             service="service",
         )
 
-    out_bytes = outstreams[0].getvalue().decode().splitlines()
-    assert out_bytes == ["error: Commit creating failed: Permission denied"]
+    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+    assert out_bytes == [("error", "Commit creating failed: Permission denied")]
     assert res == mock_send_commit_data.return_value
     mock_send_commit_data.assert_called_with(
         commit_sha="commit_sha",

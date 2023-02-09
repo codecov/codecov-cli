@@ -4,6 +4,7 @@ from click.testing import CliRunner
 
 from codecov_cli.services.report import create_report_logic, send_create_report_request
 from codecov_cli.types import RequestError, RequestResult, RequestResultWarning
+from tests.test_helpers import parse_outstreams_into_log_lines
 
 
 def test_send_create_report_request_200(mocker):
@@ -55,10 +56,10 @@ def test_create_report_command_with_warnings(mocker):
             token="token",
         )
 
-    out_bytes = outstreams[0].getvalue().decode().splitlines()
+    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
-        "info: Report creating process had 1 warning",
-        "warning: Warning 1: somewarningmessage",
+        ("info", "Report creating process had 1 warning"),
+        ("warning", "Warning 1: somewarningmessage"),
     ]
     assert res == RequestResult(
         error=None,
@@ -99,8 +100,8 @@ def test_create_report_command_with_error(mocker):
             token="token",
         )
 
-    out_bytes = outstreams[0].getvalue().decode().splitlines()
-    assert out_bytes == ["error: Report creating failed: Permission denied"]
+    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+    assert out_bytes == [("error", "Report creating failed: Permission denied")]
     assert res == RequestResult(
         error=RequestError(
             code="HTTP Error 403",

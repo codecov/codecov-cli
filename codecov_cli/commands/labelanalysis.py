@@ -97,7 +97,7 @@ class ThisRunner(object):
         ]
 
     def do_something_with_result(self, result):
-        command_array = ["python", "-m", "pytest"]
+        command_array = ["python", "-m", "pytest", "--cov=./", "--cov-context=test"]
         all_labels = (
             result["absent_labels"]
             + result["present_diff_labels"]

@@ -26,7 +26,6 @@ def test_sample_analysis(input_filename, output_filename):
     with open(output_filename, "r") as file:
         expected_result = json.load(file)
     json_res = json.dumps(res.asdict())
-    print(json_res)
     res_dict = json.loads(json_res)
     assert sorted(res_dict["result"].keys()) == sorted(expected_result["result"].keys())
     res_dict["result"]["functions"] = sorted(

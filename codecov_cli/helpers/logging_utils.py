@@ -34,10 +34,13 @@ class ColorFormatter(logging.Formatter):
     def format(self, record):
         if not record.exc_info:
             level = record.levelname.lower()
+            asctime = self.formatTime(record, self.datefmt)
             msg = record.getMessage()
             if level in self.colors:
-                prefix = click.style("{}: ".format(level), **self.colors[level])
-                msg = "\n".join(prefix + x for x in msg.splitlines())
+                prefix = click.style("{}".format(level), **self.colors[level])
+                msg = "\n".join(
+                    f"{prefix} - {asctime} -- {x}" for x in msg.splitlines()
+                )
             if hasattr(record, "extra_log_attributes"):
                 msg += " --- " + json.dumps(
                     record.extra_log_attributes, cls=JsonEncoder

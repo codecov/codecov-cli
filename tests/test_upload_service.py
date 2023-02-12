@@ -7,11 +7,7 @@ from codecov_cli.services.legacy_upload import (
     UploadCollector,
     do_upload_logic,
 )
-from codecov_cli.services.legacy_upload.upload_sender import (
-    UploadSendingResult,
-    UploadSendingResultWarning,
-)
-from codecov_cli.types import RequestResult
+from codecov_cli.types import RequestResult, RequestResultWarning
 from tests.test_helpers import parse_outstreams_into_log_lines
 
 
@@ -31,9 +27,11 @@ def test_do_upload_logic_happy_path(mocker):
     mock_send_upload_data = mocker.patch.object(
         LegacyUploadSender,
         "send_upload_data",
-        return_value=UploadSendingResult(
+        return_value=RequestResult(
+            status_code=200,
             error=None,
-            warnings=[UploadSendingResultWarning(message="somewarningmessage")],
+            warnings=[RequestResultWarning(message="somewarningmessage")],
+            text="",
         ),
     )
     cli_config = {}

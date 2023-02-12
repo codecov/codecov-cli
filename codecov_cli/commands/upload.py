@@ -213,7 +213,7 @@ def do_upload(
             )
         ),
     )
-    do_upload_logic(
+    res = do_upload_logic(
         cli_config,
         versioning_system,
         ci_adapter,
@@ -238,3 +238,8 @@ def do_upload(
         fail_on_error=fail_on_error,
         dry_run=dry_run,
     )
+    if not res.error:
+        logger.info(
+            "Finished uploading report successfully",
+            extra=dict(extra_log_attributes=dict(response=res.text)),
+        )

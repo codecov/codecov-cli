@@ -5,28 +5,12 @@ from dataclasses import dataclass
 import requests
 
 from codecov_cli import __version__ as codecov_cli_version
-from codecov_cli.types import UploadCollectionResult, UploadCollectionResultFile
-
-
-@dataclass
-class UploadSendingResultWarning(object):
-    __slots__ = ("message",)
-    message: str
-
-
-@dataclass
-class UploadSendingError(object):
-    __slots__ = ("code", "params", "description")
-    code: str
-    params: typing.Dict
-    description: str
-
-
-@dataclass
-class UploadSendingResult(object):
-    __slots__ = ("error", "warnings")
-    error: typing.Optional[UploadSendingError]
-    warnings: typing.List[UploadSendingResultWarning]
+from codecov_cli.types import (
+    RequestError,
+    RequestResult,
+    UploadCollectionResult,
+    UploadCollectionResultFile,
+)
 
 
 class LegacyUploadSender(object):
@@ -46,7 +30,7 @@ class LegacyUploadSender(object):
         job_code: typing.Optional[str] = None,
         flags: typing.List[str] = None,
         service: typing.Optional[str] = None,
-    ) -> UploadSendingResult:
+    ) -> RequestResult:
 
         params = {
             "package": f"codecov-cli/{codecov_cli_version}",
@@ -69,13 +53,15 @@ class LegacyUploadSender(object):
         )
 
         if resp.status_code >= 400:
-            return UploadSendingResult(
-                error=UploadSendingError(
+            return RequestResult(
+                status_code=resp.status_code,
+                error=RequestError(
                     code=f"HTTP Error {resp.status_code}",
                     description=resp.text,
                     params={},
                 ),
                 warnings=[],
+                text=resp.text,
             )
 
         result_url, put_url = resp.text.split("\n")
@@ -84,16 +70,20 @@ class LegacyUploadSender(object):
         resp = requests.put(put_url, data=reports_payload)
 
         if resp.status_code >= 400:
-            return UploadSendingResult(
-                error=UploadSendingError(
+            return RequestResult(
+                status_code=resp.status_code,
+                error=RequestError(
                     code=f"HTTP Error {resp.status_code}",
                     description=resp.text,
                     params={},
                 ),
                 warnings=[],
+                text=resp.text,
             )
 
-        return UploadSendingResult(error=None, warnings=[])
+        return RequestResult(
+            status_code=resp.status_code, error=None, warnings=[], text=resp.text
+        )
 
     def _generate_payload(
         self, upload_data: UploadCollectionResult, env_vars: typing.Dict[str, str]

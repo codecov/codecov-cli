@@ -2,6 +2,7 @@ import logging
 import subprocess
 import typing
 from pathlib import Path
+from shutil import which
 
 from codecov_cli.fallbacks import FallbackFieldEnum
 from codecov_cli.helpers.git import parse_git_service, parse_slug
@@ -37,7 +38,7 @@ def get_versioning_system() -> VersioningSystemInterface:
 class GitVersioningSystem(VersioningSystemInterface):
     @classmethod
     def is_available(cls):
-        return True
+        return which("git") is not None
 
     def get_fallback_value(self, fallback_field: FallbackFieldEnum):
         if fallback_field == FallbackFieldEnum.commit_sha:

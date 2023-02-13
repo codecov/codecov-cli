@@ -37,6 +37,8 @@ class UploadCollector(object):
     def _produce_file_fixes_for_network(
         self, network: typing.List[str]
     ) -> typing.List[UploadCollectionResultFileFixer]:
+        if not network:
+            return []
         # patterns that we don't need to specify a reason for
         empty_line_regex = re.compile(r"^\s*$")
         comment_regex = re.compile(r"^\s*\/\/.*$")

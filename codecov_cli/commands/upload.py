@@ -143,9 +143,7 @@ def _turn_env_vars_into_dict(ctx, params, value):
     default=[],
     help="Flag the upload to group coverage metrics. Multiple flags allowed.",
 )
-@click.option(
-    "--plugin", "plugin_names", multiple=True, default=["xcode", "gcov", "pycoverage"]
-)
+@click.option("--plugin", "plugin_names", multiple=True, default=[])
 @click.option(
     "-Z",
     "--fail-on-error",

@@ -1,3 +1,6 @@
+from codecov_cli.plugins.pycoverage import Pycoverage
+import pytest
+
 from codecov_cli.plugins import (
     GcovPlugin,
     NoopPlugin,
@@ -42,14 +45,18 @@ def test_load_plugin_from_yaml_bad_parameters(mocker):
     assert isinstance(res, NoopPlugin)
 
 
-def test_get_plugin_gcov():
-    res = _get_plugin({}, "gcov")
-    assert isinstance(res, GcovPlugin)
-
-
-def test_get_plugin_xcode():
-    res = _get_plugin({}, "xcode")
-    assert isinstance(res, XcodePlugin)
+@pytest.mark.parametrize(
+    "plugin_name,expected_class",
+    [
+        ("gcov", GcovPlugin),
+        ("xcode", XcodePlugin),
+        ("pycoverage", Pycoverage),
+        (None, NoopPlugin),
+    ],
+)
+def test_get_plugin_by_name(plugin_name, expected_class):
+    plugin = _get_plugin({}, plugin_name)
+    assert isinstance(plugin, expected_class)
 
 
 def test_select_preparation_plugins(mocker):

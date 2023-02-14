@@ -13,5 +13,6 @@ def test_existing_commands():
         "do-upload",
         "get-report-results",
         "label-analysis",
+        "pr-base-picking",
         "static-analysis",
     ]

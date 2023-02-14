@@ -32,7 +32,7 @@ def label_analysis(token, head_commit_sha, base_commit_sha):
     url = "https://api.codecov.io/labels/labels-analysis"
     token_header = f"Repotoken {token}"
     # this needs to be more flexible to support multiple elements
-    runner = ThisRunner()
+    runner = PythonStandardRunner()
     requested_labels = runner.collect_tests()
     payload = {
         "base_commit": base_commit_sha,
@@ -44,6 +44,18 @@ def label_analysis(token, head_commit_sha, base_commit_sha):
             url, json=payload, headers={"Authorization": token_header}
         )
         if response.status_code >= 500:
+            logger.warning(
+                "Sorry. Codecov is having problems",
+                extra=dict(extra_log_attributes=dict(status_code=response.status_code)),
+            )
+            if requested_labels:
+                fake_response = {
+                    "present_report_labels": [],
+                    "absent_labels": requested_labels,
+                    "present_diff_labels": [],
+                    "global_level_labels": [],
+                }
+                return runner.do_something_with_result(fake_response)
             raise click.ClickException("Sorry. Codecov is having problems")
         if response.status_code >= 400:
             logger.warning(
@@ -77,12 +89,21 @@ def label_analysis(token, head_commit_sha, base_commit_sha):
                 "Request had problems calculating",
                 extra=dict(extra_log_attributes=dict(resp_json=resp_json)),
             )
+            if requested_labels:
+                logger.info("Using requested labels as tests to run")
+                fake_response = {
+                    "present_report_labels": [],
+                    "absent_labels": requested_labels,
+                    "present_diff_labels": [],
+                    "global_level_labels": [],
+                }
+                return runner.do_something_with_result(fake_response)
             return
         logger.info("Waiting more time for result")
         time.sleep(5)
 
 
-class ThisRunner(object):
+class PythonStandardRunner(object):
     def collect_tests(self):
         return [
             x
@@ -98,11 +119,30 @@ class ThisRunner(object):
 
     def do_something_with_result(self, result):
         command_array = ["python", "-m", "pytest", "--cov=./", "--cov-context=test"]
+        logger.info(
+            "Received information about tests to run",
+            extra=dict(
+                extra_log_attributes=dict(
+                    absent_labels=len(result["absent_labels"] or []),
+                    present_diff_labels=len(result["present_diff_labels"] or []),
+                    global_level_labels=len(result["global_level_labels"] or []),
+                    present_report_labels=len(result["present_report_labels"] or []),
+                )
+            ),
+        )
         all_labels = (
             result["absent_labels"]
             + result["present_diff_labels"]
             + result["global_level_labels"]
         )
+        skipped_tests = set(result["present_report_labels"]) - set(all_labels)
+        if skipped_tests:
+            logger.info(
+                "Some tests are being skipped",
+                extra=dict(
+                    extra_log_attributes=dict(skipped_tests=sorted(skipped_tests))
+                ),
+            )
         all_labels = set(all_labels)
         all_labels = [x.rsplit("[", 1)[0] if "[" in x else x for x in all_labels]
         # Not safe from the customer perspective, in general, probably.

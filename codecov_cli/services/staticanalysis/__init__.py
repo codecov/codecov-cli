@@ -117,7 +117,7 @@ async def send_single_upload_put(client, all_data, el):
         if response.status_code < 300:
             return response
         if response.status_code in retryable_statuses:
-            asyncio.sleep(2**current_retry)
+            await asyncio.sleep(2**current_retry)
     logger.warning(
         "Unable to send data",
         extra=dict(

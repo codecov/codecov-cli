@@ -72,9 +72,4 @@ def pr_base_picking(
         )
         return
 
-    res = base_picking_logic(base_sha, pr, slug, token, service)
-    if not res.error:
-        logger.info(
-            "Base picking finished successfully",
-            extra=dict(extra_log_attributes=dict(response=res.text)),
-        )
+    base_picking_logic(base_sha, pr, slug, token, service)

@@ -1,0 +1,2 @@
+class AnalysisError(Exception):
+    pass

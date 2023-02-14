@@ -34,10 +34,13 @@ class ColorFormatter(logging.Formatter):
     def format(self, record):
         if not record.exc_info:
             level = record.levelname.lower()
+            asctime = self.formatTime(record, self.datefmt)
             msg = record.getMessage()
             if level in self.colors:
-                prefix = click.style("{}: ".format(level), **self.colors[level])
-                msg = "\n".join(prefix + x for x in msg.splitlines())
+                prefix = click.style("{}".format(level), **self.colors[level])
+                msg = "\n".join(
+                    f"{prefix} - {asctime} -- {x}" for x in msg.splitlines()
+                )
             if hasattr(record, "extra_log_attributes"):
                 msg += " --- " + json.dumps(
                     record.extra_log_attributes, cls=JsonEncoder
@@ -58,9 +61,12 @@ class ClickHandler(logging.Handler):
             self.handleError(record)
 
 
-def configure_logger(logger):
-    ch = ClickHandler()
-    ch.setFormatter(ColorFormatter())
-    logger.addHandler(ch)
+def configure_logger(logger: logging.Logger, log_level=logging.INFO):
+    # This if exists to avoid an issue where extra handlers would be added by tests that use runner.invoke()
+    # Which would cause subsequent tests to failed due to repeated log lines
+    if not logger.hasHandlers():
+        ch = ClickHandler()
+        ch.setFormatter(ColorFormatter())
+        logger.addHandler(ch)
     logger.propagate = False
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(log_level)

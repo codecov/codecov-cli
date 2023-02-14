@@ -17,6 +17,7 @@ from codecov_cli.services.legacy_upload.network_finder import select_network_fin
 from codecov_cli.services.legacy_upload.upload_collector import UploadCollector
 from codecov_cli.services.legacy_upload.upload_sender import LegacyUploadSender
 from codecov_cli.services.upload.upload_sender import UploadSender
+from codecov_cli.types import RequestResult
 
 logger = logging.getLogger("codecovcli")
 
@@ -44,7 +45,8 @@ def do_upload_logic(
     slug: typing.Optional[str],
     pull_request_number: typing.Optional[str],
     is_using_new_uploader: bool = False,
-    fail_on_error: bool = False
+    fail_on_error: bool = False,
+    dry_run: bool = False,
 ):
     preparation_plugins = select_preparation_plugins(cli_config, plugin_names)
     coverage_file_selector = select_coverage_file_finder(
@@ -61,26 +63,37 @@ def do_upload_logic(
         sender = UploadSender()
     else:
         sender = LegacyUploadSender()
+    logger.debug(f"Selected uploader to use: {type(sender)}")
     service = (
         ci_adapter.get_fallback_value(FallbackFieldEnum.service)
         if ci_adapter is not None
         else None
     )
-    sending_result = sender.send_upload_data(
-        upload_data,
-        commit_sha,
-        token,
-        env_vars,
-        report_code,
-        name,
-        branch,
-        slug,
-        pull_request_number,
-        build_code,
-        build_url,
-        job_code,
-        flags,
-        service,
-    )
+
+    if not dry_run:
+        sending_result = sender.send_upload_data(
+            upload_data,
+            commit_sha,
+            token,
+            env_vars,
+            report_code,
+            name,
+            branch,
+            slug,
+            pull_request_number,
+            build_code,
+            build_url,
+            job_code,
+            flags,
+            service,
+        )
+    else:
+        logger.info("dry-run option activated. NOT sending data to Codecov.")
+        sending_result = RequestResult(
+            error=None,
+            warnings=None,
+            status_code=200,
+            text="Data NOT sent to Codecov because of dry-run option",
+        )
     log_warnings_and_errors_if_any(sending_result, "Upload", fail_on_error)
     return sending_result

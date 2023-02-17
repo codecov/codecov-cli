@@ -47,6 +47,7 @@ def do_upload_logic(
     is_using_new_uploader: bool = False,
     fail_on_error: bool = False,
     dry_run: bool = False,
+    git_service: typing.Optional[str],
 ):
     preparation_plugins = select_preparation_plugins(cli_config, plugin_names)
     coverage_file_selector = select_coverage_file_finder(
@@ -64,7 +65,7 @@ def do_upload_logic(
     else:
         sender = LegacyUploadSender()
     logger.debug(f"Selected uploader to use: {type(sender)}")
-    service = (
+    ci_service = (
         ci_adapter.get_fallback_value(FallbackFieldEnum.service)
         if ci_adapter is not None
         else None
@@ -85,7 +86,8 @@ def do_upload_logic(
             build_url,
             job_code,
             flags,
-            service,
+            ci_service,
+            git_service,
         )
     else:
         logger.info("dry-run option activated. NOT sending data to Codecov.")

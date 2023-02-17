@@ -7,6 +7,7 @@ import uuid
 import click
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
+from codecov_cli.helpers.git import GitService
 from codecov_cli.services.legacy_upload import do_upload_logic
 
 logger = logging.getLogger("codecovcli")
@@ -161,6 +162,12 @@ def _turn_env_vars_into_dict(ctx, params, value):
     help="Don't upload files to Codecov",
 )
 @click.option("--use-new-uploader", "is_using_new_uploader", default=False)
+@click.option(
+    "--git-service",
+    cls=CodecovOption,
+    fallback_field=FallbackFieldEnum.git_service,
+    type=click.Choice(service.value for service in GitService),
+)
 @click.pass_context
 def do_upload(
     ctx: click.Context,
@@ -184,6 +191,7 @@ def do_upload(
     is_using_new_uploader: bool,
     fail_on_error: bool,
     dry_run: bool,
+    git_service: typing.Optional[str],
 ):
     versioning_system = ctx.obj["versioning_system"]
     codecov_yaml = ctx.obj["codecov_yaml"] or {}
@@ -210,6 +218,7 @@ def do_upload(
                 branch=branch,
                 slug=slug,
                 pull_request_number=pull_request_number,
+                git_service=git_service,
             )
         ),
     )
@@ -237,4 +246,5 @@ def do_upload(
         is_using_new_uploader=is_using_new_uploader,
         fail_on_error=fail_on_error,
         dry_run=dry_run,
+        git_service=git_service,
     )

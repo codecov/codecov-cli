@@ -30,7 +30,8 @@ class UploadSender(object):
         build_url: typing.Optional[str] = None,
         job_code: typing.Optional[str] = None,
         flags: typing.List[str] = None,
-        service: typing.Optional[str] = None,
+        ci_service: typing.Optional[str] = None,
+        git_service: typing.Optional[str] = None,
     ) -> RequestResult:
 
         data = {
@@ -42,7 +43,7 @@ class UploadSender(object):
 
         headers = {"Authorization": f"token {token.hex}"}
         encoded_slug = encode_slug(slug)
-        url = f"https://api.codecov.io/upload/github/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads"
+        url = f"https://api.codecov.io/upload/{git_service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads"
         resp = send_post_request(url=url, data=data, headers=headers)
 
         if resp.status_code >= 400:

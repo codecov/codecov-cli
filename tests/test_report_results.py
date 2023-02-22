@@ -120,7 +120,7 @@ def test_get_report_results_200_completed(mocker, capsys):
         "codecov_cli.services.report.requests.get",
         return_value=mocker.MagicMock(
             status_code=200,
-            text='{"state": "completed", "result": {"state": "failure","message": "33.33% of diff hit (target 77.77%)"}}',
+            text='{"state": "success", "result": {"state": "failure","message": "33.33% of diff hit (target 77.77%)"}}',
         ),
     )
     token = uuid.uuid4()

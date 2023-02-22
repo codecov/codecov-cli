@@ -72,8 +72,8 @@ def send_reports_result_get_request(
         if response_obj.error:
             log_warnings_and_errors_if_any(response_obj, "Getting report results")
             return response_obj
-
-        state = response_content.get("state").lower()
+        state = response_content.get("state") or ""
+        state = state.lower()
         if state == "error":
             logger.error(
                 "An error occured while processing the report. Please try again later.",
@@ -88,7 +88,7 @@ def send_reports_result_get_request(
             return response_obj
         elif state == "pending":
             logger.info("Report with the given code is still being processed.")
-        elif state == "completed":
+        elif state == "success":
             logger.info(
                 "Finished processing report results",
                 extra=dict(

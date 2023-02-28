@@ -1,7 +1,7 @@
 from click.testing import CliRunner
 
 from codecov_cli.main import cli
-from codecov_cli.services.legacy_upload import UploadSender
+from codecov_cli.services.upload import UploadSender
 from codecov_cli.types import RequestError, RequestResult
 from tests.test_helpers import parse_outstreams_into_log_lines
 
@@ -31,9 +31,7 @@ def test_upload_raise_Z_option(mocker):
         UploadSender, "send_upload_data", return_value=result
     )
     runner = CliRunner()
-    result = runner.invoke(
-        cli, ["do-upload", "--fail-on-error", "--use-new-uploader=True"], obj={}
-    )
+    result = runner.invoke(cli, ["do-upload", "--fail-on-error"], obj={})
     upload_sender.assert_called
     assert ("error", "Upload failed: Unauthorized") in parse_outstreams_into_log_lines(
         result.output

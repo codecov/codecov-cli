@@ -8,7 +8,7 @@ import click
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
 from codecov_cli.helpers.git import GitService
-from codecov_cli.services.legacy_upload import do_upload_logic
+from codecov_cli.services.upload import do_upload_logic
 
 logger = logging.getLogger("codecovcli")
 
@@ -161,7 +161,7 @@ def _turn_env_vars_into_dict(ctx, params, value):
     is_flag=True,
     help="Don't upload files to Codecov",
 )
-@click.option("--use-new-uploader", "is_using_new_uploader", default=False)
+@click.option("--use-new-uploader", "is_using_new_uploader", default=True)
 @click.option(
     "--git-service",
     cls=CodecovOption,

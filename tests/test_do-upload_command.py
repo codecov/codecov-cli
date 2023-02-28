@@ -1,7 +1,7 @@
 from click.testing import CliRunner
 
 from codecov_cli.main import cli
-from codecov_cli.services.legacy_upload import UploadSender
+from codecov_cli.services.upload import UploadSender
 from codecov_cli.types import RequestError, RequestResult
 from tests.test_helpers import parse_outstreams_into_log_lines
 

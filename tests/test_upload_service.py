@@ -2,12 +2,12 @@ import logging
 
 from click.testing import CliRunner
 
-from codecov_cli.services.legacy_upload import (
+from codecov_cli.services.upload import (
     LegacyUploadSender,
     UploadCollector,
     do_upload_logic,
 )
-from codecov_cli.services.legacy_upload.upload_sender import (
+from codecov_cli.services.upload.legacy_upload_sender import (
     UploadSendingResult,
     UploadSendingResultWarning,
 )
@@ -17,13 +17,13 @@ from tests.test_helpers import parse_outstreams_into_log_lines
 
 def test_do_upload_logic_happy_path(mocker):
     mock_select_preparation_plugins = mocker.patch(
-        "codecov_cli.services.legacy_upload.select_preparation_plugins"
+        "codecov_cli.services.upload.select_preparation_plugins"
     )
     mock_select_coverage_file_finder = mocker.patch(
-        "codecov_cli.services.legacy_upload.select_coverage_file_finder"
+        "codecov_cli.services.upload.select_coverage_file_finder"
     )
     mock_select_network_finder = mocker.patch(
-        "codecov_cli.services.legacy_upload.select_network_finder"
+        "codecov_cli.services.upload.select_network_finder"
     )
     mock_generate_upload_data = mocker.patch.object(
         UploadCollector, "generate_upload_data"
@@ -99,13 +99,13 @@ def test_do_upload_logic_happy_path(mocker):
 
 def test_do_upload_logic_dry_run(mocker):
     mock_select_preparation_plugins = mocker.patch(
-        "codecov_cli.services.legacy_upload.select_preparation_plugins"
+        "codecov_cli.services.upload.select_preparation_plugins"
     )
     mock_select_coverage_file_finder = mocker.patch(
-        "codecov_cli.services.legacy_upload.select_coverage_file_finder"
+        "codecov_cli.services.upload.select_coverage_file_finder"
     )
     mock_select_network_finder = mocker.patch(
-        "codecov_cli.services.legacy_upload.select_network_finder"
+        "codecov_cli.services.upload.select_network_finder"
     )
     mock_generate_upload_data = mocker.patch.object(
         UploadCollector, "generate_upload_data"
@@ -164,9 +164,9 @@ def test_do_upload_logic_dry_run(mocker):
 
 
 def test_do_upload_logic_verbose(mocker, use_verbose_option):
-    mocker.patch("codecov_cli.services.legacy_upload.select_preparation_plugins")
-    mocker.patch("codecov_cli.services.legacy_upload.select_coverage_file_finder")
-    mocker.patch("codecov_cli.services.legacy_upload.select_network_finder")
+    mocker.patch("codecov_cli.services.upload.select_preparation_plugins")
+    mocker.patch("codecov_cli.services.upload.select_coverage_file_finder")
+    mocker.patch("codecov_cli.services.upload.select_network_finder")
     mocker.patch.object(UploadCollector, "generate_upload_data")
     mocker.patch.object(
         LegacyUploadSender,
@@ -206,7 +206,7 @@ def test_do_upload_logic_verbose(mocker, use_verbose_option):
     assert out_bytes == [
         (
             "debug",
-            "Selected uploader to use: <class 'codecov_cli.services.legacy_upload.upload_sender.LegacyUploadSender'>",
+            "Selected uploader to use: <class 'codecov_cli.services.upload.legacy_upload_sender.LegacyUploadSender'>",
         ),
         ("info", "dry-run option activated. NOT sending data to Codecov."),
         (

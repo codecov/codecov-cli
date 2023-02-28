@@ -161,7 +161,13 @@ def _turn_env_vars_into_dict(ctx, params, value):
     is_flag=True,
     help="Don't upload files to Codecov",
 )
-@click.option("--use-new-uploader", "is_using_new_uploader", default=True)
+@click.option(
+    "--legacy",
+    "--use-legacy-uploader",
+    "use_legacy_uploader",
+    is_flag=True,
+    help="Use the legacy upload endpoint",
+)
 @click.option(
     "--git-service",
     cls=CodecovOption,
@@ -188,7 +194,7 @@ def do_upload(
     branch: typing.Optional[str],
     slug: typing.Optional[str],
     pull_request_number: typing.Optional[str],
-    is_using_new_uploader: bool,
+    use_legacy_uploader: bool,
     fail_on_error: bool,
     dry_run: bool,
     git_service: typing.Optional[str],
@@ -243,7 +249,7 @@ def do_upload(
         branch=branch,
         slug=slug,
         pull_request_number=pull_request_number,
-        is_using_new_uploader=is_using_new_uploader,
+        use_legacy_uploader=use_legacy_uploader,
         fail_on_error=fail_on_error,
         dry_run=dry_run,
         git_service=git_service,

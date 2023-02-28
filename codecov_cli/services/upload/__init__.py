@@ -42,7 +42,7 @@ def do_upload_logic(
     branch: typing.Optional[str],
     slug: typing.Optional[str],
     pull_request_number: typing.Optional[str],
-    is_using_new_uploader: bool = False,
+    use_legacy_uploader: bool = False,
     fail_on_error: bool = False,
     dry_run: bool = False,
     git_service: typing.Optional[str],
@@ -58,10 +58,10 @@ def do_upload_logic(
         preparation_plugins, network_finder, coverage_file_selector
     )
     upload_data = collector.generate_upload_data()
-    if is_using_new_uploader:
-        sender = UploadSender()
-    else:
+    if use_legacy_uploader:
         sender = LegacyUploadSender()
+    else:
+        sender = UploadSender()
     logger.debug(f"Selected uploader to use: {type(sender)}")
     ci_service = (
         ci_adapter.get_fallback_value(FallbackFieldEnum.service)

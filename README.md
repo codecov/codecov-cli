@@ -44,6 +44,20 @@ WIP
 
 # Development
 
+## Requirements
+
+To start, most of this package is a normal Python package. The main different thing is the static analysis tool that uses both git submodules and c code
+
+Before installing, one should pull the submodules with
+
+```
+git submodule update --init
+```
+
+The c code shouldn't require anything on most places, but it might ask you to install compilers and stuff. Most of the times you can find the instructions online given the error messsage
+
+## Guidelines
+
 There are a few guidelines when developing in this systems. We have a few notable folders:
 
 1. `commands` - It's the folder that interacts with the caller. This is where the commands themselves should live. They are not meant to do heavy lifting. They only do wiring, which is mostly parsing the input parameters

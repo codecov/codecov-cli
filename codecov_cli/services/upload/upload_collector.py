@@ -1,3 +1,4 @@
+import logging
 import pathlib
 import re
 import typing
@@ -5,13 +6,15 @@ import uuid
 from collections import namedtuple
 from fnmatch import fnmatch
 
-from codecov_cli.services.legacy_upload.coverage_file_finder import CoverageFileFinder
-from codecov_cli.services.legacy_upload.network_finder import NetworkFinder
+from codecov_cli.services.upload.coverage_file_finder import CoverageFileFinder
+from codecov_cli.services.upload.network_finder import NetworkFinder
 from codecov_cli.types import (
     PreparationPluginInterface,
     UploadCollectionResult,
     UploadCollectionResultFileFixer,
 )
+
+logger = logging.getLogger("codecovcli")
 
 fix_patterns_to_apply = namedtuple(
     "fix_patterns_to_apply", ["without_reason", "with_reason", "eof"]
@@ -123,9 +126,14 @@ class UploadCollector(object):
 
     def generate_upload_data(self) -> UploadCollectionResult:
         for prep in self.preparation_plugins:
+            logger.debug(f"Running preparation plugin: {type(prep)}")
             prep.run_preparation(self)
+        logger.debug("Collecting relevant files")
         network = self.network_finder.find_files()
         coverage_files = self.coverage_file_finder.find_coverage_files()
+        logger.debug(f"Found {len(coverage_files)} coverage files to upload")
+        for file in coverage_files:
+            logger.debug(f"> {file}")
         return UploadCollectionResult(
             network=network,
             coverage_files=coverage_files,

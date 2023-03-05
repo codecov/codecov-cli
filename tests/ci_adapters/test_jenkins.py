@@ -12,9 +12,34 @@ class JenkinsCIEnvEnum(str, Enum):
     BUILD_NUMBER = "BUILD_NUMBER"
     CHANGE_ID = "CHANGE_ID"
     BRANCH_NAME = "BRANCH_NAME"
+    JENKINS_URL = "JENKINS_URL"
 
 
 class TestJenkins(object):
+    @pytest.mark.parametrize(
+        "env_dict,expected",
+        [
+            ({}, False),
+            ({JenkinsCIEnvEnum.JENKINS_URL: "url"}, True),
+        ],
+    )
+    def test_detect(self, env_dict, expected, mocker):
+        mocker.patch.dict(os.environ, env_dict)
+        actual = JenkinsAdapter().detect()
+        assert actual == expected
+
+    @pytest.mark.parametrize(
+        "env_dict,expected",
+        [
+            ({}, None),
+            ({JenkinsCIEnvEnum.BUILD_URL: "url"}, "url"),
+        ],
+    )
+    def test_build_url(self, env_dict, expected, mocker):
+        mocker.patch.dict(os.environ, env_dict)
+        actual = JenkinsAdapter().get_fallback_value(FallbackFieldEnum.build_url)
+        assert actual == expected
+
     @pytest.mark.parametrize(
         "env_dict,expected",
         [

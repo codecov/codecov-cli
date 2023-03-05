@@ -5,6 +5,10 @@ from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
 
 class AzurePipelinesCIAdapter(CIAdapterBase):
     # https://learn.microsoft.com/en-us/azure/devops/pipelines/build/variables?view=azure-devops&tabs=yaml#build-variables-devops-services
+
+    def detect(self) -> bool:
+        return bool(os.getenv("SYSTEM_TEAMFOUNDATIONCOLLECTIONURI"))
+
     def _get_commit_sha(self):
         return os.getenv("BUILD_SOURCEVERSION")
 
@@ -33,3 +37,6 @@ class AzurePipelinesCIAdapter(CIAdapterBase):
 
     def _get_service(self):
         return "azure_pipelines"
+
+    def get_service_name(self):
+        return "AzurePipelines"

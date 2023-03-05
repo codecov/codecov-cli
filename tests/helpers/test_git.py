@@ -67,3 +67,55 @@ def test_parse_slug_valid_address(address, slug):
 )
 def test_parse_slug_invalid_address(address):
     assert git.parse_slug(address) is None
+
+
+@pytest.mark.parametrize(
+    "address,git_service",
+    [
+        ("https://github.com/codecov/codecov-cli/", "github"),
+        ("https://github.com/codecov/codecov-cli.git/", "github"),
+        ("https://gitlab.com/gitlab-org/gitlab.git", "gitlab"),
+        (
+            "https://user-name@bitbucket.org/namespace-codecov/first_repo.git",
+            "bitbucket",
+        ),
+        (
+            "https://username-codecov@bitbucket.org/username-codecov/fasdf.git.git",
+            "bitbucket",
+        ),
+        (
+            "https://username-codecov@bitbucket.org/username-codecov/fasdf.git.git.git",
+            "bitbucket",
+        ),
+        (
+            "https://gitlab-ci-token:[MASKED]@gitlab.com/abc_xyz/testing_env_vars.git",
+            "gitlab",
+        ),
+        ("git@github.com:codecov/codecov-cli.git/", "github"),
+        ("git@gitlab.com:gitlab-org/gitlab.git", "gitlab"),
+        ("git@github.com:gitcodecov/codecov-cli", "github"),
+        ("git@github.com:git-codecov/codecov-cli", "github"),
+        ("git@github.com:git-codecov/codecov-cli-git", "github"),
+        ("git@github.com:codecov/git.", "github"),
+        (
+            "git@bitbucket.org:namespace-codecov/first_repo.git",
+            "bitbucket",
+        ),
+        ("git@bitbucket.org:name-codecov/abc.git.git", "bitbucket"),
+    ],
+)
+def test_parse_git_service_valid_address(address, git_service):
+    assert git.parse_git_service(address) == git_service
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        ("ssh://host.abc.xz/owner/repo.git/"),
+        ("ssh://host.abc.xz/owner/repo.git"),
+        ("user-name@host.xz:owner/repo.git/"),
+        ("host.xz:owner/repo.git/"),
+    ],
+)
+def test_parse_git_service_invalid_service(url):
+    assert git.parse_git_service(url) is None

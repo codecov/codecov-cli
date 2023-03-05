@@ -17,9 +17,23 @@ class CircleCIEnvEnum(str, Enum):
     CIRCLE_PROJECT_REPONAME = "CIRCLE_PROJECT_REPONAME"
     CIRCLE_REPOSITORY_URL = "CIRCLE_REPOSITORY_URL"
     CIRCLE_BRANCH = "CIRCLE_BRANCH"
+    CI = "CI"
+    CIRCLECI = "CIRCLECI"
 
 
 class TestCircleCI(object):
+    @pytest.mark.parametrize(
+        "env_dict,expected",
+        [
+            ({}, False),
+            ({CircleCIEnvEnum.CI: "true", CircleCIEnvEnum.CIRCLECI: "true"}, True),
+        ],
+    )
+    def test_detect(self, env_dict, expected, mocker):
+        mocker.patch.dict(os.environ, env_dict)
+        actual = CircleCICIAdapter().detect()
+        assert actual == expected
+
     @pytest.mark.parametrize(
         "env_dict,expected",
         [

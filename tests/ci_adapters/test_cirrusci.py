@@ -14,9 +14,25 @@ class CirrusEnvEnum(str, Enum):
     CIRRUS_REPO_FULL_NAME = "CIRRUS_REPO_FULL_NAME"
     CIRRUS_PR = "CIRRUS_PR"
     CIRRUS_TASK_ID = "CIRRUS_TASK_ID"
+    CIRRUS_CI = "CIRRUS_CI"
 
 
 class TestCirrus(object):
+    @pytest.mark.parametrize(
+        "env_dict,expected",
+        [
+            ({}, False),
+            (
+                {CirrusEnvEnum.CIRRUS_CI: "true"},
+                True,
+            ),
+        ],
+    )
+    def test_detect(self, env_dict, expected, mocker):
+        mocker.patch.dict(os.environ, env_dict)
+        actual = CirrusCIAdapter().detect()
+        assert actual == expected
+
     @pytest.mark.parametrize(
         "env_dict,expected",
         [
@@ -33,9 +49,7 @@ class TestCirrus(object):
         assert actual == expected
 
     def test_build_url(self):
-        assert (
-            CirrusCIAdapter().get_fallback_value(FallbackFieldEnum.build_url) is None
-        )
+        assert CirrusCIAdapter().get_fallback_value(FallbackFieldEnum.build_url) is None
 
     @pytest.mark.parametrize(
         "env_dict,expected",
@@ -56,7 +70,7 @@ class TestCirrus(object):
             ({CirrusEnvEnum.CIRRUS_TASK_ID: "123"}, "123"),
         ],
     )
-    def test_build_code(self, env_dict, expected, mocker):
+    def test_job_code(self, env_dict, expected, mocker):
         mocker.patch.dict(os.environ, env_dict)
         actual = CirrusCIAdapter().get_fallback_value(FallbackFieldEnum.job_code)
         assert actual == expected

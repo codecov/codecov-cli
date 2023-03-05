@@ -45,7 +45,8 @@ class LegacyUploadSender(object):
         build_url: typing.Optional[str] = None,
         job_code: typing.Optional[str] = None,
         flags: typing.List[str] = None,
-        service: typing.Optional[str] = None,
+        ci_service: typing.Optional[str] = None,
+        git_service: typing.Optional[str] = None,
     ) -> UploadSendingResult:
 
         params = {
@@ -56,7 +57,7 @@ class LegacyUploadSender(object):
             "branch": branch,
             "name": name,
             "slug": slug,
-            "service": service,
+            "service": ci_service,
             "flags": flags,
             "pr": pull_request_number,
             "job": job_code,

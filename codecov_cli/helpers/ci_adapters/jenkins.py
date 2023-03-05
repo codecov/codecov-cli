@@ -7,6 +7,9 @@ class JenkinsAdapter(CIAdapterBase):
     # https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#using-environment-variables
     # https://www.jenkins.io/doc/book/pipeline/multibranch/
 
+    def detect(self) -> bool:
+        return bool(os.getenv("JENKINS_URL"))
+
     def _get_commit_sha(self):
         return None
 
@@ -30,3 +33,6 @@ class JenkinsAdapter(CIAdapterBase):
 
     def _get_service(self):
         return "jenkins"
+
+    def get_service_name(self):
+        return "Jenkins"

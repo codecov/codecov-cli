@@ -42,3 +42,6 @@ class AWSCodeBuildCIAdapter(CIAdapterBase):
 
     def _get_job_code(self):
         return os.getenv("CODEBUILD_BUILD_ID")
+
+    def get_service_name(self):
+        return "AWSCodeBuild"

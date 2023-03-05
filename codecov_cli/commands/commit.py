@@ -5,6 +5,7 @@ import uuid
 import click
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
+from codecov_cli.helpers.git import GitService
 from codecov_cli.services.commit import create_commit_logic
 
 logger = logging.getLogger("codecovcli")
@@ -50,10 +51,10 @@ logger = logging.getLogger("codecovcli")
     envvar="CODECOV_TOKEN",
 )
 @click.option(
-    "--service",
+    "--git-service",
     cls=CodecovOption,
-    fallback_field=FallbackFieldEnum.service,
-    help="Specify the service provider of the repo e.g. github",
+    fallback_field=FallbackFieldEnum.git_service,
+    type=click.Choice(service.value for service in GitService),
 )
 @click.pass_context
 def create_commit(
@@ -64,7 +65,7 @@ def create_commit(
     branch: typing.Optional[str],
     slug: typing.Optional[str],
     token: typing.Optional[uuid.UUID],
-    service: typing.Optional[str],
+    git_service: typing.Optional[str],
 ):
     logger.debug(
         "Starting create commit process",
@@ -76,8 +77,8 @@ def create_commit(
                 branch=branch,
                 slug=slug,
                 token=token,
-                service=service,
+                service=git_service,
             )
         ),
     )
-    create_commit_logic(commit_sha, parent_sha, pr, branch, slug, token, service)
+    create_commit_logic(commit_sha, parent_sha, pr, branch, slug, token, git_service)

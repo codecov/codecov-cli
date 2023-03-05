@@ -13,6 +13,7 @@ class FallbackFieldEnum(Enum):
     slug = auto()
     branch = auto()
     service = auto()
+    git_service = auto()
 
 
 class CodecovOption(click.Option):

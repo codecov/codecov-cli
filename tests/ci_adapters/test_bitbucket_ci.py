@@ -13,9 +13,29 @@ class BitbucketEnvEnum(str, Enum):
     BITBUCKET_PR_ID = "BITBUCKET_PR_ID"
     BITBUCKET_COMMIT = "BITBUCKET_COMMIT"
     BITBUCKET_REPO_FULL_NAME = "BITBUCKET_REPO_FULL_NAME"
+    CI = "CI"
 
 
 class TestBitbucket(object):
+    @pytest.mark.parametrize(
+        "env_dict,expected",
+        [
+            ({}, False),
+            (
+                {
+                    BitbucketEnvEnum.CI: "true",
+                    BitbucketEnvEnum.BITBUCKET_BUILD_NUMBER: "123",
+                },
+                True,
+            ),
+        ],
+    )
+    def test_detect(self, env_dict, expected, mocker):
+        mocker.patch.dict(os.environ, env_dict)
+        actual = BitbucketAdapter().detect()
+
+        assert actual == expected
+
     @pytest.mark.parametrize(
         "env_dict,expected",
         [

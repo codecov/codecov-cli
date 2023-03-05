@@ -14,16 +14,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: true
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install black==22.3.0 isort==5.10.1
       - name: Check linting with black
         run: |
-          black --check .
+          black --check codecov_cli
       - name: Check imports order with isort
         run: |
-          isort --check --profile=black .
+          isort --check --profile=black codecov_cli -p staticcodecov_languages
 
 
   build:
@@ -35,6 +37,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
+        submodules: true
         fetch-depth: 2
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
@@ -50,10 +53,10 @@ jobs:
         pytest --cov
     - name: Dogfooding codecov-cli. Use codecov-cli to upload to codecov
       run: |
-        codecovcli --auto-load-params-from githubactions do-upload -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag cli3.10
-    - name: Upload to codecov
-      run: |
-        pip install codecov
-        codecov -t ${{ secrets.CODECOV_TOKEN }} -F python3.10
+        codecovcli do-upload -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag cli3.10 --flag python3.10
+    # - name: Upload to codecov
+    #   run: |
+    #     pip install codecov
+    #     codecov -t ${{ secrets.CODECOV_TOKEN }} -F python3.10
 
     

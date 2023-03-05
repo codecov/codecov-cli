@@ -4,6 +4,11 @@ from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
 
 
 class AppveyorCIAdapter(CIAdapterBase):
+    # https://www.appveyor.com/docs/environment-variables/
+
+    def detect(self) -> bool:
+        return bool(os.getenv("CI")) and bool(os.getenv("APPVEYOR"))
+
     def _get_commit_sha(self):
         return os.getenv("APPVEYOR_PULL_REQUEST_HEAD_COMMIT") or os.getenv(
             "APPVEYOR_REPO_COMMIT"
@@ -44,3 +49,6 @@ class AppveyorCIAdapter(CIAdapterBase):
 
     def _get_service(self):
         return "appveyor"
+
+    def get_service_name(self):
+        return "AppVeyor"

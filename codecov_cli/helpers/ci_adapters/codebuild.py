@@ -26,6 +26,8 @@ class AWSCodeBuildCIAdapter(CIAdapterBase):
         slug = os.getenv("CODEBUILD_SOURCE_REPO_URL")
         if slug:
             slug = re.sub("^.*github.com\/", "", slug)
+            slug = re.sub("^.*gitlab.com\/", "", slug)
+            slug = re.sub("^.*bitbucket.com\/", "", slug)
             return re.sub("\.git$", "", slug)
         return None
 

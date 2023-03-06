@@ -2,6 +2,7 @@ import os
 
 from codecov_cli.helpers.ci_adapters import (
     AppveyorCIAdapter,
+    AWSCodeBuildCIAdapter,
     AzurePipelinesCIAdapter,
     BitbucketAdapter,
     BitriseCIAdapter,
@@ -72,6 +73,9 @@ class TestCISelector(object):
 
     def test_returns_cirrusci(self):
         assert isinstance(get_ci_adapter("cirrusci"), CirrusCIAdapter)
+
+    def test_returns_codebuild(self):
+        assert isinstance(get_ci_adapter("AWScodebuild"), AWSCodeBuildCIAdapter)
 
     def test_auto_return_gh_actions(self, mocker):
         mocker.patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}, clear=True)

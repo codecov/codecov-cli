@@ -13,9 +13,22 @@ class CodeBuildEnvEnum(str, Enum):
     CODEBUILD_RESOLVED_SOURCE_VERSION = "CODEBUILD_RESOLVED_SOURCE_VERSION"
     CODEBUILD_SOURCE_REPO_URL = "CODEBUILD_SOURCE_REPO_URL"
     CODEBUILD_SOURCE_VERSION = "CODEBUILD_SOURCE_VERSION"
+    CODEBUILD_CI = "CODEBUILD_CI"
 
 
 class TestCodeBuild(object):
+    @pytest.mark.parametrize(
+        "env_dict,expected",
+        [
+            ({}, False),
+            ({CodeBuildEnvEnum.CODEBUILD_CI: "true"}, True),
+        ],
+    )
+    def test_detect(self, env_dict, expected, mocker):
+        mocker.patch.dict(os.environ, env_dict)
+        actual = AWSCodeBuildCIAdapter().detect()
+        assert actual == expected
+
     @pytest.mark.parametrize(
         "env_dict,expected",
         [

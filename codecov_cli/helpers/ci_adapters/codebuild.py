@@ -6,6 +6,8 @@ from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
 
 class AWSCodeBuildCIAdapter(CIAdapterBase):
     # https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
+    def detect(self) -> bool:
+        return bool(os.getenv("CODEBUILD_CI"))
 
     def _get_branch(self):
         branch = os.getenv("CODEBUILD_WEBHOOK_HEAD_REF")

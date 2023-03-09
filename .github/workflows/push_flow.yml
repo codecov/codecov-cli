@@ -1,13 +1,9 @@
 # This workflow will install Python dependencies, run tests and lint with a variety of Python versions
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: Python package
+name: Build-Test-Upload
 
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+on: [push] # Run on any push event
 
 jobs:
   lint:
@@ -27,13 +23,10 @@ jobs:
         run: |
           isort --check --profile=black codecov_cli -p staticcodecov_languages
 
-
-  build:
-
+  build-test-upload:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-
     steps:
     - uses: actions/checkout@v3
       with:
@@ -48,15 +41,16 @@ jobs:
         python -m pip install --upgrade pip
         python setup.py develop
         pip install -r requirements.txt
+    - name: Create commit in codecov
+      run: |
+        codecovcli create-commit -t ${{ secrets.CODECOV_TOKEN }} --git-service github
+    - name: Create commit report in codecov
+      run: |
+        codecovcli create-report -t ${{ secrets.CODECOV_TOKEN }} --git-service github
     - name: Test with pytest
       run: |
         pytest --cov
-    - name: Dogfooding codecov-cli. Use codecov-cli to upload to codecov
+    - name: Dogfooding codecov-cli. Use codecov-cli to upload to codecov (new upload endpoint)
       run: |
-        codecovcli do-upload -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag cli3.10 --flag python3.10
-    # - name: Upload to codecov
-    #   run: |
-    #     pip install codecov
-    #     codecov -t ${{ secrets.CODECOV_TOKEN }} -F python3.10
-
+        codecovcli do-upload --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python3.10
     

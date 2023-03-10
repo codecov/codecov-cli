@@ -68,6 +68,7 @@ class UploadSender(object):
             "coverage_files": self._get_coverage_files(upload_data),
             "metadata": {},
         }
+
         json_data = json.dumps(payload)
         return json_data.encode()
 
@@ -92,7 +93,7 @@ class UploadSender(object):
             total_fixed_lines = list(
                 file_fixer.fixed_lines_without_reason.union(fixed_lines_with_reason)
             )
-            file_fixers[file_fixer.path] = {
+            file_fixers[str(file_fixer.path)] = {
                 "eof": file_fixer.eof,
                 "lines": total_fixed_lines,
             }

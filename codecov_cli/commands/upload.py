@@ -57,7 +57,7 @@ def _turn_env_vars_into_dict(ctx, params, value):
     help="Folders where to search for coverage files",
     type=click.Path(path_type=pathlib.Path),
     multiple=True,
-    default=None,
+    default=[],
 )
 @click.option(
     "-f",
@@ -67,7 +67,7 @@ def _turn_env_vars_into_dict(ctx, params, value):
     help="Explicit files to upload",
     type=click.Path(path_type=pathlib.Path),
     multiple=True,
-    default=None,
+    default=[],
 )
 @click.option(
     "-b",
@@ -242,8 +242,12 @@ def do_upload(
         name=name,
         network_root_folder=network_root_folder,
         coverage_files_search_root_folder=coverage_files_search_root_folder,
-        coverage_files_search_exclude_folders=coverage_files_search_exclude_folders,
-        coverage_files_search_explicitly_listed_files=coverage_files_search_explicitly_listed_files,
+        coverage_files_search_exclude_folders=list(
+            coverage_files_search_exclude_folders
+        ),
+        coverage_files_search_explicitly_listed_files=list(
+            coverage_files_search_explicitly_listed_files
+        ),
         plugin_names=plugin_names,
         token=token,
         branch=branch,

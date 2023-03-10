@@ -1,5 +1,6 @@
 import json
 import uuid
+from pathlib import Path
 
 import pytest
 import responses
@@ -87,7 +88,7 @@ def get_fake_upload_collection_result(mocked_coverage_file):
     coverage_files = [mocked_coverage_file, mocked_coverage_file]
     path_fixers = [
         UploadCollectionResultFileFixer(
-            path="SwiftExample/AppDelegate.swift",
+            path=Path("SwiftExample/AppDelegate.swift"),
             fixed_lines_without_reason=set([1, 2, 3, 4, 9, 10, 11]),
             fixed_lines_with_reason=set(
                 [
@@ -100,7 +101,7 @@ def get_fake_upload_collection_result(mocked_coverage_file):
             eof=15,
         ),
         UploadCollectionResultFileFixer(
-            path="SwiftExample/Hello.swift",
+            path=Path("SwiftExample/Hello.swift"),
             fixed_lines_without_reason=set([1, 3, 7, 9, 12, 14]),
             fixed_lines_with_reason=set(
                 [
@@ -111,7 +112,7 @@ def get_fake_upload_collection_result(mocked_coverage_file):
             eof=30,
         ),
         UploadCollectionResultFileFixer(
-            path="SwiftExample/ViewController.swift",
+            path=Path("SwiftExample/ViewController.swift"),
             fixed_lines_without_reason=set(
                 [1, 4, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 26]
             ),

@@ -36,7 +36,7 @@ jobs:
         draft: ${{ contains(github.ref_name, 'test') }}
         prerelease: ${{ contains(github.ref_name, 'beta') }}
 
-  build-assets:
+  buildassets:
     name: Build packages
     needs: createrelease
     runs-on: ${{ matrix.os }}
@@ -91,7 +91,7 @@ jobs:
 
   purge_release_if_failed:
     name: Delete release if build failed
-    needs: build
+    needs: buildassets
     runs-on: ubuntu-latest
     if: ${{ failure() || cancelled() }}
     steps:

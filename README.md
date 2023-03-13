@@ -1,3 +1,12 @@
+- [Installing](#installing)
+- [Running the upload command](#running-the-upload-command)
+- [Running other commands](#running-other-commands)
+- [Plugin System](#plugin-system)
+- [Development](#development)
+  - [Requirements](#requirements)
+  - [Guidelines](#guidelines)
+- [Releases](#releases)
+
 # Installing
 
 To install this package locally, you can run
@@ -63,3 +72,14 @@ There are a few guidelines when developing in this systems. We have a few notabl
 1. `commands` - It's the folder that interacts with the caller. This is where the commands themselves should live. They are not meant to do heavy lifting. They only do wiring, which is mostly parsing the input parameters
 2. `services` - It's where the heavy logic lives. It's mostly organizaed by which command needs them.
 3. `helpers` - This is meant for logic that is probably useful accross different commands. For example, logging helpers, or the logic the searches folders
+
+# Releases
+
+The standard way to making a new release is to get the up-to-date master branch locally and run the `tag.release` command from the Makefile.
+
+`$ make tag.release version=v0.1.1`
+
+The version tag must match the regex defined on the Makefile (`tag_regex := ^v([0-9]{1,}\.){2}[0-9]{1,}([-_]\w+)?$`).
+Also keep in mind:
+* Releases with `test` word in them are created as `draft` 
+* Releases with `beta` work in them are created as `pre-release`

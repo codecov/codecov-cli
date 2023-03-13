@@ -21,7 +21,7 @@ jobs:
       with:
         tag_name: ${{ github.ref }}
         release_name: Release ${{ github.ref }}
-        draft: false
+        draft: true
         prerelease: false
     - name: Output Release URL File
       run: echo "${{ steps.create_release.outputs.upload_url }}" > release_url.txt
@@ -30,13 +30,6 @@ jobs:
       with:
         name: release_url
         path: release_url.txt
-
-        
-    - name: Build executable with pyinstaller 
-      run: |
-        pip install pyinstaller
-        pyinstaller -F codecov_cli/main.py
-
   build-assets:
     name: Build packages
     needs: createrelease

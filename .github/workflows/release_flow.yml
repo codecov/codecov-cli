@@ -49,7 +49,7 @@ jobs:
             CMD_BUILD: >
               pyinstaller -F codecov_cli/main.py &&
               cd dist/ &&
-              zip -r9 codecovcli_macos_${{github.ref_name}} main
+              zip -r9 codecovcli_macos_${{github.ref_name}}.zip main
             OUT_FILE_NAME: codecovcli_macos_${{github.ref_name}}.zip
             ASSET_MIME: application/zip
           - os: ubuntu-latest

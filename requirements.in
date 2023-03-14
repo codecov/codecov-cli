@@ -4,3 +4,5 @@ pytest-cov
 pytest-mock
 pyyaml
 responses
+httpx
+tree_sitter

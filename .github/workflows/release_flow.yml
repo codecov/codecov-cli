@@ -107,3 +107,19 @@ jobs:
       with:
         delete_release: true
         tag_name: ${{ github.ref_name }}
+
+  
+  publish_release:
+    name: Publish release
+    needs: buildassets
+      # Authenticate with gcloud using OIDC
+    - name: Authenticate with GCP using OIDC
+      run: |
+        echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > gcp-service-account.json
+        gcloud auth activate-service-account --key-file=gcp-service-account.json
+        gcloud auth login --update-adc
+
+    # Publish the release tag to a Pub/Sub topic
+    - name: Publish a message to a Pub/Sub topic
+      run: |
+        gcloud pubsub topics publish ${{ secrets.GCLOUD_UPLOADER_PUBSUB_TOPIC }} --message '{"release":"'"${{ github.ref_name }}"'", "latest":true}'

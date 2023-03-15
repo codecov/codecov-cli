@@ -48,7 +48,7 @@ jobs:
             TARGET: macos
             CMD_BUILD: >
               STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
-              pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:staticcodecov_languages --add-data languages:languages --paths build --hidden-import staticcodecov_languages -F codecov_cli/main.py &&
+              pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:staticcodecov_languages --hidden-import staticcodecov_languages -F codecov_cli/main.py &&
               cd dist/ &&
               zip -r9 codecovcli_macos_${{github.ref_name}}.zip main
             OUT_FILE_NAME: codecovcli_macos_${{github.ref_name}}.zip
@@ -57,7 +57,7 @@ jobs:
             TARGET: ubuntu
             CMD_BUILD: >
               STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
-              pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:staticcodecov_languages --add-data languages:languages --paths build --hidden-import staticcodecov_languages -F codecov_cli/main.py &&
+              pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:staticcodecov_languages --hidden-import staticcodecov_languages -F codecov_cli/main.py &&
               cp ./dist/main ./dist/codecovcli_linux_${{github.ref_name}}       
             OUT_FILE_NAME: codecovcli_linux_${{github.ref_name}}
             ASSET_MIME: application/octet-stream
@@ -80,6 +80,7 @@ jobs:
       run: |
         pip install -r requirements.txt  
         python setup.py build
+        python setup.py install
     - name: Install pyinstaller
       run: pip install pyinstaller
     - name: Build with pyinstaller for ${{matrix.TARGET}}

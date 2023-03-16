@@ -3,7 +3,7 @@ import json
 import logging
 import typing
 from functools import partial
-from multiprocessing import Pool
+from multiprocessing import get_context
 from pathlib import Path
 
 import click
@@ -41,7 +41,7 @@ async def run_analysis_entrypoint(
         length=len(files),
         label="Analyzing files",
     ) as bar:
-        with Pool(processes=numberprocesses) as pool:
+        with get_context("fork").Pool(processes=numberprocesses) as pool:
             file_results = pool.imap_unordered(mapped_func, files)
             for x in file_results:
                 bar.update(1, x)

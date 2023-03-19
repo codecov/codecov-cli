@@ -69,7 +69,7 @@ def create_commit(
     ctx,
     commit_sha: str,
     parent_sha: typing.Optional[str],
-    pr: typing.Optional[int],
+    pull_request_number: typing.Optional[int],
     branch: typing.Optional[str],
     slug: typing.Optional[str],
     token: typing.Optional[uuid.UUID],
@@ -81,7 +81,7 @@ def create_commit(
             extra_log_attributes=dict(
                 commit_sha=commit_sha,
                 parent_sha=parent_sha,
-                pr=pr,
+                pr=pull_request_number,
                 branch=branch,
                 slug=slug,
                 token=token,
@@ -89,4 +89,6 @@ def create_commit(
             )
         ),
     )
-    create_commit_logic(commit_sha, parent_sha, pr, branch, slug, token, git_service)
+    create_commit_logic(
+        commit_sha, parent_sha, pull_request_number, branch, slug, token, git_service
+    )

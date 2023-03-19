@@ -13,7 +13,10 @@ logger = logging.getLogger("codecovcli")
 
 @click.command()
 @click.option(
+    "-C",
+    "--sha",
     "--commit-sha",
+    "commit_sha",
     help="Commit SHA (with 40 chars)",
     cls=CodecovOption,
     fallback_field=FallbackFieldEnum.commit_sha,
@@ -24,8 +27,11 @@ logger = logging.getLogger("codecovcli")
     help="SHA (with 40 chars) of what should be the parent of this commit",
 )
 @click.option(
+    "-P",
     "--pr",
-    help="Pull Request id to associate commit with",
+    "--pull-request-number",
+    "pull_request_number",
+    help="Specify the pull request number mannually. Used to override pre-existing CI environment variables",
     cls=CodecovOption,
     fallback_field=FallbackFieldEnum.pull_request_number,
 )
@@ -37,7 +43,9 @@ logger = logging.getLogger("codecovcli")
     fallback_field=FallbackFieldEnum.branch,
 )
 @click.option(
+    "-r",
     "--slug",
+    "slug",
     cls=CodecovOption,
     fallback_field=FallbackFieldEnum.slug,
     help="owner/repo slug used instead of the private repo token in Self-hosted",

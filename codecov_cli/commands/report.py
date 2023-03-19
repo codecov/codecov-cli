@@ -12,7 +12,10 @@ logger = logging.getLogger("codecovcli")
 
 @click.command()
 @click.option(
+    "-C",
+    "--sha",
     "--commit-sha",
+    "commit_sha",
     help="Commit SHA (with 40 chars)",
     cls=CodecovOption,
     fallback_field=FallbackFieldEnum.commit_sha,
@@ -22,12 +25,13 @@ logger = logging.getLogger("codecovcli")
     "--code", help="The code of the report. If unsure, leave default", default="default"
 )
 @click.option(
+    "-r",
     "--slug",
+    "slug",
     cls=CodecovOption,
     fallback_field=FallbackFieldEnum.slug,
     help="owner/repo slug used instead of the private repo token in Self-hosted",
     envvar="CODECOV_SLUG",
-    required=True,
 )
 @click.option(
     "--git-service",

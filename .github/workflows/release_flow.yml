@@ -127,4 +127,5 @@ jobs:
       # Publish the release tag to a Pub/Sub topic
       - name: Publish a message to a Pub/Sub topic
         run: |
+          gcloud --quiet config set project ${{ secrets.GCLOUD_UPLOADER_PROJECT_ID }}
           gcloud pubsub topics publish ${{ secrets.GCLOUD_UPLOADER_PUBSUB_TOPIC }} --message '{"release":"'"${{ github.ref_name }}"'", "latest":true}'

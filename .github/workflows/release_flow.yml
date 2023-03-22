@@ -76,6 +76,8 @@ jobs:
       run: |
         pip install -r requirements.txt  
         echo "--------------------===----------------------"
+        echo cl.exe /showIncludes
+        echo "=================="
         python setup.py build
     - name: Install pyinstaller
       run: pip install pyinstaller

@@ -76,11 +76,7 @@ jobs:
       shell: bash
       if: runner.os == 'Windows'
       run: |
-        echo "PATH=$PATH:C:\msys64\mingw64\bin" >> $GITHUB_ENV
-        mkdir build
-        cd build
-        cmake .. -G "Visual Studio 16 2019" -A x64 -DCMAKE_INCLUDE_PATH=C:\msys64\usr\include
-        cmake --build . --config Release
+        echo "PATH=$PATH:C:\msys64\usr\bin;C:\msys64\mingw64\bin" >> $GITHUB_ENV
     - name: Install dependencies
       run: |
         pip install -r requirements.txt  

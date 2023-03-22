@@ -41,22 +41,22 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          - os: macos-latest
-            TARGET: macos
-            CMD_BUILD: >
-              STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
-              pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:. --hidden-import staticcodecov_languages -F codecov_cli/main.py &&
-              mv dist/main dist/codecovcli_macos
-            OUT_FILE_NAME: codecovcli_macos
-            ASSET_MIME: application/octet-stream
-          - os: ubuntu-latest
-            TARGET: ubuntu
-            CMD_BUILD: >
-              STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
-              pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:. --hidden-import staticcodecov_languages -F codecov_cli/main.py &&
-              cp ./dist/main ./dist/codecovcli_linux      
-            OUT_FILE_NAME: codecovcli_linux
-            ASSET_MIME: application/octet-stream
+          # - os: macos-latest
+          #   TARGET: macos
+          #   CMD_BUILD: >
+          #     STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
+          #     pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:. --hidden-import staticcodecov_languages -F codecov_cli/main.py &&
+          #     mv dist/main dist/codecovcli_macos
+          #   OUT_FILE_NAME: codecovcli_macos
+          #   ASSET_MIME: application/octet-stream
+          # - os: ubuntu-latest
+          #   TARGET: ubuntu
+          #   CMD_BUILD: >
+          #     STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
+          #     pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:. --hidden-import staticcodecov_languages -F codecov_cli/main.py &&
+          #     cp ./dist/main ./dist/codecovcli_linux      
+          #   OUT_FILE_NAME: codecovcli_linux
+          #   ASSET_MIME: application/octet-stream
           - os: windows-2019
             TARGET: windows
             CMD_BUILD: >

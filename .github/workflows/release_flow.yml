@@ -75,6 +75,8 @@ jobs:
     - name: Install dependencies
       run: |
         pip install -r requirements.txt  
+        echo "--------------------===----------------------"
+        python setup.py build
     - name: Install pyinstaller
       run: pip install pyinstaller
     - name: Build with pyinstaller for ${{matrix.TARGET}}

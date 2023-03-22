@@ -75,9 +75,13 @@ jobs:
     - name: Add clang path to $PATH env
       shell: bash
       if: runner.os == 'Windows'
-      run: echo "PATH=$PATH:C:\msys64\mingw64\bin" >> $GITHUB_ENV
+      run: |
+        echo "PATH=$PATH:C:\msys64\mingw64\bin" >> $GITHUB_ENV
+        mkdir build
+        cd build
+        cmake .. -G "Visual Studio 16 2019" -A x64 -DCMAKE_INCLUDE_PATH=C:\msys64\usr\include
+        cmake --build . --config Release
     - name: Install dependencies
-      shell: bash
       run: |
         pip install -r requirements.txt  
         echo "--------------------===----------------------"

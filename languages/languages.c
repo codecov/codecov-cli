@@ -2,8 +2,7 @@
 #include "Python.h"
 #include <wctype.h>
 
-static PyMethodDef module_methods[] = {
-};
+static PyMethodDef module_methods[] = {};
 
 static struct PyModuleDef module_definition = {
   .m_base = PyModuleDef_HEAD_INIT,

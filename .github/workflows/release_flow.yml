@@ -3,10 +3,7 @@
 
 name: Build-and-Release
 
-on:
-  push:
-    tags:
-      - 'v*' # Runs only for tags that start with v (new versions)
+on: [push]
 
 jobs:
   changelog:
@@ -33,7 +30,7 @@ jobs:
         tag_name: ${{ github.ref_name }}
         release_name: Release ${{ github.ref_name }}
         body: ${{ needs.changelog.outputs.changelog }}
-        draft: ${{ contains(github.ref_name, 'test') }}
+        draft: true
         prerelease: ${{ contains(github.ref_name, 'beta') }}
 
   buildassets:
@@ -60,13 +57,13 @@ jobs:
               cp ./dist/main ./dist/codecovcli_linux      
             OUT_FILE_NAME: codecovcli_linux
             ASSET_MIME: application/octet-stream
-          # - os: windows-latest
-          #   TARGET: windows
-          #   CMD_BUILD: >
-          #     pyinstaller --debug=imports -F codecov_cli/main.py &&
-          #     cp ./dist/main.exe ./dist/codecovcli_windows.exe
-          #   OUT_FILE_NAME: codecovcli_windows.exe
-          #   ASSET_MIME: application/vnd.microsoft.portable-executable
+          - os: windows-latest
+            TARGET: windows
+            CMD_BUILD: >
+              pyinstaller --debug=imports -F codecov_cli/main.py &&
+              cp ./dist/main.exe ./dist/codecovcli_windows.exe
+            OUT_FILE_NAME: codecovcli_windows.exe
+            ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
     - uses: actions/checkout@v3
       with:

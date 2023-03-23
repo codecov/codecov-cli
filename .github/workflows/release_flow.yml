@@ -72,13 +72,12 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: "3.10"   
-    - name: Install Windows 10 SDK
-      uses: microsoft/setup-windows-visualstudio@v1
+    - name: Install Visual Studio and Windows 10 SDK
+      uses: microsoft/setup-msbuild@v1.0.2
       with:
-        vs-version: 2019
-        vc-vars-arch: x64
-        includeRecommended: true
-        sdk: '10.0.19041.0'
+        vs-version: '2019'
+        vc-vars-arch: 'x64'
+        include-prerelease: true
     # - name: Add clang path to $PATH env
     #   shell: bash
     #   if: runner.os == 'Windows'
@@ -119,24 +118,24 @@ jobs:
         tag_name: ${{ github.ref_name }}
 
   
-  publish_release:
-    name: Publish release
-    needs: buildassets
-    runs-on: ubuntu-latest
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-    steps:
-      - id: 'auth'
-        name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@v1.0.0'
-        with:
-          create_credentials_file: 'true'
-          workload_identity_provider: ${{ secrets.CODECOV_GCP_WIDP }}
-          service_account: ${{ secrets.CODECOV_GCP_WIDSA }}
+  # publish_release:
+  #   name: Publish release
+  #   needs: buildassets
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: 'read'
+  #     id-token: 'write'
+  #   steps:
+  #     - id: 'auth'
+  #       name: 'Authenticate to Google Cloud'
+  #       uses: 'google-github-actions/auth@v1.0.0'
+  #       with:
+  #         create_credentials_file: 'true'
+  #         workload_identity_provider: ${{ secrets.CODECOV_GCP_WIDP }}
+  #         service_account: ${{ secrets.CODECOV_GCP_WIDSA }}
 
-      # Publish the release tag to a Pub/Sub topic
-      - name: Publish a message to a Pub/Sub topic
-        run: |
-          gcloud --quiet config set project ${{ secrets.GCLOUD_UPLOADER_PROJECT_ID }}
-          gcloud pubsub topics publish ${{ secrets.GCLOUD_UPLOADER_PUBSUB_TOPIC }} --message '{"release":"'"${{ github.ref_name }}"'", "latest":true}'
+  #     # Publish the release tag to a Pub/Sub topic
+  #     - name: Publish a message to a Pub/Sub topic
+  #       run: |
+  #         gcloud --quiet config set project ${{ secrets.GCLOUD_UPLOADER_PROJECT_ID }}
+  #         gcloud pubsub topics publish ${{ secrets.GCLOUD_UPLOADER_PUBSUB_TOPIC }} --message '{"release":"'"${{ github.ref_name }}"'", "latest":true}'

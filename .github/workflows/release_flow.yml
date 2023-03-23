@@ -73,7 +73,7 @@ jobs:
       with:
         python-version: "3.10"   
     - name: Install Visual Studio and Windows 10 SDK
-      uses: microsoft/setup-msbuild@v1.3.1
+      uses: microsoft/setup-msbuild@v1.1
       with:
         vs-version: '2019'
         vc-vars-arch: 'x64'

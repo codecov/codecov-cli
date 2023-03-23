@@ -72,12 +72,13 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: "3.10"   
-    # - name: Add clang path to $PATH env
-    #   shell: bash
-    #   if: runner.os == 'Windows'
-    #   run: |
-    #     echo "PATH=$PATH:C:\msys64\usr\bin;C:\msys64\mingw64\bin" >> $GITHUB_ENV
+    - name: Add clang path to $PATH env
+      shell: bash
+      if: runner.os == 'Windows'
+      run: |
+        echo "PATH=$PATH:C:\msys64\usr\bin;C:\msys64\mingw64\bin" >> $GITHUB_ENV
     - name: Install dependencies
+      shell: bash
       run: |
         pip install -r requirements.txt  
         echo "--------------------===----------------------"

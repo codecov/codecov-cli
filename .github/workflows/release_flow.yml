@@ -60,11 +60,18 @@ jobs:
           #   ASSET_MIME: application/octet-stream
           - os: windows-latest
             TARGET: windows
+            PRE_CMD: >
+              for /d %%i in ("build\lib.*") do (
+                  for /r "%%i" %%f in ("staticcodecov*") do (
+                      set "STATICCODECOV_LIB_PATH=%%f"
+                      goto :done
+                  )
+              )
+              :done
+              echo "STATICCODECOV_LIB_PATH=$STATICCODECOV_LIB_PATH"
             CMD_BUILD: >
-              $libPath = Get-ChildItem -Path ./build -Directory -Filter 'lib.*' | Select-Object -First 1 | Select-Object -ExpandProperty FullName &&
-              $staticcodecovPath = Get-ChildItem -Path $libPath -Recurse -File -Filter 'staticcodecov*' | Select-Object -First 1 | Select-Object -ExpandProperty FullName &&
-              pyinstaller --add-binary "$staticcodecovPath;." --hidden-import staticcodecov_languages -F codecov_cli/main.py &&
-              Copy-Item ./dist/main.exe ./dist/codecovcli_windows.exe
+              pyinstaller --add-binary %STATICCODECOV_LIB_PATH%;. --hidden-import staticcodecov_languages -F codecov_cli/main.py
+              copy dist\main dist\codecovcli_windows.exe
             OUT_FILE_NAME: codecovcli_windows.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
@@ -84,7 +91,6 @@ jobs:
     - name: Install pyinstaller
       run: pip install pyinstaller
     - name: Build with pyinstaller for ${{matrix.TARGET}}
-      shell: pwsh
       run: ${{matrix.CMD_BUILD}}
     - name: Upload Release Asset
       id: upload-release-asset

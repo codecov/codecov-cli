@@ -61,9 +61,9 @@ jobs:
           - os: windows-latest
             TARGET: windows
             CMD_BUILD: >
-              $libPath = Get-ChildItem -Path ./build -Directory -Filter 'lib.*' | Select-Object -First 1 | Select-Object -ExpandProperty FullName 
-              $staticcodecovPath = Get-ChildItem -Path $libPath -Recurse -File -Filter 'staticcodecov*' | Select-Object -First 1 | Select-Object -ExpandProperty FullName
-              pyinstaller --add-binary "$staticcodecovPath;." --hidden-import staticcodecov_languages -F codecov_cli/main.py
+              $libPath = Get-ChildItem -Path ./build -Directory -Filter 'lib.*' | Select-Object -First 1 | Select-Object -ExpandProperty FullName &&
+              $staticcodecovPath = Get-ChildItem -Path $libPath -Recurse -File -Filter 'staticcodecov*' | Select-Object -First 1 | Select-Object -ExpandProperty FullName &&
+              pyinstaller --add-binary "$staticcodecovPath;." --hidden-import staticcodecov_languages -F codecov_cli/main.py &&
               Copy-Item ./dist/main.exe ./dist/codecovcli_windows.exe
             OUT_FILE_NAME: codecovcli_windows.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable

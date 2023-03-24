@@ -81,7 +81,8 @@ jobs:
         echo "--------------------===----------------------"
         python setup.py build
         echo "==================="
-        Get-ChildItem -Path ".\build\temp*\Release\languages\staticcodecov_languages*" 
+        Get-ChildItem -Path ".\build\temp*\Release\languages\staticcodecov_languages*" -Filter "*.lib" | Select-Object -First 1 -ExpandProperty FullName
+
     - name: Install pyinstaller
       run: pip install pyinstaller
     - name: Build with pyinstaller for ${{matrix.TARGET}}

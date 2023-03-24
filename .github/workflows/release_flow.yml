@@ -61,8 +61,8 @@ jobs:
           - os: windows-latest
             TARGET: windows
             CMD_BUILD: >
-              $STATICCODECOV_LIB_PATH = ((Get-ChildItem -Path ".\build\lib*\staticcodecov_languages*" | Select-Object -First 1 | Split-Path -Parent) -replace '^.*build\\', 'build\') &&
-              pyinstaller --add-binary "$STATICCODECOV_LIB_PATH;." --hidden-import staticcodecov_languages -F codecov_cli\main.py &&
+              set STATICCODECOV_LIB_PATH = ((Get-ChildItem -Path ".\build\lib*\staticcodecov_languages*" | Select-Object -First 1 | Split-Path -Parent) -replace '^.*build\\', 'build\') &&
+              pyinstaller --add-binary "%STATICCODECOV_LIB_PATH%;." --hidden-import staticcodecov_languages -F codecov_cli\main.py &&
               Copy-Item -Path ".\dist\main.exe" -Destination ".\dist\codecovcli_windows.exe"
 
             OUT_FILE_NAME: codecovcli_windows.exe

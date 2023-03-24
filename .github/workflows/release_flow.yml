@@ -81,6 +81,7 @@ jobs:
     - name: Install pyinstaller
       run: pip install pyinstaller
     - name: Build with pyinstaller for ${{matrix.TARGET}}
+      shell: pwsh
       run: |
         ${{matrix.CMD_BUILD}}
     - name: Upload Release Asset

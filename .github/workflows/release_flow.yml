@@ -61,10 +61,7 @@ jobs:
           - os: windows-latest
             TARGET: windows
             CMD_BUILD: >
-              $STATICCODECOV_LIB_PATH = ((Get-ChildItem -Path ".\build\temp*\Release\languages\staticcodecov_languages*" -Filter "*.lib" | Select-Object -First 1 | Split-Path -Parent) -replace '^.*build\\', 'build\') &&
               Get-ChildItem -Path ".\build\temp*\Release\languages\staticcodecov_languages*" -Filter "*.lib" | Select-Object -First 1 -ExpandProperty FullName &&
-              pyinstaller --add-binary "build\temp.win-amd64-cpython-310\Release\languages\staticcodecov_languages.cp310-win_amd64.lib;." --hidden-import staticcodecov_languages -F codecov_cli\main.py &&
-              Copy-Item -Path ".\dist\main.exe" -Destination ".\dist\codecovcli_windows.exe"
             OUT_FILE_NAME: codecovcli_windows.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
@@ -82,6 +79,7 @@ jobs:
     - name: Install pyinstaller
       run: pip install pyinstaller
     - name: Build with pyinstaller for ${{matrix.TARGET}}
+      shell: pwsh
       run: ${{matrix.CMD_BUILD}}
     - name: Upload Release Asset
       id: upload-release-asset

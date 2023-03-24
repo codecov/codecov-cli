@@ -61,7 +61,9 @@ jobs:
           - os: windows-latest
             TARGET: windows
             CMD_BUILD: >
-              set STATICCODECOV_LIB_PATH=(for /d %i in (build\lib.*) do @(for /r %i %j in (staticcodecov*) do @(echo %j&goto :done))&:done) && pyinstaller --add-binary "%STATICCODECOV_LIB_PATH%";. --hidden-import staticcodecov_languages -F codecov_cli\main.py
+              $STATICCODECOV_LIB_PATH = ((Get-ChildItem -Path "build" -Filter "lib.*" -Directory -Name | Sort-Object)[0] | ForEach-Object { Get-ChildItem -Path "build\$_" -Filter "staticcodecov*" -Recurse | Select-Object -First 1 }).FullName
+              pyinstaller.exe --add-binary "$STATICCODECOV_LIB_PATH;." --hidden-import staticcodecov_languages -F codecov_cli\main.py
+
             OUT_FILE_NAME: codecovcli_windows.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:

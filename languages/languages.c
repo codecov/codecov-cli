@@ -3,6 +3,7 @@
 #include <wctype.h>
 
 static PyMethodDef module_methods[] = {
+  NULL
 };
 
 static struct PyModuleDef module_definition = {

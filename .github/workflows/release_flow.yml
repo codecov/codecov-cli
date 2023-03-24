@@ -81,7 +81,7 @@ jobs:
         echo "--------------------===----------------------"
         python setup.py build
         echo "==================="
-        Get-ChildItem -Path ".\build\temp*\Release\languages\" 
+        Get-ChildItem -Path ".\build\temp*\Release\languages" 
     - name: Install pyinstaller
       run: pip install pyinstaller
     - name: Build with pyinstaller for ${{matrix.TARGET}}

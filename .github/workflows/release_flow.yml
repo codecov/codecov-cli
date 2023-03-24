@@ -91,7 +91,9 @@ jobs:
     - name: Install pyinstaller
       run: pip install pyinstaller
     - name: Build with pyinstaller for ${{matrix.TARGET}}
-      run: ${{matrix.CMD_BUILD}}
+      run: |
+        ${{matrix.PRE_CMD}}
+        ${{matrix.CMD_BUILD}}
     - name: Upload Release Asset
       id: upload-release-asset
       uses: actions/upload-release-asset@v1

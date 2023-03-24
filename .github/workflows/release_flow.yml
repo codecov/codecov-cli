@@ -45,7 +45,6 @@ jobs:
             TARGET: macos
             CMD_BUILD: >
               STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
-              echo ${STATICCODECOV_LIB_PATH}
               pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:. --hidden-import staticcodecov_languages -F codecov_cli/main.py &&
               cd dist/ &&
               zip -r9 codecovcli_macos.zip main

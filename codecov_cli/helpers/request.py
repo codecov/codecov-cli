@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 import requests
 
@@ -18,6 +19,14 @@ def send_post_request(
         headers=headers,
     )
     return request_result(resp)
+
+
+def get_token_header_or_fail(token: uuid.UUID) -> dict:
+    if token is None:
+        raise Exception("Codecov token not found.")
+    if not isinstance(token, uuid.UUID):
+        raise Exception(f"Token must be UUID. Received {type(token)}")
+    return {"Authorization": f"token {token.hex}"}
 
 
 def send_put_request(

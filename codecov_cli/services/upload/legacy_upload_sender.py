@@ -62,7 +62,8 @@ class LegacyUploadSender(object):
             "pr": pull_request_number,
             "job": job_code,
         }
-
+        if token is None:
+            raise Exception("Codecov token not found.")
         headers = {"X-Upload-Token": token.hex}
 
         resp = requests.post(

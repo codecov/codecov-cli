@@ -3,10 +3,8 @@
 
 name: Build-and-Release
 
-on:
-  push:
-    tags:
-      - 'v*' # Runs only for tags that start with v (new versions)
+on: [push]
+
 
 jobs:
   changelog:
@@ -33,7 +31,7 @@ jobs:
         tag_name: ${{ github.ref_name }}
         release_name: Release ${{ github.ref_name }}
         body: ${{ needs.changelog.outputs.changelog }}
-        draft: ${{ contains(github.ref_name, 'test') }}
+        draft: true
         prerelease: ${{ contains(github.ref_name, 'beta') }}
 
   buildassets:
@@ -44,29 +42,31 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          - os: macos-latest
-            TARGET: macos
-            CMD_BUILD: >
-              STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
-              pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:. --hidden-import staticcodecov_languages -F codecov_cli/main.py &&
-              mv dist/main dist/codecovcli_macos
-            OUT_FILE_NAME: codecovcli_macos
-            ASSET_MIME: application/octet-stream
-          - os: ubuntu-latest
-            TARGET: ubuntu
-            CMD_BUILD: >
-              STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
-              pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:. --hidden-import staticcodecov_languages -F codecov_cli/main.py &&
-              cp ./dist/main ./dist/codecovcli_linux      
-            OUT_FILE_NAME: codecovcli_linux
-            ASSET_MIME: application/octet-stream
-          # - os: windows-latest
-          #   TARGET: windows
+          # - os: macos-latest
+          #   TARGET: macos
           #   CMD_BUILD: >
-          #     pyinstaller --debug=imports -F codecov_cli/main.py &&
-          #     cp ./dist/main.exe ./dist/codecovcli_windows.exe
-          #   OUT_FILE_NAME: codecovcli_windows.exe
-          #   ASSET_MIME: application/vnd.microsoft.portable-executable
+          #     STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
+          #     pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:. --hidden-import staticcodecov_languages -F codecov_cli/main.py &&
+          #     mv dist/main dist/codecovcli_macos
+          #   OUT_FILE_NAME: codecovcli_macos
+          #   ASSET_MIME: application/octet-stream
+          # - os: ubuntu-latest
+          #   TARGET: ubuntu
+          #   CMD_BUILD: >
+          #     STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
+          #     pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:. --hidden-import staticcodecov_languages -F codecov_cli/main.py &&
+          #     cp ./dist/main ./dist/codecovcli_linux      
+          #   OUT_FILE_NAME: codecovcli_linux
+          #   ASSET_MIME: application/octet-stream
+          - os: windows-latest
+            TARGET: windows
+            PRE_BUILD_CMD: >
+              $STATICCODECOV_LIB_PATH = ((Get-ChildItem -Path ".\build\lib*\staticcodecov_languages*" | Select-Object -First 1 | Split-Path -Parent) -replace '^.*build\\', 'build\') 
+            CMD_BUILD: >
+              pyinstaller --add-binary "$STATICCODECOV_LIB_PATH;." --hidden-import staticcodecov_languages -F codecov_cli\main.py &&
+              Copy-Item -Path ".\dist\main.exe" -Destination ".\dist\codecovcli_windows.exe"
+            OUT_FILE_NAME: codecovcli_windows.exe
+            ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
     - uses: actions/checkout@v3
       with:
@@ -81,8 +81,11 @@ jobs:
         python setup.py build
     - name: Install pyinstaller
       run: pip install pyinstaller
-    - name: Build with pyinstaller for ${{matrix.TARGET}}
-      run: ${{matrix.CMD_BUILD}}
+    - name: Pre-Build for ${{ matrix.TARGET }}
+      if: ${{ matrix.PRE_BUILD_CMD != '' }}
+      run: ${{ matrix.PRE_BUILD_CMD }}
+    - name: Build with pyinstaller for ${{ matrix.TARGET }}
+      run: ${{ matrix.BUILD_CMD }}
     - name: Upload Release Asset
       id: upload-release-asset
       uses: actions/upload-release-asset@v1
@@ -108,24 +111,24 @@ jobs:
         tag_name: ${{ github.ref_name }}
 
   
-  publish_release:
-    name: Publish release
-    needs: buildassets
-    runs-on: ubuntu-latest
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-    steps:
-      - id: 'auth'
-        name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@v1.0.0'
-        with:
-          create_credentials_file: 'true'
-          workload_identity_provider: ${{ secrets.CODECOV_GCP_WIDP }}
-          service_account: ${{ secrets.CODECOV_GCP_WIDSA }}
+  # publish_release:
+  #   name: Publish release
+  #   needs: buildassets
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: 'read'
+  #     id-token: 'write'
+  #   steps:
+  #     - id: 'auth'
+  #       name: 'Authenticate to Google Cloud'
+  #       uses: 'google-github-actions/auth@v1.0.0'
+  #       with:
+  #         create_credentials_file: 'true'
+  #         workload_identity_provider: ${{ secrets.CODECOV_GCP_WIDP }}
+  #         service_account: ${{ secrets.CODECOV_GCP_WIDSA }}
 
-      # Publish the release tag to a Pub/Sub topic
-      - name: Publish a message to a Pub/Sub topic
-        run: |
-          gcloud --quiet config set project ${{ secrets.GCLOUD_UPLOADER_PROJECT_ID }}
-          gcloud pubsub topics publish ${{ secrets.GCLOUD_UPLOADER_PUBSUB_TOPIC }} --message '{"release":"'"${{ github.ref_name }}"'", "latest":true}'
+  #     # Publish the release tag to a Pub/Sub topic
+  #     - name: Publish a message to a Pub/Sub topic
+  #       run: |
+  #         gcloud --quiet config set project ${{ secrets.GCLOUD_UPLOADER_PROJECT_ID }}
+  #         gcloud pubsub topics publish ${{ secrets.GCLOUD_UPLOADER_PUBSUB_TOPIC }} --message '{"release":"'"${{ github.ref_name }}"'", "latest":true}'

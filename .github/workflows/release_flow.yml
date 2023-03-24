@@ -63,8 +63,8 @@ jobs:
             CMD_BUILD: >
               $STATICCODECOV_LIB_PATH = ((Get-ChildItem -Path ".\build\temp*\Release\languages\staticcodecov_languages*" -Filter "*.lib" | Select-Object -First 1 | Split-Path -Parent) -replace '^.*build\\', 'build\') &&
               Get-ChildItem -Path ".\build\temp*\Release\languages\staticcodecov_languages*" -Filter "*.lib" | Select-Object -First 1 -ExpandProperty FullName &&
-              pyinstaller --add-binary "build\temp.win-amd64-cpython-310\Release\languages\staticcodecov_languages.cp310-win_amd64.lib;." --hidden-import staticcodecov_languages -F codecov_cli\main.py
-
+              pyinstaller --add-binary "build\temp.win-amd64-cpython-310\Release\languages\staticcodecov_languages.cp310-win_amd64.lib;." --hidden-import staticcodecov_languages -F codecov_cli\main.py &&
+              cp ./dist/main.exe ./dist/codecovcli_windows.exe
             OUT_FILE_NAME: codecovcli_windows.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:

@@ -61,7 +61,7 @@ jobs:
           - os: windows-latest
             TARGET: windows
             CMD_BUILD: >
-              Get-ChildItem -Path ".\build\lib*"
+              Get-ChildItem -Path ".\build\lib*\staticcodecov*"
               
             OUT_FILE_NAME: codecovcli_windows.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable

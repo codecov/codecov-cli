@@ -84,6 +84,7 @@ jobs:
     - name: Install pyinstaller
       run: pip install pyinstaller
     - name: Pre-Build for ${{ matrix.TARGET }}
+      shell: pwsh
       if: ${{ matrix.PRE_BUILD_CMD != '' }}
       run: ${{ matrix.PRE_BUILD_CMD }}
     - name: Build with pyinstaller for ${{ matrix.TARGET }}

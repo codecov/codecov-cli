@@ -62,7 +62,7 @@ jobs:
             TARGET: windows
             PRE_BUILD_CMD: >
               $STATICCODECOV_LIB_PATH = "hi" &&
-              $file = Get-ChildItem -Path .\build\lib*\staticcodecov* | Select-Object -First 1 
+              $file = (Get-ChildItem -Path .\build\lib* -Filter "staticcodecov*" | Select-Object -First 1)
               $path = $file.FullName
 
             CMD_BUILD: >

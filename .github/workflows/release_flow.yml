@@ -60,7 +60,6 @@ jobs:
           #   ASSET_MIME: application/octet-stream
           - os: windows-latest
             TARGET: windows
-
             CMD_BUILD: >
               $STATICCODECOV_LIB_PATH = "build\lib.win-amd64-cpython-310\staticcodecov_languages.cp310-win_amd64.pyd"
               pyinstaller --add-binary $STATICCODECOV_LIB_PATH;. --hidden-import staticcodecov_languages -F codecov_cli\main.py &&
@@ -81,10 +80,6 @@ jobs:
         python setup.py build
     - name: Install pyinstaller
       run: pip install pyinstaller
-    - name: Pre-Build for ${{ matrix.TARGET }}
-      shell: pwsh
-      if: ${{ matrix.PRE_BUILD_CMD != '' }}
-      run: ${{ matrix.PRE_BUILD_CMD }}
     - name: Build with pyinstaller for ${{ matrix.TARGET }}
       run: ${{ matrix.CMD_BUILD }}
     - name: Upload Release Asset

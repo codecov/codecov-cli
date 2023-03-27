@@ -61,9 +61,9 @@ jobs:
           - os: windows-latest
             TARGET: windows
             PRE_BUILD_CMD: >
-              $STATICCODECOV_LIB_PATH = "hi" &&
+              ls &&
+              echo "-----" &&
               $file = Get-ChildItem -Path ./build/lib*/staticcodecov* | Select-Object -First 1 &&
-              echo "hi"
               $path = $file.FullName
 
             CMD_BUILD: >

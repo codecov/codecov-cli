@@ -62,7 +62,7 @@ jobs:
             TARGET: windows
             CMD_BUILD: >
               $STATICCODECOV_LIB_PATH = "build\lib.win-amd64-cpython-310\staticcodecov_languages.cp310-win_amd64.pyd" &&
-              pyinstaller --add-binary $STATICCODECOV_LIB_PATH;. --hidden-import staticcodecov_languages -F codecov_cli\main.py &&
+              pyinstaller --add-binary "$STATICCODECOV_LIB_PATH;." --hidden-import staticcodecov_languages -F codecov_cli\main.py &&
               Copy-Item -Path ".\dist\main.exe" -Destination ".\dist\codecovcli_windows.exe"
             OUT_FILE_NAME: codecovcli_windows.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable

@@ -1,3 +1,4 @@
+import logging
 import typing
 import uuid
 from dataclasses import dataclass
@@ -6,6 +7,8 @@ import requests
 
 from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.types import UploadCollectionResult, UploadCollectionResultFile
+
+logger = logging.getLogger("codecovcli")
 
 
 @dataclass
@@ -63,7 +66,11 @@ class LegacyUploadSender(object):
             "job": job_code,
         }
 
-        headers = {"X-Upload-Token": token.hex}
+        if token:
+            headers = {"X-Upload-Token": token.hex}
+        else:
+            logger.warning("Token is empty.")
+            headers = {"X-Upload-Token": ""}
 
         resp = requests.post(
             "https://codecov.io/upload/v4", headers=headers, params=params

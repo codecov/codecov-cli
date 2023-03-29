@@ -8,6 +8,7 @@ import requests
 
 from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.helpers.request import (
+    get_token_header_or_fail,
     log_warnings_and_errors_if_any,
     request_result,
     send_post_request,
@@ -30,7 +31,7 @@ def create_report_logic(
 
 def send_create_report_request(commit_sha, code, service, token, encoded_slug):
     data = {"code": code}
-    headers = {"Authorization": f"token {token.hex}"}
+    headers = get_token_header_or_fail(token)
     url = f"https://api.codecov.io/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports"
     return send_post_request(url=url, headers=headers, data=data)
 
@@ -52,7 +53,7 @@ def create_report_results_logic(
 
 
 def send_reports_result_request(commit_sha, report_code, encoded_slug, service, token):
-    headers = {"Authorization": f"token {token.hex}"}
+    headers = get_token_header_or_fail(token)
     url = f"https://api.codecov.io/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/results"
     return send_post_request(url=url, headers=headers)
 
@@ -60,7 +61,7 @@ def send_reports_result_request(commit_sha, report_code, encoded_slug, service, 
 def send_reports_result_get_request(
     commit_sha, report_code, encoded_slug, service, token
 ):
-    headers = {"Authorization": f"token {token.hex}"}
+    headers = get_token_header_or_fail(token)
     url = f"https://api.codecov.io/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/results"
     number_tries = 0
     while number_tries < MAX_NUMBER_TRIES:

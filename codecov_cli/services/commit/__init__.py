@@ -4,6 +4,7 @@ import uuid
 
 from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.helpers.request import (
+    get_token_header_or_fail,
     log_warnings_and_errors_if_any,
     send_post_request,
 )
@@ -42,6 +43,6 @@ def send_commit_data(commit_sha, parent_sha, pr, branch, slug, token, service):
         "pullid": pr,
         "branch": branch,
     }
-    headers = {"Authorization": f"token {token.hex}"}
+    headers = get_token_header_or_fail(token)
     url = f"https://api.codecov.io/upload/{service}/{slug}/commits"
     return send_post_request(url=url, data=data, headers=headers)

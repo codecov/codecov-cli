@@ -6,7 +6,11 @@ import zlib
 from typing import Any, Dict
 
 from codecov_cli.helpers.encoder import encode_slug
-from codecov_cli.helpers.request import send_post_request, send_put_request
+from codecov_cli.helpers.request import (
+    get_token_header_or_fail,
+    send_post_request,
+    send_put_request,
+)
 from codecov_cli.types import (
     RequestResult,
     UploadCollectionResult,
@@ -41,7 +45,7 @@ class UploadSender(object):
             "name": name,
         }
 
-        headers = {"Authorization": f"token {token.hex}"}
+        headers = get_token_header_or_fail(token)
         encoded_slug = encode_slug(slug)
         url = f"https://api.codecov.io/upload/{git_service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads"
         resp = send_post_request(url=url, data=data, headers=headers)

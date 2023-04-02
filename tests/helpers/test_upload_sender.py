@@ -32,6 +32,7 @@ named_upload_data = {
 request_data = {
     "ci_url": "build_url",
     "flags": "flags",
+    "job_code": "job_code",
     "name": "name",
 }
 

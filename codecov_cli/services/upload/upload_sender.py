@@ -43,6 +43,7 @@ class UploadSender(object):
             "flags": flags,
             "env": env_vars,
             "name": name,
+            "job_code": job_code,
         }
 
         headers = get_token_header_or_fail(token)

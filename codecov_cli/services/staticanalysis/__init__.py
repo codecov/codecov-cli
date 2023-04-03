@@ -53,7 +53,7 @@ async def run_analysis_entrypoint(
                     )
     try:
         json_output = {"commit": commit, "filepaths": file_metadata}
-        logger.info(
+        logger.debug(
             "Sending data for server",
             extra=dict(extra_log_attributes=dict(json_payload=json_output)),
         )
@@ -62,23 +62,40 @@ async def run_analysis_entrypoint(
             json=json_output,
             headers={"Authorization": f"Repotoken {token}"},
         )
+        response_json = response.json()
         if response.status_code >= 500:
             raise click.ClickException("Sorry. Codecov is having problems")
         if response.status_code >= 400:
             raise click.ClickException(
-                "There is some problem with the submitted information"
+                f"There is some problem with the submitted information.\n{response_json.get('detail')}"
             )
     except requests.RequestException:
         raise click.ClickException(click.style("Unable to reach Codecov", fg="red"))
-    response_json = response.json()
     logger.info(
         "Received response from server",
         extra=dict(
+            extra_log_attributes=dict(time_taken=response.elapsed.total_seconds())
+        ),
+    )
+    logger.debug(
+        "Response",
+        extra=dict(
             extra_log_attributes=dict(
-                response_json=response_json, time_taken=response.elapsed.total_seconds()
+                response_json=response_json,
             )
         ),
     )
+
+    valid_files_len = len(
+        [el for el in response_json["filepaths"] if el["state"].lower() == "valid"]
+    )
+    created_files_len = len(
+        [el for el in response_json["filepaths"] if el["state"].lower() == "created"]
+    )
+    logger.info(
+        f"{valid_files_len} files VALID; {created_files_len} files CREATED",
+    )
+
     files_that_need_upload = [
         el
         for el in response_json["filepaths"]
@@ -86,6 +103,7 @@ async def run_analysis_entrypoint(
     ]
     if files_that_need_upload:
         uploaded_files = []
+        failed_upload = []
         with click.progressbar(
             length=len(files_that_need_upload),
             label="Uploading files",
@@ -95,10 +113,23 @@ async def run_analysis_entrypoint(
                 all_tasks = []
                 for el in response_json["filepaths"]:
                     all_tasks.append(send_single_upload_put(client, all_data, el))
-                    uploaded_files.append(el["filepath"])
                     bar.update(1, all_data[el["filepath"]])
-                await asyncio.gather(*all_tasks)
+                resps = await asyncio.gather(*all_tasks)
+            for resp in resps:
+                if resp["succeeded"]:
+                    uploaded_files.append(resp["filepath"])
+                else:
+                    failed_upload.append(resp["filepath"])
+        if failed_upload:
+            logger.warning(f"{len(failed_upload)} files failed to upload")
+            logger.debug(
+                "Failed files",
+                extra=dict(extra_log_attributes=dict(filenames=failed_upload)),
+            )
         logger.info(
+            f"Uploaded {len(uploaded_files)} files",
+        )
+        logger.debug(
             "Uploaded files",
             extra=dict(extra_log_attributes=dict(filenames=uploaded_files)),
         )
@@ -115,7 +146,11 @@ async def send_single_upload_put(client, all_data, el):
             presigned_put, data=json.dumps(all_data[el["filepath"]])
         )
         if response.status_code < 300:
-            return response
+            return {
+                "status_code": response.status_code,
+                "filepath": el["filepath"],
+                "succeeded": True,
+            }
         if response.status_code in retryable_statuses:
             await asyncio.sleep(2**current_retry)
     logger.warning(
@@ -129,6 +164,11 @@ async def send_single_upload_put(client, all_data, el):
             )
         ),
     )
+    return {
+        "status_code": response.status_code,
+        "filepath": el["filepath"],
+        "succeeded": False,
+    }
 
 
 def analyze_file(config, filename: FileAnalysisRequest):

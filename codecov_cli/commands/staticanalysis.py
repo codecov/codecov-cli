@@ -1,10 +1,13 @@
 import asyncio
+import logging
 import pathlib
 
 import click
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
 from codecov_cli.services.staticanalysis import run_analysis_entrypoint
+
+logger = logging.getLogger("codecovcli")
 
 
 @click.command()
@@ -32,6 +35,19 @@ from codecov_cli.services.staticanalysis import run_analysis_entrypoint
 def static_analysis(
     ctx, foldertosearch, numberprocesses, pattern, commit, token, force
 ):
+    logger.debug(
+        "Starting Static Analysis processing",
+        extra=dict(
+            extra_log_attributes=dict(
+                foldertosearch=foldertosearch,
+                numberprocesses=numberprocesses,
+                pattern=pattern,
+                commit_sha=commit,
+                token="NOTOKEN" if not token else (str(token)[:1] + 18 * "*"),
+                force=force,
+            )
+        ),
+    )
     return asyncio.run(
         run_analysis_entrypoint(
             ctx.obj["codecov_yaml"],

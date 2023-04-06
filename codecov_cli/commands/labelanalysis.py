@@ -12,7 +12,11 @@ logger = logging.getLogger("codecovcli")
 
 
 @click.command()
-@click.option("--token", required=True)
+@click.option(
+    "--token",
+    required=True,
+    help="The static analysis token (NOT the same token as upload)",
+)
 @click.option(
     "--head-sha",
     "head_commit_sha",
@@ -29,11 +33,26 @@ logger = logging.getLogger("codecovcli")
     required=True,
 )
 def label_analysis(token, head_commit_sha, base_commit_sha):
+    logger.debug(
+        "Starting label analysis",
+        extra=dict(
+            extra_log_attributes=dict(
+                head_commit_sha=head_commit_sha,
+                base_commit_sha=base_commit_sha,
+                token="NOTOKEN" if not token else (str(token)[:1] + 18 * "*"),
+            )
+        ),
+    )
     url = "https://api.codecov.io/labels/labels-analysis"
     token_header = f"Repotoken {token}"
     # this needs to be more flexible to support multiple elements
     runner = PythonStandardRunner()
     requested_labels = runner.collect_tests()
+    logger.info(f"Collected {len(requested_labels)} tests")
+    logger.debug(
+        "Labels collected.",
+        extra=dict(extra_log_attributes=dict(labels_collected=requested_labels)),
+    )
     payload = {
         "base_commit": base_commit_sha,
         "head_commit": head_commit_sha,
@@ -49,6 +68,9 @@ def label_analysis(token, head_commit_sha, base_commit_sha):
                 extra=dict(extra_log_attributes=dict(status_code=response.status_code)),
             )
             if requested_labels:
+                logger.info(
+                    "Could not get set of tests to run. Falling back to running all collected tests."
+                )
                 fake_response = {
                     "present_report_labels": [],
                     "absent_labels": requested_labels,
@@ -148,8 +170,9 @@ class PythonStandardRunner(object):
         # Not safe from the customer perspective, in general, probably.
         # This is just to check it working
         command_array.extend(all_labels)
-        logger.info(
-            "Running Pytest command",
+        logger.info("Running tests")
+        logger.debug(
+            "Pytest command",
             extra=dict(extra_log_attributes=dict(command_array=command_array)),
         )
         subprocess.run(command_array, check=True)

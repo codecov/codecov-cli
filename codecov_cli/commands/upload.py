@@ -54,7 +54,7 @@ def _turn_env_vars_into_dict(ctx, params, value):
     "--exclude",
     "--coverage-files-search-exclude-folder",
     "coverage_files_search_exclude_folders",
-    help="Folders where to search for coverage files",
+    help="Folders to exclude from search",
     type=click.Path(path_type=pathlib.Path),
     multiple=True,
     default=[],

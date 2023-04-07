@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import pathlib
+import typing
 
 import click
 
@@ -30,10 +31,24 @@ logger = logging.getLogger("codecovcli")
     fallback_field=FallbackFieldEnum.commit_sha,
     required=True,
 )
+@click.option(
+    "--folders-to-exclude",
+    help="Folders not to search",
+    type=click.Path(path_type=pathlib.Path),
+    multiple=True,
+    default=[],
+)
 @click.option("--token")
 @click.pass_context
 def static_analysis(
-    ctx, foldertosearch, numberprocesses, pattern, commit, token, force
+    ctx,
+    foldertosearch,
+    numberprocesses,
+    pattern,
+    commit,
+    token,
+    force,
+    folders_to_exclude: typing.List[pathlib.Path],
 ):
     logger.debug(
         "Starting Static Analysis processing",
@@ -45,6 +60,7 @@ def static_analysis(
                 commit_sha=commit,
                 token="NOTOKEN" if not token else (str(token)[:1] + 18 * "*"),
                 force=force,
+                folders_to_exclude=folders_to_exclude,
             )
         ),
     )
@@ -57,5 +73,6 @@ def static_analysis(
             commit,
             token,
             force,
+            list(folders_to_exclude),
         )
     )

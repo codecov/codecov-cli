@@ -30,9 +30,10 @@ async def run_analysis_entrypoint(
     commit: str,
     token: str,
     should_force: bool,
+    folders_to_exclude: typing.List[Path],
 ):
     ff = select_file_finder(config)
-    files = list(ff.find_files(folder, pattern))
+    files = list(ff.find_files(folder, pattern, folders_to_exclude))
     logger.info(f"Running the analyzer on {len(files)} files")
     mapped_func = partial(analyze_file, config)
     all_data = {}

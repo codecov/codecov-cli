@@ -1,14 +1,12 @@
+from unittest.mock import patch
+
 import pytest
 import responses
 from click.testing import CliRunner
 from responses import matchers
 
-from codecov_cli.commands.labelanalysis import PythonStandardRunner
-from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
 from codecov_cli.main import cli
-from codecov_cli.types import RequestError, RequestResult
-from tests.factory import FakeProvider, FakeVersioningSystem
-from tests.test_helpers import parse_outstreams_into_log_lines
+from tests.factory import FakeProvider, FakeRunner, FakeVersioningSystem
 
 
 @pytest.fixture
@@ -56,27 +54,35 @@ class TestLabelAnalysisCommand(object):
     def test_invoke_label_analysis(self, mocker):
         fake_ci_provider = FakeProvider()
         fake_versioning_system = FakeVersioningSystem()
+        fake_runner = FakeRunner(
+            collect_tests_response=[
+                "test_present",
+                "test_absent",
+                "test_in_diff",
+                "test_global",
+            ]
+        )
         mocker.patch("codecov_cli.main.get_ci_adapter", return_value=fake_ci_provider)
         mocker.patch(
             "codecov_cli.main.get_versioning_system",
             return_value=fake_versioning_system,
         )
-        mocker.patch.object(
-            PythonStandardRunner,
-            "collect_tests",
-            return_value=["test_present", "test_absent", "test_in_diff", "test_global"],
-        )
-        patch_do_something = mocker.patch.object(
-            PythonStandardRunner,
-            "do_something_with_result",
-            return_value=None,
-        )
+
         label_analysis_result = {
             "present_report_labels": ["test_present"],
             "absent_labels": ["test_absent"],
             "present_diff_labels": ["test_in_diff"],
             "global_level_labels": ["test_global"],
         }
+
+        def side_effect(result):
+            assert result == label_analysis_result
+
+        fake_runner.process_labelanalysis_result = side_effect
+        mock_get_runner = mocker.patch(
+            "codecov_cli.commands.labelanalysis.get_runner", return_value=fake_runner
+        )
+
         with responses.RequestsMock() as rsps:
             rsps.add(
                 responses.POST,
@@ -92,12 +98,12 @@ class TestLabelAnalysisCommand(object):
                 "https://api.codecov.io/labels/labels-analysis/label-analysis-request-id",
                 json={"state": "finished", "result": label_analysis_result},
             )
-            runner = CliRunner()
-            result = runner.invoke(
+            cli_runner = CliRunner()
+            result = cli_runner.invoke(
                 cli,
-                ["label-analysis", "--token=STATIC_TOKEN", "--base-sha=BASE_SHA"],
+                ["-v", "label-analysis", "--token=STATIC_TOKEN", "--base-sha=BASE_SHA"],
                 obj={},
             )
-        print(result.output)
+            mock_get_runner.assert_called()
+            print(result.output)
         assert result.exit_code == 0
-        patch_do_something.assert_called_with(label_analysis_result)

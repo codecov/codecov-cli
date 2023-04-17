@@ -1,12 +1,11 @@
 import logging
-import pprint
-import subprocess
 import time
 
 import click
 import requests
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
+from codecov_cli.runners import get_runner
 
 logger = logging.getLogger("codecovcli")
 
@@ -32,7 +31,14 @@ logger = logging.getLogger("codecovcli")
     cls=CodecovOption,
     required=True,
 )
-def label_analysis(token, head_commit_sha, base_commit_sha):
+@click.pass_context
+def label_analysis(
+    ctx: click.Context,
+    token: str,
+    head_commit_sha: str,
+    base_commit_sha: str,
+    runner_name: str = "python",
+):
     logger.debug(
         "Starting label analysis",
         extra=dict(
@@ -40,13 +46,17 @@ def label_analysis(token, head_commit_sha, base_commit_sha):
                 head_commit_sha=head_commit_sha,
                 base_commit_sha=base_commit_sha,
                 token="NOTOKEN" if not token else (str(token)[:1] + 18 * "*"),
+                runner_name=runner_name,
             )
         ),
     )
     url = "https://api.codecov.io/labels/labels-analysis"
     token_header = f"Repotoken {token}"
-    # this needs to be more flexible to support multiple elements
-    runner = PythonStandardRunner()
+
+    codecov_yaml = ctx.obj["codecov_yaml"] or {}
+    cli_config = codecov_yaml.get("cli", {})
+    runner = get_runner(cli_config, runner_name)
+    logger.debug(f"Selected runner: {runner}")
     requested_labels = runner.collect_tests()
     logger.info(f"Collected {len(requested_labels)} tests")
     logger.debug(
@@ -77,7 +87,7 @@ def label_analysis(token, head_commit_sha, base_commit_sha):
                     "present_diff_labels": [],
                     "global_level_labels": [],
                 }
-                return runner.do_something_with_result(fake_response)
+                return runner.process_labelanalysis_result(fake_response)
             raise click.ClickException("Sorry. Codecov is having problems")
         if response.status_code >= 400:
             logger.warning(
@@ -104,7 +114,7 @@ def label_analysis(token, head_commit_sha, base_commit_sha):
         )
         resp_json = resp_data.json()
         if resp_json["state"] == "finished":
-            runner.do_something_with_result(resp_data.json()["result"])
+            runner.process_labelanalysis_result(resp_data.json()["result"])
             return
         if resp_json["state"] == "error":
             logger.error(
@@ -119,60 +129,7 @@ def label_analysis(token, head_commit_sha, base_commit_sha):
                     "present_diff_labels": [],
                     "global_level_labels": [],
                 }
-                return runner.do_something_with_result(fake_response)
+                return runner.process_labelanalysis_result(fake_response)
             return
         logger.info("Waiting more time for result")
         time.sleep(5)
-
-
-class PythonStandardRunner(object):
-    def collect_tests(self):
-        return [
-            x
-            for x in subprocess.run(
-                ["python", "-m", "pytest", "-q", "--collect-only"],
-                capture_output=True,
-                check=True,
-            )
-            .stdout.decode()
-            .split()
-            if "::" in x
-        ]
-
-    def do_something_with_result(self, result):
-        command_array = ["python", "-m", "pytest", "--cov=./", "--cov-context=test"]
-        logger.info(
-            "Received information about tests to run",
-            extra=dict(
-                extra_log_attributes=dict(
-                    absent_labels=len(result["absent_labels"] or []),
-                    present_diff_labels=len(result["present_diff_labels"] or []),
-                    global_level_labels=len(result["global_level_labels"] or []),
-                    present_report_labels=len(result["present_report_labels"] or []),
-                )
-            ),
-        )
-        all_labels = (
-            result["absent_labels"]
-            + result["present_diff_labels"]
-            + result["global_level_labels"]
-        )
-        skipped_tests = set(result["present_report_labels"]) - set(all_labels)
-        if skipped_tests:
-            logger.info(
-                "Some tests are being skipped",
-                extra=dict(
-                    extra_log_attributes=dict(skipped_tests=sorted(skipped_tests))
-                ),
-            )
-        all_labels = set(all_labels)
-        all_labels = [x.rsplit("[", 1)[0] if "[" in x else x for x in all_labels]
-        # Not safe from the customer perspective, in general, probably.
-        # This is just to check it working
-        command_array.extend(all_labels)
-        logger.info("Running tests")
-        logger.debug(
-            "Pytest command",
-            extra=dict(extra_log_attributes=dict(command_array=command_array)),
-        )
-        subprocess.run(command_array, check=True)

@@ -1,8 +1,9 @@
-from typing import Optional
+from typing import List, Optional
 
 from codecov_cli.fallbacks import FallbackFieldEnum
 from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
 from codecov_cli.helpers.versioning_systems import VersioningSystemInterface
+from codecov_cli.runners.types import LabelAnalysisRunnerInterface
 
 
 class FakeProvider(CIAdapterBase):
@@ -71,3 +72,15 @@ class FakeVersioningSystem(VersioningSystemInterface):
 
     def get_fallback_value(self, fallback_field: FallbackFieldEnum) -> Optional[str]:
         return self.values_dict[fallback_field]
+
+
+class FakeRunner(LabelAnalysisRunnerInterface):
+    def __init__(self, collect_tests_response: List[str]) -> None:
+        super().__init__()
+        self.collect_tests_response = collect_tests_response
+
+    def collect_tests(self) -> List[str]:
+        return self.collect_tests_response
+
+    def process_labelanalysis_result(self, result):
+        return "I ran tests :D"

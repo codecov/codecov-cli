@@ -16,7 +16,8 @@ def _load_runner_from_yaml() -> LabelAnalysisRunnerInterface:
 
 def get_runner(cli_config, runner_name) -> LabelAnalysisRunnerInterface:
     if runner_name == "python":
-        return PythonStandardRunner()
+        config_params = cli_config.get("runners", {}).get("python", {})
+        return PythonStandardRunner(config_params)
     logger.debug(
         f"Trying to load runner {runner_name}",
         extra=dict(

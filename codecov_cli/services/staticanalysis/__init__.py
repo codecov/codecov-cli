@@ -112,7 +112,7 @@ async def run_analysis_entrypoint(
             limits = httpx.Limits(max_keepalive_connections=3, max_connections=5)
             async with httpx.AsyncClient(limits=limits) as client:
                 all_tasks = []
-                for el in response_json["filepaths"]:
+                for el in files_that_need_upload:
                     all_tasks.append(send_single_upload_put(client, all_data, el))
                     bar.update(1, all_data[el["filepath"]])
                 resps = await asyncio.gather(*all_tasks)

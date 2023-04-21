@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -40,3 +41,16 @@ def test_sample_analysis(input_filename, output_filename):
     )
     assert res_dict["result"] == expected_result["result"]
     assert res_dict == expected_result
+
+
+@patch("builtins.open")
+@patch("codecov_cli.services.staticanalysis.get_best_analyzer", return_value=None)
+def test_analyse_file_no_analyser(mock_get_analyser, mock_open):
+    fake_contents = MagicMock()
+    file_name = MagicMock(actual_filepath="filepath")
+    mock_open.return_value.read.return_value = fake_contents
+    config = {}
+    res = analyze_file(config, file_name)
+    assert res == None
+    assert mock_open.called_with("filepath", "rb")
+    assert mock_get_analyser.called_with(file_name, fake_contents)

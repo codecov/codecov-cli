@@ -1,3 +1,4 @@
+import pathlib
 from dataclasses import dataclass
 from typing import Optional
 
@@ -5,7 +6,7 @@ from typing import Optional
 @dataclass
 class FileAnalysisRequest(object):
     result_filename: str
-    actual_filepath: str
+    actual_filepath: pathlib.Path
 
 
 @dataclass

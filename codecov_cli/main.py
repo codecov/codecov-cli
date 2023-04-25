@@ -3,7 +3,6 @@ import pathlib
 import typing
 
 import click
-import yaml
 
 from codecov_cli.commands.base_picking import pr_base_picking
 from codecov_cli.commands.commit import create_commit
@@ -14,6 +13,7 @@ from codecov_cli.commands.report import create_report
 from codecov_cli.commands.staticanalysis import static_analysis
 from codecov_cli.commands.upload import do_upload
 from codecov_cli.helpers.ci_adapters import get_ci_adapter, get_ci_providers_list
+from codecov_cli.helpers.config import load_cli_config
 from codecov_cli.helpers.logging_utils import configure_logger
 from codecov_cli.helpers.versioning_systems import get_versioning_system
 
@@ -46,13 +46,9 @@ def cli(
     ctx.obj["ci_adapter"] = get_ci_adapter(auto_load_params_from)
     ctx.obj["versioning_system"] = get_versioning_system()
     ctx.obj["codecov_yaml"] = (
-        yaml.safe_load(codecov_yml_path.read())
-        if codecov_yml_path is not None
-        else None
+        load_cli_config(codecov_yml_path) if codecov_yml_path else None
     )
-    if ctx.obj["codecov_yaml"]:
-        logger.debug(f"Using codecov_yaml from {codecov_yml_path}")
-    else:
+    if ctx.obj["codecov_yaml"] is None:
         logger.debug("No codecov_yaml found")
 
 

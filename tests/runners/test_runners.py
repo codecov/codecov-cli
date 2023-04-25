@@ -17,7 +17,7 @@ class TestRunners(object):
         )
         runner_instance = get_runner({"runners": {"python": config_params}}, "python")
         assert isinstance(runner_instance, PythonStandardRunner)
-        assert runner_instance.params == {**config_params, "include_curr_dir": False}
+        assert runner_instance.params == {**config_params, "include_curr_dir": True}
 
     def test_get_dan_runner_with_params(self):
         config = {

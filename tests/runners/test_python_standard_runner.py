@@ -16,7 +16,7 @@ class TestPythonStandardRunner(object):
 
     def test_init_with_params(self):
         assert self.runner.params == PythonStandardRunnerConfigParams(
-            collect_tests_options=[], include_curr_dir=False
+            collect_tests_options=[], include_curr_dir=True
         )
         config_params = PythonStandardRunnerConfigParams(
             collect_tests_options=["--option=value", "-option"], include_curr_dir=True
@@ -24,10 +24,16 @@ class TestPythonStandardRunner(object):
         runner_with_params = PythonStandardRunner(config_params)
         assert runner_with_params.params == config_params
 
+    @patch(
+        "codecov_cli.runners.python_standard_runner.getcwd",
+        return_value="current directory",
+    )
     @patch("codecov_cli.runners.python_standard_runner.path")
     @patch("codecov_cli.runners.python_standard_runner.StringIO")
     @patch("codecov_cli.runners.python_standard_runner.pytest")
-    def test_execute_pytest(self, mock_pytest, mock_stringio, mock_sys_path):
+    def test_execute_pytest(
+        self, mock_pytest, mock_stringio, mock_sys_path, mock_getcwd
+    ):
         output = "Output in stdout"
         mock_getvalue = MagicMock(return_value=output)
         mock_stringio.return_value.__enter__.return_value.getvalue = mock_getvalue
@@ -37,13 +43,20 @@ class TestPythonStandardRunner(object):
         mock_pytest.main.assert_called_with(["--option", "--ignore=batata"])
         mock_stringio.assert_called()
         mock_getvalue.assert_called()
-        mock_sys_path.append.assert_not_called()
+        mock_sys_path.append.assert_called_with("current directory")
+        mock_sys_path.remove.assert_called_with("current directory")
         assert result == output
 
+    @patch(
+        "codecov_cli.runners.python_standard_runner.getcwd",
+        return_value="current directory",
+    )
     @patch("codecov_cli.runners.python_standard_runner.path")
     @patch("codecov_cli.runners.python_standard_runner.StringIO")
     @patch("codecov_cli.runners.python_standard_runner.pytest")
-    def test_execute_pytest_fail(self, mock_pytest, mock_stringio, mock_sys_path):
+    def test_execute_pytest_fail(
+        self, mock_pytest, mock_stringio, mock_sys_path, mock_getcwd
+    ):
         output = "Output in stdout"
         mock_getvalue = MagicMock(return_value=output)
         mock_stringio.return_value.__enter__.return_value.getvalue = mock_getvalue
@@ -55,13 +68,13 @@ class TestPythonStandardRunner(object):
         mock_pytest.main.assert_called_with(["--option", "--ignore=batata"])
         mock_stringio.assert_called()
         mock_getvalue.assert_called()
-        mock_sys_path.append.assert_not_called()
+        mock_sys_path.append.assert_called_with("current directory")
 
     @patch("codecov_cli.runners.python_standard_runner.getcwd")
     @patch("codecov_cli.runners.python_standard_runner.path")
     @patch("codecov_cli.runners.python_standard_runner.StringIO")
     @patch("codecov_cli.runners.python_standard_runner.pytest")
-    def test_execute_pytest_include_curr_dir(
+    def test_execute_pytest_NOT_include_curr_dir(
         self, mock_pytest, mock_stringio, mock_sys_path, mock_getcwd
     ):
         output = "Output in stdout"
@@ -70,14 +83,13 @@ class TestPythonStandardRunner(object):
         mock_stringio.return_value.__enter__.return_value.getvalue = mock_getvalue
         mock_pytest.main.return_value = ExitCode.OK
 
-        config_params = PythonStandardRunnerConfigParams(include_curr_dir=True)
+        config_params = PythonStandardRunnerConfigParams(include_curr_dir=False)
         runner = PythonStandardRunner(config_params)
         result = runner._execute_pytest(["--option", "--ignore=batata"])
         mock_pytest.main.assert_called_with(["--option", "--ignore=batata"])
         mock_stringio.assert_called()
         mock_getvalue.assert_called()
-        mock_sys_path.append.assert_called_with("current directory")
-        mock_sys_path.remove.assert_called_with("current directory")
+        mock_sys_path.append.assert_not_called()
         mock_getcwd.assert_called()
         assert result == output
 

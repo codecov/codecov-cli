@@ -35,6 +35,7 @@ logger = logging.getLogger("codecovcli")
 @click.option("--enterprise-url")
 @click.option("-v", "--verbose", "verbose", help="Use verbose logging", is_flag=True)
 @click.pass_context
+@click.version_option()
 def cli(
     ctx: click.Context,
     auto_load_params_from: typing.Optional[str],

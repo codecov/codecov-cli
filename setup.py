@@ -4,7 +4,7 @@ from setuptools import Extension, find_packages, setup
 
 setup(
     name="codecov-cli",
-    version="0.1.0",
+    version="0.1.4",
     packages=find_packages(exclude=["contrib", "docs", "tests*"]),
     description="Codecov Command Line Interface",
     long_description="",

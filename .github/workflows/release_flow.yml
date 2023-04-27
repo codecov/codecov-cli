@@ -23,6 +23,7 @@ jobs:
         python setup.py build
     - name: Build distribution
       run: |
+        pip install wheel
         python setup.py sdist bdist_wheel bdist_egg 
           
       # - name: Publish to Test PyPI

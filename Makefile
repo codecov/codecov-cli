@@ -19,8 +19,10 @@ else
 endif
 
 package.install:
-	pip install --upgrade build
+	pip install --upgrade pip
 	pip install setuptools wheel twine
+	pip install -r requirements.txt  
+    python setup.py build
 
 package.build:
 	python setup.py sdist bdist_wheel bdist_egg 

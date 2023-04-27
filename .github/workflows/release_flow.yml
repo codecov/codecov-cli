@@ -27,7 +27,7 @@ jobs:
     - name: Build distribution
       run: |
         pip install wheel
-        python setup.py sdist bdist_wheel bdist_egg 
+        python -m build
     - name: Publish package to TestPyPi
       uses: pypa/gh-action-pypi-publish@release/v1
       with:

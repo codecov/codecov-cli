@@ -6,33 +6,34 @@ name: Build-and-Release
 on: [push] # Run on any push event
 
 jobs:
-  runs-on: ubuntu-latest
-  permissions:
-    id-token: write
-  steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
-    - name: Install Packaging Tools
-      run: |
-        make package.install
-    - name: Build Package
-      run: |
-        make package.build
-    - name: Publish package to TestPyPi
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        repository-url: https://test.pypi.org/legacy/
-
-  changelog:
+  package:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
-      - name: "Generate release changelog"
-        uses: heinrichreimer/github-changelog-generator-action@v2.3
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }} 
+          python-version: 3.8
+      - name: Install Packaging Tools
+        run: |
+          make package.install
+      - name: Build Package
+        run: |
+          make package.build
+      - name: Publish package to TestPyPi
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+    changelog:
+      runs-on: ubuntu-latest
+      steps:
+        - name: "Generate release changelog"
+          uses: heinrichreimer/github-changelog-generator-action@v2.3
+          with:
+            token: ${{ secrets.GITHUB_TOKEN }} 
 
   createrelease:
     name: Create Release

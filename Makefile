@@ -23,4 +23,4 @@ package.install:
 	python setup.py develop
 
 package.build:
-	python -m build
+	python setup.py sdist bdist_wheel bdist_egg 

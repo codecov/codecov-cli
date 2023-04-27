@@ -28,7 +28,7 @@ jobs:
     - name: Build distribution
       run: |
         pip install --upgrade build
-        python -m build --universal
+        python -m build --wheel --no-isolation --plat-name=manylinux2014_x86_64,macosx_10_9_x86_64,win_amd64
     - name: Publish package to TestPyPi
       uses: pypa/gh-action-pypi-publish@release/v1
       with:

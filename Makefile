@@ -19,7 +19,8 @@ else
 endif
 
 package.install:
-	pip install --upgrade build
+	python -m pip install --upgrade pip
+    pip install setuptools wheel twine
 	python setup.py develop
 
 package.build:

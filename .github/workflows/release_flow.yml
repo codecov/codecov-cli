@@ -10,21 +10,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.10"
-        
-      - name: Install dependencies
-        run: |
-          make package.install
-        
-      - name: Build distribution
-        run: |
-          make package.build
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"   
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt  
+        python setup.py build
+    - name: Build distribution
+      run: |
+        python setup.py sdist bdist_wheel bdist_egg 
           
       # - name: Publish to Test PyPI
       #   uses: pypa/gh-action-pypi-publish@release-1.1.0

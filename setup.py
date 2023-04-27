@@ -44,4 +44,8 @@ setup(
             ),
         )
     ],
+    headers=[
+        "languages/treesitterjavascript/src/tree_sitter/parser.h"
+        "languages/treesitterpython/src/tree_sitter/parser.h"
+    ]
 )

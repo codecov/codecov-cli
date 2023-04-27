@@ -25,28 +25,11 @@ jobs:
       run: |
         pip install wheel
         python setup.py sdist bdist_wheel bdist_egg 
+    - name: Publish package to TestPyPi
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
           
-      # - name: Publish to Test PyPI
-      #   uses: pypa/gh-action-pypi-publish@release-1.1.0
-      #   with:
-      #     user: __token__
-      #     password: ${{ secrets.PYPI_TEST_PASSWORD }}
-      #     repository_url: https://test.pypi.org/legacy/
-      #     distributions: "sdist bdist_wheel"
-      #     skip_existing: true
-
-
-  publish:
-    permissions:
-      id-token: write
-    runs-on: ubuntu-latest
-    needs: build
-    steps: 
-      - name: Publish package to TestPyPi
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-
 
   changelog:
     runs-on: ubuntu-latest

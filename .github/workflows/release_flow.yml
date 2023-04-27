@@ -6,7 +6,6 @@ name: Build-and-Release
 on: [push] # Run on any push event
 
 jobs:
-  package:
   runs-on: ubuntu-latest
   permissions:
     id-token: write

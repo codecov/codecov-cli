@@ -22,8 +22,8 @@ package.install:
 	pip install setuptools
 	pip install wheel
 	pip install twine
-	pip install -r requirements.txt  
-    python setup.py build
+	pip install -r requirements.txt
+	python setup.py build
 
 package.build:
 	python setup.py sdist bdist_wheel bdist_egg 

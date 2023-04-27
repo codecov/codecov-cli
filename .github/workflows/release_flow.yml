@@ -8,8 +8,6 @@ on: [push] # Run on any push event
 jobs:
   package:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python
@@ -22,6 +20,13 @@ jobs:
       - name: Build Package
         run: |
           make package.build
+
+  publish:
+    permissions:
+      id-token: write
+    runs-on: ubuntu-latest
+    needs: package
+    steps: 
       - name: Publish package to TestPyPi
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
@@ -29,7 +34,7 @@ jobs:
 
   changelog:
     runs-on: ubuntu-latest
-    needs: package
+    needs: publish
     steps:
       - name: "Generate release changelog"
         uses: heinrichreimer/github-changelog-generator-action@v2.3

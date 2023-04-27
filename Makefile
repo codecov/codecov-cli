@@ -19,7 +19,9 @@ else
 endif
 
 package.install:
-	pip install setuptools wheel twine
+	pip install setuptools
+	pip install wheel
+	pip install twine
 	pip install -r requirements.txt  
     python setup.py build
 

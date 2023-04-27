@@ -21,7 +21,6 @@ endif
 package.install:
 	pip install --upgrade build
 	pip install setuptools wheel twine
-	python setup.py develop
 
 package.build:
 	python setup.py sdist bdist_wheel bdist_egg 

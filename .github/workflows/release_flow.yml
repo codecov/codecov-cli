@@ -29,7 +29,7 @@ jobs:
       run: |
         pip install --upgrade build
         pip install wheel
-        python setup.py sdist bdist_wheel
+        python setup.py sdist bdist_wheel --plat-name=manylinux2014_x86_64 --plat-name=macosx_10_9_x86_64 --plat-name=win_amd64
     - name: Publish package to TestPyPi
       uses: pypa/gh-action-pypi-publish@release/v1
       with:

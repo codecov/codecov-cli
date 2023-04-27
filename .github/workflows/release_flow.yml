@@ -3,12 +3,30 @@
 
 name: Build-and-Release
 
-on:
-  push:
-    tags:
-      - 'v*' # Runs only for tags that start with v (new versions)
+on: [push] # Run on any push event
 
 jobs:
+  package:
+  runs-on: ubuntu-latest
+  permissions:
+    id-token: write
+  steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Install Packaging Tools
+      run: |
+        make package.install
+    - name: Build Package
+      run: |
+        make package.build
+    - name: Publish package to TestPyPi
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        repository-url: https://test.pypi.org/legacy/
+
   changelog:
     runs-on: ubuntu-latest
     steps:
@@ -108,25 +126,25 @@ jobs:
         tag_name: ${{ github.ref_name }}
 
   
-  publish_release:
-    name: Publish release
-    needs: buildassets
-    runs-on: ubuntu-latest
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-    steps:
-      - id: 'auth'
-        name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@v1.0.0'
-        with:
-          create_credentials_file: 'true'
-          workload_identity_provider: ${{ secrets.CODECOV_GCP_WIDP }}
-          service_account: ${{ secrets.CODECOV_GCP_WIDSA }}
+  # publish_release:
+  #   name: Publish release
+  #   needs: buildassets
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: 'read'
+  #     id-token: 'write'
+  #   steps:
+  #     - id: 'auth'
+  #       name: 'Authenticate to Google Cloud'
+  #       uses: 'google-github-actions/auth@v1.0.0'
+  #       with:
+  #         create_credentials_file: 'true'
+  #         workload_identity_provider: ${{ secrets.CODECOV_GCP_WIDP }}
+  #         service_account: ${{ secrets.CODECOV_GCP_WIDSA }}
 
-      # Publish the release tag to a Pub/Sub topic
-      - name: Publish a message to a Pub/Sub topic
-        env: 
-          CLOUDSDK_CORE_PROJECT: ${{ secrets.GCLOUD_UPLOADER_PROJECT_ID }}
-        run: |
-          gcloud pubsub topics publish ${{ secrets.GCLOUD_UPLOADER_PUBSUB_TOPIC }} --message '{"release":"'"${{ github.ref_name }}"'", "latest":true}'
+  #     # Publish the release tag to a Pub/Sub topic
+  #     - name: Publish a message to a Pub/Sub topic
+  #       env: 
+  #         CLOUDSDK_CORE_PROJECT: ${{ secrets.GCLOUD_UPLOADER_PROJECT_ID }}
+  #       run: |
+  #         gcloud pubsub topics publish ${{ secrets.GCLOUD_UPLOADER_PUBSUB_TOPIC }} --message '{"release":"'"${{ github.ref_name }}"'", "latest":true}'

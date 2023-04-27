@@ -4,7 +4,7 @@ from setuptools import Extension, find_packages, setup
 
 setup(
     name="codecov-cli",
-    version="0.1.0",
+    version="0.1.24",
     packages=find_packages(exclude=["contrib", "docs", "tests*"]),
     description="Codecov Command Line Interface",
     long_description="",
@@ -29,6 +29,8 @@ setup(
             include_dirs=[
                 "languages/treesitterpython/src",
                 "languages/treesitterjavascript/src",
+                "languages/treesitterjavascript/src/tree_sitter",
+                "languages/treesitterpython/src/tree_sitter",
             ],
             extra_compile_args=(
                 ["-Wno-unused-variable"] if system() != "Windows" else None

@@ -28,7 +28,7 @@ jobs:
     - name: Build distribution
       run: |
         pip install --upgrade build
-        python -m build --sdist --wheel --outdir dist/
+        python -m build --universal
     - name: Publish package to TestPyPi
       uses: pypa/gh-action-pypi-publish@release/v1
       with:

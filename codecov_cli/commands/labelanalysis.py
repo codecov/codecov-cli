@@ -56,7 +56,10 @@ def label_analysis(
     codecov_yaml = ctx.obj["codecov_yaml"] or {}
     cli_config = codecov_yaml.get("cli", {})
     runner = get_runner(cli_config, runner_name)
-    logger.debug(f"Selected runner: {runner}")
+    logger.debug(
+        f"Selected runner: {runner}",
+        extra=dict(extra_log_attributes=dict(config=runner.params)),
+    )
     requested_labels = runner.collect_tests()
     logger.info(f"Collected {len(requested_labels)} tests")
     logger.debug(

@@ -42,7 +42,7 @@ class PythonStandardRunner(LabelAnalysisRunnerInterface):
         super().__init__()
         default_config: PythonStandardRunnerConfigParams = {
             "collect_tests_options": [],
-            "include_curr_dir": False,
+            "include_curr_dir": True,
         }
         if config_params is None:
             config_params = PythonStandardRunnerConfigParams()

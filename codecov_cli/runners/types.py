@@ -9,6 +9,8 @@ class LabelAnalysisRequestResult(TypedDict):
 
 
 class LabelAnalysisRunnerInterface(object):
+    params = None
+
     def collect_tests(self) -> List[str]:
         raise NotImplementedError()
 

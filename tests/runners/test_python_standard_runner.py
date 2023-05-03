@@ -9,6 +9,7 @@ from codecov_cli.runners.python_standard_runner import (
     PythonStandardRunnerConfigParams,
     _execute_pytest_subprocess,
 )
+from codecov_cli.runners.python_standard_runner import stdout as pyrunner_stdout
 
 
 @patch("codecov_cli.runners.python_standard_runner.pytest")
@@ -19,15 +20,28 @@ def test_execute_pytest_subprocess(mock_pytest, mocker):
 
     mock_pytest.main.side_effect = side_effect
     mock_queue = MagicMock()
-    _execute_pytest_subprocess(["pytest", "args"], mock_queue)
+    _execute_pytest_subprocess(["pytest", "args"], mock_queue, MagicMock())
     mock_pytest.main.assert_called_with(["pytest", "args"])
     assert mock_queue.put.call_count == 2
     mock_queue.put.assert_has_calls([call("Pytest output\n"), call(ExitCode.OK)])
 
 
+@patch("codecov_cli.runners.python_standard_runner.pytest")
+def test_execute_pytest_subprocess_no_capture_stdout(mock_pytest, mocker):
+    def side_effect(*args, **kwargs):
+        print("Pytest output")
+        return ExitCode.OK
+
+    mock_pytest.main.side_effect = side_effect
+    mock_queue = MagicMock()
+    _execute_pytest_subprocess(["pytest", "args"], mock_queue, MagicMock(), False)
+    mock_pytest.main.assert_called_with(["pytest", "args"])
+    assert mock_queue.put.call_count == 1
+    mock_queue.put.assert_has_calls([call(ExitCode.OK)])
+
+
 class TestPythonStandardRunner(object):
     runner = PythonStandardRunner()
-    output_noise = "\n\n========================================================== warnings summary ===========================================================\n../codecov-api/venv/lib/python3.9/site-packages/pytest_asyncio/plugin.py:191\n  /Users/giovannimguidini/Projects/GitHub/codecov-api/venv/lib/python3.9/site-packages/pytest_asyncio/plugin.py:191: DeprecationWarning: The 'asyncio_mode' default value will change to 'strict' in future, please explicitly use 'asyncio_mode=strict' or 'asyncio_mode=auto' in pytest configuration file.\n    config.issue_config_time_warning(LEGACY_MODE, stacklevel=2)\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n508 tests collected in 0.26s\n<ExitCode.OK: 0>\n"
 
     def test_init_with_params(self):
         assert self.runner.params == PythonStandardRunnerConfigParams(
@@ -58,7 +72,7 @@ class TestPythonStandardRunner(object):
         mock_get_context.return_value.Queue.assert_called_with(2)
         mock_get_context.return_value.Process.assert_called_with(
             target=_execute_pytest_subprocess,
-            args=[["--option", "--ignore=batata"], mock_queue],
+            args=[["--option", "--ignore=batata"], mock_queue, pyrunner_stdout, True],
         )
         mock_sys_path.append.assert_called_with("current directory")
         mock_sys_path.remove.assert_called_with("current directory")
@@ -86,7 +100,7 @@ class TestPythonStandardRunner(object):
         mock_get_context.return_value.Queue.assert_called_with(2)
         mock_get_context.return_value.Process.assert_called_with(
             target=_execute_pytest_subprocess,
-            args=[["--option", "--ignore=batata"], mock_queue],
+            args=[["--option", "--ignore=batata"], mock_queue, pyrunner_stdout, True],
         )
         mock_sys_path.append.assert_called_with("current directory")
 
@@ -110,7 +124,7 @@ class TestPythonStandardRunner(object):
         mock_get_context.return_value.Queue.assert_called_with(2)
         mock_get_context.return_value.Process.assert_called_with(
             target=_execute_pytest_subprocess,
-            args=[["--option", "--ignore=batata"], mock_queue],
+            args=[["--option", "--ignore=batata"], mock_queue, pyrunner_stdout, True],
         )
         assert mock_queue.get.call_count == 2
         assert result == output
@@ -168,7 +182,7 @@ class TestPythonStandardRunner(object):
 
         self.runner.process_labelanalysis_result(label_analysis_result)
         args, kwargs = mock_execute.call_args
-        assert kwargs == {}
+        assert kwargs == {"capture_output": False}
         assert isinstance(args[0], list)
         actual_command = args[0]
         assert actual_command[:2] == [

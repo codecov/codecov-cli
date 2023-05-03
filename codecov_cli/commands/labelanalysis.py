@@ -60,6 +60,7 @@ def label_analysis(
         f"Selected runner: {runner}",
         extra=dict(extra_log_attributes=dict(config=runner.params)),
     )
+    logger.info("Collecting labels...")
     requested_labels = runner.collect_tests()
     logger.info(f"Collected {len(requested_labels)} tests")
     logger.debug(
@@ -71,6 +72,7 @@ def label_analysis(
         "head_commit": head_commit_sha,
         "requested_labels": requested_labels,
     }
+    logger.info("Requesting set of labels to run...")
     try:
         response = requests.post(
             url, json=payload, headers={"Authorization": token_header}
@@ -108,7 +110,7 @@ def label_analysis(
         raise click.ClickException(click.style("Unable to reach Codecov", fg="red"))
     eid = response.json()["external_id"]
     has_result = False
-    logger.info("Label request sent")
+    logger.info("Label request sent. Waiting for result.")
     time.sleep(2)
     while not has_result:
         resp_data = requests.get(

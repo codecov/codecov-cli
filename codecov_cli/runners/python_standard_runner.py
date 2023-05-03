@@ -1,7 +1,7 @@
 import logging
-import subprocess
 from contextlib import redirect_stdout
 from io import StringIO
+from multiprocessing import Queue, get_context
 from os import getcwd
 from sys import path
 from typing import List, TypedDict
@@ -37,6 +37,21 @@ def _include_curr_dir(method):
     return call_method
 
 
+def _execute_pytest_subprocess(pytest_args: List[str], queue: Queue):
+    """Runs pytest from python in a subprocess.
+    This is because we call it twice in the label-analysis process,
+    so we might have import errors if calling it directly.
+    Check the warning: https://docs.pytest.org/en/7.1.x/how-to/usage.html#calling-pytest-from-python-code
+
+    Returns the output value and pytest exit code via queue
+    """
+    with StringIO() as fd:
+        with redirect_stdout(fd):
+            result = pytest.main(pytest_args)
+        queue.put(fd.getvalue())
+        queue.put(result)
+
+
 class PythonStandardRunner(LabelAnalysisRunnerInterface):
     def __init__(self, config_params: PythonStandardRunnerConfigParams = None) -> None:
         super().__init__()
@@ -49,19 +64,25 @@ class PythonStandardRunner(LabelAnalysisRunnerInterface):
         self.params = {**default_config, **config_params}
 
     @_include_curr_dir
-    def _execute_pytest(self, pytest_args: List[str]) -> str:
-        with StringIO() as fd:
-            with redirect_stdout(fd):
-                result = pytest.main(pytest_args)
-            output = fd.getvalue()
-            if result != pytest.ExitCode.OK and result != 0:
-                logger.error(
-                    "Pytest did not run correctly",
-                    extra=dict(
-                        extra_log_attributes=dict(exit_code=result, output=output)
-                    ),
-                )
-                raise Exception("Pytest did not run correctly")
+    def _execute_pytest(self, pytest_args: List[str], numprocess: int = 1) -> str:
+        """Handles calling pytest from Python in a subprocess.
+        Raises Exception if pytest fails
+        Returns the complete pytest output
+        """
+        ctx = get_context("fork")
+        queue = ctx.Queue(2)
+        p = ctx.Process(target=_execute_pytest_subprocess, args=[pytest_args, queue])
+        p.start()
+        output = queue.get()  # Output from pytest emitted by subprocess
+        result = queue.get()  # Pytest exit code emitted by subprocess
+        p.join()
+
+        if p.exitcode != 0 or (result != pytest.ExitCode.OK and result != 0):
+            logger.error(
+                "Pytest did not run correctly",
+                extra=dict(extra_log_attributes=dict(exit_code=result, output=output)),
+            )
+            raise Exception("Pytest did not run correctly")
         return output
 
     def collect_tests(self):
@@ -108,8 +129,7 @@ class PythonStandardRunner(LabelAnalysisRunnerInterface):
             )
         all_labels = set(all_labels)
         all_labels = [x.rsplit("[", 1)[0] if "[" in x else x for x in all_labels]
-        # Not safe from the customer perspective, in general, probably.
-        # This is just to check it working
+
         command_array = default_options + all_labels
         logger.info("Running tests")
         logger.debug(

@@ -58,6 +58,10 @@ def test_create_report_command_with_warnings(mocker):
 
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
+        (
+            "info",
+            "Process Report creating complete. --- {\"result\": \"RequestResult(error=None, warnings=[RequestResultWarning(message='somewarningmessage')], status_code=200, text='')\"}",
+        ),
         ("info", "Report creating process had 1 warning"),
         ("warning", "Warning 1: somewarningmessage"),
     ]
@@ -101,7 +105,13 @@ def test_create_report_command_with_error(mocker):
         )
 
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
-    assert out_bytes == [("error", "Report creating failed: Permission denied")]
+    assert out_bytes == [
+        (
+            "info",
+            "Process Report creating complete. --- {\"result\": \"RequestResult(error=RequestError(code='HTTP Error 403', params={}, description='Permission denied'), warnings=[], status_code=403, text='')\"}",
+        ),
+        ("error", "Report creating failed: Permission denied"),
+    ]
     assert res == RequestResult(
         error=RequestError(
             code="HTTP Error 403",

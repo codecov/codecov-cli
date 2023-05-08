@@ -131,9 +131,9 @@ class UploadCollector(object):
         logger.debug("Collecting relevant files")
         network = self.network_finder.find_files()
         coverage_files = self.coverage_file_finder.find_coverage_files()
-        logger.debug(f"Found {len(coverage_files)} coverage files to upload")
+        logger.info(f"Found {len(coverage_files)} coverage files to upload")
         for file in coverage_files:
-            logger.debug(f"> {file}")
+            logger.info(f"> {file}")
         return UploadCollectionResult(
             network=network,
             coverage_files=coverage_files,

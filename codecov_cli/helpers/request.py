@@ -59,7 +59,7 @@ def request_result(resp):
 def log_warnings_and_errors_if_any(
     sending_result: RequestResult, process_desc: str, fail_on_error: bool = False
 ):
-    logger.debug(
+    logger.info(
         f"Process {process_desc} complete.",
         extra=dict(extra_log_attributes=dict(result=sending_result)),
     )

@@ -46,19 +46,20 @@ class UploadSender(object):
             "job_code": job_code,
         }
 
+        # Data to upload to Codecov
         headers = get_token_header_or_fail(token)
         encoded_slug = encode_slug(slug)
         url = f"https://api.codecov.io/upload/{git_service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads"
-        resp = send_post_request(url=url, data=data, headers=headers)
-
-        if resp.status_code >= 400:
-            return resp
-
-        resp_json_obj = json.loads(resp.text)
-        put_url = resp_json_obj["raw_upload_location"]
+        # Data that goes to storage
         reports_payload = self._generate_payload(upload_data, env_vars)
-        resp = send_put_request(put_url, data=reports_payload)
-        return resp
+
+        resp_from_codecov = send_post_request(url=url, data=data, headers=headers)
+        if resp_from_codecov.status_code >= 400:
+            return resp_from_codecov
+        resp_json_obj = json.loads(resp_from_codecov.text)
+        put_url = resp_json_obj["raw_upload_location"]
+        resp_from_storage = send_put_request(put_url, data=reports_payload)
+        return resp_from_storage
 
     def _generate_payload(
         self, upload_data: UploadCollectionResult, env_vars: typing.Dict[str, str]

@@ -31,10 +31,7 @@ def test_commit_command_with_warnings(mocker):
 
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
-        (
-            "info",
-            "Process Commit creating complete. --- {\"result\": \"RequestResult(error=None, warnings=[RequestResultWarning(message='somewarningmessage')], status_code=201, text='')\"}",
-        ),
+        ("info", "Process Commit creating complete"),
         ("info", "Commit creating process had 1 warning"),
         ("warning", "Warning 1: somewarningmessage"),
     ]
@@ -80,7 +77,7 @@ def test_commit_command_with_error(mocker):
     assert out_bytes == [
         (
             "info",
-            "Process Commit creating complete. --- {\"result\": \"RequestResult(error=RequestError(code='HTTP Error 403', params={}, description='Permission denied'), warnings=[], status_code=403, text='Permission denied')\"}",
+            "Process Commit creating complete",
         ),
         ("error", "Commit creating failed: Permission denied"),
     ]

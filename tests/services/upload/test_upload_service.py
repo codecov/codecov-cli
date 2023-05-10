@@ -69,6 +69,7 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
+        ("info", "Process Upload complete"),
         ("info", "Upload process had 1 warning"),
         ("warning", "Warning 1: somewarningmessage"),
     ]
@@ -151,6 +152,7 @@ def test_do_upload_logic_happy_path(mocker):
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
+        ("info", "Process Upload complete"),
         ("info", "Upload process had 1 warning"),
         ("warning", "Warning 1: somewarningmessage"),
     ]
@@ -237,7 +239,8 @@ def test_do_upload_logic_dry_run(mocker):
         cli_config, ["first_plugin", "another", "forth"]
     )
     assert out_bytes == [
-        ("info", "dry-run option activated. NOT sending data to Codecov.")
+        ("info", "dry-run option activated. NOT sending data to Codecov."),
+        ("info", "Process Upload complete"),
     ]
     assert res == RequestResult(
         error=None,
@@ -294,9 +297,10 @@ def test_do_upload_logic_verbose(mocker, use_verbose_option):
             "Selected uploader to use: <class 'codecov_cli.services.upload.legacy_upload_sender.LegacyUploadSender'>",
         ),
         ("info", "dry-run option activated. NOT sending data to Codecov."),
+        ("info", "Process Upload complete"),
         (
             "debug",
-            'Process Upload complete. --- {"result": "RequestResult(error=None, warnings=None, status_code=200, text=\'Data NOT sent to Codecov because of dry-run option\')"}',
+            'Upload result --- {"result": "RequestResult(error=None, warnings=None, status_code=200, text=\'Data NOT sent to Codecov because of dry-run option\')"}',
         ),
     ]
     assert res == RequestResult(

@@ -1,5 +1,6 @@
 import base64
 import json
+import logging
 import typing
 import uuid
 import zlib
@@ -16,6 +17,8 @@ from codecov_cli.types import (
     UploadCollectionResult,
     UploadCollectionResultFile,
 )
+
+logger = logging.getLogger("codecovcli")
 
 
 class UploadSender(object):
@@ -53,11 +56,17 @@ class UploadSender(object):
         # Data that goes to storage
         reports_payload = self._generate_payload(upload_data, env_vars)
 
+        logger.debug("Sending upload request to Codecov")
         resp_from_codecov = send_post_request(url=url, data=data, headers=headers)
         if resp_from_codecov.status_code >= 400:
             return resp_from_codecov
         resp_json_obj = json.loads(resp_from_codecov.text)
+        logger.debug(
+            "Upload request to Codecov complete.",
+            extra=dict(extra_log_attributes=dict(response=resp_json_obj)),
+        )
         put_url = resp_json_obj["raw_upload_location"]
+        logger.debug("Sending upload to storage")
         resp_from_storage = send_put_request(put_url, data=reports_payload)
         return resp_from_storage
 

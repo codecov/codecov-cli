@@ -6,6 +6,7 @@ import requests
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
 from codecov_cli.runners import get_runner
+from codecov_cli.runners.types import LabelAnalysisRequestResult
 
 logger = logging.getLogger("codecovcli")
 
@@ -86,12 +87,14 @@ def label_analysis(
                 logger.info(
                     "Could not get set of tests to run. Falling back to running all collected tests."
                 )
-                fake_response = {
-                    "present_report_labels": [],
-                    "absent_labels": requested_labels,
-                    "present_diff_labels": [],
-                    "global_level_labels": [],
-                }
+                fake_response = LabelAnalysisRequestResult(
+                    {
+                        "present_report_labels": [],
+                        "absent_labels": requested_labels,
+                        "present_diff_labels": [],
+                        "global_level_labels": [],
+                    }
+                )
                 return runner.process_labelanalysis_result(fake_response)
             raise click.ClickException("Sorry. Codecov is having problems")
         if response.status_code >= 400:
@@ -119,7 +122,9 @@ def label_analysis(
         )
         resp_json = resp_data.json()
         if resp_json["state"] == "finished":
-            runner.process_labelanalysis_result(resp_data.json()["result"])
+            runner.process_labelanalysis_result(
+                LabelAnalysisRequestResult(resp_data.json()["result"])
+            )
             return
         if resp_json["state"] == "error":
             logger.error(
@@ -128,12 +133,14 @@ def label_analysis(
             )
             if requested_labels:
                 logger.info("Using requested labels as tests to run")
-                fake_response = {
-                    "present_report_labels": [],
-                    "absent_labels": requested_labels,
-                    "present_diff_labels": [],
-                    "global_level_labels": [],
-                }
+                fake_response = LabelAnalysisRequestResult(
+                    {
+                        "present_report_labels": [],
+                        "absent_labels": requested_labels,
+                        "present_diff_labels": [],
+                        "global_level_labels": [],
+                    }
+                )
                 return runner.process_labelanalysis_result(fake_response)
             return
         logger.info("Waiting more time for result")

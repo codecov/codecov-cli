@@ -3,10 +3,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from codecov_cli.runners.dan_runner import DoAnythingNowRunner
-from codecov_cli.runners.python_standard_runner import PythonStandardRunner
 
 
-class TestPythonStandardRunner(object):
+class TestDoAnythingNowRunner(object):
     @patch("codecov_cli.runners.dan_runner.subprocess.run")
     def test_collect_tests(self, mock_run):
         test_list = ["test_1", "test_2", "test_3"]

@@ -1,11 +1,25 @@
-from typing import List, TypedDict
+from typing import List
 
 
-class LabelAnalysisRequestResult(TypedDict):
-    present_report_labels: List[str]
-    absent_labels: List[str]
-    present_diff_labels: List[str]
-    global_level_labels: List[str]
+# This is supposed to be a TypedDict,
+# But that is Python >= 3.7 only
+# So we are not using those
+class LabelAnalysisRequestResult(dict):
+    @property
+    def present_report_labels(self) -> List[str]:
+        return self.get("present_report_labels", [])
+
+    @property
+    def absent_labels(self) -> List[str]:
+        return self.get("absent_labels", [])
+
+    @property
+    def present_diff_labels(self) -> List[str]:
+        return self.get("present_diff_labels", [])
+
+    @property
+    def global_level_labels(self) -> List[str]:
+        return self.get("global_level_labels", [])
 
 
 class LabelAnalysisRunnerInterface(object):

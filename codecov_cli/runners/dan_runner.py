@@ -1,5 +1,5 @@
 import subprocess
-from typing import List, TypedDict, Union
+from typing import List, Optional, Union
 
 from codecov_cli.runners.types import (
     LabelAnalysisRequestResult,
@@ -7,20 +7,25 @@ from codecov_cli.runners.types import (
 )
 
 
-class DoAnythingNowConfigParams(TypedDict):
-    collect_tests_command: Union[List[str], str]
-    process_labelanalysis_result_command: Union[List[str], str]
+class DoAnythingNowConfigParams(dict):
+    @property
+    def collect_tests_command(self) -> Union[List[str], str]:
+        return self.get("collect_tests_command", None)
+
+    @property
+    def process_labelanalysis_result_command(self) -> Union[List[str], str]:
+        return self.get("process_labelanalysis_result_command", None)
 
 
 class DoAnythingNowRunner(LabelAnalysisRunnerInterface):
-    def __init__(self, config_params: DoAnythingNowConfigParams = None) -> None:
+    def __init__(self, config_params: Optional[dict] = None) -> None:
         super().__init__()
         if config_params is None:
-            config_params = DoAnythingNowConfigParams()
-        self.params = config_params
+            config_params = {}
+        self.params = DoAnythingNowConfigParams(config_params)
 
     def collect_tests(self) -> List[str]:
-        command = self.params.get("collect_tests_command", None)
+        command = self.params.collect_tests_command
         if command is None:
             raise Exception(
                 "DAN runner missing 'collect_tests_command' configuration value"
@@ -28,7 +33,7 @@ class DoAnythingNowRunner(LabelAnalysisRunnerInterface):
         return subprocess.run(command, check=True, capture_output=True).stdout.decode()
 
     def process_labelanalysis_result(self, result: LabelAnalysisRequestResult):
-        command = self.params.get("process_labelanalysis_result_command", None)
+        command = self.params.process_labelanalysis_result_command
         if command is None:
             raise Exception(
                 "DAN runner missing 'process_labelanalysis_result_command' configuration value"

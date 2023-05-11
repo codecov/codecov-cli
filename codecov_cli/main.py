@@ -7,6 +7,7 @@ import click
 from codecov_cli.commands.base_picking import pr_base_picking
 from codecov_cli.commands.commit import create_commit
 from codecov_cli.commands.create_report_result import create_report_results
+from codecov_cli.commands.empty_upload import empty_upload
 from codecov_cli.commands.get_report_results import get_report_results
 from codecov_cli.commands.labelanalysis import label_analysis
 from codecov_cli.commands.report import create_report
@@ -61,6 +62,7 @@ cli.add_command(get_report_results)
 cli.add_command(pr_base_picking)
 cli.add_command(label_analysis)
 cli.add_command(static_analysis)
+cli.add_command(empty_upload)
 
 
 def run():

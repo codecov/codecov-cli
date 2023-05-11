@@ -1,4 +1,5 @@
 import logging
+import random
 from contextlib import redirect_stdout
 from io import StringIO, TextIOWrapper
 from multiprocessing import Queue, get_context
@@ -143,6 +144,12 @@ class PythonStandardRunner(LabelAnalysisRunnerInterface):
                 ),
             )
 
+        if len(all_labels) == 0:
+            all_labels = [random.choice(result["present_report_labels"])]
+            logger.info(
+                "All tests are being skipped. Selected random label to run",
+                extra=dict(extra_log_attributes=dict(selected_label=all_labels[0])),
+            )
         command_array = default_options + [
             label.split("[")[0] if "[" in label else label for label in all_labels
         ]

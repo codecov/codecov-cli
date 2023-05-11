@@ -194,3 +194,25 @@ class TestPythonStandardRunner(object):
             "test_global",
             "test_in_diff",
         ]
+
+    def test_process_label_analysis_skip_all_tests(self, mocker):
+        label_analysis_result = {
+            "present_report_labels": ["test_present"],
+            "absent_labels": [],
+            "present_diff_labels": [],
+            "global_level_labels": [],
+        }
+        mock_execute = mocker.patch.object(PythonStandardRunner, "_execute_pytest")
+
+        self.runner.process_labelanalysis_result(label_analysis_result)
+        args, kwargs = mock_execute.call_args
+        assert kwargs == {"capture_output": False}
+        assert isinstance(args[0], list)
+        actual_command = args[0]
+        assert actual_command[:2] == [
+            "--cov=./",
+            "--cov-context=test",
+        ]
+        assert sorted(actual_command[2:]) == [
+            "test_present",
+        ]

@@ -44,11 +44,12 @@ class TestPythonStandardRunner(object):
     runner = PythonStandardRunner()
 
     def test_init_with_params(self):
-        assert self.runner.params == PythonStandardRunnerConfigParams(
-            collect_tests_options=[], include_curr_dir=True
-        )
-        config_params = PythonStandardRunnerConfigParams(
-            collect_tests_options=["--option=value", "-option"], include_curr_dir=True
+        assert self.runner.params.collect_tests_options == []
+        assert self.runner.params.include_curr_dir == True
+
+        config_params = dict(
+            collect_tests_options=["--option=value", "-option"],
+            include_curr_dir=False,
         )
         runner_with_params = PythonStandardRunner(config_params)
         assert runner_with_params.params == config_params
@@ -118,7 +119,7 @@ class TestPythonStandardRunner(object):
         mock_get_context.return_value.Queue.return_value = mock_queue
         mock_get_context.return_value.Process.return_value = mock_process
 
-        config_params = PythonStandardRunnerConfigParams(include_curr_dir=False)
+        config_params = dict(include_curr_dir=False)
         runner = PythonStandardRunner(config_params=config_params)
         result = runner._execute_pytest(["--option", "--ignore=batata"])
         mock_get_context.return_value.Queue.assert_called_with(2)
@@ -160,9 +161,7 @@ class TestPythonStandardRunner(object):
             return_value="\n".join(collected_test_list),
         )
 
-        config_params = PythonStandardRunnerConfigParams(
-            collect_tests_options=["--option=value", "-option"],
-        )
+        config_params = dict(collect_tests_options=["--option=value", "-option"])
         runner_with_params = PythonStandardRunner(config_params)
 
         collected_tests_from_runner = runner_with_params.collect_tests()

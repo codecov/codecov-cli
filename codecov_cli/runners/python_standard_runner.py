@@ -5,7 +5,7 @@ from io import StringIO, TextIOWrapper
 from multiprocessing import Queue, get_context
 from os import getcwd
 from sys import path, stdout
-from typing import List, TypedDict
+from typing import List, Optional
 
 import pytest
 
@@ -17,16 +17,23 @@ from codecov_cli.runners.types import (
 logger = logging.getLogger("codecovcli")
 
 
-class PythonStandardRunnerConfigParams(TypedDict):
-    collect_tests_options: List[str]
-    # include_dirs is to account for the difference described in
-    # https://docs.pytest.org/en/7.1.x/how-to/usage.html#calling-pytest-through-python-m-pytest
-    include_curr_dir: bool
+class PythonStandardRunnerConfigParams(dict):
+    @property
+    def collect_tests_options(self) -> List[str]:
+        return self.get("collect_tests_options", [])
+
+    @property
+    def include_curr_dir(self) -> bool:
+        """ "
+        Account for the difference 'pytest' vs 'python -m pytest'
+        https://docs.pytest.org/en/7.1.x/how-to/usage.html#calling-pytest-through-python-m-pytest
+        """
+        return self.get("include_curr_dir", True)
 
 
 def _include_curr_dir(method):
     def call_method(self, *args, **kwargs):
-        include_curr_dir = self.params["include_curr_dir"]
+        include_curr_dir = self.params.include_curr_dir
         curr_dir = getcwd()
         if include_curr_dir:
             path.append(curr_dir)
@@ -62,15 +69,11 @@ def _execute_pytest_subprocess(
 
 
 class PythonStandardRunner(LabelAnalysisRunnerInterface):
-    def __init__(self, config_params: PythonStandardRunnerConfigParams = None) -> None:
+    def __init__(self, config_params: Optional[dict] = None) -> None:
         super().__init__()
-        default_config: PythonStandardRunnerConfigParams = {
-            "collect_tests_options": [],
-            "include_curr_dir": True,
-        }
         if config_params is None:
-            config_params = PythonStandardRunnerConfigParams()
-        self.params = {**default_config, **config_params}
+            config_params = {}
+        self.params = PythonStandardRunnerConfigParams(config_params)
 
     @_include_curr_dir
     def _execute_pytest(
@@ -103,7 +106,7 @@ class PythonStandardRunner(LabelAnalysisRunnerInterface):
 
     def collect_tests(self):
         default_options = ["-q", "--collect-only"]
-        extra_args = self.params["collect_tests_options"]
+        extra_args = self.params.collect_tests_options
         options_to_use = default_options + extra_args
         logger.debug(
             "Collecting tests",

@@ -11,6 +11,7 @@ def test_existing_commands():
         "create-report",
         "create-report-results",
         "do-upload",
+        "empty-upload",
         "get-report-results",
         "label-analysis",
         "pr-base-picking",

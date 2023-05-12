@@ -27,6 +27,7 @@ def test_empty_upload_with_warnings(mocker):
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
+        ("info", "Process Empty Upload complete"),
         ("info", "Empty Upload process had 1 warning"),
         ("warning", "Warning 1: somewarningmessage"),
     ]
@@ -59,7 +60,10 @@ def test_empty_upload_with_error(mocker):
 
     print(outstreams)
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
-    assert out_bytes == [("error", "Empty Upload failed: Permission denied")]
+    assert out_bytes == [
+        ("info", "Process Empty Upload complete"),
+        ("error", "Empty Upload failed: Permission denied"),
+    ]
     assert res == mock_send_commit_data.return_value
     mock_send_commit_data.assert_called_once()
 

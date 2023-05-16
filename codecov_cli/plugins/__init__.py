@@ -50,7 +50,8 @@ def _get_plugin(cli_config, plugin_name):
     if plugin_name == "gcov":
         return GcovPlugin()
     if plugin_name == "pycoverage":
-        return Pycoverage()
+        config = cli_config.get("plugins", {}).get("pycoverage", {})
+        return Pycoverage(config)
     if plugin_name == "xcode":
         return XcodePlugin()
     if cli_config and plugin_name in cli_config.get("plugins", {}):

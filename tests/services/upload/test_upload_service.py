@@ -66,6 +66,7 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
             slug="slug",
             pull_request_number="pr",
             git_service="git_service",
+            enterprise_url=None,
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
@@ -97,6 +98,7 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
         None,
         "service",
         "git_service",
+        None,
     )
 
 
@@ -149,6 +151,7 @@ def test_do_upload_logic_happy_path(mocker):
             slug="slug",
             pull_request_number="pr",
             git_service="git_service",
+            enterprise_url=None,
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
@@ -180,6 +183,7 @@ def test_do_upload_logic_happy_path(mocker):
         None,
         "service",
         "git_service",
+        None,
     )
 
 
@@ -229,6 +233,7 @@ def test_do_upload_logic_dry_run(mocker):
             pull_request_number="pr",
             dry_run=True,
             git_service="git_service",
+            enterprise_url=None,
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     mock_select_coverage_file_finder.assert_called_with(None, None, None)
@@ -289,6 +294,7 @@ def test_do_upload_logic_verbose(mocker, use_verbose_option):
             pull_request_number="pr",
             dry_run=True,
             git_service="git_service",
+            enterprise_url=None,
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [

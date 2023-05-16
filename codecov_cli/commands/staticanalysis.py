@@ -50,6 +50,7 @@ def static_analysis(
     force,
     folders_to_exclude: typing.List[pathlib.Path],
 ):
+    enterprise_url = ctx.obj.get("enterprise_url")
     logger.debug(
         "Starting Static Analysis processing",
         extra=dict(
@@ -61,6 +62,7 @@ def static_analysis(
                 token="NOTOKEN" if not token else (str(token)[:1] + 18 * "*"),
                 force=force,
                 folders_to_exclude=folders_to_exclude,
+                enterprise_url=enterprise_url,
             )
         ),
     )
@@ -74,5 +76,6 @@ def static_analysis(
             token,
             force,
             list(folders_to_exclude),
+            enterprise_url,
         )
     )

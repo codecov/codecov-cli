@@ -5,6 +5,7 @@ import click
 import requests
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
+from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.runners import get_runner
 from codecov_cli.runners.types import LabelAnalysisRequestResult
 
@@ -40,6 +41,7 @@ def label_analysis(
     base_commit_sha: str,
     runner_name: str = "python",
 ):
+    enterprise_url = ctx.obj.get("enterprise_url")
     logger.debug(
         "Starting label analysis",
         extra=dict(
@@ -48,10 +50,12 @@ def label_analysis(
                 base_commit_sha=base_commit_sha,
                 token="NOTOKEN" if not token else (str(token)[:1] + 18 * "*"),
                 runner_name=runner_name,
+                enterprise_url=enterprise_url,
             )
         ),
     )
-    url = "https://api.codecov.io/labels/labels-analysis"
+    upload_url = enterprise_url or CODECOV_API_URL
+    url = f"{upload_url}/labels/labels-analysis"
     token_header = f"Repotoken {token}"
 
     codecov_yaml = ctx.obj["codecov_yaml"] or {}
@@ -117,7 +121,7 @@ def label_analysis(
     time.sleep(2)
     while not has_result:
         resp_data = requests.get(
-            f"https://api.codecov.io/labels/labels-analysis/{eid}",
+            f"{upload_url}/labels/labels-analysis/{eid}",
             headers={"Authorization": token_header},
         )
         resp_json = resp_data.json()

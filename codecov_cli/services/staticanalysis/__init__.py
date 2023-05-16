@@ -11,6 +11,7 @@ import httpx
 import requests
 import yaml
 
+from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.services.staticanalysis.analyzers import get_best_analyzer
 from codecov_cli.services.staticanalysis.exceptions import AnalysisError
 from codecov_cli.services.staticanalysis.finders import select_file_finder
@@ -31,6 +32,7 @@ async def run_analysis_entrypoint(
     token: str,
     should_force: bool,
     folders_to_exclude: typing.List[Path],
+    enterprise_url: typing.Optional[str],
 ):
     ff = select_file_finder(config)
     files = list(ff.find_files(folder, pattern, folders_to_exclude))
@@ -58,8 +60,9 @@ async def run_analysis_entrypoint(
             "Sending data for server",
             extra=dict(extra_log_attributes=dict(json_payload=json_output)),
         )
+        upload_url = enterprise_url or CODECOV_API_URL
         response = requests.post(
-            "https://api.codecov.io/staticanalysis/analyses",
+            f"{upload_url}/staticanalysis/analyses",
             json=json_output,
             headers={"Authorization": f"Repotoken {token}"},
         )

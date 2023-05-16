@@ -2,6 +2,7 @@ import logging
 import typing
 import uuid
 
+from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.helpers.request import (
     get_token_header_or_fail,
@@ -20,6 +21,7 @@ def create_commit_logic(
     slug: typing.Optional[str],
     token: uuid.UUID,
     service: typing.Optional[str],
+    enterprise_url: typing.Optional[str] = None,
 ):
     encoded_slug = encode_slug(slug)
     sending_result = send_commit_data(
@@ -30,13 +32,16 @@ def create_commit_logic(
         slug=encoded_slug,
         token=token,
         service=service,
+        enterprise_url=enterprise_url,
     )
 
     log_warnings_and_errors_if_any(sending_result, "Commit creating")
     return sending_result
 
 
-def send_commit_data(commit_sha, parent_sha, pr, branch, slug, token, service):
+def send_commit_data(
+    commit_sha, parent_sha, pr, branch, slug, token, service, enterprise_url
+):
     data = {
         "commitid": commit_sha,
         "parent_commit_id": parent_sha,
@@ -44,5 +49,6 @@ def send_commit_data(commit_sha, parent_sha, pr, branch, slug, token, service):
         "branch": branch,
     }
     headers = get_token_header_or_fail(token)
-    url = f"https://api.codecov.io/upload/{service}/{slug}/commits"
+    upload_url = enterprise_url or CODECOV_API_URL
+    url = f"{upload_url}/upload/{service}/{slug}/commits"
     return send_post_request(url=url, data=data, headers=headers)

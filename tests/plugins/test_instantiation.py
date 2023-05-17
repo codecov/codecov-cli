@@ -6,6 +6,7 @@ from codecov_cli.plugins import (
     _load_plugin_from_yaml,
     select_preparation_plugins,
 )
+from codecov_cli.plugins.compress_pycoverage_contexts import CompressPycoverageContexts
 from codecov_cli.plugins.pycoverage import Pycoverage, PycoverageConfig
 
 
@@ -64,6 +65,18 @@ def test_get_plugin_pycoverage():
     assert isinstance(res, Pycoverage)
     assert res.config == PycoverageConfig(pycoverage_config)
     assert res.config.report_type == "json"
+
+
+def test_get_plugin_compress_pycoverage():
+    res = _get_plugin({}, "compress-pycoverage")
+    assert isinstance(res, CompressPycoverageContexts)
+
+    res = _get_plugin(
+        {"plugins": {"compress-pycoverage": {"file_to_compress": "something.json"}}},
+        "compress-pycoverage",
+    )
+    assert isinstance(res, CompressPycoverageContexts)
+    assert str(res.file_to_compress) == "something.json"
 
 
 def test_select_preparation_plugins(mocker):

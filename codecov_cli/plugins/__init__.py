@@ -4,6 +4,7 @@ from importlib import import_module
 
 import click
 
+from codecov_cli.plugins.compress_pycoverage_contexts import CompressPycoverageContexts
 from codecov_cli.plugins.gcov import GcovPlugin
 from codecov_cli.plugins.pycoverage import Pycoverage
 from codecov_cli.plugins.xcode import XcodePlugin
@@ -54,6 +55,9 @@ def _get_plugin(cli_config, plugin_name):
         return Pycoverage(config)
     if plugin_name == "xcode":
         return XcodePlugin()
+    if plugin_name == "compress-pycoverage":
+        config = cli_config.get("plugins", {}).get("compress-pycoverage", {})
+        return CompressPycoverageContexts(config)
     if cli_config and plugin_name in cli_config.get("plugins", {}):
         return _load_plugin_from_yaml(cli_config["plugins"][plugin_name])
     click.secho(f"Unable to find plugin {plugin_name}", fg="magenta", err=True)

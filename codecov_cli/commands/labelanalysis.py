@@ -32,6 +32,7 @@ logger = logging.getLogger("codecovcli")
     cls=CodecovOption,
     required=True,
 )
+@click.option("--runner-name", "--runner", "runner_name", help="Runner to use")
 @click.pass_context
 def label_analysis(
     ctx: click.Context,

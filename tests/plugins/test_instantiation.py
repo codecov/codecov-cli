@@ -6,6 +6,7 @@ from codecov_cli.plugins import (
     _load_plugin_from_yaml,
     select_preparation_plugins,
 )
+from codecov_cli.plugins.pycoverage import Pycoverage, PycoverageConfig
 
 
 def test_load_plugin_from_yaml(mocker):
@@ -50,6 +51,19 @@ def test_get_plugin_gcov():
 def test_get_plugin_xcode():
     res = _get_plugin({}, "xcode")
     assert isinstance(res, XcodePlugin)
+
+
+def test_get_plugin_pycoverage():
+    res = _get_plugin({}, "pycoverage")
+    assert isinstance(res, Pycoverage)
+    assert res.config == PycoverageConfig()
+    assert res.config.report_type == "xml"
+
+    pycoverage_config = {"project_root": "project/root", "report_type": "json"}
+    res = _get_plugin({"plugins": {"pycoverage": pycoverage_config}}, "pycoverage")
+    assert isinstance(res, Pycoverage)
+    assert res.config == PycoverageConfig(pycoverage_config)
+    assert res.config.report_type == "json"
 
 
 def test_select_preparation_plugins(mocker):

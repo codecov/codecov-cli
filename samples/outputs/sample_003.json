@@ -1,22 +1,127 @@
 {
     "result": {
         "empty_lines": [
-            4
+            4, 
+            9, 
+            14,
+            16,
+            25,
+            30,
+            35,
+            45,
+            48,
+            53,
+            59,
+            64,
+            70,
+            75,
+            79,
+            88,
+            97
         ],
         "executable_lines": [],
+        "number_lines": 98,
+        "hash": "ad3f8572135398ba290dcb36ff0410c2",
+        "filename": "samples/inputs/sample_003.js",
+        "language": "javascript",
         "functions": [
             {
                 "identifier": "myFunction",
-                "start_line": 1,
-                "end_line": 3,
-                "code_hash": "7c4b5655b5fd47e70e28fb937d373131",
-                "complexity_metrics": {}
+                "start_line": 1, 
+                "end_line": 3, 
+                "code_hash": "7c4b5655b5fd47e70e28fb937d373131", 
+                "complexity_metrics": {
+                    "conditions": 0, 
+                    "mccabe_cyclomatic_complexity": 1, 
+                    "returns": 1, 
+                    "max_nested_conditional": 0
+                }
+            }, 
+            {
+                "identifier": "add", 
+                "start_line": 11, 
+                "end_line": 13, 
+                "code_hash": "ef7cfd56b6055457f8979099b2ebae1a",
+                "complexity_metrics": {
+                    "conditions": 0, 
+                    "mccabe_cyclomatic_complexity": 1, 
+                    "returns": 1, 
+                    "max_nested_conditional": 0
+                }
+            }, 
+            {
+                "identifier": "fetchData", 
+                "start_line": 81, 
+                "end_line": 87, 
+                "code_hash": "5a39210070434ffafa536fb1653dad05", 
+                "complexity_metrics": {
+                    "conditions": 0, 
+                    "mccabe_cyclomatic_complexity": 1, 
+                    "returns": 1, 
+                    "max_nested_conditional": 0
+                }
+            }, 
+            {
+                "identifier": "getData", 
+                "start_line": 89, 
+                "end_line": 96, "code_hash": "44721228ef36e7dd7702285c5609e092", 
+                "complexity_metrics": {
+                    "conditions": 0,
+                    "mccabe_cyclomatic_complexity": 1, 
+                    "returns": 0, 
+                    "max_nested_conditional": 0
+                }
+            },
+            {
+                "identifier": "Shape::constructor", 
+                "start_line": 56, 
+                "end_line": 58, 
+                "code_hash": "1cb8edc3d15294f0d0e3c936850706bf", 
+                "complexity_metrics": {
+                    "conditions": 0, 
+                    "mccabe_cyclomatic_complexity": 1, 
+                    "returns": 0, 
+                    "max_nested_conditional": 0
+                }
+            }, 
+            {
+                "identifier": "Shape::getColor", 
+                "start_line": 60, 
+                "end_line": 62, 
+                "code_hash": "e83d61eae8ef3e2743c5152c4366ff23", 
+                "complexity_metrics": {
+                    "conditions": 0, 
+                    "mccabe_cyclomatic_complexity": 1, 
+                    "returns": 1, 
+                    "max_nested_conditional": 0
+                }
+            }, 
+            {
+                "identifier": "Circle::constructor", 
+                "start_line": 66, 
+                "end_line": 69, 
+                "code_hash": "7c91868fee0b86df072055b184517f87",
+                "complexity_metrics": {
+                    "conditions": 0, 
+                    "mccabe_cyclomatic_complexity": 1, 
+                    "returns": 0, 
+                    "max_nested_conditional": 0
+                }
+            }, 
+            {
+                "identifier": "Circle::getArea", 
+                "start_line": 71, 
+                "end_line": 73, 
+                "code_hash": "19af6f0e42c7cd3fce4a85604a814fa5", 
+                "complexity_metrics": {
+                    "conditions": 0, 
+                    "mccabe_cyclomatic_complexity": 1, 
+                    "returns": 1, 
+                    "max_nested_conditional": 0
+                }
             }
-        ],
-        "number_lines": 4,
-        "hash": "edf4c56a9c9da3751090df58b7b16986",
-        "filename": "samples/inputs/sample_003.js",
-        "language": "javascript"
+        ]   
     },
-    "error": null
+    "error": null  
 }
+

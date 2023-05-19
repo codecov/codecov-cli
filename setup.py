@@ -17,7 +17,7 @@ setup(
     long_description_content_type='text/markdown',
     author="Codecov",
     author_email="support@codecov.io",
-    install_requires=["click", "requests", "PyYAML", "tree_sitter", "httpx"],
+    install_requires=["click", "requests", "PyYAML", "tree_sitter", "httpx", "pytest", "pytest-cov", "ijson", "smart-open"],
     entry_points={
         "console_scripts": [
             "codecovcli = codecov_cli.main:run",

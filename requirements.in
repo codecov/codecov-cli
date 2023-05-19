@@ -7,3 +7,5 @@ pyyaml
 responses
 httpx
 tree_sitter
+ijson
+smart-open

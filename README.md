@@ -161,7 +161,7 @@ Codecov-cli supports user input. These inputs, along with their descriptions and
 If desired, the CLI can be used as a replacement for our [NodeJS Binary Uploader](https://github.com/codecov/uploader). To use the CLI to upload from your CI workflow, you need to add these commands: 
 
 ```
-pip install codecovcli
+pip install codecov-cli
 codecovcli create-commit
 codecovcli create-report
 codecovcli do-upload
@@ -175,7 +175,7 @@ The CLI also supports "dry run" local uploading. This is useful if you prefer to
 Local Upload is accomplished as follows:
 
 ```
-pip install codecovcli
+pip install codecov-cli
 codecovcli create-commit
 codecovcli create-report --code <CODE>
 codecovcli do-upload --report-code <CODE>

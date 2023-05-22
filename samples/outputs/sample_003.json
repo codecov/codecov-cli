@@ -17,13 +17,19 @@
             75,
             79,
             88,
-            97
+            97,
+            100,
+            103,
+            106,
+            109,
+            112
         ],
         "executable_lines": [],
-        "number_lines": 98,
-        "hash": "ad3f8572135398ba290dcb36ff0410c2",
+        "number_lines": 128,
+        "hash": "6cfa011ad0c3793848438c3fff8bd5b3",
         "filename": "samples/inputs/sample_003.js",
         "language": "javascript",
+        "import_lines": [[99, 0], [102, 0], [105, 0], [108, 0], [111, 0], [116, 0], [118, 0]],
         "functions": [
             {
                 "identifier": "myFunction",

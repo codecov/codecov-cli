@@ -93,10 +93,9 @@ class PythonAnalyzer(BaseAnalyzer):
             self.definitions_lines.add(
                 (a.start_point[0] + 1, a.end_point[0] - a.start_point[0])
             )
-        for (a, _) in imports_query.captures(root_node):
-            self.import_lines.add(
-                (a.start_point[0] + 1, a.end_point[0] - a.start_point[0])
-            )
+
+        self.import_lines = self.get_import_lines(root_node, imports_query)
+
         h = hashlib.md5()
         h.update(self.actual_code)
         statements = sorted(

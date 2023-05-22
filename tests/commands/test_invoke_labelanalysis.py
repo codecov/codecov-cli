@@ -21,15 +21,17 @@ class TestLabelAnalysisCommand(object):
 
         result = runner.invoke(cli, ["label-analysis", "--help"], obj={})
         assert result.exit_code == 0
+        print(result.output)
         assert result.output.split("\n") == [
             "Usage: cli label-analysis [OPTIONS]",
             "",
             "Options:",
-            "  --token TEXT     The static analysis token (NOT the same token as upload)",
-            "                   [required]",
-            "  --head-sha TEXT  Commit SHA (with 40 chars)  [required]",
-            "  --base-sha TEXT  Commit SHA (with 40 chars)  [required]",
-            "  --help           Show this message and exit.",
+            "  --token TEXT                  The static analysis token (NOT the same token as",
+            "                                upload)  [required]",
+            "  --head-sha TEXT               Commit SHA (with 40 chars)  [required]",
+            "  --base-sha TEXT               Commit SHA (with 40 chars)  [required]",
+            "  --runner-name, --runner TEXT  Runner to use",
+            "  --help                        Show this message and exit.",
             "",
         ]
 

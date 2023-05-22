@@ -32,13 +32,16 @@ logger = logging.getLogger("codecovcli")
     cls=CodecovOption,
     required=True,
 )
+@click.option(
+    "--runner-name", "--runner", "runner_name", help="Runner to use", default="python"
+)
 @click.pass_context
 def label_analysis(
     ctx: click.Context,
     token: str,
     head_commit_sha: str,
     base_commit_sha: str,
-    runner_name: str = "python",
+    runner_name: str,
 ):
     logger.debug(
         "Starting label analysis",

@@ -7,6 +7,10 @@ from codecov_cli.services.staticanalysis.analyzers.general import BaseAnalyzer
 
 function_query_str = """
 (function_declaration) @elemen
+(generator_function_declaration) @elemen2
+(function) @elemen3
+(generator_function) @elemen4
+(arrow_function) @elemen5
 """
 
 method_query_str = """

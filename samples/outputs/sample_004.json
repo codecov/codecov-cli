@@ -1,0 +1,161 @@
+{
+    "result": {
+        "empty_lines": [
+            2, 8, 10, 12, 16, 19, 22, 24, 33, 35
+        ],
+        "executable_lines": [],
+        "number_lines": 35,
+        "hash": "1ab313b3c1dd7f13c5beb09d99361481",
+        "filename": "samples/inputs/sample_004.js",
+        "language": "javascript",
+        "import_lines": [],
+        "functions": [
+            {
+                "identifier": "outerFunction", 
+                "start_line": 1, 
+                "end_line": 7, 
+                "code_hash": "410e3cdac877f4d4d96650fd2bdb7302", 
+                "complexity_metrics": {
+                    "conditions": 0, 
+                    "mccabe_cyclomatic_complexity": 1, 
+                    "returns": 0, 
+                    "max_nested_conditional": 0
+                }
+            }, 
+            {
+                "identifier": "outerFunction::innerFunction", 
+                "start_line": 3, 
+                "end_line": 5, 
+                "code_hash": "867352b5697c99ec8bf920eace84b90a", 
+                "complexity_metrics": {
+                    "conditions": 0, 
+                    "mccabe_cyclomatic_complexity": 1, 
+                    "returns": 0, 
+                    "max_nested_conditional": 0
+                }
+            }, 
+            {
+                "identifier": "foo", 
+                "start_line": 11, 
+                "end_line": 11, 
+                "code_hash": "99914b932bd37a50b983c5e7c90ae93b",
+                "complexity_metrics": {
+                    "conditions": 0, 
+                    "mccabe_cyclomatic_complexity": 1, 
+                    "returns": 0, 
+                    "max_nested_conditional": 0
+                    }
+                    }, 
+            {
+                "identifier": "Foo::bar", 
+                "start_line": 14, 
+                "end_line": 14, 
+                "code_hash": "99914b932bd37a50b983c5e7c90ae93b", 
+                "complexity_metrics": {
+                    "conditions": 0, 
+                    "mccabe_cyclomatic_complexity": 1, 
+                    "returns": 0, 
+                    "max_nested_conditional": 0
+                }
+            }, 
+            {
+                "identifier": "Anonymous", 
+                "start_line": 18, 
+                "end_line": 18, 
+                "code_hash": "8dd5ce440cc0dbf8e9b874e3a9a61951", 
+                "complexity_metrics": {
+                    "conditions": 0, 
+                    "mccabe_cyclomatic_complexity": 1, 
+                    "returns": 1, 
+                    "max_nested_conditional": 0
+                }
+            }, 
+            {
+                "identifier": "foo", 
+                "start_line": 21, 
+                "end_line": 21, 
+                "code_hash": "d858b03b04be75bf6f333641e8ef41a5", 
+                "complexity_metrics": {
+                    "conditions": 0, 
+                    "mccabe_cyclomatic_complexity": 1, 
+                    "returns": 0, 
+                    "max_nested_conditional": 0
+                }
+            }, 
+            {
+                "identifier": "a", 
+                "start_line": 23, 
+                "end_line": 23, 
+                "code_hash": "a9b5caf33c892637947990938210b544", 
+                "complexity_metrics": {
+                    "conditions": 0, 
+                    "mccabe_cyclomatic_complexity": 1, 
+                    "returns": 1, 
+                    "max_nested_conditional": 0
+                }
+            }, 
+            {
+                "identifier": "a::b", 
+                "start_line": 23, 
+                "end_line": 23, 
+                "code_hash": "99914b932bd37a50b983c5e7c90ae93b", 
+                "complexity_metrics": {
+                    "conditions": 0, 
+                    "mccabe_cyclomatic_complexity": 1, 
+                    "returns": 0, 
+                    "max_nested_conditional": 0
+                }
+            }, 
+            {
+                "identifier": "a::c", 
+                "start_line": 23, 
+                "end_line": 23, 
+                "code_hash": "99914b932bd37a50b983c5e7c90ae93b", 
+                "complexity_metrics": {
+                    "conditions": 0, 
+                    "mccabe_cyclomatic_complexity": 1, 
+                    "returns": 0, 
+                    "max_nested_conditional": 0
+                }
+            }, 
+            {
+                "identifier": "Anonymous", 
+                "start_line": 26, 
+                "end_line": 26, 
+                "code_hash": "99914b932bd37a50b983c5e7c90ae93b", 
+                "complexity_metrics": {
+                    "conditions": 0, 
+                    "mccabe_cyclomatic_complexity": 1, 
+                    "returns": 0, 
+                    "max_nested_conditional": 0
+                }
+            }, 
+            {
+                "identifier": "generateStuff", 
+                "start_line": 27, 
+                "end_line": 31, 
+                "code_hash": "e3ca3f85be0a1ca905c7b5d29c7dc070", 
+                "complexity_metrics": {
+                    "conditions": 0, 
+                    "mccabe_cyclomatic_complexity": 1,
+                    "returns": 0, 
+                    "max_nested_conditional": 0
+                }
+            }, 
+            {
+                "identifier": "Anonymous", 
+                "start_line": 34, 
+                "end_line": 34, 
+                "code_hash": "99914b932bd37a50b983c5e7c90ae93b", 
+                "complexity_metrics": {
+                    "conditions": 0, 
+                    "mccabe_cyclomatic_complexity": 1, 
+                    "returns": 0, 
+                    "max_nested_conditional": 0
+                }
+            }
+        ]  
+    },
+    "error": null  
+}
+

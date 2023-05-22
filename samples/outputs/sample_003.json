@@ -68,6 +68,30 @@
                 }
             }, 
             {
+                "identifier": "fetchData::Anonymous", 
+                "start_line": 82, 
+                "end_line": 86, 
+                "code_hash": "843009cc4a83d8d54e0e60e11212cad5", 
+                "complexity_metrics": {
+                    "conditions": 0, 
+                    "mccabe_cyclomatic_complexity": 1, 
+                    "returns": 0, 
+                    "max_nested_conditional": 0
+                }
+            },
+            {
+                "identifier": "fetchData::Anonymous",
+                "start_line": 83,
+                "end_line": 85,
+                "code_hash": "06839ff9cb3f2f8253694bb9143c615d",
+                "complexity_metrics": {
+                    "conditions": 0,
+                    "mccabe_cyclomatic_complexity": 1,
+                    "returns": 0,
+                    "max_nested_conditional": 0
+                }
+            },
+            {
                 "identifier": "getData", 
                 "start_line": 89, 
                 "end_line": 96, "code_hash": "44721228ef36e7dd7702285c5609e092", 

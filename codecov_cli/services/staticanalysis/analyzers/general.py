@@ -32,9 +32,11 @@ class BaseAnalyzer(object):
 
     def _get_name(self, node):
         name_node = node.child_by_field_name("name")
-        actual_name = self.actual_code[
-            name_node.start_byte : name_node.end_byte
-        ].decode()
+        actual_name = (
+            self.actual_code[name_node.start_byte : name_node.end_byte].decode()
+            if name_node
+            else "Anonymous"
+        )
         try:
             wrapping_class = next(
                 x for x in self._get_parent_chain(node) if x.type in self.wrappers

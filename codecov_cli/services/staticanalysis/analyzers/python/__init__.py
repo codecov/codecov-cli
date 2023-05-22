@@ -3,6 +3,7 @@ import hashlib
 from tree_sitter import Language, Parser
 
 import staticcodecov_languages
+from codecov_cli.services.staticanalysis.analyzers.general import BaseAnalyzer
 from codecov_cli.services.staticanalysis.analyzers.python.node_wrappers import (
     NodeVisitor,
 )
@@ -41,7 +42,7 @@ _wildcard_import_query_str = """
 """
 
 
-class PythonAnalyzer(object):
+class PythonAnalyzer(BaseAnalyzer):
 
     condition_statements = [
         "if_statement",
@@ -49,6 +50,7 @@ class PythonAnalyzer(object):
         "for_statement",
         "conditional_expression",
     ]
+    wrappers = ["class_definition", "function_definition"]
 
     def __init__(self, path, actual_code, **options):
         self.actual_code = actual_code
@@ -127,64 +129,7 @@ class PythonAnalyzer(object):
             "import_lines": sorted(self.import_lines),
         }
 
-    def _count_elements(self, node, types):
-        count = 0
-        for c in node.children:
-            count += self._count_elements(c, types)
-        if node.type in types:
-            count += 1
-        return count
-
-    def _get_max_nested_conditional(self, node):
-        return (1 if node.type in self.condition_statements else 0) + max(
-            (self._get_max_nested_conditional(x) for x in node.children), default=0
-        )
-
-    def _get_complexity_metrics(self, body_node):
-        number_conditions = self._count_elements(
-            body_node,
-            [
-                "if_statement",
-                "while_statement",
-                "for_statement",
-                "conditional_expression",
-            ],
-        )
-        return {
-            "conditions": number_conditions,
-            "mccabe_cyclomatic_complexity": number_conditions + 1,
-            "returns": self._count_elements(body_node, ["return_statement"]),
-            "max_nested_conditional": self._get_max_nested_conditional(body_node),
-        }
-
     def _get_code_hash(self, start_byte, end_byte):
         j = hashlib.md5()
         j.update(self.actual_code[start_byte:end_byte].strip())
         return j.hexdigest()
-
-    def _get_parent_chain(self, node):
-        cur = node.parent
-        while cur:
-            yield cur
-            cur = cur.parent
-
-    def _get_name(self, node):
-        name_node = node.child_by_field_name("name")
-        actual_name = self.actual_code[
-            name_node.start_byte : name_node.end_byte
-        ].decode()
-        try:
-            wrapping_class = next(
-                x
-                for x in self._get_parent_chain(node)
-                if x.type in ("class_definition", "function_definition")
-            )
-        except StopIteration:
-            wrapping_class = None
-        if wrapping_class is not None:
-            class_name_node = wrapping_class.child_by_field_name("name")
-            class_name = self.actual_code[
-                class_name_node.start_byte : class_name_node.end_byte
-            ].decode()
-            return f"{class_name}::{actual_name}"
-        return actual_name

@@ -3,13 +3,29 @@ import hashlib
 from tree_sitter import Language, Parser
 
 import staticcodecov_languages
+from codecov_cli.services.staticanalysis.analyzers.general import BaseAnalyzer
 
 function_query_str = """
 (function_declaration) @elemen
 """
 
+method_query_str = """
+(method_definition) @elemen
+"""
 
-class ES6Analyzer(object):
+
+class ES6Analyzer(BaseAnalyzer):
+    condition_statements = [
+        "if_statement",
+        "switch_statement",
+        "for_statement",
+        "for_in_statement",
+        "while_statement",
+        "do_statement",
+    ]
+
+    wrappers = ["class_declaration", "function_declaration"]
+
     def __init__(self, path, actual_code, **options):
         self.actual_code = actual_code
         self.lines = self.actual_code.split(b"\n")
@@ -30,21 +46,21 @@ class ES6Analyzer(object):
         tree = self.parser.parse(self.actual_code)
         root_node = tree.root_node
         function_query = self.JS_LANGUAGE.query(function_query_str)
-        for func_node, _ in function_query.captures(root_node):
-            name_node = func_node.child_by_field_name("name")
-            actual_name = self.actual_code[
-                name_node.start_byte : name_node.end_byte
-            ].decode()
+        method_query = self.JS_LANGUAGE.query(method_query_str)
+        combined_results = function_query.captures(root_node) + method_query.captures(
+            root_node
+        )
+        for func_node, _ in combined_results:
             body_node = func_node.child_by_field_name("body")
             self.functions.append(
                 {
-                    "identifier": actual_name,
+                    "identifier": self._get_name(func_node),
                     "start_line": func_node.start_point[0] + 1,
                     "end_line": func_node.end_point[0] + 1,
                     "code_hash": self.get_code_hash(
                         body_node.start_byte, body_node.end_byte
                     ),
-                    "complexity_metrics": {},
+                    "complexity_metrics": self._get_complexity_metrics(body_node),
                 }
             )
         h = hashlib.md5()

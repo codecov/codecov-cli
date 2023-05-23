@@ -54,6 +54,7 @@ def pr_base_picking(
     token: typing.Optional[uuid.UUID],
     service: typing.Optional[str],
 ):
+    enterprise_url = ctx.obj.get("enterprise_url")
     logger.debug(
         "Starting base picking process",
         extra=dict(
@@ -62,6 +63,7 @@ def pr_base_picking(
                 slug=slug,
                 token=token,
                 service=service,
+                enterprise_url=enterprise_url,
             )
         ),
     )
@@ -72,4 +74,4 @@ def pr_base_picking(
         )
         return
 
-    base_picking_logic(base_sha, pr, slug, token, service)
+    base_picking_logic(base_sha, pr, slug, token, service, enterprise_url)

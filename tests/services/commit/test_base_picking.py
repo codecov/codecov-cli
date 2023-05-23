@@ -29,6 +29,7 @@ def test_base_picking_command(mocker):
             "--slug",
             "owner/repo",
         ],
+        obj=mocker.MagicMock(),  # context object
     )
     assert result.exit_code == 0
     mocked_response.assert_called_once()
@@ -51,6 +52,7 @@ def test_base_picking_command_slug_invalid(mocker):
             "--slug",
             "owner-repo",
         ],
+        obj=mocker.MagicMock(),  # context object
     )
     assert result.exit_code == 0
     assert (
@@ -85,6 +87,7 @@ def test_base_picking_command_warnings(mocker):
             "--slug",
             "owner/repo",
         ],
+        obj=mocker.MagicMock(),  # context object
     )
     assert result.exit_code == 0
     assert (
@@ -128,6 +131,7 @@ def test_base_picking_command_error(mocker):
             "--slug",
             "owner/repo",
         ],
+        obj=mocker.MagicMock(),  # context object
     )
     mocked_response.assert_called_once()
     assert result.exit_code == 0

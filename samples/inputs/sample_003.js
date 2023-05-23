@@ -95,4 +95,34 @@ async function getData() {
   }
 }
 
+// Importing a default export
+import greet from '../example_module.js';
+
+// Importing named exports
+import { sum, pi } from '../example_module.js';
+
+// Importing a default export and renaming it
+import { default as renamedGreet } from '../example_module.js';
+
+// Importing everything from a module
+import * as moduleExports from '../example_module.js';
+
+// Importing a default export and specific named exports together
+import greet, { pi as constantPi } from '../example_module.js';
+
+//Dynamic import by using import(), which is different from the previous imports (static imports)
+let myModule;
+if (typeof window === "undefined") {
+  myModule = await import("../example_module.js");
+} else {
+  myModule = await import("../example_module.js");
+}
+greet('Alice');
+console.log(sum(2, 3));
+console.log(pi);
+console.log(renamedGreet('Bob'));
+console.log(moduleExports.sum(4, 5));
+console.log(moduleExports.pi);
+console.log(greet('Charlie'));
+console.log(constantPi);
 getData();

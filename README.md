@@ -55,7 +55,7 @@ Codecov-cli supports user input. These inputs, along with their descriptions and
 # Codecov-cli Commands
 | Command  | Description | 
 | :---:     |     :---:   |    
-| `create-commit` | Saves the commit's metadata in codecov, it's only necessry to run this once per commit 
+| `create-commit` | Saves the commit's metadata in codecov, it's only necessary to run this once per commit 
 | `create-report` | Creates an empty report in codecov with initial data e.g. report name, report's commit 
 | `do-upload` | Searches for and uploads coverage data to codecov 
 | `create-report-results` | Used for local upload. It tells codecov that you finished local uploading and want it to calculate the results for you to get them locally.
@@ -161,7 +161,7 @@ Codecov-cli supports user input. These inputs, along with their descriptions and
 If desired, the CLI can be used as a replacement for our [NodeJS Binary Uploader](https://github.com/codecov/uploader). To use the CLI to upload from your CI workflow, you need to add these commands: 
 
 ```
-pip install codecovcli
+pip install codecov-cli
 codecovcli create-commit
 codecovcli create-report
 codecovcli do-upload
@@ -175,7 +175,7 @@ The CLI also supports "dry run" local uploading. This is useful if you prefer to
 Local Upload is accomplished as follows:
 
 ```
-pip install codecovcli
+pip install codecov-cli
 codecovcli create-commit
 codecovcli create-report --code <CODE>
 codecovcli do-upload --report-code <CODE>
@@ -216,15 +216,15 @@ pip install -r requirements.txt
 python setup.py develop
 ```
 
-The C code shouldn't require anything additional setup to get running, but depending on your enviroment, you may be prompted to install compilers and supporting tools. If errors are generating during installation, it is likely due to missing dependencies / tools required of the C code. In many cases, resulting error messages should be clear enough to determine what is missing and how to install it, but common errors will be collected here as they are encountered.
+The C code shouldn't require any additional setup to get running, but depending on your environment, you may be prompted to install compilers and supporting tools. If errors are generated during installation, it is likely due to missing dependencies / tools required of the C code. In many cases, resulting error messages should be clear enough to determine what is missing and how to install it, but common errors will be collected here as they are encountered.
 
 ## Guidelines
 
-There are a few guidelines when developing in this systems. Some notable folders:
+There are a few guidelines when developing in this system. Some notable folders:
 
 1. `commands` - It's the folder that interacts with the caller. This is where the commands themselves should reside. These commands are not meant to do heavy lifting. They only do wiring, which is mostly parsing the input parameters. 
-2. `services` - It's where the heavy logic resides. It's mostly organizaed by which command needs them. Commands should generally be thin wrappers around these services.
-3. `helpers` - This is meant for logic that is useful accross different commands. For example, logging helpers, or the logic the searches folders.
+2. `services` - It's where the heavy logic resides. It's mostly organized by which command needs them. Commands should generally be thin wrappers around these services.
+3. `helpers` - This is meant for logic that is useful across different commands. For example, logging helpers, or the logic that searches folders.
 
 # Releases
 

@@ -1,3 +1,6 @@
+import hashlib
+
+
 class BaseAnalyzer(object):
     def __init__(self, filename, actual_code):
         pass
@@ -70,3 +73,29 @@ class BaseAnalyzer(object):
                 (a.start_point[0] + 1, a.end_point[0] - a.start_point[0])
             )
         return definition_lines
+
+    def _get_code_hash(self, start_byte, end_byte):
+        j = hashlib.md5()
+        j.update(self.actual_code[start_byte:end_byte].strip())
+        return j.hexdigest()
+
+    def get_statements(self):
+        return sorted(
+            (
+                (
+                    x["current_line"],
+                    {
+                        "line_surety_ancestorship": self.line_surety_ancestorship.get(
+                            x["current_line"], None
+                        ),
+                        **dict(
+                            (k, v)
+                            for (k, v) in x.items()
+                            if k not in ["line_surety_ancestorship", "current_line"]
+                        ),
+                    },
+                )
+                for x in self.statements
+            ),
+            key=lambda x: (x[0], x[1]["start_column"]),
+        )

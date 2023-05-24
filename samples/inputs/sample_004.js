@@ -33,3 +33,29 @@ function a () { function b () {} function *c () {} class D {} return }
 
 var b = function() {};
   
+var fruit = "apple";
+
+switch (fruit) {
+  case "apple":
+    console.log("It's an apple.");
+    break;
+  case "banana":
+    console.log("It's a banana.");
+    console.log("It's a banana.");
+    break;
+  case "orange":
+    console.log("It's an orange.");
+    break;
+  default:
+    console.log("It's an unknown fruit.");
+}
+
+var i = 0;
+do {
+  console.log("The value of i is: " + i);
+  i++;
+} while (i < 5);
+
+do
+  console.log("The value of i is: " + i);
+while (i < 5);

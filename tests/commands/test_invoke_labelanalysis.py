@@ -86,6 +86,25 @@ class TestLabelAnalysisCommand(object):
         assert result.exit_code != 0
         assert "Error: Missing option '--base-sha'." in result.output
 
+    def test_invoke_label_analysis_base_sha_same_as_head_sha(
+        self, mocker, fake_ci_provider
+    ):
+        mocker.patch("codecov_cli.main.get_ci_adapter", return_value=fake_ci_provider)
+        runner = CliRunner()
+
+        result = runner.invoke(
+            cli,
+            [
+                "label-analysis",
+                "--token=STATIC_TOKEN",
+                "--base-sha=commit-sha",
+                "--head-sha=commit-sha",
+            ],
+            obj={},
+        )
+        assert result.exit_code != 0
+        assert "Base and head sha can't be the same" in result.output
+
     def test_invoke_label_analysis(self, get_labelanalysis_deps, mocker):
         mock_get_runner = get_labelanalysis_deps["mock_get_runner"]
         fake_runner = get_labelanalysis_deps["fake_runner"]

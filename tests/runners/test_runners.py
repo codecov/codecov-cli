@@ -1,8 +1,11 @@
 from unittest.mock import patch
 
-from codecov_cli.runners import get_runner
+import pytest
+
+from codecov_cli.runners import _load_runner_from_yaml, get_runner
 from codecov_cli.runners.dan_runner import DoAnythingNowRunner
 from codecov_cli.runners.python_standard_runner import PythonStandardRunner
+from tests.factory import FakeRunner
 
 
 class TestRunners(object):
@@ -42,3 +45,57 @@ class TestRunners(object):
         mock_load_runner.return_value = "MyRunner()"
         assert get_runner(config, "my_runner") == "MyRunner()"
         mock_load_runner.assert_called_with({"path": "path_to_my_runner"})
+
+    def test_load_runner_from_yaml(self, mocker):
+        fake_module = mocker.MagicMock(FakeRunner=FakeRunner)
+        mocker.patch("codecov_cli.runners.import_module", return_value=fake_module)
+        res = _load_runner_from_yaml(
+            {
+                "module": "mymodule.runner",
+                "class": "FakeRunner",
+                "params": {"collect_tests_response": ["list", "of", "labels"]},
+            }
+        )
+        assert isinstance(res, FakeRunner)
+        assert res.collect_tests() == ["list", "of", "labels"]
+        assert res.process_labelanalysis_result({}) == "I ran tests :D"
+
+    def test_load_runner_from_yaml_module_not_found(self, mocker):
+        def side_effect(*args, **kwargs):
+            raise ModuleNotFoundError()
+
+        mocker.patch("codecov_cli.runners.import_module", side_effect=side_effect)
+        with pytest.raises(ModuleNotFoundError):
+            _load_runner_from_yaml(
+                {
+                    "module": "mymodule.runner",
+                    "class": "FakeRunner",
+                    "params": {"collect_tests_response": ["list", "of", "labels"]},
+                }
+            )
+
+    def test_load_runner_from_yaml_class_not_found(self, mocker):
+        import tests.factory as fake_module
+
+        mocker.patch("codecov_cli.runners.import_module", return_value=fake_module)
+
+        with pytest.raises(AttributeError):
+            _load_runner_from_yaml(
+                {
+                    "module": "mymodule.runner",
+                    "class": "WrongClassName",
+                    "params": {"collect_tests_response": ["list", "of", "labels"]},
+                }
+            )
+
+    def test_load_runner_from_yaml_fail_instantiate_class(self, mocker):
+        fake_module = mocker.MagicMock(FakeRunner=FakeRunner)
+        mocker.patch("codecov_cli.runners.import_module", return_value=fake_module)
+        with pytest.raises(TypeError):
+            _load_runner_from_yaml(
+                {
+                    "module": "mymodule.runner",
+                    "class": "FakeRunner",
+                    "params": {"wrong_params": ["list", "of", "labels"]},
+                }
+            )

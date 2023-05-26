@@ -75,6 +75,7 @@ def create_commit(
     token: typing.Optional[uuid.UUID],
     git_service: typing.Optional[str],
 ):
+    enterprise_url = ctx.obj.get("enterprise_url")
     logger.debug(
         "Starting create commit process",
         extra=dict(
@@ -86,9 +87,17 @@ def create_commit(
                 slug=slug,
                 token=token,
                 service=git_service,
+                enterprise_url=enterprise_url,
             )
         ),
     )
     create_commit_logic(
-        commit_sha, parent_sha, pull_request_number, branch, slug, token, git_service
+        commit_sha,
+        parent_sha,
+        pull_request_number,
+        branch,
+        slug,
+        token,
+        git_service,
+        enterprise_url,
     )

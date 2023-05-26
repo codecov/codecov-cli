@@ -203,6 +203,7 @@ def do_upload(
     codecov_yaml = ctx.obj["codecov_yaml"] or {}
     cli_config = codecov_yaml.get("cli", {})
     ci_adapter = ctx.obj.get("ci_adapter")
+    enterprise_url = ctx.obj.get("enterprise_url")
     logger.debug(
         "Starting upload processing",
         extra=dict(
@@ -225,6 +226,7 @@ def do_upload(
                 slug=slug,
                 pull_request_number=pull_request_number,
                 git_service=git_service,
+                enterprise_url=enterprise_url,
             )
         ),
     )
@@ -257,4 +259,5 @@ def do_upload(
         fail_on_error=fail_on_error,
         dry_run=dry_run,
         git_service=git_service,
+        enterprise_url=enterprise_url,
     )

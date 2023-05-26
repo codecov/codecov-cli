@@ -44,6 +44,7 @@ def test_commit_command_with_warnings(mocker):
         slug="owner::::repo",
         token="token",
         service="service",
+        enterprise_url=None,
     )
 
 
@@ -71,6 +72,7 @@ def test_commit_command_with_error(mocker):
             slug="owner/repo",
             token="token",
             service="service",
+            enterprise_url=None,
         )
 
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
@@ -90,6 +92,7 @@ def test_commit_command_with_error(mocker):
         slug="owner::::repo",
         token="token",
         service="service",
+        enterprise_url=None,
     )
 
 
@@ -100,7 +103,7 @@ def test_commit_sender_200(mocker):
     )
     token = uuid.uuid4()
     res = send_commit_data(
-        "commit_sha", "parent_sha", "pr", "branch", "slug", token, "service"
+        "commit_sha", "parent_sha", "pr", "branch", "slug", token, "service", None
     )
     assert res.error is None
     assert res.warnings == []
@@ -114,7 +117,7 @@ def test_commit_sender_403(mocker):
     )
     token = uuid.uuid4()
     res = send_commit_data(
-        "commit_sha", "parent_sha", "pr", "branch", "slug", token, "service"
+        "commit_sha", "parent_sha", "pr", "branch", "slug", token, "service", None
     )
     assert res.error == RequestError(
         code="HTTP Error 403",

@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import requests
 
 from codecov_cli import __version__ as codecov_cli_version
+from codecov_cli.helpers.config import LEGACY_CODECOV_API_URL
 from codecov_cli.types import UploadCollectionResult, UploadCollectionResultFile
 
 logger = logging.getLogger("codecovcli")
@@ -50,6 +51,7 @@ class LegacyUploadSender(object):
         flags: typing.List[str] = None,
         ci_service: typing.Optional[str] = None,
         git_service: typing.Optional[str] = None,
+        enterprise_url: typing.Optional[str] = None,
     ) -> UploadSendingResult:
 
         params = {
@@ -72,9 +74,8 @@ class LegacyUploadSender(object):
             logger.warning("Token is empty.")
             headers = {"X-Upload-Token": ""}
 
-        resp = requests.post(
-            "https://codecov.io/upload/v4", headers=headers, params=params
-        )
+        upload_url = enterprise_url or LEGACY_CODECOV_API_URL
+        resp = requests.post(f"{upload_url}/upload/v4", headers=headers, params=params)
 
         if resp.status_code >= 400:
             return UploadSendingResult(

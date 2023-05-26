@@ -46,6 +46,7 @@ def do_upload_logic(
     fail_on_error: bool = False,
     dry_run: bool = False,
     git_service: typing.Optional[str],
+    enterprise_url: typing.Optional[str],
 ):
     preparation_plugins = select_preparation_plugins(cli_config, plugin_names)
     coverage_file_selector = select_coverage_file_finder(
@@ -86,6 +87,7 @@ def do_upload_logic(
             flags,
             ci_service,
             git_service,
+            enterprise_url,
         )
     else:
         logger.info("dry-run option activated. NOT sending data to Codecov.")

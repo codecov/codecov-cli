@@ -51,12 +51,19 @@ def create_report_results(
     git_service: str,
     token: uuid.UUID,
 ):
+    enterprise_url = ctx.obj.get("enterprise_url")
     logger.debug(
         "Creating report results",
         extra=dict(
             extra_log_attributes=dict(
-                commit_sha=commit_sha, code=code, slug=slug, service=git_service
+                commit_sha=commit_sha,
+                code=code,
+                slug=slug,
+                service=git_service,
+                enterprise_url=enterprise_url,
             )
         ),
     )
-    create_report_results_logic(commit_sha, code, slug, git_service, token)
+    create_report_results_logic(
+        commit_sha, code, slug, git_service, token, enterprise_url
+    )

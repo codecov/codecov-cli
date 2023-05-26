@@ -33,7 +33,9 @@ logger = logging.getLogger("codecovcli")
     "--codecov-yml-path",
     type=click.Path(path_type=pathlib.Path),
 )
-@click.option("--enterprise-url")
+@click.option(
+    "--enterprise-url", "--url", "-u", help="Change the upload host (Enterprise use)"
+)
 @click.option("-v", "--verbose", "verbose", help="Use verbose logging", is_flag=True)
 @click.pass_context
 @click.version_option()
@@ -52,6 +54,7 @@ def cli(
     )
     if ctx.obj["codecov_yaml"] is None:
         logger.debug("No codecov_yaml found")
+    ctx.obj["enterprise_url"] = enterprise_url
 
 
 cli.add_command(do_upload)

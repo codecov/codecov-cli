@@ -52,6 +52,7 @@ def empty_upload(
     token: typing.Optional[uuid.UUID],
     git_service: typing.Optional[str],
 ):
+    enterprise_url = ctx.obj.get("enterprise_url")
     logger.debug(
         "Starting empty upload process",
         extra=dict(
@@ -60,7 +61,8 @@ def empty_upload(
                 slug=slug,
                 token=token,
                 service=git_service,
+                enterprise_url=enterprise_url,
             )
         ),
     )
-    return empty_upload_logic(commit_sha, slug, token, git_service)
+    return empty_upload_logic(commit_sha, slug, token, git_service, enterprise_url)

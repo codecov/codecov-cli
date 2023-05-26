@@ -6,6 +6,7 @@ import uuid
 
 import requests
 
+from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.helpers.request import (
     get_token_header_or_fail,
@@ -19,25 +20,38 @@ MAX_NUMBER_TRIES = 3
 
 
 def create_report_logic(
-    commit_sha: str, code: str, slug: str, service: str, token: uuid.UUID
+    commit_sha: str,
+    code: str,
+    slug: str,
+    service: str,
+    token: uuid.UUID,
+    enterprise_url: str,
 ):
     encoded_slug = encode_slug(slug)
     sending_result = send_create_report_request(
-        commit_sha, code, service, token, encoded_slug
+        commit_sha, code, service, token, encoded_slug, enterprise_url
     )
     log_warnings_and_errors_if_any(sending_result, "Report creating")
     return sending_result
 
 
-def send_create_report_request(commit_sha, code, service, token, encoded_slug):
+def send_create_report_request(
+    commit_sha, code, service, token, encoded_slug, enterprise_url
+):
     data = {"code": code}
     headers = get_token_header_or_fail(token)
-    url = f"https://api.codecov.io/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports"
+    upload_url = enterprise_url or CODECOV_API_URL
+    url = f"{upload_url}/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports"
     return send_post_request(url=url, headers=headers, data=data)
 
 
 def create_report_results_logic(
-    commit_sha: str, code: str, slug: str, service: str, token: uuid.UUID
+    commit_sha: str,
+    code: str,
+    slug: str,
+    service: str,
+    token: uuid.UUID,
+    enterprise_url: str,
 ):
     encoded_slug = encode_slug(slug)
     sending_result = send_reports_result_request(
@@ -46,23 +60,28 @@ def create_report_results_logic(
         encoded_slug=encoded_slug,
         service=service,
         token=token,
+        enterprise_url=enterprise_url,
     )
 
     log_warnings_and_errors_if_any(sending_result, "Report results creating")
     return sending_result
 
 
-def send_reports_result_request(commit_sha, report_code, encoded_slug, service, token):
+def send_reports_result_request(
+    commit_sha, report_code, encoded_slug, service, token, enterprise_url
+):
     headers = get_token_header_or_fail(token)
-    url = f"https://api.codecov.io/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/results"
+    upload_url = enterprise_url or CODECOV_API_URL
+    url = f"{upload_url}/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/results"
     return send_post_request(url=url, headers=headers)
 
 
 def send_reports_result_get_request(
-    commit_sha, report_code, encoded_slug, service, token
+    commit_sha, report_code, encoded_slug, service, token, enterprise_url
 ):
     headers = get_token_header_or_fail(token)
-    url = f"https://api.codecov.io/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/results"
+    upload_url = enterprise_url or CODECOV_API_URL
+    url = f"{upload_url}/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/results"
     number_tries = 0
     while number_tries < MAX_NUMBER_TRIES:
         resp = requests.get(url=url, headers=headers)

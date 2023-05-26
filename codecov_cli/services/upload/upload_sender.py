@@ -6,6 +6,7 @@ import uuid
 import zlib
 from typing import Any, Dict
 
+from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.helpers.request import (
     get_token_header_or_fail,
@@ -39,6 +40,7 @@ class UploadSender(object):
         flags: typing.List[str] = None,
         ci_service: typing.Optional[str] = None,
         git_service: typing.Optional[str] = None,
+        enterprise_url: typing.Optional[str] = None,
     ) -> RequestResult:
 
         data = {
@@ -52,7 +54,8 @@ class UploadSender(object):
         # Data to upload to Codecov
         headers = get_token_header_or_fail(token)
         encoded_slug = encode_slug(slug)
-        url = f"https://api.codecov.io/upload/{git_service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads"
+        upload_url = enterprise_url or CODECOV_API_URL
+        url = f"{upload_url}/upload/{git_service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads"
         # Data that goes to storage
         reports_payload = self._generate_payload(upload_data, env_vars)
 

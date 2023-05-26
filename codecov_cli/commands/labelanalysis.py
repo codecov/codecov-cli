@@ -69,6 +69,19 @@ def label_analysis(
             )
         ),
     )
+    if head_commit_sha == base_commit_sha:
+        logger.error(
+            "Base and head sha can't be the same",
+            extra=dict(
+                extra_log_attributes=dict(
+                    head_commit_sha=head_commit_sha,
+                    base_commit_sha=base_commit_sha,
+                )
+            ),
+        )
+        raise click.ClickException(
+            click.style("Unable to run label analysis", fg="red")
+        )
     upload_url = enterprise_url or CODECOV_API_URL
     url = f"{upload_url}/labels/labels-analysis"
     token_header = f"Repotoken {token}"

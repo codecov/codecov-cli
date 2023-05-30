@@ -1,3 +1,4 @@
+import json
 import logging
 import uuid
 
@@ -13,11 +14,14 @@ def send_post_request(
     data: dict = None,
     headers: dict = None,
 ):
+    headers['Content-Type'] = 'application/json'
+
     resp = requests.post(
         url=url,
-        data=data,
+        data=json.dumps(data),
         headers=headers,
     )
+
     return request_result(resp)
 
 

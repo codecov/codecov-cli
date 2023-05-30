@@ -14,11 +14,9 @@ def send_post_request(
     data: dict = None,
     headers: dict = None,
 ):
-    headers['Content-Type'] = 'application/json'
-
     resp = requests.post(
         url=url,
-        data=json.dumps(data),
+        data=data,
         headers=headers,
     )
 

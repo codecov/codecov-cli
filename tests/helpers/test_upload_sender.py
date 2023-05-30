@@ -31,6 +31,7 @@ named_upload_data = {
 }
 request_data = {
     "ci_url": "build_url",
+    "env": {},
     "flags": "flags",
     "job_code": "job_code",
     "name": "name",
@@ -131,7 +132,7 @@ class TestUploadSender(object):
         headers = {"Authorization": f"token {random_token.hex}"}
 
         mocked_legacy_upload_endpoint.match = [
-            matchers.urlencoded_params_matcher(request_data),
+            matchers.json_params_matcher(request_data),
             matchers.header_matcher(headers),
         ]
 

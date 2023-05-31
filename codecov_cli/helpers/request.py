@@ -15,9 +15,10 @@ def send_post_request(
 ):
     resp = requests.post(
         url=url,
-        data=data,
+        json=data,
         headers=headers,
     )
+
     return request_result(resp)
 
 

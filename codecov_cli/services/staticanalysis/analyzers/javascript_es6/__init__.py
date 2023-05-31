@@ -33,7 +33,14 @@ class ES6Analyzer(BaseAnalyzer):
         "do_statement",
     ]
 
-    wrappers = ["class_declaration", "function_declaration"]
+    wrappers = [
+        "class_declaration",
+        "function_declaration",
+        "generator_function_declaration",
+        "function",
+        "generator_function",
+        "arrow_function",
+    ]
 
     def __init__(self, path, actual_code, **options):
         self.actual_code = actual_code

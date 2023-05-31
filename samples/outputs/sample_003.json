@@ -68,7 +68,7 @@
                 }
             }, 
             {
-                "identifier": "fetchData::Anonymous", 
+                "identifier": "fetchData::Anonymous_82_4", 
                 "start_line": 82, 
                 "end_line": 86, 
                 "code_hash": "843009cc4a83d8d54e0e60e11212cad5", 
@@ -80,7 +80,7 @@
                 }
             },
             {
-                "identifier": "fetchData::Anonymous",
+                "identifier": "fetchData::Anonymous_82_4::Anonymous_83_2",
                 "start_line": 83,
                 "end_line": 85,
                 "code_hash": "06839ff9cb3f2f8253694bb9143c615d",

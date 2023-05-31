@@ -32,23 +32,29 @@ class BaseAnalyzer(object):
 
     def _get_name(self, node):
         name_node = node.child_by_field_name("name")
+        body_node = node.child_by_field_name("body")
         actual_name = (
             self.actual_code[name_node.start_byte : name_node.end_byte].decode()
             if name_node
-            else "Anonymous"
+            else f"Anonymous_{body_node.start_point[0] + 1}_{body_node.end_point[0] - body_node.start_point[0]}"
         )
-        try:
-            wrapping_class = next(
-                x for x in self._get_parent_chain(node) if x.type in self.wrappers
-            )
-        except StopIteration:
-            wrapping_class = None
-        if wrapping_class is not None:
-            class_name_node = wrapping_class.child_by_field_name("name")
-            class_name = self.actual_code[
-                class_name_node.start_byte : class_name_node.end_byte
-            ].decode()
-            return f"{class_name}::{actual_name}"
+        wrapping_classes = [
+            x for x in self._get_parent_chain(node) if x.type in self.wrappers
+        ]
+        wrapping_classes.reverse()
+        if wrapping_classes:
+            parents_actual_names = ""
+
+            for x in wrapping_classes:
+                name = x.child_by_field_name("name")
+                body = x.child_by_field_name("body")
+                class_name = (
+                    self.actual_code[name.start_byte : name.end_byte].decode()
+                    if name
+                    else f"Anonymous_{body.start_point[0] + 1}_{body.end_point[0] - body.start_point[0]}"
+                )
+                parents_actual_names = parents_actual_names + class_name + "::"
+            return f"{parents_actual_names}{actual_name}"
         return actual_name
 
     def _get_parent_chain(self, node):

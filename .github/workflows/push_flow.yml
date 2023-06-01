@@ -5,7 +5,7 @@ name: Build-Test-Upload
 
 on: [push] # Run on any push event
 
-jobs:
+jobs :
   lint:
     runs-on: ubuntu-latest
     steps:

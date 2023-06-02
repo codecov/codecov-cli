@@ -58,7 +58,7 @@ coverage_files_excluded_patterns = [
     "*.exe",
     "*.ftl",
     "*.gif",
-    ".gitignore",
+    ".git*",
     "*.gradle",
     "*.gz",
     "*.h",
@@ -127,23 +127,29 @@ coverage_files_excluded_patterns = [
     "*.map",
     "*.egg-info",
     ".ds_store",
+    "*.zip"
 ]
 
 
 default_folders_to_ignore = [
     "vendor",
     "bower_components",
-    ".egg-info*",
+    ".circleci",
     "conftest_*.c.gcov",
+    ".egg-info*",
     ".env",
     ".envs",
     ".git",
+    ".go",
     ".hg",
+    ".map",
+    ".marker",
     ".tox",
     ".venv",
     ".venvs",
     ".virtualenv",
     ".virtualenvs",
+    ".yarn",
     ".yarn-cache",
     "__pycache__",
     "env",
@@ -155,7 +161,6 @@ default_folders_to_ignore = [
     "venvs",
     "virtualenv",
     "virtualenvs",
-    ".circleci",
     "jspm_packages",
     ".nyc_output",
 ]

@@ -127,7 +127,7 @@ coverage_files_excluded_patterns = [
     "*.map",
     "*.egg-info",
     ".ds_store",
-    "*.zip"
+    "*.zip",
 ]
 
 

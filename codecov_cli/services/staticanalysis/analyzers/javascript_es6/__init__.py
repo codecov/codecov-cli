@@ -7,6 +7,10 @@ from codecov_cli.services.staticanalysis.analyzers.general import BaseAnalyzer
 
 function_query_str = """
 (function_declaration) @elemen
+(generator_function_declaration) @elemen2
+(function) @elemen3
+(generator_function) @elemen4
+(arrow_function) @elemen5
 """
 
 method_query_str = """
@@ -29,7 +33,14 @@ class ES6Analyzer(BaseAnalyzer):
         "do_statement",
     ]
 
-    wrappers = ["class_declaration", "function_declaration"]
+    wrappers = [
+        "class_declaration",
+        "function_declaration",
+        "generator_function_declaration",
+        "function",
+        "generator_function",
+        "arrow_function",
+    ]
 
     def __init__(self, path, actual_code, **options):
         self.actual_code = actual_code

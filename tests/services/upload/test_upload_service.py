@@ -79,7 +79,7 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
     mock_select_preparation_plugins.assert_called_with(
         cli_config, ["first_plugin", "another", "forth"]
     )
-    mock_select_coverage_file_finder.assert_called_with(None, None, None)
+    mock_select_coverage_file_finder.assert_called_with(None, None, None, False)
     mock_select_network_finder.assert_called_with(versioning_system)
     mock_generate_upload_data.assert_called_with()
     mock_send_upload_data.assert_called_with(
@@ -164,7 +164,7 @@ def test_do_upload_logic_happy_path(mocker):
     mock_select_preparation_plugins.assert_called_with(
         cli_config, ["first_plugin", "another", "forth"]
     )
-    mock_select_coverage_file_finder.assert_called_with(None, None, None)
+    mock_select_coverage_file_finder.assert_called_with(None, None, None, False)
     mock_select_network_finder.assert_called_with(versioning_system)
     mock_generate_upload_data.assert_called_with()
     mock_send_upload_data.assert_called_with(
@@ -236,7 +236,7 @@ def test_do_upload_logic_dry_run(mocker):
             enterprise_url=None,
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
-    mock_select_coverage_file_finder.assert_called_with(None, None, None)
+    mock_select_coverage_file_finder.assert_called_with(None, None, None, False)
     mock_select_network_finder.assert_called_with(versioning_system)
     assert mock_generate_upload_data.call_count == 1
     assert mock_send_upload_data.call_count == 0

@@ -47,12 +47,14 @@ def do_upload_logic(
     dry_run: bool = False,
     git_service: typing.Optional[str],
     enterprise_url: typing.Optional[str],
+    disable_search: bool = False,
 ):
     preparation_plugins = select_preparation_plugins(cli_config, plugin_names)
     coverage_file_selector = select_coverage_file_finder(
         coverage_files_search_root_folder,
         coverage_files_search_exclude_folders,
         coverage_files_search_explicitly_listed_files,
+        disable_search,
     )
     network_finder = select_network_finder(versioning_system)
     collector = UploadCollector(

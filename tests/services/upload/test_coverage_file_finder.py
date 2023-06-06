@@ -10,7 +10,7 @@ class TestCoverageFileFinder(object):
             "codecov_cli.services.upload.coverage_file_finder.search_files",
             return_value=[],
         )
-        assert CoverageFileFinder().find_coverage_files() == set()
+        assert CoverageFileFinder().find_coverage_files() == []
 
         coverage_files_paths = [
             Path("a/b.txt"),
@@ -22,10 +22,10 @@ class TestCoverageFileFinder(object):
             return_value=coverage_files_paths,
         )
 
-        expected = {
-            UploadCollectionResultFile(Path("a/b.txt")),
+        expected = [
             UploadCollectionResultFile(Path("c.txt")),
-        }
+            UploadCollectionResultFile(Path("a/b.txt")),
+        ]
 
         assert CoverageFileFinder().find_coverage_files() == expected
 

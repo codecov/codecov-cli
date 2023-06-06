@@ -204,7 +204,7 @@ class CoverageFileFinder(object):
             if user_coverage_files_paths
         ]
 
-        return set(result_files + user_result_files)
+        return list(set(result_files + user_result_files))
 
     def get_user_specified_coverage_files(self, regex_patterns_to_exclude):
         user_filenames_to_include = []

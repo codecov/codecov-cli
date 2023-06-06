@@ -52,5 +52,7 @@ jobs:
         pytest --cov
     - name: Dogfooding codecov-cli. Use codecov-cli to upload to codecov (new upload endpoint)
       run: |
-        codecovcli do-upload --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python3.10
+        codecovcli do-upload --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag test --file coverage.xml --file **/services/upload/testing.abc --disable-search
+
+      
     

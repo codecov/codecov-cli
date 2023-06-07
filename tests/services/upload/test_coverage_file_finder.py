@@ -27,7 +27,13 @@ class TestCoverageFileFinder(object):
             UploadCollectionResultFile(Path("a/b.txt")),
         ]
 
-        assert CoverageFileFinder().find_coverage_files() == expected
+        expected_paths = sorted([file.get_filename() for file in expected])
+
+        actual_paths = sorted(
+            [file.get_filename() for file in CoverageFileFinder().find_coverage_files()]
+        )
+
+        assert expected_paths == actual_paths
 
     def test_find_coverage_files(self, tmp_path):
         (tmp_path / "sub").mkdir()

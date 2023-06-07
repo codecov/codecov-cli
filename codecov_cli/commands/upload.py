@@ -64,10 +64,16 @@ def _turn_env_vars_into_dict(ctx, params, value):
     "--file",
     "--coverage-files-search-direct-file",
     "coverage_files_search_explicitly_listed_files",
-    help="Explicit files to upload",
+    help="Explicit files to upload. These will be added to the coverage files found for upload. If you wish to only upload the specified files, please consider using --disable-search to disable uploading other files.",
     type=click.Path(path_type=pathlib.Path),
     multiple=True,
     default=[],
+)
+@click.option(
+    "--disable-search",
+    help="Disable search for coverage files. This is helpful when specifying what files you want to uload with the --file option.",
+    is_flag=True,
+    default=False,
 )
 @click.option(
     "-b",
@@ -189,6 +195,7 @@ def do_upload(
     coverage_files_search_root_folder: pathlib.Path,
     coverage_files_search_exclude_folders: typing.List[pathlib.Path],
     coverage_files_search_explicitly_listed_files: typing.List[pathlib.Path],
+    disable_search: bool,
     token: typing.Optional[uuid.UUID],
     plugin_names: typing.List[str],
     branch: typing.Optional[str],
@@ -227,6 +234,7 @@ def do_upload(
                 pull_request_number=pull_request_number,
                 git_service=git_service,
                 enterprise_url=enterprise_url,
+                disable_search=disable_search,
             )
         ),
     )
@@ -260,4 +268,5 @@ def do_upload(
         dry_run=dry_run,
         git_service=git_service,
         enterprise_url=enterprise_url,
+        disable_search=disable_search,
     )

@@ -12,7 +12,8 @@ def _is_included(
     path: pathlib.Path,
 ):
     return filename_include_regex.match(path.name) and (
-        multipart_include_regex is None or multipart_include_regex.match(str(path))
+        multipart_include_regex is None
+        or multipart_include_regex.match(str(path.resolve()))
     )
 
 
@@ -38,6 +39,19 @@ def search_files(
     multipart_exclude_regex: typing.Optional[typing.Pattern] = None,
     search_for_directories: bool = False
 ) -> typing.Generator[pathlib.Path, None, None]:
+    """ "
+    Searches for files or directories in a given folder
+
+    Parameters:
+        folder_to_search (pathlib.Path): in which folder you want the search to be
+        folders_to_ignore (list of str): what folders inside the folder_to_search to ignore and not search inside
+        filename_include_regex (regex): Regex for filenames only, this does not include the full path of the file
+        filename_exclude_regex (regex): Regex for filenames only, this does not include the full path of the file
+        multipart_include_regex (regex): Regex for full path of the files you want to include
+        multipart_exclude_regex (regex): Regex for full path of the files you want to exclude
+        search_for_directories (bool)
+
+    """
     this_is_included = functools.partial(
         _is_included, filename_include_regex, multipart_include_regex
     )

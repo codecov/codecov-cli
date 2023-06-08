@@ -22,6 +22,16 @@ imports_query_str = """
 (import) @elemen
 """
 
+definitions_query_str = """
+(function_declaration) @elemen
+(generator_function_declaration) @elemen2
+(function) @elemen3
+(generator_function) @elemen4
+(arrow_function) @elemen5
+(method_definition) @elemen6
+(class_declaration) @elemen7
+"""
+
 
 class ES6Analyzer(BaseAnalyzer):
     condition_statements = [
@@ -52,6 +62,7 @@ class ES6Analyzer(BaseAnalyzer):
         self.parser = Parser()
         self.parser.set_language(self.JS_LANGUAGE)
         self.import_lines = set()
+        self.definitions_lines = set()
 
     def get_code_hash(self, start_byte, end_byte):
         j = hashlib.md5()
@@ -65,6 +76,7 @@ class ES6Analyzer(BaseAnalyzer):
         function_query = self.JS_LANGUAGE.query(function_query_str)
         method_query = self.JS_LANGUAGE.query(method_query_str)
         imports_query = self.JS_LANGUAGE.query(imports_query_str)
+        definitions_query = self.JS_LANGUAGE.query(definitions_query_str)
         combined_results = function_query.captures(root_node) + method_query.captures(
             root_node
         )
@@ -83,6 +95,7 @@ class ES6Analyzer(BaseAnalyzer):
             )
 
         self.import_lines = self.get_import_lines(root_node, imports_query)
+        self.definition_lines = self.get_definition_lines(root_node, definitions_query)
 
         h = hashlib.md5()
         h.update(self.actual_code)
@@ -95,4 +108,5 @@ class ES6Analyzer(BaseAnalyzer):
             "filename": str(self.path),
             "language": "javascript",
             "import_lines": sorted(self.import_lines),
+            "definition_lines": sorted(self.definition_lines),
         }

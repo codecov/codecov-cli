@@ -89,12 +89,9 @@ class PythonAnalyzer(BaseAnalyzer):
         visitor = NodeVisitor(self)
         visitor.start_visit(tree.root_node)
         self.functions = sorted(self.functions, key=lambda x: x["start_line"])
-        for (a, _) in definitions_query.captures(root_node):
-            self.definitions_lines.add(
-                (a.start_point[0] + 1, a.end_point[0] - a.start_point[0])
-            )
 
         self.import_lines = self.get_import_lines(root_node, imports_query)
+        self.definitions_lines = self.get_definition_lines(root_node, definitions_query)
 
         h = hashlib.md5()
         h.update(self.actual_code)

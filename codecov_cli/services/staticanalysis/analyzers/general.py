@@ -68,3 +68,11 @@ class BaseAnalyzer(object):
         for (a, _) in imports_query.captures(root_node):
             import_lines.add((a.start_point[0] + 1, a.end_point[0] - a.start_point[0]))
         return import_lines
+
+    def get_definition_lines(self, root_node, definitions_query):
+        definition_lines = set()
+        for (a, _) in definitions_query.captures(root_node):
+            definition_lines.add(
+                (a.start_point[0] + 1, a.end_point[0] - a.start_point[0])
+            )
+        return definition_lines

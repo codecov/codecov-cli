@@ -95,25 +95,7 @@ class PythonAnalyzer(BaseAnalyzer):
 
         h = hashlib.md5()
         h.update(self.actual_code)
-        statements = sorted(
-            (
-                (
-                    x["current_line"],
-                    {
-                        "line_surety_ancestorship": self.line_surety_ancestorship.get(
-                            x["current_line"], None
-                        ),
-                        **dict(
-                            (k, v)
-                            for (k, v) in x.items()
-                            if k not in ["line_surety_ancestorship", "current_line"]
-                        ),
-                    },
-                )
-                for x in self.statements
-            ),
-            key=lambda x: (x[0], x[1]["start_column"]),
-        )
+        statements = self.get_statements()
         return {
             "language": "python",
             "empty_lines": [i + 1 for (i, n) in enumerate(self.lines) if not n.strip()],
@@ -124,8 +106,3 @@ class PythonAnalyzer(BaseAnalyzer):
             "definition_lines": sorted(self.definitions_lines),
             "import_lines": sorted(self.import_lines),
         }
-
-    def _get_code_hash(self, start_byte, end_byte):
-        j = hashlib.md5()
-        j.update(self.actual_code[start_byte:end_byte].strip())
-        return j.hexdigest()

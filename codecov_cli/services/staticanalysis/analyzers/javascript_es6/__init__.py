@@ -4,6 +4,9 @@ from tree_sitter import Language, Parser
 
 import staticcodecov_languages
 from codecov_cli.services.staticanalysis.analyzers.general import BaseAnalyzer
+from codecov_cli.services.staticanalysis.analyzers.javascript_es6.node_wrappers import (
+    NodeVisitor,
+)
 
 function_query_str = """
 (function_declaration) @elemen
@@ -63,6 +66,8 @@ class ES6Analyzer(BaseAnalyzer):
         self.parser.set_language(self.JS_LANGUAGE)
         self.import_lines = set()
         self.definitions_lines = set()
+        self.line_surety_ancestorship = {}
+        self.statements = []
 
     def get_code_hash(self, start_byte, end_byte):
         j = hashlib.md5()
@@ -70,7 +75,6 @@ class ES6Analyzer(BaseAnalyzer):
         return j.hexdigest()
 
     def process(self):
-        # TODO : A lot is obsolete and needs to be updated here
         tree = self.parser.parse(self.actual_code)
         root_node = tree.root_node
         function_query = self.JS_LANGUAGE.query(function_query_str)
@@ -93,9 +97,14 @@ class ES6Analyzer(BaseAnalyzer):
                     "complexity_metrics": self._get_complexity_metrics(body_node),
                 }
             )
+        self.functions = sorted(self.functions, key=lambda x: x["start_line"])
 
         self.import_lines = self.get_import_lines(root_node, imports_query)
         self.definition_lines = self.get_definition_lines(root_node, definitions_query)
+
+        visitor = NodeVisitor(self)
+        visitor.start_visit(tree.root_node)
+        statements = self.get_statements()
 
         h = hashlib.md5()
         h.update(self.actual_code)
@@ -109,4 +118,5 @@ class ES6Analyzer(BaseAnalyzer):
             "language": "javascript",
             "import_lines": sorted(self.import_lines),
             "definition_lines": sorted(self.definition_lines),
+            "statements": statements,
         }

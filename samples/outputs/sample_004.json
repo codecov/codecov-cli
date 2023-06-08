@@ -1,11 +1,11 @@
 {
     "result": {
         "empty_lines": [
-            2, 8, 10, 12, 16, 19, 22, 24, 33, 35
+            2, 8, 10, 12, 16, 19, 22, 24, 33, 35, 37, 52, 58
         ],
         "executable_lines": [],
-        "number_lines": 35,
-        "hash": "1ab313b3c1dd7f13c5beb09d99361481",
+        "number_lines": 61,
+        "hash": "94a0d0fa4f21d0e4742395a44017d38c",
         "filename": "samples/inputs/sample_004.js",
         "language": "javascript",
         "import_lines": [],
@@ -199,6 +199,259 @@
             [
                 34,
                 0
+            ]
+        ],
+        "statements": [
+            [
+                4,
+                {
+                    "extra_connected_lines": [],
+                    "len": 0,
+                    "line_hash": "eff097bf909655b124975db21192054d",
+                    "line_surety_ancestorship": null,
+                    "start_column": 6
+                }
+            ],
+            [
+                6,
+                {
+                    "extra_connected_lines": [],
+                    "len": 0,
+                    "line_hash": "742c0b905985a201c629a256ac33c334",
+                    "line_surety_ancestorship": 3,
+                    "start_column": 4
+                }
+            ],
+            [
+                9,
+                {
+                    "extra_connected_lines": [],
+                    "len": 0,
+                    "line_hash": "a7b175bfb7e62b97fe52d7434c0c2379",
+                    "line_surety_ancestorship": 1,
+                    "start_column": 0
+                }
+            ],
+            [
+                18,
+                {
+                    "extra_connected_lines": [],
+                    "len": 0,
+                    "line_hash": "f6ea9085578e5a80c6104e30fbe5ef3c",
+                    "line_surety_ancestorship": 17,
+                    "start_column": 0
+                }
+            ],
+            [
+                18,
+                {
+                    "extra_connected_lines": [],
+                    "len": 0,
+                    "line_hash": "d369d1ecc3ccb56df658eb499ad61773",
+                    "line_surety_ancestorship": 17,
+                    "start_column": 15
+                }
+            ],
+            [
+                21,
+                {
+                    "extra_connected_lines": [],
+                    "len": 0,
+                    "line_hash": "9f0f779138c7a11f885bf3e372db5fd2",
+                    "line_surety_ancestorship": null,
+                    "start_column": 24
+                }
+            ],
+            [
+                23,
+                {
+                    "extra_connected_lines": [],
+                    "len": 0,
+                    "line_hash": "e70c4df10ef0983b9c8c31bd06b2a2c3",
+                    "line_surety_ancestorship": 23,
+                    "start_column": 62
+                }
+            ],
+            [
+                25,
+             
+                {
+                    "extra_connected_lines": [],
+                    "len": 7,
+                    "line_hash": "70887a514d6e06b28b39500a54b393f9",
+                    "line_surety_ancestorship": 23,
+                    "start_column": 0
+                }
+            ],
+            [
+                28,
+                {
+                    "extra_connected_lines": [],
+                    "len": 0,
+                    "line_hash": "703ecd2943c1874ca5608f9464aa9ff0",
+                    "line_surety_ancestorship": null,
+                    "start_column": 6
+                }
+            ],
+            [
+                29,
+                {
+                    "extra_connected_lines": [],
+                    "len": 0,
+                    "line_hash": "9c656de2e04da573fe679a5b74eb92fc",
+                    "line_surety_ancestorship": 28,
+                    "start_column": 6
+                }
+            ],
+            [
+                30,
+                {
+                    "extra_connected_lines": [],
+                    "len": 0,
+                    "line_hash": "f1b967d8395128e11a41de08e9f08ece",
+                    "line_surety_ancestorship": 29,
+                    "start_column": 6
+                }
+            ],
+            [
+                34,
+                {
+                    "extra_connected_lines": [],
+                    "len": 0,
+                    "line_hash": "17ae910a1dbe2730c7e201ce6a1fe8ec",
+                    "line_surety_ancestorship": 25,
+                    "start_column": 0
+                }
+            ],
+            [
+                36,
+                {
+                    "extra_connected_lines": [],
+                    "len": 0,
+                    "line_hash": "e814e98ca3f6f96c97c02db4d1f61304",
+                    "line_surety_ancestorship": 34,
+                    "start_column": 0
+                }
+            ],
+            [
+                38,
+                {
+                    "extra_connected_lines": [],
+                    "len": 13,
+                    "line_hash": "4b53099f0acfb5d8773ea75803947fd7",
+                    "line_surety_ancestorship": 36,
+                    "start_column": 0
+                }
+            ],
+            [
+                40,
+                {
+                    "extra_connected_lines": [],
+                    "len": 0,
+                    "line_hash": "f1f7a65a890a99a88f69d3fe69c45d4b",
+                    "line_surety_ancestorship": 39,
+                    "start_column": 4
+                }
+            ],
+            [
+                43,
+                {
+                    "extra_connected_lines": [],
+                    "len": 0,
+                    "line_hash": "323eaab2caad4af96c638517dfc5f4af",
+                    "line_surety_ancestorship": 42,
+                    "start_column": 4
+                }
+            ],
+            [
+                44,
+                {
+                    "extra_connected_lines": [],
+                    "len": 0,
+                    "line_hash": "323eaab2caad4af96c638517dfc5f4af",
+                    "line_surety_ancestorship": 43,
+                    "start_column": 4
+                }
+            ],
+            [
+                47,
+                {
+                    "extra_connected_lines": [],
+                    "len": 0,
+                    "line_hash": "8897bd88721dc631417598744ef0c436",
+                    "line_surety_ancestorship": 46,
+                    "start_column": 4
+                }
+            ],
+            [
+                50,
+                {
+                    "extra_connected_lines": [],
+                    "len": 0,
+                    "line_hash": "eda9e8e15b2c891dca883393879996a0",
+                    "line_surety_ancestorship": null,
+                    "start_column": 4
+                }
+            ],
+            [
+                53,
+                {
+                    "extra_connected_lines": [],
+                    "len": 0,
+                    "line_hash": "d2b8f1c9948c6b25a039a7fe0b6946fe",
+                    "line_surety_ancestorship": 38,
+                    "start_column": 0
+                }
+            ],
+            [
+                54,
+                {
+                    "extra_connected_lines": [],
+                    "len": 3,
+                    "line_hash": "c206008ca7e8b3357b038943eb5c47a5",
+                    "line_surety_ancestorship": 53,
+                    "start_column": 0
+                }
+            ],
+            [
+                55,
+                {
+                    "extra_connected_lines": [],
+                    "len": 0,
+                    "line_hash": "be6259730b056abc927b3cbd970d0b4e",
+                    "line_surety_ancestorship": 54,
+                    "start_column": 2
+                }
+            ],
+            [
+                56,
+                {
+                    "extra_connected_lines": [],
+                    "len": 0,
+                    "line_hash": "0dd578d50cfa4265d49d2164f357a42b",
+                    "line_surety_ancestorship": 55,
+                    "start_column": 2
+                }
+            ],
+            [
+                59,
+                {
+                    "extra_connected_lines": [],
+                    "len": 2,
+                    "line_hash": "829c25aab63a91899fb33b63168c6f18",
+                    "line_surety_ancestorship": 54,
+                    "start_column": 0
+                }
+            ],
+            [
+                60,
+                {
+                    "extra_connected_lines": [],
+                    "len": 0,
+                    "line_hash": "be6259730b056abc927b3cbd970d0b4e",
+                    "line_surety_ancestorship": 59,
+                    "start_column": 2
+                }
             ]
         ]
     },

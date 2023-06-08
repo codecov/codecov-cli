@@ -126,3 +126,11 @@ console.log(moduleExports.pi);
 console.log(greet('Charlie'));
 console.log(constantPi);
 getData();
+
+//if statement without {}
+if (x > 0)
+  console.log("x is positive.");
+
+//for statement without {}
+for (var i = 0; i < 5; i++)
+  console.log("The value of i is: " + i);

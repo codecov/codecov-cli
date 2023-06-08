@@ -47,6 +47,7 @@ def cli(
     verbose: bool = False,
 ):
     configure_logger(logger, log_level=(logging.DEBUG if verbose else logging.INFO))
+    ctx.help_option_names = ["-h", "--help"]
     ctx.obj["ci_adapter"] = get_ci_adapter(auto_load_params_from)
     ctx.obj["versioning_system"] = get_versioning_system()
     ctx.obj["codecov_yaml"] = (

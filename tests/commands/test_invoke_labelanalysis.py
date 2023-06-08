@@ -64,7 +64,7 @@ class TestLabelAnalysisCommand(object):
             "  --max-wait-time INTEGER       Max time (in seconds) to wait for the label",
             "                                analysis result before falling back to running",
             "                                all tests. Default is to wait forever.",
-            "  --help                        Show this message and exit.",
+            "  -h, --help                    Show this message and exit.",
             "",
         ]
 

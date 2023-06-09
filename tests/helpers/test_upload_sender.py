@@ -51,7 +51,10 @@ def mocked_legacy_upload_endpoint(mocked_responses):
         responses.POST,
         f"https://api.codecov.io/upload/github/{encoded_slug}/commits/{random_sha}/reports/{named_upload_data['report_code']}/uploads",
         status=200,
-        json={"raw_upload_location": "https://puturl.com"},
+        json={
+            "raw_upload_location": "https://puturl.com",
+            "url": "https://app.codecov.io/commit-url",
+        },
     )
     mocked_responses.add(resp)
     yield resp
@@ -146,6 +149,8 @@ class TestUploadSender(object):
 
         post_req_made = mocked_responses.calls[0].request
         encoded_slug = encode_slug(named_upload_data["slug"])
+        response = json.loads(mocked_responses.calls[0].response.text)
+        assert response.get("url") == "https://app.codecov.io/commit-url"
         assert (
             post_req_made.url
             == f"https://api.codecov.io/upload/github/{encoded_slug}/commits/{random_sha}/reports/{named_upload_data['report_code']}/uploads"

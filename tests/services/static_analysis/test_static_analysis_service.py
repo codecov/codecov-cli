@@ -11,11 +11,19 @@ from codecov_cli.services.staticanalysis.types import FileAnalysisRequest
 
 class TestStaticAnalysisService:
     @pytest.mark.asyncio
-    @patch("codecov_cli.services.staticanalysis.select_file_finder")
-    @patch("codecov_cli.services.staticanalysis.send_single_upload_put")
-    async def test_static_analysis_service(
-        self, mock_send_upload_put, mock_file_finder
-    ):
+    async def test_static_analysis_service(self, mocker):
+        mock_file_finder = mocker.patch(
+            "codecov_cli.services.staticanalysis.select_file_finder"
+        )
+        mock_send_upload_put = mocker.patch(
+            "codecov_cli.services.staticanalysis.send_single_upload_put"
+        )
+        # Doing it this way to support Python 3.7
+        async def side_effect(*args, **kwargs):
+            return MagicMock()
+
+        mock_send_upload_put.side_effect = side_effect
+
         files_found = map(
             lambda filename: FileAnalysisRequest(str(filename), Path(filename)),
             [
@@ -33,12 +41,12 @@ class TestStaticAnalysisService:
                         {
                             "state": "created",
                             "filepath": "samples/inputs/sample_001.py",
-                            "raw_upload_location": "some URL",
+                            "raw_upload_location": "http://storage-url",
                         },
                         {
                             "state": "valid",
                             "filepath": "samples/inputs/sample_002.py",
-                            "raw_upload_location": "some URL",
+                            "raw_upload_location": "http://storage-url",
                         },
                     ]
                 },
@@ -65,15 +73,23 @@ class TestStaticAnalysisService:
         assert args[2] == {
             "state": "created",
             "filepath": "samples/inputs/sample_001.py",
-            "raw_upload_location": "some URL",
+            "raw_upload_location": "http://storage-url",
         }
 
     @pytest.mark.asyncio
-    @patch("codecov_cli.services.staticanalysis.select_file_finder")
-    @patch("codecov_cli.services.staticanalysis.send_single_upload_put")
-    async def test_static_analysis_service_should_force_option(
-        self, mock_send_upload_put, mock_file_finder
-    ):
+    async def test_static_analysis_service_should_force_option(self, mocker):
+        mock_file_finder = mocker.patch(
+            "codecov_cli.services.staticanalysis.select_file_finder"
+        )
+        mock_send_upload_put = mocker.patch(
+            "codecov_cli.services.staticanalysis.send_single_upload_put"
+        )
+        # Doing it this way to support Python 3.7
+        async def side_effect(*args, **kwargs):
+            return MagicMock()
+
+        mock_send_upload_put.side_effect = side_effect
+
         files_found = map(
             lambda filename: FileAnalysisRequest(str(filename), Path(filename)),
             [
@@ -91,12 +107,12 @@ class TestStaticAnalysisService:
                         {
                             "state": "created",
                             "filepath": "samples/inputs/sample_001.py",
-                            "raw_upload_location": "some URL",
+                            "raw_upload_location": "http://storage-url",
                         },
                         {
                             "state": "valid",
                             "filepath": "samples/inputs/sample_002.py",
-                            "raw_upload_location": "some URL",
+                            "raw_upload_location": "http://storage-url",
                         },
                     ]
                 },
@@ -119,4 +135,3 @@ class TestStaticAnalysisService:
         mock_file_finder.assert_called_with({})
         mock_file_finder.return_value.find_files.assert_called()
         assert mock_send_upload_put.call_count == 2
-        args, _ = mock_send_upload_put.call_args

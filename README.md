@@ -1,14 +1,17 @@
 # CodecovCLI 
 
 [![codecov](https://codecov.io/gh/codecov/codecov-cli/branch/master/graph/badge.svg?token=jN0CICuA6Z)](https://codecov.io/gh/codecov/codecov-cli)
+[![Build-Test-Upload](https://github.com/codecov/codecov-cli/actions/workflows/push_flow.yml/badge.svg)](https://github.com/codecov/codecov-cli/actions/workflows/push_flow.yml)
 
 CodecovCLI is a new way for users to interact with Codecov directly from the user’s terminal or CI platform. Many Codecov features that require the user’s interference can be done via the codecovCLI. It saves commits, creates reports, uploads coverage and has many more features.
 
+- [CodecovCLI](#codecovcli)
 - [Installing](#installing)
   - [Using PIP](#using-pip)
   - [As a Binary](#as-a-binary)
-    - [Integrity Checking the Binary](#integrity-checking-the-binary)  
-- [How to upload to Codecov](#how-to-upload-to-codecov)
+    - [Integrity Checking the Binary](#integrity-checking-the-binary)
+- [How to Upload to Codecov](#how-to-upload-to-codecov)
+  - [How to Get an Upload Token](#how-to-get-an-upload-token)
 - [Usage](#usage)
 - [Codecov-cli Commands](#codecov-cli-commands)
   - [create-commit](#create-commit)
@@ -17,7 +20,6 @@ CodecovCLI is a new way for users to interact with Codecov directly from the use
   - [create-report-results](#create-report-results)
   - [get-report-results](#get-report-results)
   - [pr-base-picking](#pr-base-picking)
-
 - [How to Use Local Upload](#how-to-use-local-upload)
 - [Work in Progress Features](#work-in-progress-features)
   - [Plugin System](#plugin-system)

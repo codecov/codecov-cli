@@ -45,10 +45,13 @@ def _load_plugin_from_yaml(plugin_dict: typing.Dict):
         )
         return NoopPlugin()
     try:
-        return class_obj(**plugin_dict["params"])
+        if "params" not in plugin_dict or plugin_dict["params"] is None:
+            return class_obj()
+        else:
+            return class_obj(**plugin_dict["params"])
     except TypeError:
         click.secho(
-            f"Unable to instantiate {class_obj} with parameters {plugin_dict['params']}",
+            f"Unable to instantiate {class_obj} with provided parameters { plugin_dict.get('params', '') }",
             err=True,
         )
         return NoopPlugin()

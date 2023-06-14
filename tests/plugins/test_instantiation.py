@@ -59,6 +59,29 @@ def test_load_plugin_from_yaml_bad_parameters(mocker):
     )
     assert isinstance(res, NoopPlugin)
 
+def test_load_plugin_from_yaml_missing_params(mocker):
+    class SampleModule(object):
+        class SamplePlugin(object):
+            def __init__(self):
+                pass
+
+    mocker.patch("codecov_cli.plugins.import_module", return_value=SampleModule)
+    res = _load_plugin_from_yaml(
+        {"module": "a", "class": "SamplePlugin"}
+    )
+    assert isinstance(res, SampleModule.SamplePlugin)
+
+def test_load_plugin_from_yaml_empty_params(mocker):
+    class SampleModule(object):
+        class SamplePlugin(object):
+            def __init__(self):
+                pass
+
+    mocker.patch("codecov_cli.plugins.import_module", return_value=SampleModule)
+    res = _load_plugin_from_yaml(
+        {"module": "a", "class": "SamplePlugin", "params" : {}}
+    )
+    assert isinstance(res, SampleModule.SamplePlugin)
 
 def test_get_plugin_gcov():
     res = _get_plugin({}, "gcov")

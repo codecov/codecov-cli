@@ -45,10 +45,12 @@ def _load_plugin_from_yaml(plugin_dict: typing.Dict):
         )
         return NoopPlugin()
     try:
-        if "params" not in plugin_dict or plugin_dict["params"] is None:
-            return class_obj()
-        else:
+        params = plugin_dict.get("params", None)
+        if params:
             return class_obj(**plugin_dict["params"])
+        else:
+            return class_obj()
+        
     except TypeError:
         click.secho(
             f"Unable to instantiate {class_obj} with provided parameters { plugin_dict.get('params', '') }",

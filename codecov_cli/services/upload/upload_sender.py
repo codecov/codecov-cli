@@ -64,6 +64,10 @@ class UploadSender(object):
         if resp_from_codecov.status_code >= 400:
             return resp_from_codecov
         resp_json_obj = json.loads(resp_from_codecov.text)
+        if resp_json_obj.get("url"):
+            logger.info(
+                f"Your upload is now processing. When finished, results will be available at: {resp_json_obj.get('url')}"
+            )
         logger.debug(
             "Upload request to Codecov complete.",
             extra=dict(extra_log_attributes=dict(response=resp_json_obj)),

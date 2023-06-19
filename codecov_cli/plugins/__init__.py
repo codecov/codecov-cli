@@ -50,7 +50,7 @@ def _load_plugin_from_yaml(plugin_dict: typing.Dict):
             return class_obj(**plugin_dict["params"])
         else:
             return class_obj()
-        
+
     except TypeError:
         click.secho(
             f"Unable to instantiate {class_obj} with provided parameters { plugin_dict.get('params', '') }",

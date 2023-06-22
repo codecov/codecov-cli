@@ -1,3 +1,5 @@
+import json
+
 import pytest
 import responses
 from click.testing import CliRunner
@@ -64,6 +66,10 @@ class TestLabelAnalysisCommand(object):
             "  --max-wait-time INTEGER       Max time (in seconds) to wait for the label",
             "                                analysis result before falling back to running",
             "                                all tests. Default is to wait forever.",
+            "  --dry-run                     Userful during setup. This will run the label",
+            "                                analysis, but will print the result to stdout",
+            "                                and terminate instead of calling the",
+            "                                runner.process_labelanalysis_result",
             "  -h, --help                    Show this message and exit.",
             "",
         ]
@@ -145,6 +151,49 @@ class TestLabelAnalysisCommand(object):
             print(result.output)
         assert result.exit_code == 0
 
+    def test_invoke_label_analysis_dry_run(self, get_labelanalysis_deps, mocker):
+        mock_get_runner = get_labelanalysis_deps["mock_get_runner"]
+        fake_runner = get_labelanalysis_deps["fake_runner"]
+
+        label_analysis_result = {
+            "present_report_labels": ["test_present"],
+            "absent_labels": ["test_absent"],
+            "present_diff_labels": ["test_in_diff"],
+            "global_level_labels": ["test_global"],
+        }
+
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                responses.POST,
+                "https://api.codecov.io/labels/labels-analysis",
+                json={"external_id": "label-analysis-request-id"},
+                status=201,
+                match=[
+                    matchers.header_matcher({"Authorization": "Repotoken STATIC_TOKEN"})
+                ],
+            )
+            rsps.add(
+                responses.GET,
+                "https://api.codecov.io/labels/labels-analysis/label-analysis-request-id",
+                json={"state": "finished", "result": label_analysis_result},
+            )
+            cli_runner = CliRunner()
+            result = cli_runner.invoke(
+                cli,
+                [
+                    "label-analysis",
+                    "--token=STATIC_TOKEN",
+                    "--base-sha=BASE_SHA",
+                    "--dry-run",
+                ],
+                obj={},
+            )
+            mock_get_runner.assert_called()
+            fake_runner.process_labelanalysis_result.assert_not_called()
+        assert result.exit_code == 0
+        print(result.output)
+        assert json.dumps(label_analysis_result) in result.output
+
     def test_fallback_to_collected_labels(self, mocker):
         mock_runner = mocker.MagicMock()
         collected_labels = ["label_1", "label_2", "label_3"]
@@ -197,6 +246,46 @@ class TestLabelAnalysisCommand(object):
                 }
             )
             print(result.output)
+        assert result.exit_code == 0
+
+    def test_fallback_dry_run(self, get_labelanalysis_deps, mocker):
+        mock_get_runner = get_labelanalysis_deps["mock_get_runner"]
+        fake_runner = get_labelanalysis_deps["fake_runner"]
+        collected_labels = get_labelanalysis_deps["collected_labels"]
+        mock_dry_run = mocker.patch(
+            "codecov_cli.commands.labelanalysis._dry_run_output"
+        )
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                responses.POST,
+                "https://api.codecov.io/labels/labels-analysis",
+                status=500,
+                match=[
+                    matchers.header_matcher({"Authorization": "Repotoken STATIC_TOKEN"})
+                ],
+            )
+            cli_runner = CliRunner()
+            result = cli_runner.invoke(
+                cli,
+                [
+                    "-v",
+                    "label-analysis",
+                    "--token=STATIC_TOKEN",
+                    "--base-sha=BASE_SHA",
+                    "--dry-run",
+                ],
+                obj={},
+            )
+            mock_get_runner.assert_called()
+            fake_runner.process_labelanalysis_result.assert_not_called()
+            mock_dry_run.assert_called_with(
+                {
+                    "present_report_labels": [],
+                    "absent_labels": collected_labels,
+                    "present_diff_labels": [],
+                    "global_level_labels": [],
+                }
+            )
         assert result.exit_code == 0
 
     def test_fallback_collected_labels_codecov_error_processing_label_analysis(

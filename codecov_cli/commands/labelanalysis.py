@@ -1,3 +1,4 @@
+import json
 import logging
 import time
 from typing import List
@@ -47,6 +48,12 @@ logger = logging.getLogger("codecovcli")
     default=None,
     type=int,
 )
+@click.option(
+    "--dry-run",
+    "dry_run",
+    help="Userful during setup. This will run the label analysis, but will print the result to stdout and terminate instead of calling the runner.process_labelanalysis_result",
+    is_flag=True,
+)
 @click.pass_context
 def label_analysis(
     ctx: click.Context,
@@ -55,6 +62,7 @@ def label_analysis(
     base_commit_sha: str,
     runner_name: str,
     max_wait_time: str,
+    dry_run: bool,
 ):
     enterprise_url = ctx.obj.get("enterprise_url")
     logger.debug(
@@ -115,7 +123,7 @@ def label_analysis(
                 "Sorry. Codecov is having problems",
                 extra=dict(extra_log_attributes=dict(status_code=response.status_code)),
             )
-            _fallback_to_collected_labels(requested_labels, runner)
+            _fallback_to_collected_labels(requested_labels, runner, dry_run=dry_run)
             return
         if response.status_code >= 400:
             logger.warning(
@@ -143,9 +151,12 @@ def label_analysis(
         )
         resp_json = resp_data.json()
         if resp_json["state"] == "finished":
-            runner.process_labelanalysis_result(
-                LabelAnalysisRequestResult(resp_data.json()["result"])
-            )
+            if not dry_run:
+                runner.process_labelanalysis_result(
+                    LabelAnalysisRequestResult(resp_data.json()["result"])
+                )
+            else:
+                _dry_run_output(LabelAnalysisRequestResult(resp_data.json()["result"]))
             return
         if resp_json["state"] == "error":
             logger.error(
@@ -153,7 +164,7 @@ def label_analysis(
                 extra=dict(extra_log_attributes=dict(resp_json=resp_json)),
             )
             _fallback_to_collected_labels(
-                collected_labels=requested_labels, runner=runner
+                collected_labels=requested_labels, runner=runner, dry_run=dry_run
             )
             return
         if max_wait_time and (time.monotonic() - start_wait) > max_wait_time:
@@ -161,15 +172,34 @@ def label_analysis(
                 f"Exceeded max waiting time of {max_wait_time} seconds",
             )
             _fallback_to_collected_labels(
-                collected_labels=requested_labels, runner=runner
+                collected_labels=requested_labels, runner=runner, dry_run=dry_run
             )
             return
         logger.info("Waiting more time for result")
         time.sleep(5)
 
 
+def _dry_run_output(result: LabelAnalysisRequestResult):
+    logger.info(
+        "Not executing tests because '--dry-run' is on. List of labels selected for running below."
+    )
+    logger.info("")
+    logger.info("Label groups:")
+    logger.info(
+        "- absent_labels: Set of new labels found in HEAD that are not present in BASE"
+    )
+    logger.info("- present_diff_labels: Set of labels affected by the git diff")
+    logger.info("- global_level_labels: Set of labels that possibly touch global code")
+    logger.info("- present_report_labels: Set of labels previously uploaded")
+    logger.info("")
+    logger.info(json.dumps(result))
+
+
 def _fallback_to_collected_labels(
-    collected_labels: List[str], runner: LabelAnalysisRunnerInterface
+    collected_labels: List[str],
+    runner: LabelAnalysisRunnerInterface,
+    *,
+    dry_run: bool = False,
 ) -> dict:
     logger.info("Trying to fallback on collected labels")
     if collected_labels:
@@ -182,6 +212,9 @@ def _fallback_to_collected_labels(
                 "global_level_labels": [],
             }
         )
-        return runner.process_labelanalysis_result(fake_response)
+        if not dry_run:
+            return runner.process_labelanalysis_result(fake_response)
+        else:
+            return _dry_run_output(LabelAnalysisRequestResult(fake_response))
     logger.error("Cannot fallback to collected labels because no labels were collected")
     raise click.ClickException("Failed to get list of labels to run")

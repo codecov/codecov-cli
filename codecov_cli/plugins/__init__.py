@@ -30,18 +30,30 @@ def select_preparation_plugins(cli_config: typing.Dict, plugin_names: typing.Lis
 
 def _load_plugin_from_yaml(plugin_dict: typing.Dict):
     try:
-        class_obj = import_module(plugin_dict["path"])
+        module_obj = import_module(plugin_dict["module"])
+        class_obj = getattr(module_obj, plugin_dict["class"])
     except ModuleNotFoundError:
         click.secho(
-            f"Unable to dynamically load plugin on path {plugin_dict['path']}",
+            f"Unable to dynamically load module {plugin_dict['module']}",
+            err=True,
+        )
+        return NoopPlugin()
+    except AttributeError:
+        click.secho(
+            f"Unable to dynamically load class {plugin_dict['class']} from module {plugin_dict['module']}",
             err=True,
         )
         return NoopPlugin()
     try:
-        return class_obj(**plugin_dict["params"])
+        params = plugin_dict.get("params", None)
+        if params:
+            return class_obj(**plugin_dict["params"])
+        else:
+            return class_obj()
+
     except TypeError:
         click.secho(
-            f"Unable to instantiate {class_obj} with parameters {plugin_dict['params']}",
+            f"Unable to instantiate {class_obj} with provided parameters { plugin_dict.get('params', '') }",
             err=True,
         )
         return NoopPlugin()

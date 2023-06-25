@@ -86,7 +86,7 @@ Note that these commands will automatically search your environment for a `$CODE
 The following tokens are suitable for uploading:
 
 * The [Repository Upload Token](https://docs.codecov.com/docs/codecov-uploader#upload-token): Found on the settings page of your repository, also viewable on the `/new` page when setting up a repository on Codecov for the first time. 
-* The [Global Upload Token](https://docs.codecov.com/docs/codecov-uploader#organization-upload-token): Found on your organization settings page (e.g., https://app.codecov.io/account/<scm>/<org>/org-upload-token). 
+* The [Global Upload Token](https://docs.codecov.com/docs/codecov-uploader#organization-upload-token): Found on your organization settings page (e.g., `https://app.codecov.io/account/<scm>/<org>/org-upload-token`). 
 
 
 # Usage 

@@ -26,12 +26,13 @@ def create_report_logic(
     service: str,
     token: uuid.UUID,
     enterprise_url: str,
+    fail_on_error: bool = False,
 ):
     encoded_slug = encode_slug(slug)
     sending_result = send_create_report_request(
         commit_sha, code, service, token, encoded_slug, enterprise_url
     )
-    log_warnings_and_errors_if_any(sending_result, "Report creating")
+    log_warnings_and_errors_if_any(sending_result, "Report creating", fail_on_error)
     return sending_result
 
 

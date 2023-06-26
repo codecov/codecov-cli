@@ -22,6 +22,7 @@ def create_commit_logic(
     token: uuid.UUID,
     service: typing.Optional[str],
     enterprise_url: typing.Optional[str] = None,
+    fail_on_error: bool = False,
 ):
     encoded_slug = encode_slug(slug)
     sending_result = send_commit_data(
@@ -35,7 +36,7 @@ def create_commit_logic(
         enterprise_url=enterprise_url,
     )
 
-    log_warnings_and_errors_if_any(sending_result, "Commit creating")
+    log_warnings_and_errors_if_any(sending_result, "Commit creating", fail_on_error)
     return sending_result
 
 

@@ -38,7 +38,7 @@ To use codecov-cli in your local machine, or your CI workflows, you need to inst
 
 The above command will download the latest version of Codecov-cli. If you wish to use a specific version, releases can be viewed [here](https://pypi.org/project/codecov-cli/#history). 
 
-Note: If you're installing in a pytest environment, you may need to call `pytest rehash` before the CLI will work. 
+Note: If you're installing in a `pyenv` environment, you may need to call `pyenv rehash` before the CLI will work. 
 
 ## As a Binary
 If you would like to use the CLI in an environment that does not have access to Python / PIP, you can install the CLI as a compiled binary. Linux and macOS releases can be found [here](https://cli.codecov.io/), along with SHASUMs and signatures for each released version. Binary releases are also available via [Github releases](https://github.com/codecov/codecov-cli/releases) on this repository. 

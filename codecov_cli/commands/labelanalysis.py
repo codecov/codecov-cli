@@ -90,17 +90,28 @@ def label_analysis(
         raise click.ClickException(
             click.style("Unable to run label analysis", fg="red")
         )
-    upload_url = enterprise_url or CODECOV_API_URL
-    url = f"{upload_url}/labels/labels-analysis"
-    token_header = f"Repotoken {token}"
 
     codecov_yaml = ctx.obj["codecov_yaml"] or {}
     cli_config = codecov_yaml.get("cli", {})
+    # Raises error if no runner is found
     runner = get_runner(cli_config, runner_name)
     logger.debug(
         f"Selected runner: {runner}",
         extra=dict(extra_log_attributes=dict(config=runner.params)),
     )
+
+    upload_url = enterprise_url or CODECOV_API_URL
+    url = f"{upload_url}/labels/labels-analysis"
+    token_header = f"Repotoken {token}"
+    payload = {
+        "base_commit": base_commit_sha,
+        "head_commit": head_commit_sha,
+        "requested_labels": None,
+    }
+    # Send the initial label analysis request without labels
+    # Because labels might take a long time to collect
+    eid = _send_labelanalysis_request(payload, url, token_header)
+
     logger.info("Collecting labels...")
     requested_labels = runner.collect_tests()
     logger.info(f"Collected {len(requested_labels)} tests")
@@ -108,42 +119,25 @@ def label_analysis(
         "Labels collected.",
         extra=dict(extra_log_attributes=dict(labels_collected=requested_labels)),
     )
-    payload = {
-        "base_commit": base_commit_sha,
-        "head_commit": head_commit_sha,
-        "requested_labels": requested_labels,
-    }
-    logger.info("Requesting set of labels to run...")
-    try:
-        response = requests.post(
-            url, json=payload, headers={"Authorization": token_header}
-        )
-        if response.status_code >= 500:
-            logger.warning(
-                "Sorry. Codecov is having problems",
-                extra=dict(extra_log_attributes=dict(status_code=response.status_code)),
-            )
+    payload["requested_labels"] = requested_labels
+
+    if eid:
+        # Initial request with no labels was successful
+        # Now we PATCH the labels in
+        patch_url = f"{upload_url}/labels/labels-analysis/{eid}"
+        _patch_labels(payload, patch_url, token_header)
+    else:
+        # Initial request with no labels failed
+        # Retry it
+        eid = _send_labelanalysis_request(payload, url, token_header)
+        if eid is None:
             _fallback_to_collected_labels(requested_labels, runner, dry_run=dry_run)
             return
-        if response.status_code >= 400:
-            logger.warning(
-                "Got a 4XX status code back from Codecov",
-                extra=dict(
-                    extra_log_attributes=dict(
-                        status_code=response.status_code, response_json=response.json()
-                    )
-                ),
-            )
-            raise click.ClickException(
-                "There is some problem with the submitted information"
-            )
-    except requests.RequestException:
-        raise click.ClickException(click.style("Unable to reach Codecov", fg="red"))
-    eid = response.json()["external_id"]
+
     has_result = False
     logger.info("Label request sent. Waiting for result.")
     start_wait = time.monotonic()
-    time.sleep(2)
+    time.sleep(1)
     while not has_result:
         resp_data = requests.get(
             f"{upload_url}/labels/labels-analysis/{eid}",
@@ -151,12 +145,13 @@ def label_analysis(
         )
         resp_json = resp_data.json()
         if resp_json["state"] == "finished":
+            request_result = _potentially_calculate_absent_labels(
+                resp_data.json()["result"], requested_labels
+            )
             if not dry_run:
-                runner.process_labelanalysis_result(
-                    LabelAnalysisRequestResult(resp_data.json()["result"])
-                )
+                runner.process_labelanalysis_result(request_result)
             else:
-                _dry_run_output(LabelAnalysisRequestResult(resp_data.json()["result"]))
+                _dry_run_output(LabelAnalysisRequestResult(request_result))
             return
         if resp_json["state"] == "error":
             logger.error(
@@ -177,6 +172,65 @@ def label_analysis(
             return
         logger.info("Waiting more time for result")
         time.sleep(5)
+
+
+def _potentially_calculate_absent_labels(
+    request_result, requested_labels
+) -> LabelAnalysisRequestResult:
+    if request_result["absent_labels"]:
+        return LabelAnalysisRequestResult(request_result)
+    requested_labels_set = set(requested_labels)
+    present_labels_set = set(request_result["present_report_labels"])
+    request_result["absent_labels"] = list(requested_labels_set - present_labels_set)
+    return LabelAnalysisRequestResult(request_result)
+
+
+def _patch_labels(payload, url, token_header):
+    logger.info("Sending collected labels to Codecov...")
+    try:
+        response = requests.patch(
+            url, json=payload, headers={"Authorization": token_header}
+        )
+        if response.status_code < 300:
+            logger.info("Labels successfully sent to Codecov")
+    except requests.RequestException:
+        raise click.ClickException(click.style("Unable to reach Codecov", fg="red"))
+
+
+def _send_labelanalysis_request(payload, url, token_header):
+    logger.info(
+        "Requesting set of labels to run...",
+        extra=dict(
+            extra_log_attributes=dict(
+                with_labels=(payload["requested_labels"] is not None)
+            )
+        ),
+    )
+    try:
+        response = requests.post(
+            url, json=payload, headers={"Authorization": token_header}
+        )
+        if response.status_code >= 500:
+            logger.warning(
+                "Sorry. Codecov is having problems",
+                extra=dict(extra_log_attributes=dict(status_code=response.status_code)),
+            )
+            return None
+        if response.status_code >= 400:
+            logger.warning(
+                "Got a 4XX status code back from Codecov",
+                extra=dict(
+                    extra_log_attributes=dict(
+                        status_code=response.status_code, response_json=response.json()
+                    )
+                ),
+            )
+            raise click.ClickException(
+                "There is some problem with the submitted information"
+            )
+    except requests.RequestException:
+        raise click.ClickException(click.style("Unable to reach Codecov", fg="red"))
+    return response.json()["external_id"]
 
 
 def _dry_run_output(result: LabelAnalysisRequestResult):

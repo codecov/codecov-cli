@@ -1,0 +1,120 @@
+from unittest.mock import patch
+
+from click.testing import CliRunner
+
+from codecov_cli.fallbacks import FallbackFieldEnum
+from codecov_cli.main import cli
+from codecov_cli.types import RequestError, RequestResult
+from tests.factory import FakeProvider, FakeVersioningSystem
+
+
+def test_upload_process_missing_commit_sha(mocker):
+    fake_ci_provider = FakeProvider({FallbackFieldEnum.commit_sha: None})
+    fake_versioning_system = FakeVersioningSystem({FallbackFieldEnum.commit_sha: None})
+    mocker.patch(
+        "codecov_cli.main.get_versioning_system", return_value=fake_versioning_system
+    )
+    mocker.patch("codecov_cli.main.get_ci_adapter", return_value=fake_ci_provider)
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        result = runner.invoke(cli, ["upload-process"], obj={})
+        assert result.exit_code != 0
+        assert "Missing option '-C' / '--sha' / '--commit-sha'" in result.output
+
+
+def test_upload_process_raise_Z_option(mocker):
+    error = RequestError(
+        code=401, params={"some": "params"}, description="Unauthorized"
+    )
+    command_result = RequestResult(
+        error=error, warnings=[], status_code=401, text="Unauthorized"
+    )
+
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        with patch(
+            "codecov_cli.services.commit.send_commit_data"
+        ) as mocked_create_commit:
+            mocked_create_commit.return_value = command_result
+            result = runner.invoke(
+                cli,
+                [
+                    "-v",
+                    "upload-process",
+                    "--fail-on-error",
+                    "-C",
+                    "command-sha",
+                    "--slug",
+                    "owner/repo",
+                ],
+                obj={},
+            )
+
+    assert result.exit_code != 0
+    assert "Commit creating failed: Unauthorized" in result.output
+    assert str(result) == "<Result SystemExit(1)>"
+
+
+def test_upload_process_options(mocker):
+    runner = CliRunner()
+    fake_ci_provider = FakeProvider({FallbackFieldEnum.commit_sha: None})
+    mocker.patch("codecov_cli.main.get_ci_adapter", return_value=fake_ci_provider)
+    with runner.isolated_filesystem():
+        runner = CliRunner()
+        result = runner.invoke(cli, ["upload-process", "-h"], obj={})
+        assert result.exit_code == 0
+        print(result.output)
+
+        assert result.output.split("\n") == [
+            "Usage: cli upload-process [OPTIONS]",
+            "",
+            "Options:",
+            "  -C, --sha, --commit-sha TEXT    Commit SHA (with 40 chars)  [required]",
+            "  --report-code TEXT              The code of the report. If unsure, leave",
+            "                                  default",
+            "  --network-root-folder PATH      Root folder from which to consider paths on",
+            "                                  the network section  [default: (Current",
+            "                                  working directory)]",
+            "  -s, --dir, --coverage-files-search-root-folder PATH",
+            "                                  Folder where to search for coverage files",
+            "                                  [default: (Current Working Directory)]",
+            "  --exclude, --coverage-files-search-exclude-folder PATH",
+            "                                  Folders to exclude from search",
+            "  -f, --file, --coverage-files-search-direct-file PATH",
+            "                                  Explicit files to upload. These will be added",
+            "                                  to the coverage files found for upload. If you",
+            "                                  wish to only upload the specified files,",
+            "                                  please consider using --disable-search to",
+            "                                  disable uploading other files.",
+            "  --disable-search                Disable search for coverage files. This is",
+            "                                  helpful when specifying what files you want to",
+            "                                  uload with the --file option.",
+            "  -b, --build, --build-code TEXT  Specify the build number manually",
+            "  --build-url TEXT                The URL of the build where this is running",
+            "  --job-code TEXT",
+            "  -t, --token UUID                Codecov upload token",
+            "  -n, --name TEXT                 Custom defined name of the upload. Visible in",
+            "                                  Codecov UI",
+            "  -B, --branch TEXT               Branch to which this commit belongs to",
+            "  -r, --slug TEXT                 owner/repo slug used instead of the private",
+            "                                  repo token in Self-hosted",
+            "  -P, --pr, --pull-request-number TEXT",
+            "                                  Specify the pull request number mannually.",
+            "                                  Used to override pre-existing CI environment",
+            "                                  variables",
+            "  -e, --env, --env-var TEXT       Specify environment variables to be included",
+            "                                  with this build.",
+            "  -F, --flag TEXT                 Flag the upload to group coverage metrics.",
+            "                                  Multiple flags allowed.",
+            "  --plugin TEXT",
+            "  -Z, --fail-on-error             Exit with non-zero code in case of error",
+            "                                  uploading.",
+            "  -d, --dry-run                   Don't upload files to Codecov",
+            "  --legacy, --use-legacy-uploader",
+            "                                  Use the legacy upload endpoint",
+            "  --git-service []",
+            "  --parent-sha TEXT               SHA (with 40 chars) of what should be the",
+            "                                  parent of this commit",
+            "  -h, --help                      Show this message and exit.",
+            "",
+        ]

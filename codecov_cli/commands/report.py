@@ -46,9 +46,22 @@ logger = logging.getLogger("codecovcli")
     type=click.UUID,
     envvar="CODECOV_TOKEN",
 )
+@click.option(
+    "-Z",
+    "--fail-on-error",
+    "fail_on_error",
+    is_flag=True,
+    help="Exit with non-zero code in case of error processing.",
+)
 @click.pass_context
 def create_report(
-    ctx, commit_sha: str, code: str, slug: str, git_service: str, token: uuid.UUID
+    ctx,
+    commit_sha: str,
+    code: str,
+    slug: str,
+    git_service: str,
+    token: uuid.UUID,
+    fail_on_error: bool,
 ):
     enterprise_url = ctx.obj.get("enterprise_url")
     logger.debug(
@@ -64,7 +77,7 @@ def create_report(
         ),
     )
     res = create_report_logic(
-        commit_sha, code, slug, git_service, token, enterprise_url
+        commit_sha, code, slug, git_service, token, enterprise_url, fail_on_error
     )
     if not res.error:
         logger.info(

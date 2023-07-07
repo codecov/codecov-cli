@@ -64,6 +64,13 @@ logger = logging.getLogger("codecovcli")
     fallback_field=FallbackFieldEnum.git_service,
     type=click.Choice(service.value for service in GitService),
 )
+@click.option(
+    "-Z",
+    "--fail-on-error",
+    "fail_on_error",
+    is_flag=True,
+    help="Exit with non-zero code in case of error processing.",
+)
 @click.pass_context
 def create_commit(
     ctx,
@@ -74,6 +81,7 @@ def create_commit(
     slug: typing.Optional[str],
     token: typing.Optional[uuid.UUID],
     git_service: typing.Optional[str],
+    fail_on_error: bool,
 ):
     enterprise_url = ctx.obj.get("enterprise_url")
     logger.debug(
@@ -100,4 +108,5 @@ def create_commit(
         token,
         git_service,
         enterprise_url,
+        fail_on_error,
     )

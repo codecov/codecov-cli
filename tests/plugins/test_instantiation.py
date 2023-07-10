@@ -15,12 +15,16 @@ def test_load_plugin_from_yaml(mocker):
         def __init__(self, banana, other):
             self.something = banana
             self.other = other
-    
+
     SampleModule = mocker.MagicMock(SamplePlugin=SamplePlugin)
 
     mocker.patch("codecov_cli.plugins.import_module", return_value=SampleModule)
     res = _load_plugin_from_yaml(
-        {"module": "a", "class": "SamplePlugin",  "params": {"banana": "super", "other": 1}}
+        {
+            "module": "a",
+            "class": "SamplePlugin",
+            "params": {"banana": "super", "other": 1},
+        }
     )
     assert isinstance(res, SamplePlugin)
     assert res.something == "super"
@@ -32,20 +36,29 @@ def test_load_plugin_from_yaml_non_existing_class(mocker):
         def __init__(self, banana, other):
             self.something = banana
             self.other = other
-    
+
     SampleModule = mocker.MagicMock(SamplePlugin=SamplePlugin)
     del SampleModule.NonExistingClass
 
     mocker.patch("codecov_cli.plugins.import_module", return_value=SampleModule)
-    
+
     res = _load_plugin_from_yaml(
-        {"module": "a", "class": "NonExistingClass", "params": {"banana": "super", "other": 1}}
+        {
+            "module": "a",
+            "class": "NonExistingClass",
+            "params": {"banana": "super", "other": 1},
+        }
     )
     assert isinstance(res, NoopPlugin)
 
+
 def test_load_plugin_from_yaml_non_existing_module(mocker):
     res = _load_plugin_from_yaml(
-        {"module": "nonexisting.module", "class": "nonexisting.class", "params": {"banana": "super", "other": 1}}
+        {
+            "module": "nonexisting.module",
+            "class": "nonexisting.class",
+            "params": {"banana": "super", "other": 1},
+        }
     )
     assert isinstance(res, NoopPlugin)
 
@@ -54,42 +67,43 @@ def test_load_plugin_from_yaml_bad_parameters(mocker):
     class SamplePlugin(object):
         def __init__(self, banana):
             pass
-    
-    SampleModule = mocker.MagicMock(SamplePlugin=SamplePlugin)
 
+    SampleModule = mocker.MagicMock(SamplePlugin=SamplePlugin)
 
     mocker.patch("codecov_cli.plugins.import_module", return_value=SampleModule)
     res = _load_plugin_from_yaml(
-        {"module": "a", "class": "SamplePlugin", "params": {"banana": "super", "other": 1}}
+        {
+            "module": "a",
+            "class": "SamplePlugin",
+            "params": {"banana": "super", "other": 1},
+        }
     )
     assert isinstance(res, NoopPlugin)
+
 
 def test_load_plugin_from_yaml_missing_params(mocker):
     class SamplePlugin(object):
         def __init__(self):
             pass
-    
+
     SampleModule = mocker.MagicMock(SamplePlugin=SamplePlugin)
 
-
     mocker.patch("codecov_cli.plugins.import_module", return_value=SampleModule)
-    res = _load_plugin_from_yaml(
-        {"module": "a", "class": "SamplePlugin"}
-    )
+    res = _load_plugin_from_yaml({"module": "a", "class": "SamplePlugin"})
     assert isinstance(res, SamplePlugin)
+
 
 def test_load_plugin_from_yaml_empty_params(mocker):
     class SamplePlugin(object):
         def __init__(self):
             pass
-    
+
     SampleModule = mocker.MagicMock(SamplePlugin=SamplePlugin)
 
     mocker.patch("codecov_cli.plugins.import_module", return_value=SampleModule)
-    res = _load_plugin_from_yaml(
-        {"module": "a", "class": "SamplePlugin", "params" : {}}
-    )
+    res = _load_plugin_from_yaml({"module": "a", "class": "SamplePlugin", "params": {}})
     assert isinstance(res, SamplePlugin)
+
 
 def test_get_plugin_gcov():
     res = _get_plugin({}, "gcov")
@@ -130,7 +144,7 @@ def test_select_preparation_plugins(mocker):
     class SamplePlugin(object):
         def __init__(self, banana=None):
             pass
-    
+
     SampleModule = mocker.MagicMock(SamplePlugin=SamplePlugin)
 
     class SecondSamplePlugin(object):
@@ -138,7 +152,6 @@ def test_select_preparation_plugins(mocker):
             pass
 
     SecondSampleModule = mocker.MagicMock(SecondSamplePlugin=SecondSamplePlugin)
-    
 
     mocker.patch(
         "codecov_cli.plugins.import_module",
@@ -153,7 +166,11 @@ def test_select_preparation_plugins(mocker):
                     "class": "SamplePlugin",
                     "params": {"banana": "apple", "pineapple": 2},
                 },
-                "second": {"module": "c", "class": "SecondSamplePlugin", "params": {"banana": "apple"}},
+                "second": {
+                    "module": "c",
+                    "class": "SecondSamplePlugin",
+                    "params": {"banana": "apple"},
+                },
                 "something": {"module": "e", "class": "f"},
             }
         },

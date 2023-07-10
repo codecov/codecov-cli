@@ -1,3 +1,4 @@
+import json
 import uuid
 
 from click.testing import CliRunner
@@ -63,12 +64,26 @@ def test_empty_upload_with_error(mocker):
 
 
 def test_empty_upload_200(mocker):
+    res = {
+        "result": "All changed files are ignored. Triggering passing notifications.",
+        "non_ignored_files": [],
+    }
     mocked_response = mocker.patch(
         "codecov_cli.helpers.request.requests.post",
-        return_value=mocker.MagicMock(status_code=200),
+        return_value=RequestResult(
+            status_code=200, error=None, warnings=[], text=json.dumps(res)
+        ),
     )
     token = uuid.uuid4()
-    res = empty_upload_logic("commit_sha", "owner/repo", token, "service", None)
+    runner = CliRunner()
+    with runner.isolation() as outstreams:
+        res = empty_upload_logic("commit_sha", "owner/repo", token, "service", None)
+    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+    assert out_bytes == [
+        ("info", "Process Empty Upload complete"),
+        ("info", "All changed files are ignored. Triggering passing notifications."),
+        ("info", "Non ignored files []"),
+    ]
     assert res.error is None
     assert res.warnings == []
     mocked_response.assert_called_once()

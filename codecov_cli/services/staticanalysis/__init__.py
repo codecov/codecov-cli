@@ -139,6 +139,17 @@ async def run_analysis_entrypoint(
         )
     else:
         logger.info("All files are already uploaded!")
+    try:
+        response = send_finish_signal(response_json, upload_url, token)
+    except requests.RequestException:
+        raise click.ClickException(click.style("Unable to reach Codecov", fg="red"))
+    logger.info(
+        "Received response with status code %s from server",
+        response.status_code,
+        extra=dict(
+            extra_log_attributes=dict(time_taken=response.elapsed.total_seconds())
+        ),
+    )
 
 
 async def send_single_upload_put(client, all_data, el):
@@ -173,6 +184,25 @@ async def send_single_upload_put(client, all_data, el):
         "filepath": el["filepath"],
         "succeeded": False,
     }
+
+
+def send_finish_signal(response_json, upload_url: str, token: str):
+    external_id = response_json["external_id"]
+    logger.debug(
+        "Sending finish signal to let API know to schedule static analysis task",
+        extra=dict(extra_log_attributes=dict(external_id=external_id)),
+    )
+    response = requests.post(
+        f"{upload_url}/staticanalysis/analyses/{external_id}/finish",
+        headers={"Authorization": f"Repotoken {token}"},
+    )
+    if response.status_code >= 500:
+        raise click.ClickException("Sorry. Codecov is having problems")
+    if response.status_code >= 400:
+        raise click.ClickException(
+            f"There is some problem with the submitted information.\n{response_json.get('detail')}"
+        )
+    return response
 
 
 def analyze_file(config, filename: FileAnalysisRequest):

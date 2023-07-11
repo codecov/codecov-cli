@@ -1,11 +1,5 @@
-click
+.
 pytest
 pytest-cov
 pytest-mock
 pytest-asyncio
-pyyaml
-responses
-httpx
-tree_sitter
-ijson
-smart-open

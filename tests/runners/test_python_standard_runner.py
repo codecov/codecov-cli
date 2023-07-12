@@ -1,5 +1,4 @@
 from subprocess import CalledProcessError
-from typing import List
 from unittest.mock import MagicMock, call, patch
 
 import pytest
@@ -7,10 +6,10 @@ from pytest import ExitCode
 
 from codecov_cli.runners.python_standard_runner import (
     PythonStandardRunner,
-    PythonStandardRunnerConfigParams,
     _execute_pytest_subprocess,
 )
 from codecov_cli.runners.python_standard_runner import stdout as pyrunner_stdout
+from codecov_cli.runners.types import LabelAnalysisRequestResult
 
 
 @patch("codecov_cli.runners.python_standard_runner.pytest")
@@ -248,13 +247,43 @@ class TestPythonStandardRunner(object):
         }
         mock_execute = mocker.patch.object(PythonStandardRunner, "_execute_pytest")
 
-        self.runner.process_labelanalysis_result(label_analysis_result)
+        self.runner.process_labelanalysis_result(
+            LabelAnalysisRequestResult(label_analysis_result)
+        )
         args, kwargs = mock_execute.call_args
         assert kwargs == {"capture_output": False}
         assert isinstance(args[0], list)
         actual_command = args[0]
         assert actual_command[:2] == [
             "--cov=./",
+            "--cov-context=test",
+        ]
+        assert sorted(actual_command[2:]) == [
+            "test_absent",
+            "test_global",
+            "test_in_diff",
+        ]
+
+    def test_process_label_analysis_result_diff_coverage_root(self, mocker):
+        label_analysis_result = {
+            "present_report_labels": ["test_present"],
+            "absent_labels": ["test_absent"],
+            "present_diff_labels": ["test_in_diff"],
+            "global_level_labels": ["test_global"],
+        }
+        mock_execute = mocker.patch.object(PythonStandardRunner, "_execute_pytest")
+
+        config_params = dict(coverage_root="coverage_root/")
+        runner_with_params = PythonStandardRunner(config_params)
+        runner_with_params.process_labelanalysis_result(
+            LabelAnalysisRequestResult(label_analysis_result)
+        )
+        args, kwargs = mock_execute.call_args
+        assert kwargs == {"capture_output": False}
+        assert isinstance(args[0], list)
+        actual_command = args[0]
+        assert actual_command[:2] == [
+            "--cov=coverage_root/",
             "--cov-context=test",
         ]
         assert sorted(actual_command[2:]) == [
@@ -277,7 +306,9 @@ class TestPythonStandardRunner(object):
 
         runner_config = {"strict_mode": True}
         runner = PythonStandardRunner(runner_config)
-        runner.process_labelanalysis_result(label_analysis_result)
+        runner.process_labelanalysis_result(
+            LabelAnalysisRequestResult(label_analysis_result)
+        )
         mock_execute.assert_not_called()
         args, kwargs = mock_execute_strict.call_args
         assert kwargs == {"capture_output": False}
@@ -302,7 +333,9 @@ class TestPythonStandardRunner(object):
         }
         mock_execute = mocker.patch.object(PythonStandardRunner, "_execute_pytest")
 
-        self.runner.process_labelanalysis_result(label_analysis_result)
+        self.runner.process_labelanalysis_result(
+            LabelAnalysisRequestResult(label_analysis_result)
+        )
         args, kwargs = mock_execute.call_args
         assert kwargs == {"capture_output": False}
         assert isinstance(args[0], list)

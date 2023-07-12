@@ -7,10 +7,10 @@ from pytest import ExitCode
 
 from codecov_cli.runners.python_standard_runner import (
     PythonStandardRunner,
-    PythonStandardRunnerConfigParams,
     _execute_pytest_subprocess,
 )
 from codecov_cli.runners.python_standard_runner import stdout as pyrunner_stdout
+from codecov_cli.runners.types import LabelAnalysisRequestResult
 
 
 @patch("codecov_cli.runners.python_standard_runner.pytest")
@@ -248,7 +248,9 @@ class TestPythonStandardRunner(object):
         }
         mock_execute = mocker.patch.object(PythonStandardRunner, "_execute_pytest")
 
-        self.runner.process_labelanalysis_result(label_analysis_result)
+        self.runner.process_labelanalysis_result(
+            LabelAnalysisRequestResult(label_analysis_result)
+        )
         args, kwargs = mock_execute.call_args
         assert kwargs == {"capture_output": False}
         assert isinstance(args[0], list)
@@ -277,7 +279,9 @@ class TestPythonStandardRunner(object):
 
         runner_config = {"strict_mode": True}
         runner = PythonStandardRunner(runner_config)
-        runner.process_labelanalysis_result(label_analysis_result)
+        runner.process_labelanalysis_result(
+            LabelAnalysisRequestResult(label_analysis_result)
+        )
         mock_execute.assert_not_called()
         args, kwargs = mock_execute_strict.call_args
         assert kwargs == {"capture_output": False}
@@ -302,7 +306,9 @@ class TestPythonStandardRunner(object):
         }
         mock_execute = mocker.patch.object(PythonStandardRunner, "_execute_pytest")
 
-        self.runner.process_labelanalysis_result(label_analysis_result)
+        self.runner.process_labelanalysis_result(
+            LabelAnalysisRequestResult(label_analysis_result)
+        )
         args, kwargs = mock_execute.call_args
         assert kwargs == {"capture_output": False}
         assert isinstance(args[0], list)

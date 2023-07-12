@@ -16,5 +16,6 @@ def test_existing_commands():
         "label-analysis",
         "pr-base-picking",
         "static-analysis",
+        "upload-completion",
         "upload-process",
     ]

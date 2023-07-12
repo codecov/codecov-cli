@@ -1,12 +1,11 @@
 from pathlib import Path
 from unittest.mock import MagicMock
 
+import click
 import pytest
 import requests
 import responses
 from responses import matchers
-
-import click
 
 from codecov_cli.services.staticanalysis import run_analysis_entrypoint
 from codecov_cli.services.staticanalysis.types import FileAnalysisRequest

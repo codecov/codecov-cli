@@ -14,10 +14,18 @@ setup(
     packages=find_packages(exclude=["contrib", "docs", "tests*"]),
     description="Codecov Command Line Interface",
     long_description=long_description,
-    long_description_content_type='text/markdown',
+    long_description_content_type="text/markdown",
     author="Codecov",
     author_email="support@codecov.io",
-    install_requires=["click", "requests", "PyYAML", "tree_sitter", "httpx", "pytest", "pytest-cov", "ijson", "smart-open"],
+    install_requires=[
+        "click==8.*",
+        "httpx==0.23.*",
+        "ijson==3.*",
+        "pyyaml==6.*",
+        "responses==0.21.*",
+        "smart-open==6.*",
+        "tree-sitter==0.20.*",
+    ],
     entry_points={
         "console_scripts": [
             "codecovcli = codecov_cli.main:run",

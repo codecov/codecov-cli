@@ -26,6 +26,14 @@ class PythonStandardRunnerConfigParams(dict):
         return self.get("collect_tests_options", [])
 
     @property
+    def coverage_root(self) -> str:
+        """
+        The coverage root. This will be passed to --cov=<coverage_root_dir>
+        Default: ./
+        """
+        return self.get("coverage_root", "./")
+
+    @property
     def strict_mode(self) -> bool:
         """
         Run pytest from within Python instead of using subprocess.run
@@ -180,7 +188,7 @@ class PythonStandardRunner(LabelAnalysisRunnerInterface):
         return test_names
 
     def process_labelanalysis_result(self, result: LabelAnalysisRequestResult):
-        default_options = ["--cov=./", "--cov-context=test"]
+        default_options = [f"--cov={self.params.coverage_root}", "--cov-context=test"]
         logger.info(
             "Received information about tests to run",
             extra=dict(

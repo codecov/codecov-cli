@@ -178,11 +178,29 @@ def _potentially_calculate_absent_labels(
     request_result, requested_labels
 ) -> LabelAnalysisRequestResult:
     if request_result["absent_labels"]:
+        # This means that Codecov already calculated everything for us
         return LabelAnalysisRequestResult(request_result)
+    # Here we have to calculate the absent labels
+    # And also remove labels that maybe don't exist anymore from the set of labels to test
+    # Because codecov didn't have this info previously
     requested_labels_set = set(requested_labels)
-    present_labels_set = set(request_result["present_report_labels"])
-    request_result["absent_labels"] = list(requested_labels_set - present_labels_set)
-    return LabelAnalysisRequestResult(request_result)
+    present_diff_labels_set = set(request_result.get("present_diff_labels", []))
+    present_report_labels_set = set(request_result.get("present_report_labels", []))
+    global_level_labels_set = set(request_result.get("global_level_labels", []))
+    return LabelAnalysisRequestResult(
+        {
+            "present_report_labels": sorted(
+                present_report_labels_set & requested_labels_set
+            ),
+            "present_diff_labels": sorted(
+                present_diff_labels_set & requested_labels_set
+            ),
+            "absent_labels": sorted(requested_labels_set - present_report_labels_set),
+            "global_level_labels": sorted(
+                global_level_labels_set & requested_labels_set
+            ),
+        }
+    )
 
 
 def _patch_labels(payload, url, token_header):

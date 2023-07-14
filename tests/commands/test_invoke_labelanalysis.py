@@ -1,11 +1,16 @@
 import json
 
+import click
 import pytest
 import responses
 from click.testing import CliRunner
 from responses import matchers
 
-from codecov_cli.commands.labelanalysis import _fallback_to_collected_labels
+from codecov_cli.commands.labelanalysis import (
+    _fallback_to_collected_labels,
+    _potentially_calculate_absent_labels,
+    _send_labelanalysis_request,
+)
 from codecov_cli.commands.labelanalysis import time as labelanalysis_time
 from codecov_cli.main import cli
 from codecov_cli.runners.types import LabelAnalysisRequestResult
@@ -44,6 +49,49 @@ def get_labelanalysis_deps(mocker):
         "fake_runner": fake_runner,
         "collected_labels": collected_labels,
     }
+
+
+class TestLabelAnalysisNotInvoke(object):
+    def test_potentially_calculate_labels(self):
+        request_result = {
+            "present_report_labels": ["label_1", "label_2", "label_3"],
+            "absent_labels": [],
+            "present_diff_labels": ["label_2", "label_3"],
+            "global_level_labels": ["label_1"],
+        }
+        collected_labels = ["label_1", "label_2", "label_3", "label_4"]
+        expected = {**request_result, "absent_labels": ["label_4"]}
+        assert (
+            _potentially_calculate_absent_labels(request_result, collected_labels)
+            == expected
+        )
+        request_result["absent_labels"] = ["label_4", "label_5"]
+        expected["absent_labels"].append("label_5")
+        assert (
+            _potentially_calculate_absent_labels(request_result, collected_labels)
+            == expected
+        )
+
+    def test_send_label_analysis_bad_payload(self):
+        payload = {
+            "base_commit": "base_commit",
+            "head_commit": "head_commit",
+            "requested_labels": [],
+        }
+        url = "https://api.codecov.io/labels/labels-analysis"
+        header = "Repotoken STATIC_TOKEN"
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                responses.POST,
+                "https://api.codecov.io/labels/labels-analysis",
+                json={"error": "list field cannot be empty list"},
+                status=400,
+                match=[
+                    matchers.header_matcher({"Authorization": "Repotoken STATIC_TOKEN"})
+                ],
+            )
+            with pytest.raises(click.ClickException):
+                _send_labelanalysis_request(payload, url, header)
 
 
 class TestLabelAnalysisCommand(object):
@@ -134,6 +182,15 @@ class TestLabelAnalysisCommand(object):
                 ],
             )
             rsps.add(
+                responses.PATCH,
+                "https://api.codecov.io/labels/labels-analysis/label-analysis-request-id",
+                json={"external_id": "label-analysis-request-id"},
+                status=201,
+                match=[
+                    matchers.header_matcher({"Authorization": "Repotoken STATIC_TOKEN"})
+                ],
+            )
+            rsps.add(
                 responses.GET,
                 "https://api.codecov.io/labels/labels-analysis/label-analysis-request-id",
                 json={"state": "finished", "result": label_analysis_result},
@@ -144,12 +201,12 @@ class TestLabelAnalysisCommand(object):
                 ["-v", "label-analysis", "--token=STATIC_TOKEN", "--base-sha=BASE_SHA"],
                 obj={},
             )
-            mock_get_runner.assert_called()
-            fake_runner.process_labelanalysis_result.assert_called_with(
-                label_analysis_result
-            )
-            print(result.output)
-        assert result.exit_code == 0
+            assert result.exit_code == 0
+        mock_get_runner.assert_called()
+        fake_runner.process_labelanalysis_result.assert_called_with(
+            label_analysis_result
+        )
+        print(result.output)
 
     def test_invoke_label_analysis_dry_run(self, get_labelanalysis_deps, mocker):
         mock_get_runner = get_labelanalysis_deps["mock_get_runner"]
@@ -166,6 +223,15 @@ class TestLabelAnalysisCommand(object):
             rsps.add(
                 responses.POST,
                 "https://api.codecov.io/labels/labels-analysis",
+                json={"external_id": "label-analysis-request-id"},
+                status=201,
+                match=[
+                    matchers.header_matcher({"Authorization": "Repotoken STATIC_TOKEN"})
+                ],
+            )
+            rsps.add(
+                responses.PATCH,
+                "https://api.codecov.io/labels/labels-analysis/label-analysis-request-id",
                 json={"external_id": "label-analysis-request-id"},
                 status=201,
                 match=[
@@ -190,8 +256,8 @@ class TestLabelAnalysisCommand(object):
             )
             mock_get_runner.assert_called()
             fake_runner.process_labelanalysis_result.assert_not_called()
-        assert result.exit_code == 0
         print(result.output)
+        assert result.exit_code == 0
         assert json.dumps(label_analysis_result) in result.output
 
     def test_fallback_to_collected_labels(self, mocker):
@@ -306,6 +372,15 @@ class TestLabelAnalysisCommand(object):
                 ],
             )
             rsps.add(
+                responses.PATCH,
+                "https://api.codecov.io/labels/labels-analysis/label-analysis-request-id",
+                json={"external_id": "label-analysis-request-id"},
+                status=201,
+                match=[
+                    matchers.header_matcher({"Authorization": "Repotoken STATIC_TOKEN"})
+                ],
+            )
+            rsps.add(
                 responses.GET,
                 "https://api.codecov.io/labels/labels-analysis/label-analysis-request-id",
                 json={"state": "error"},
@@ -347,6 +422,15 @@ class TestLabelAnalysisCommand(object):
                 ],
             )
             rsps.add(
+                responses.PATCH,
+                "https://api.codecov.io/labels/labels-analysis/label-analysis-request-id",
+                json={"external_id": "label-analysis-request-id"},
+                status=201,
+                match=[
+                    matchers.header_matcher({"Authorization": "Repotoken STATIC_TOKEN"})
+                ],
+            )
+            rsps.add(
                 responses.GET,
                 "https://api.codecov.io/labels/labels-analysis/label-analysis-request-id",
                 json={"state": "processing"},
@@ -374,3 +458,53 @@ class TestLabelAnalysisCommand(object):
                 "global_level_labels": [],
             }
         )
+
+    def test_first_labelanalysis_request_fails_but_second_works(
+        self, get_labelanalysis_deps, mocker
+    ):
+        mock_get_runner = get_labelanalysis_deps["mock_get_runner"]
+        fake_runner = get_labelanalysis_deps["fake_runner"]
+        collected_labels = get_labelanalysis_deps["collected_labels"]
+
+        label_analysis_result = {
+            "present_report_labels": ["test_present"],
+            "absent_labels": ["test_absent"],
+            "present_diff_labels": ["test_in_diff"],
+            "global_level_labels": ["test_global"],
+        }
+
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                responses.POST,
+                "https://api.codecov.io/labels/labels-analysis",
+                status=502,
+                match=[
+                    matchers.header_matcher({"Authorization": "Repotoken STATIC_TOKEN"})
+                ],
+            )
+            rsps.add(
+                responses.POST,
+                "https://api.codecov.io/labels/labels-analysis",
+                json={"external_id": "label-analysis-request-id"},
+                status=201,
+                match=[
+                    matchers.header_matcher({"Authorization": "Repotoken STATIC_TOKEN"})
+                ],
+            )
+            rsps.add(
+                responses.GET,
+                "https://api.codecov.io/labels/labels-analysis/label-analysis-request-id",
+                json={"state": "finished", "result": label_analysis_result},
+            )
+            cli_runner = CliRunner()
+            result = cli_runner.invoke(
+                cli,
+                ["-v", "label-analysis", "--token=STATIC_TOKEN", "--base-sha=BASE_SHA"],
+                obj={},
+            )
+            assert result.exit_code == 0
+        mock_get_runner.assert_called()
+        fake_runner.process_labelanalysis_result.assert_called_with(
+            label_analysis_result
+        )
+        print(result.output)

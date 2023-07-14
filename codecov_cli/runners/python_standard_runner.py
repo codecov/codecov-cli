@@ -193,19 +193,19 @@ class PythonStandardRunner(LabelAnalysisRunnerInterface):
             "Received information about tests to run",
             extra=dict(
                 extra_log_attributes=dict(
-                    absent_labels=len(result["absent_labels"] or []),
-                    present_diff_labels=len(result["present_diff_labels"] or []),
-                    global_level_labels=len(result["global_level_labels"] or []),
-                    present_report_labels=len(result["present_report_labels"] or []),
+                    absent_labels=len(result.absent_labels),
+                    present_diff_labels=len(result.present_diff_labels),
+                    global_level_labels=len(result.global_level_labels),
+                    present_report_labels=len(result.present_report_labels),
                 )
             ),
         )
         all_labels = set(
-            result["absent_labels"]
-            + result["present_diff_labels"]
-            + result["global_level_labels"]
+            result.absent_labels
+            + result.present_diff_labels
+            + result.global_level_labels
         )
-        skipped_tests = set(result["present_report_labels"]) - all_labels
+        skipped_tests = set(result.present_report_labels) - all_labels
         if skipped_tests:
             logger.info(
                 "Some tests are being skipped",
@@ -215,7 +215,7 @@ class PythonStandardRunner(LabelAnalysisRunnerInterface):
             )
 
         if len(all_labels) == 0:
-            all_labels = [random.choice(result["present_report_labels"])]
+            all_labels = [random.choice(result.present_report_labels)]
             logger.info(
                 "All tests are being skipped. Selected random label to run",
                 extra=dict(extra_log_attributes=dict(selected_label=all_labels[0])),

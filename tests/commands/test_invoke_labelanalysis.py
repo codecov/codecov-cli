@@ -52,21 +52,26 @@ def get_labelanalysis_deps(mocker):
 
 
 class TestLabelAnalysisNotInvoke(object):
-    def test_potentially_calculate_labels(self):
+    def test_potentially_calculate_labels_recalculate(self):
         request_result = {
-            "present_report_labels": ["label_1", "label_2", "label_3"],
+            "present_report_labels": [
+                "label_1",
+                "label_2",
+                "label_3",
+                "label_old",
+                "label_older",
+            ],
             "absent_labels": [],
-            "present_diff_labels": ["label_2", "label_3"],
-            "global_level_labels": ["label_1"],
+            "present_diff_labels": ["label_2", "label_3", "label_old"],
+            "global_level_labels": ["label_1", "label_older"],
         }
         collected_labels = ["label_1", "label_2", "label_3", "label_4"]
-        expected = {**request_result, "absent_labels": ["label_4"]}
-        assert (
-            _potentially_calculate_absent_labels(request_result, collected_labels)
-            == expected
-        )
-        request_result["absent_labels"] = ["label_4", "label_5"]
-        expected["absent_labels"].append("label_5")
+        expected = {
+            "present_diff_labels": ["label_2", "label_3"],
+            "global_level_labels": ["label_1"],
+            "absent_labels": ["label_4"],
+            "present_report_labels": ["label_1", "label_2", "label_3"],
+        }
         assert (
             _potentially_calculate_absent_labels(request_result, collected_labels)
             == expected

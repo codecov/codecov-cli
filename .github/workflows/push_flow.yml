@@ -23,8 +23,23 @@ jobs:
         run: |
           isort --check --profile=black codecov_cli -p staticcodecov_languages
 
+  codecov-startup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@v3
+      - name: Install CLI
+        run: |
+          pip install codecov-cli
+      - name: Create commit in codecov
+        run: |
+          codecovcli create-commit -t ${{ secrets.CODECOV_TOKEN }} --git-service github
+      - name: Create commit report in codecov
+        run: |
+          codecovcli create-report -t ${{ secrets.CODECOV_TOKEN }} --git-service github
+
   build-test-upload:
     runs-on: ubuntu-latest
+    needs: codecov-startup
     strategy:
       fail-fast: false
       matrix:
@@ -47,12 +62,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         python setup.py develop
-    - name: Create commit in codecov
-      run: |
-        codecovcli create-commit -t ${{ secrets.CODECOV_TOKEN }} --git-service github
-    - name: Create commit report in codecov
-      run: |
-        codecovcli create-report -t ${{ secrets.CODECOV_TOKEN }} --git-service github
     - name: Test with pytest
       run: |
         pytest --cov
@@ -60,3 +69,18 @@ jobs:
       run: |
         codecovcli do-upload --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
     
+  static-analysis:
+    runs-on: ubuntu-latest
+    needs: codecov-startup
+    steps:
+      - uses: actions/setup-python@v3
+      - name: Install CLI
+        run: |
+          pip install codecov-cli
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+          fetch-depth: 2
+      - name: Static Analysis
+        run: |
+          codecovcli static-analysis --token ${{ secrets.STATIC_TOKEN }}

@@ -46,6 +46,18 @@ def mocked_legacy_upload_endpoint(mocked_responses):
 
 
 @pytest.fixture
+def mocked_legacy_upload_endpoint_too_many_fails(mocked_responses):
+    resp = responses.Response(
+        responses.POST,
+        "https://codecov.io/upload/v4",
+        body="https://resulturl.com\nhttps://puturl.com",
+        status=400,
+    )
+    for _ in range(4):
+        mocked_responses.add(resp)
+
+
+@pytest.fixture
 def mocked_storage_server(mocked_responses):
     resp = responses.Response(responses.PUT, "https://puturl.com", status=200)
     mocked_responses.add(resp)
@@ -116,9 +128,10 @@ class TestUploadSender(object):
         assert not sender.warnings
 
     def test_upload_sender_result_fail_post_400(
-        self, mocked_responses, mocked_legacy_upload_endpoint
+        self, mocked_responses, mocked_legacy_upload_endpoint, mocker
     ):
         mocked_legacy_upload_endpoint.status = 400
+        mocker.patch("codecov_cli.helpers.request.sleep")
 
         sender = LegacyUploadSender().send_upload_data(
             upload_collection, random_sha, random_token, {}, **named_upload_data

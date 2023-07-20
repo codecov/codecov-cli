@@ -7,6 +7,7 @@ import requests
 
 from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.helpers.config import LEGACY_CODECOV_API_URL
+from codecov_cli.helpers.request import send_post_request, send_put_request
 from codecov_cli.types import UploadCollectionResult, UploadCollectionResultFile
 
 logger = logging.getLogger("codecovcli")
@@ -75,34 +76,16 @@ class LegacyUploadSender(object):
             headers = {"X-Upload-Token": ""}
 
         upload_url = enterprise_url or LEGACY_CODECOV_API_URL
-        resp = requests.post(f"{upload_url}/upload/v4", headers=headers, params=params)
-
+        resp = send_post_request(
+            f"{upload_url}/upload/v4", headers=headers, params=params
+        )
         if resp.status_code >= 400:
-            return UploadSendingResult(
-                error=UploadSendingError(
-                    code=f"HTTP Error {resp.status_code}",
-                    description=resp.text,
-                    params={},
-                ),
-                warnings=[],
-            )
-
+            return resp
         result_url, put_url = resp.text.split("\n")
 
         reports_payload = self._generate_payload(upload_data, env_vars)
-        resp = requests.put(put_url, data=reports_payload)
-
-        if resp.status_code >= 400:
-            return UploadSendingResult(
-                error=UploadSendingError(
-                    code=f"HTTP Error {resp.status_code}",
-                    description=resp.text,
-                    params={},
-                ),
-                warnings=[],
-            )
-
-        return UploadSendingResult(error=None, warnings=[])
+        resp = send_put_request(put_url, data=reports_payload)
+        return resp
 
     def _generate_payload(
         self, upload_data: UploadCollectionResult, env_vars: typing.Dict[str, str]

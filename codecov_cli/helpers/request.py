@@ -1,5 +1,6 @@
 import logging
 import uuid
+from time import sleep
 
 import requests
 
@@ -7,18 +8,39 @@ from codecov_cli.types import RequestError, RequestResult
 
 logger = logging.getLogger("codecovcli")
 
+MAX_RETRIES = 3
 
+
+def backoff_time(curr_retry):
+    return 2 ** (curr_retry - 1)
+
+
+def retry_request(func):
+    def wrapper(*args, **kwargs):
+        retry = 0
+        while retry < MAX_RETRIES:
+            try:
+                return func(*args, **kwargs)
+            except (
+                requests.exceptions.ConnectionError,
+                requests.exceptions.Timeout,
+            ) as exp:
+                logger.warning(
+                    "Request failed. Retrying",
+                    extra=dict(extra_log_attributes=dict(retry=retry)),
+                )
+                sleep(backoff_time(retry))
+                retry += 1
+        raise Exception("Request failed after too many retries")
+
+    return wrapper
+
+
+@retry_request
 def send_post_request(
-    url: str,
-    data: dict = None,
-    headers: dict = None,
+    url: str, data: dict = None, headers: dict = None, params: dict = None
 ):
-    resp = requests.post(
-        url=url,
-        json=data,
-        headers=headers,
-    )
-
+    resp = requests.post(url=url, json=data, headers=headers, params=params)
     return request_result(resp)
 
 
@@ -30,6 +52,7 @@ def get_token_header_or_fail(token: uuid.UUID) -> dict:
     return {"Authorization": f"token {token.hex}"}
 
 
+@retry_request
 def send_put_request(
     url: str,
     data: dict = None,

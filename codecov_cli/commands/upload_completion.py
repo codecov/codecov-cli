@@ -59,7 +59,7 @@ def upload_completion(
             extra_log_attributes=dict(
                 commit_sha=commit_sha,
                 slug=slug,
-                token=token,
+                token="NOTOKEN" if not token else (str(token)[:1] + 18 * "*"),
                 service=git_service,
                 enterprise_url=enterprise_url,
             )

@@ -93,7 +93,7 @@ def create_commit(
                 pr=pull_request_number,
                 branch=branch,
                 slug=slug,
-                token=token,
+                token="NOTOKEN" if not token else (str(token)[:1] + 18 * "*"),
                 service=git_service,
                 enterprise_url=enterprise_url,
             )

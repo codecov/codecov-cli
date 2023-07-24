@@ -73,6 +73,7 @@ def create_report(
                 slug=slug,
                 service=git_service,
                 enterprise_url=enterprise_url,
+                token="NOTOKEN" if not token else (str(token)[:1] + 18 * "*"),
             )
         ),
     )

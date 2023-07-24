@@ -8,9 +8,12 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
+with open(path.join(here, "codecov_cli/__init__.py"), encoding="utf-8") as f:
+    version = f.read().split('"')[1]
+
 setup(
     name="codecov-cli",
-    version="0.1.16",
+    version=version,
     packages=find_packages(exclude=["contrib", "docs", "tests*"]),
     description="Codecov Command Line Interface",
     long_description=long_description,

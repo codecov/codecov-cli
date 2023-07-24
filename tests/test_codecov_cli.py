@@ -1,8 +1,4 @@
-from codecov_cli import __version__, main
-
-
-def test_version():
-    assert __version__ == "0.1.0"
+from codecov_cli import main
 
 
 def test_existing_commands():

@@ -61,7 +61,7 @@ def pr_base_picking(
             extra_log_attributes=dict(
                 pr=pr,
                 slug=slug,
-                token="NOTOKEN" if not token else (str(token)[:1] + 18 * "*"),
+                token=token,
                 service=service,
                 enterprise_url=enterprise_url,
             )

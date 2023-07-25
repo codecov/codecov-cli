@@ -242,7 +242,7 @@ def do_upload(
                 coverage_files_search_exclude_folders=coverage_files_search_exclude_folders,
                 coverage_files_search_explicitly_listed_files=coverage_files_search_explicitly_listed_files,
                 plugin_names=plugin_names,
-                token="NOTOKEN" if not token else (str(token)[:1] + 18 * "*"),
+                token=token,
                 branch=branch,
                 slug=slug,
                 pull_request_number=pull_request_number,

@@ -189,17 +189,6 @@ class PythonStandardRunner(LabelAnalysisRunnerInterface):
 
     def process_labelanalysis_result(self, result: LabelAnalysisRequestResult):
         default_options = [f"--cov={self.params.coverage_root}", "--cov-context=test"]
-        logger.info(
-            "Received information about tests to run",
-            extra=dict(
-                extra_log_attributes=dict(
-                    absent_labels=len(result.absent_labels),
-                    present_diff_labels=len(result.present_diff_labels),
-                    global_level_labels=len(result.global_level_labels),
-                    present_report_labels=len(result.present_report_labels),
-                )
-            ),
-        )
         all_labels = set(
             result.absent_labels
             + result.present_diff_labels

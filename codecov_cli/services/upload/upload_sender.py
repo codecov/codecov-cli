@@ -6,6 +6,7 @@ import uuid
 import zlib
 from typing import Any, Dict
 
+from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.helpers.request import (
@@ -42,13 +43,13 @@ class UploadSender(object):
         git_service: typing.Optional[str] = None,
         enterprise_url: typing.Optional[str] = None,
     ) -> RequestResult:
-
         data = {
             "ci_url": build_url,
             "flags": flags,
             "env": env_vars,
             "name": name,
             "job_code": job_code,
+            "version": codecov_cli_version,
         }
 
         # Data to upload to Codecov
@@ -60,7 +61,11 @@ class UploadSender(object):
         reports_payload = self._generate_payload(upload_data, env_vars)
 
         logger.debug("Sending upload request to Codecov")
-        resp_from_codecov = send_post_request(url=url, data=data, headers=headers)
+        resp_from_codecov = send_post_request(
+            url=url,
+            data=data,
+            headers=headers,
+        )
         if resp_from_codecov.status_code >= 400:
             return resp_from_codecov
         resp_json_obj = json.loads(resp_from_codecov.text)

@@ -26,6 +26,7 @@ coverage_files_patterns = [
     "gcov.info",
     "jacoco*.xml",
     "lcov.dat",
+    "pylcov.dat",
     "lcov.info",
     "luacov.report.out",
     "naxsi.info",

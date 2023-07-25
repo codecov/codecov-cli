@@ -2,6 +2,7 @@ import logging
 import uuid
 from time import sleep
 
+import click
 import requests
 
 from codecov_cli.types import RequestError, RequestResult
@@ -46,9 +47,11 @@ def send_post_request(
 
 def get_token_header_or_fail(token: uuid.UUID) -> dict:
     if token is None:
-        raise Exception("Codecov token not found.")
+        raise click.ClickException(
+            "Codecov token not found. Please provide Codecov token with -t flag."
+        )
     if not isinstance(token, uuid.UUID):
-        raise Exception(f"Token must be UUID. Received {type(token)}")
+        raise click.ClickException(f"Token must be UUID. Received {type(token)}")
     return {"Authorization": f"token {token.hex}"}
 
 

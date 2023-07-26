@@ -74,6 +74,8 @@ def label_analysis(
                 token="NOTOKEN" if not token else (str(token)[:1] + 18 * "*"),
                 runner_name=runner_name,
                 enterprise_url=enterprise_url,
+                max_wait_time=max_wait_time,
+                dry_run=dry_run,
             )
         ),
     )
@@ -114,9 +116,9 @@ def label_analysis(
 
     logger.info("Collecting labels...")
     requested_labels = runner.collect_tests()
-    logger.info(f"Collected {len(requested_labels)} tests")
+    logger.info(f"Collected {len(requested_labels)} test labels")
     logger.debug(
-        "Labels collected.",
+        "Labels collected",
         extra=dict(extra_log_attributes=dict(labels_collected=requested_labels)),
     )
     payload["requested_labels"] = requested_labels
@@ -135,7 +137,7 @@ def label_analysis(
             return
 
     has_result = False
-    logger.info("Label request sent. Waiting for result.")
+    logger.info("Waiting for list of tests to run...")
     start_wait = time.monotonic()
     time.sleep(1)
     while not has_result:
@@ -164,43 +166,62 @@ def label_analysis(
             return
         if max_wait_time and (time.monotonic() - start_wait) > max_wait_time:
             logger.error(
-                f"Exceeded max waiting time of {max_wait_time} seconds",
+                f"Exceeded max waiting time of {max_wait_time} seconds. Running all tests.",
             )
             _fallback_to_collected_labels(
                 collected_labels=requested_labels, runner=runner, dry_run=dry_run
             )
             return
-        logger.info("Waiting more time for result")
+        logger.info("Waiting more time for result...")
         time.sleep(5)
 
 
 def _potentially_calculate_absent_labels(
     request_result, requested_labels
 ) -> LabelAnalysisRequestResult:
+    logger.info(
+        "Received list of tests from Codecov",
+        extra=dict(processing_errors=request_result.get("errors", [])),
+    )
     if request_result["absent_labels"]:
         # This means that Codecov already calculated everything for us
-        return LabelAnalysisRequestResult(request_result)
-    # Here we have to calculate the absent labels
-    # And also remove labels that maybe don't exist anymore from the set of labels to test
-    # Because codecov didn't have this info previously
-    requested_labels_set = set(requested_labels)
-    present_diff_labels_set = set(request_result.get("present_diff_labels", []))
-    present_report_labels_set = set(request_result.get("present_report_labels", []))
-    global_level_labels_set = set(request_result.get("global_level_labels", []))
-    return LabelAnalysisRequestResult(
-        {
-            "present_report_labels": sorted(
-                present_report_labels_set & requested_labels_set
-            ),
-            "present_diff_labels": sorted(
-                present_diff_labels_set & requested_labels_set
-            ),
-            "absent_labels": sorted(requested_labels_set - present_report_labels_set),
-            "global_level_labels": sorted(
-                global_level_labels_set & requested_labels_set
-            ),
-        }
+        final_result = LabelAnalysisRequestResult(request_result)
+    else:
+        # Here we have to calculate the absent labels
+        # And also remove labels that maybe don't exist anymore from the set of labels to test
+        # Because codecov didn't have this info previously
+        requested_labels_set = set(requested_labels)
+        present_diff_labels_set = set(request_result.get("present_diff_labels", []))
+        present_report_labels_set = set(request_result.get("present_report_labels", []))
+        global_level_labels_set = set(request_result.get("global_level_labels", []))
+        final_result = LabelAnalysisRequestResult(
+            {
+                "present_report_labels": sorted(
+                    present_report_labels_set & requested_labels_set
+                ),
+                "present_diff_labels": sorted(
+                    present_diff_labels_set & requested_labels_set
+                ),
+                "absent_labels": sorted(
+                    requested_labels_set - present_report_labels_set
+                ),
+                "global_level_labels": sorted(
+                    global_level_labels_set & requested_labels_set
+                ),
+            }
+        )
+    logger.info(
+        "Received information about tests to run",
+        extra=dict(
+            extra_log_attributes=dict(
+                absent_labels=len(final_result.absent_labels),
+                present_diff_labels=len(final_result.present_diff_labels),
+                global_level_labels=len(final_result.global_level_labels),
+                present_report_labels=len(final_result.present_report_labels),
+            )
+        ),
     )
+    return final_result
 
 
 def _patch_labels(payload, url, token_header):
@@ -248,7 +269,12 @@ def _send_labelanalysis_request(payload, url, token_header):
             )
     except requests.RequestException:
         raise click.ClickException(click.style("Unable to reach Codecov", fg="red"))
-    return response.json()["external_id"]
+    eid = response.json()["external_id"]
+    logger.info(
+        "Label Analysis request successful",
+        extra=dict(extra_log_attributes=dict(request_id=eid)),
+    )
+    return eid
 
 
 def _dry_run_output(result: LabelAnalysisRequestResult):

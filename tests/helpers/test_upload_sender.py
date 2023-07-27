@@ -35,6 +35,7 @@ request_data = {
     "flags": "flags",
     "job_code": "job_code",
     "name": "name",
+    "version": codecov_cli_version,
 }
 
 

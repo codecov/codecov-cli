@@ -237,7 +237,7 @@ class TestPayloadGeneration(object):
             get_fake_upload_collection_result(mocked_coverage_file), None
         )
         expected_report = {
-            "path_fixes": {
+            "report_fixes": {
                 "format": "legacy",
                 "value": {
                     "SwiftExample/AppDelegate.swift": {
@@ -304,7 +304,7 @@ class TestPayloadGeneration(object):
             UploadCollectionResult([], [], []), None
         )
         expected_report = {
-            "path_fixes": {
+            "report_fixes": {
                 "format": "legacy",
                 "value": {},
             },

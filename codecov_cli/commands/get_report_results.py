@@ -6,6 +6,7 @@ import click
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
 from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.helpers.git import GitService
+from codecov_cli.helpers.options import global_options
 from codecov_cli.services.report import send_reports_result_get_request
 
 logger = logging.getLogger("codecovcli")
@@ -13,36 +14,9 @@ logger = logging.getLogger("codecovcli")
 
 @click.command()
 @click.option(
-    "--commit-sha",
-    help="Commit SHA (with 40 chars)",
-    cls=CodecovOption,
-    fallback_field=FallbackFieldEnum.commit_sha,
-    required=True,
-)
-@click.option(
     "--code", help="The code of the report. If unsure, leave default", default="default"
 )
-@click.option(
-    "--slug",
-    cls=CodecovOption,
-    fallback_field=FallbackFieldEnum.slug,
-    help="owner/repo slug used instead of the private repo token in Self-hosted",
-    envvar="CODECOV_SLUG",
-    required=True,
-)
-@click.option(
-    "--git-service",
-    cls=CodecovOption,
-    fallback_field=FallbackFieldEnum.git_service,
-    type=click.Choice(service.value for service in GitService),
-)
-@click.option(
-    "-t",
-    "--token",
-    help="Codecov upload token",
-    type=click.UUID,
-    envvar="CODECOV_TOKEN",
-)
+@global_options
 @click.pass_context
 def get_report_results(
     ctx,
@@ -51,6 +25,7 @@ def get_report_results(
     slug: str,
     git_service: str,
     token: uuid.UUID,
+    fail_on_error: bool,
 ):
     enterprise_url = ctx.obj.get("enterprise_url")
     logger.debug(
@@ -73,4 +48,5 @@ def get_report_results(
         service=git_service,
         token=token,
         enterprise_url=enterprise_url,
+        fail_on_error=fail_on_error,
     )

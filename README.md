@@ -130,7 +130,7 @@ Codecov-cli supports user input. These inputs, along with their descriptions and
 |-r, --slug | owner/repo slug used instead of the private repo token in Self-hosted | Required
 |-t, --token | Codecov upload token | Required 
 |--git-service | Git Provider. Options: github, gitlab, bitbucket, github_enterprise, gitlab_enterprise, bitbucket_server | Required
-|--help | Shows usage, and command options                         
+|-h, --help | Shows usage, and command options                         
 
 
 ## create-report
@@ -143,7 +143,7 @@ Codecov-cli supports user input. These inputs, along with their descriptions and
 |-t, --token | Codecov upload token | Required 
 |--git-service | Git Provider. Options: github, gitlab, bitbucket, github_enterprise, gitlab_enterprise, bitbucket_server | Required
 |--code| The code of the report. This is used in local uploading to isolate local reports from regular or cloud reports uploaded to codecov so they don't get merged. It's basically a name you give to your report e.g. local-report. | Optional
-|--help | Shows usage, and command options      
+|-h, --help | Shows usage, and command options      
 
 ## do-upload
 `codecovcli do-upload [OPTIONS]`
@@ -156,6 +156,7 @@ Codecov-cli supports user input. These inputs, along with their descriptions and
 |-s, --dir, --coverage-files-search-root-folder | Folder where to search for coverage files default: (Current Working Directory) | Optional
 |--exclude, --coverage-files-search-exclude-folder | Folders to exclude from search | Optional
 |-f, --file, --coverage-files-search-direct-file | Explicit files to upload | Optional
+|--disable-search | Disable search for coverage files. This is helpful when specifying what files you want to uload with the --file option.| Optional
 |-b, --build, --build-code | Specify the build number manually | Optional
 |--build-url | The URL of the build where this is running | Optional
 |--job-code | The job code for the CI run | Optional
@@ -171,7 +172,7 @@ Codecov-cli supports user input. These inputs, along with their descriptions and
 |-d, --dry-run | Don't upload files to Codecov | Optional
 |--legacy, --use-legacy-uploader | Use the legacy upload endpoint | Optional
 |--git-service | Git Provider. Options: github, gitlab, bitbucket, github_enterprise, gitlab_enterprise, bitbucket_server | Required
-|--help | Shows usage, and command options 
+|-h, --help | Shows usage, and command options 
 
 ## create-report-results
 `codecovcli create-report-results [OPTIONS]`
@@ -183,7 +184,7 @@ Codecov-cli supports user input. These inputs, along with their descriptions and
 |--slug | owner/repo slug | Required
 |--git-service | Git provider. Options: github, gitlab, bitbucket, github_enterprise, gitlab_enterprise, bitbucket_server | Optional
 |-t, --token | Codecov upload token | Required
-|--help | Shows usage, and command options
+|-h, --help | Shows usage, and command options
 
 ## get-report-results
 `codecovcli get-report-results [OPTIONS]`
@@ -195,7 +196,7 @@ Codecov-cli supports user input. These inputs, along with their descriptions and
 |--slug | owner/repo slug | Required
 |--git-service | Git provider. Options: github, gitlab, bitbucket, github_enterprise, gitlab_enterprise, bitbucket_server | Optional
 |-t, --token | Codecov upload token | Required
-|--help | Shows usage, and command options
+|-h, --help | Shows usage, and command options
 
 ## pr-base-picking
 `codecovcli pr-base-picking [OPTIONS]`
@@ -207,7 +208,7 @@ Codecov-cli supports user input. These inputs, along with their descriptions and
 |--slug | owner/repo slug | Required
 |-t, --token| Codecov upload token | Required
 |--service | Git provider. Options: github, gitlab, bitbucket, github_enterprise, gitlab_enterprise, bitbucket_server | Optional
-|--help | Shows usage, and command options
+|-h, --help | Shows usage, and command options
 
 
 # How to Use Local Upload

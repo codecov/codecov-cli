@@ -23,7 +23,7 @@ from codecov_cli.helpers import git
             "username-codecov/fasdf.git.git",
         ),
         (
-            "https://gitlab-ci-token:[MASKED]@gitlab.com/abc_xyz/testing_env_vars.git",
+            "https://gitlab-ci-token:testtokenaaabbbccc@gitlab.com/abc_xyz/testing_env_vars.git",
             "abc_xyz/testing_env_vars",
         ),
         ("git@github.com:codecov/codecov-cli.git/", "codecov/codecov-cli"),
@@ -88,7 +88,7 @@ def test_parse_slug_invalid_address(address):
             "bitbucket",
         ),
         (
-            "https://gitlab-ci-token:[MASKED]@gitlab.com/abc_xyz/testing_env_vars.git",
+            "https://gitlab-ci-token:testtokenaabbcc@gitlab.com/abc_xyz/testing_env_vars.git",
             "gitlab",
         ),
         ("git@github.com:codecov/codecov-cli.git/", "github"),

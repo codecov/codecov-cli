@@ -181,7 +181,7 @@ _global_upload_options = [
         "--git-service",
         cls=CodecovOption,
         fallback_field=FallbackFieldEnum.git_service,
-        type=click.Choice(service.value for service in GitService),
+        type=click.Choice([service.value for service in GitService]),
     ),
 ]
 

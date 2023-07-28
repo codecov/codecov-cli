@@ -164,7 +164,9 @@ class TestLabelAnalysisCommand(object):
         assert result.exit_code != 0
         assert "Base and head sha can't be the same" in result.output
 
-    def test_invoke_label_analysis(self, get_labelanalysis_deps, mocker):
+    def test_invoke_label_analysis(
+        self, get_labelanalysis_deps, mocker, use_verbose_option
+    ):
         mock_get_runner = get_labelanalysis_deps["mock_get_runner"]
         fake_runner = get_labelanalysis_deps["fake_runner"]
         collected_labels = get_labelanalysis_deps["collected_labels"]
@@ -203,7 +205,7 @@ class TestLabelAnalysisCommand(object):
             cli_runner = CliRunner()
             result = cli_runner.invoke(
                 cli,
-                ["-v", "label-analysis", "--token=STATIC_TOKEN", "--base-sha=BASE_SHA"],
+                ["label-analysis", "--token=STATIC_TOKEN", "--base-sha=BASE_SHA"],
                 obj={},
             )
             assert result.exit_code == 0
@@ -287,7 +289,7 @@ class TestLabelAnalysisCommand(object):
         assert str(exp.value) == "Failed to get list of labels to run"
 
     def test_fallback_collected_labels_covecov_500_error(
-        self, get_labelanalysis_deps, mocker
+        self, get_labelanalysis_deps, mocker, use_verbose_option
     ):
         mock_get_runner = get_labelanalysis_deps["mock_get_runner"]
         fake_runner = get_labelanalysis_deps["fake_runner"]
@@ -304,7 +306,7 @@ class TestLabelAnalysisCommand(object):
             cli_runner = CliRunner()
             result = cli_runner.invoke(
                 cli,
-                ["-v", "label-analysis", "--token=STATIC_TOKEN", "--base-sha=BASE_SHA"],
+                ["label-analysis", "--token=STATIC_TOKEN", "--base-sha=BASE_SHA"],
                 obj={},
             )
             mock_get_runner.assert_called()
@@ -319,7 +321,7 @@ class TestLabelAnalysisCommand(object):
             print(result.output)
         assert result.exit_code == 0
 
-    def test_fallback_dry_run(self, get_labelanalysis_deps, mocker):
+    def test_fallback_dry_run(self, get_labelanalysis_deps, mocker, use_verbose_option):
         mock_get_runner = get_labelanalysis_deps["mock_get_runner"]
         fake_runner = get_labelanalysis_deps["fake_runner"]
         collected_labels = get_labelanalysis_deps["collected_labels"]
@@ -339,7 +341,6 @@ class TestLabelAnalysisCommand(object):
             result = cli_runner.invoke(
                 cli,
                 [
-                    "-v",
                     "label-analysis",
                     "--token=STATIC_TOKEN",
                     "--base-sha=BASE_SHA",
@@ -360,7 +361,7 @@ class TestLabelAnalysisCommand(object):
         assert result.exit_code == 0
 
     def test_fallback_collected_labels_codecov_error_processing_label_analysis(
-        self, get_labelanalysis_deps, mocker
+        self, get_labelanalysis_deps, mocker, use_verbose_option
     ):
         mock_get_runner = get_labelanalysis_deps["mock_get_runner"]
         fake_runner = get_labelanalysis_deps["fake_runner"]
@@ -393,7 +394,7 @@ class TestLabelAnalysisCommand(object):
             cli_runner = CliRunner()
             result = cli_runner.invoke(
                 cli,
-                ["-v", "label-analysis", "--token=STATIC_TOKEN", "--base-sha=BASE_SHA"],
+                ["label-analysis", "--token=STATIC_TOKEN", "--base-sha=BASE_SHA"],
                 obj={},
             )
             mock_get_runner.assert_called()
@@ -409,7 +410,7 @@ class TestLabelAnalysisCommand(object):
         assert result.exit_code == 0
 
     def test_fallback_collected_labels_codecov_max_wait_time_exceeded(
-        self, get_labelanalysis_deps, mocker
+        self, get_labelanalysis_deps, mocker, use_verbose_option
     ):
         mock_get_runner = get_labelanalysis_deps["mock_get_runner"]
         fake_runner = get_labelanalysis_deps["fake_runner"]
@@ -444,7 +445,6 @@ class TestLabelAnalysisCommand(object):
             result = cli_runner.invoke(
                 cli,
                 [
-                    "-v",
                     "label-analysis",
                     "--token=STATIC_TOKEN",
                     "--base-sha=BASE_SHA",
@@ -465,7 +465,7 @@ class TestLabelAnalysisCommand(object):
         )
 
     def test_first_labelanalysis_request_fails_but_second_works(
-        self, get_labelanalysis_deps, mocker
+        self, get_labelanalysis_deps, mocker, use_verbose_option
     ):
         mock_get_runner = get_labelanalysis_deps["mock_get_runner"]
         fake_runner = get_labelanalysis_deps["fake_runner"]
@@ -504,7 +504,7 @@ class TestLabelAnalysisCommand(object):
             cli_runner = CliRunner()
             result = cli_runner.invoke(
                 cli,
-                ["-v", "label-analysis", "--token=STATIC_TOKEN", "--base-sha=BASE_SHA"],
+                ["label-analysis", "--token=STATIC_TOKEN", "--base-sha=BASE_SHA"],
                 obj={},
             )
             assert result.exit_code == 0

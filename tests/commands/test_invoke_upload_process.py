@@ -22,7 +22,7 @@ def test_upload_process_missing_commit_sha(mocker):
         assert "Missing option '-C' / '--sha' / '--commit-sha'" in result.output
 
 
-def test_upload_process_raise_Z_option(mocker):
+def test_upload_process_raise_Z_option(mocker, use_verbose_option):
     error = RequestError(
         code=401, params={"some": "params"}, description="Unauthorized"
     )
@@ -39,7 +39,6 @@ def test_upload_process_raise_Z_option(mocker):
             result = runner.invoke(
                 cli,
                 [
-                    "-v",
                     "upload-process",
                     "--fail-on-error",
                     "-C",
@@ -112,7 +111,7 @@ def test_upload_process_options(mocker):
             "  -d, --dry-run                   Don't upload files to Codecov",
             "  --legacy, --use-legacy-uploader",
             "                                  Use the legacy upload endpoint",
-            "  --git-service []",
+            "  --git-service [github|gitlab|bitbucket|github_enterprise|gitlab_enterprise|bitbucket_server]",
             "  --parent-sha TEXT               SHA (with 40 chars) of what should be the",
             "                                  parent of this commit",
             "  -h, --help                      Show this message and exit.",

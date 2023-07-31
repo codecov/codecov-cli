@@ -21,5 +21,5 @@ def upload_completion_logic(commit_sha, slug, token, git_service, enterprise_url
     log_warnings_and_errors_if_any(sending_result, "Upload Completion")
     if sending_result.status_code == 200:
         response_json = json.loads(sending_result.text)
-        logger.info(response_json.get("result"))
+        logger.info(response_json)
     return sending_result

@@ -63,7 +63,10 @@ def test_upload_completion_with_error(mocker):
 
 def test_upload_completion_200(mocker):
     res = {
-        "result": "All changed files are ignored. Triggering passing notifications.",
+        "uploads_total": 2,
+        "uploads_success": 2,
+        "uploads_processing": 0,
+        "uploads_error": 0,
     }
     mocked_response = mocker.patch(
         "codecov_cli.helpers.request.requests.post",
@@ -80,7 +83,10 @@ def test_upload_completion_200(mocker):
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
         ("info", "Process Upload Completion complete"),
-        ("info", "All changed files are ignored. Triggering passing notifications."),
+        (
+            "info",
+            "{'uploads_total': 2, 'uploads_success': 2, 'uploads_processing': 0, 'uploads_error': 0}",
+        ),
     ]
     assert res.error is None
     assert res.warnings == []

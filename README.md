@@ -156,7 +156,7 @@ Codecov-cli supports user input. These inputs, along with their descriptions and
 |-s, --dir, --coverage-files-search-root-folder | Folder where to search for coverage files default: (Current Working Directory) | Optional
 |--exclude, --coverage-files-search-exclude-folder | Folders to exclude from search | Optional
 |-f, --file, --coverage-files-search-direct-file | Explicit files to upload | Optional
-|--disable-search | Disable search for coverage files. This is helpful when specifying what files you want to uload with the --file option.| Optional
+|--disable-search | Disable search for coverage files. This is helpful when specifying what files you want to upload with the --file option.| Optional
 |-b, --build, --build-code | Specify the build number manually | Optional
 |--build-url | The URL of the build where this is running | Optional
 |--job-code | The job code for the CI run | Optional

@@ -78,6 +78,13 @@ codecovcli create-commit
 codecovcli create-report
 codecovcli do-upload
 ```
+OR 
+```
+pip install codecov-cli
+codecovcli upload-process
+```
+codecovcli upload-process is a wrapper for create-commit, create-report and do-upload. 
+
 You can customize the commands with the options aligned with each command. 
 
 Note that these commands will automatically search your environment for a `$CODECOV_TOKEN` environment variable and use it if found. If you do not have a repository upload token, or global upload token, stored as an environment variable, you will need to pass it into **each command manually**, like so: `-t {$CODECOV_TOKEN}`. 
@@ -113,7 +120,8 @@ Codecov-cli supports user input. These inputs, along with their descriptions and
 | `create-report-results` | Used for local upload. It tells codecov that you finished local uploading and want it to calculate the results for you to get them locally.
 | `get-report-results` | Used for local upload. It asks codecov to provide you the report results you calculated with the previous command. 
 | `pr-base-picking` | Tells codecov that you want to explicitly define a base for your PR
-
+| `upload-process` | A wrapper for 3 commands. Create-commit, create-report and do-upload. You can use this command to upload to codecov instead of using the previosly mentioned commands.
+| `upload-completion` | A command that tells Codecov that you finished uploading and you want to be sent notifications. To disable automatically sent notifications please consider adding manual_trigger to your codecov.yml, so it will look like codecov: notify: manual_trigger: true. 
 >**Note**: Every command has its own different options that will be mentioned later in this doc. Codecov will try to load these options from your CI environment variables, if not, it will try to load them from git, if not found, you may need to add them manually. 
 
 
@@ -209,6 +217,16 @@ Codecov-cli supports user input. These inputs, along with their descriptions and
 |--service | Git provider. Options: github, gitlab, bitbucket, github_enterprise, gitlab_enterprise, bitbucket_server | Optional
 |--help | Shows usage, and command options
 
+## upload-completion 
+`codecovcli upload-completion [OPTIONS]`
+
+| Option  | Description | Usage
+| :---:     |     :---:   |    :---:   | 
+| -C, --sha, --commit-sha TEXT    |Commit SHA (with 40 chars) | Required
+| -r, --slug TEXT                 |owner/repo slug used instead of the private repo token in Self-hosted | Required
+| -t, --token UUID                |Codecov upload token | Required
+| --git-service | Git provider. Options: github, gitlab, bitbucket, github_enterprise, gitlab_enterprise, bitbucket_server | Optional
+| -h,--help                      |Show this message and exit.
 
 # How to Use Local Upload
 

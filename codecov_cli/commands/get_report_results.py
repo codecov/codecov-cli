@@ -62,6 +62,7 @@ def get_report_results(
                 slug=slug,
                 service=git_service,
                 enterprise_url=enterprise_url,
+                token=token,
             )
         ),
     )

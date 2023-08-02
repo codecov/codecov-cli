@@ -71,7 +71,7 @@ def label_analysis(
             extra_log_attributes=dict(
                 head_commit_sha=head_commit_sha,
                 base_commit_sha=base_commit_sha,
-                token="NOTOKEN" if not token else (str(token)[:1] + 18 * "*"),
+                token=token,
                 runner_name=runner_name,
                 enterprise_url=enterprise_url,
                 max_wait_time=max_wait_time,

@@ -73,6 +73,7 @@ def create_report(
                 slug=slug,
                 service=git_service,
                 enterprise_url=enterprise_url,
+                token=token,
             )
         ),
     )

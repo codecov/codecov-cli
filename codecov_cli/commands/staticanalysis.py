@@ -59,7 +59,7 @@ def static_analysis(
                 numberprocesses=numberprocesses,
                 pattern=pattern,
                 commit_sha=commit,
-                token="NOTOKEN" if not token else (str(token)[:1] + 18 * "*"),
+                token=token,
                 force=force,
                 folders_to_exclude=folders_to_exclude,
                 enterprise_url=enterprise_url,

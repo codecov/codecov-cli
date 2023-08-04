@@ -7,7 +7,7 @@ import uuid
 import click
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
-from codecov_cli.helpers.git import GitService
+from codecov_cli.helpers.options import global_options
 from codecov_cli.services.upload import do_upload_logic
 
 logger = logging.getLogger("codecovcli")
@@ -18,16 +18,6 @@ def _turn_env_vars_into_dict(ctx, params, value):
 
 
 _global_upload_options = [
-    click.option(
-        "-C",
-        "--sha",
-        "--commit-sha",
-        "commit_sha",
-        help="Commit SHA (with 40 chars)",
-        cls=CodecovOption,
-        fallback_field=FallbackFieldEnum.commit_sha,
-        required=True,
-    ),
     click.option(
         "--report-code",
         help="The code of the report. If unsure, leave default",
@@ -97,13 +87,6 @@ _global_upload_options = [
         fallback_field=FallbackFieldEnum.job_code,
     ),
     click.option(
-        "-t",
-        "--token",
-        help="Codecov upload token",
-        type=click.UUID,
-        envvar="CODECOV_TOKEN",
-    ),
-    click.option(
         "-n",
         "--name",
         help="Custom defined name of the upload. Visible in Codecov UI",
@@ -114,15 +97,6 @@ _global_upload_options = [
         help="Branch to which this commit belongs to",
         cls=CodecovOption,
         fallback_field=FallbackFieldEnum.branch,
-    ),
-    click.option(
-        "-r",
-        "--slug",
-        "slug",
-        cls=CodecovOption,
-        fallback_field=FallbackFieldEnum.slug,
-        help="owner/repo slug used instead of the private repo token in Self-hosted",
-        envvar="CODECOV_SLUG",
     ),
     click.option(
         "-P",
@@ -157,13 +131,6 @@ _global_upload_options = [
         default=["xcode", "gcov", "pycoverage"],
     ),
     click.option(
-        "-Z",
-        "--fail-on-error",
-        "fail_on_error",
-        is_flag=True,
-        help="Exit with non-zero code in case of error uploading.",
-    ),
-    click.option(
         "-d",
         "--dry-run",
         "dry_run",
@@ -177,12 +144,6 @@ _global_upload_options = [
         is_flag=True,
         help="Use the legacy upload endpoint",
     ),
-    click.option(
-        "--git-service",
-        cls=CodecovOption,
-        fallback_field=FallbackFieldEnum.git_service,
-        type=click.Choice([service.value for service in GitService]),
-    ),
 ]
 
 
@@ -194,6 +155,7 @@ def global_upload_options(func):
 
 @click.command()
 @global_upload_options
+@global_options
 @click.pass_context
 def do_upload(
     ctx: click.Context,

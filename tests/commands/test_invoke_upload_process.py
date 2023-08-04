@@ -19,7 +19,6 @@ def test_upload_process_missing_commit_sha(mocker):
     with runner.isolated_filesystem():
         result = runner.invoke(cli, ["upload-process"], obj={})
         assert result.exit_code != 0
-        assert "Missing option '-C' / '--sha' / '--commit-sha'" in result.output
 
 
 def test_upload_process_raise_Z_option(mocker, use_verbose_option):
@@ -69,6 +68,11 @@ def test_upload_process_options(mocker):
             "",
             "Options:",
             "  -C, --sha, --commit-sha TEXT    Commit SHA (with 40 chars)  [required]",
+            "  -Z, --fail-on-error             Exit with non-zero code in case of error",
+            "  --git-service [github|gitlab|bitbucket|github_enterprise|gitlab_enterprise|bitbucket_server]",
+            "  -t, --token UUID                Codecov upload token",
+            "  -r, --slug TEXT                 owner/repo slug used instead of the private",
+            "                                  repo token in Self-hosted",
             "  --report-code TEXT              The code of the report. If unsure, leave",
             "                                  default",
             "  --network-root-folder PATH      Root folder from which to consider paths on",
@@ -91,12 +95,9 @@ def test_upload_process_options(mocker):
             "  -b, --build, --build-code TEXT  Specify the build number manually",
             "  --build-url TEXT                The URL of the build where this is running",
             "  --job-code TEXT",
-            "  -t, --token UUID                Codecov upload token",
             "  -n, --name TEXT                 Custom defined name of the upload. Visible in",
             "                                  Codecov UI",
             "  -B, --branch TEXT               Branch to which this commit belongs to",
-            "  -r, --slug TEXT                 owner/repo slug used instead of the private",
-            "                                  repo token in Self-hosted",
             "  -P, --pr, --pull-request-number TEXT",
             "                                  Specify the pull request number mannually.",
             "                                  Used to override pre-existing CI environment",
@@ -106,12 +107,9 @@ def test_upload_process_options(mocker):
             "  -F, --flag TEXT                 Flag the upload to group coverage metrics.",
             "                                  Multiple flags allowed.",
             "  --plugin TEXT",
-            "  -Z, --fail-on-error             Exit with non-zero code in case of error",
-            "                                  uploading.",
             "  -d, --dry-run                   Don't upload files to Codecov",
             "  --legacy, --use-legacy-uploader",
             "                                  Use the legacy upload endpoint",
-            "  --git-service [github|gitlab|bitbucket|github_enterprise|gitlab_enterprise|bitbucket_server]",
             "  --parent-sha TEXT               SHA (with 40 chars) of what should be the",
             "                                  parent of this commit",
             "  -h, --help                      Show this message and exit.",

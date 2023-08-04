@@ -8,11 +8,14 @@ import click
 from codecov_cli.commands.commit import create_commit
 from codecov_cli.commands.report import create_report
 from codecov_cli.commands.upload import do_upload, global_upload_options
+from codecov_cli.helpers.options import global_options
 
 logger = logging.getLogger("codecovcli")
 
+
 # These options are the combined options of commit, report and upload commands
 @click.command()
+@global_options
 @global_upload_options
 @click.option(
     "--parent-sha",

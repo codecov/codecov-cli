@@ -53,6 +53,7 @@ def create_report_results_logic(
     service: str,
     token: uuid.UUID,
     enterprise_url: str,
+    fail_on_error: bool = False,
 ):
     encoded_slug = encode_slug(slug)
     sending_result = send_reports_result_request(
@@ -64,7 +65,9 @@ def create_report_results_logic(
         enterprise_url=enterprise_url,
     )
 
-    log_warnings_and_errors_if_any(sending_result, "Report results creating")
+    log_warnings_and_errors_if_any(
+        sending_result, "Report results creating", fail_on_error
+    )
     return sending_result
 
 
@@ -78,7 +81,13 @@ def send_reports_result_request(
 
 
 def send_reports_result_get_request(
-    commit_sha, report_code, encoded_slug, service, token, enterprise_url
+    commit_sha,
+    report_code,
+    encoded_slug,
+    service,
+    token,
+    enterprise_url,
+    fail_on_error=False,
 ):
     headers = get_token_header_or_fail(token)
     upload_url = enterprise_url or CODECOV_API_URL
@@ -91,7 +100,9 @@ def send_reports_result_get_request(
 
         # if response_status is 400 and higher
         if response_obj.error:
-            log_warnings_and_errors_if_any(response_obj, "Getting report results")
+            log_warnings_and_errors_if_any(
+                response_obj, "Getting report results", fail_on_error
+            )
             return response_obj
 
         state = response_content.get("state").lower()

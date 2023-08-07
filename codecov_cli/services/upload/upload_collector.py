@@ -6,6 +6,8 @@ import uuid
 from collections import namedtuple
 from fnmatch import fnmatch
 
+import click
+
 from codecov_cli.services.upload.coverage_file_finder import CoverageFileFinder
 from codecov_cli.services.upload.network_finder import NetworkFinder
 from codecov_cli.types import (
@@ -132,6 +134,13 @@ class UploadCollector(object):
         network = self.network_finder.find_files()
         coverage_files = self.coverage_file_finder.find_coverage_files()
         logger.info(f"Found {len(coverage_files)} coverage files to upload")
+        if not coverage_files:
+            raise click.ClickException(
+                click.style(
+                    "No coverage reports found. Please make sure you're generating reports successfully.",
+                    fg="red",
+                )
+            )
         for file in coverage_files:
             logger.info(f"> {file}")
         return UploadCollectionResult(

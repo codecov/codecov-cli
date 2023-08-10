@@ -181,7 +181,11 @@ def _potentially_calculate_absent_labels(
 ) -> LabelAnalysisRequestResult:
     logger.info(
         "Received list of tests from Codecov",
-        extra=dict(processing_errors=request_result.get("errors", [])),
+        extra=dict(
+            extra_log_attributes=dict(
+                processing_errors=request_result.get("errors", [])
+            )
+        ),
     )
     if request_result["absent_labels"]:
         # This means that Codecov already calculated everything for us

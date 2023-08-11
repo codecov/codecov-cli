@@ -26,6 +26,15 @@ class PythonStandardRunnerConfigParams(dict):
         return self.get("collect_tests_options", [])
 
     @property
+    def execute_tests_options(self) -> List[str]:
+        options = self.get("execute_tests_options", [])
+        if any(map(lambda option: option.startswith("--cov"), options)):
+            logger.warning(
+                "--cov option detected when running tests. Please use coverage_root config option instead"
+            )
+        return options
+
+    @property
     def coverage_root(self) -> str:
         """
         The coverage root. This will be passed to --cov=<coverage_root_dir>
@@ -188,7 +197,10 @@ class PythonStandardRunner(LabelAnalysisRunnerInterface):
         return test_names
 
     def process_labelanalysis_result(self, result: LabelAnalysisRequestResult):
-        default_options = [f"--cov={self.params.coverage_root}", "--cov-context=test"]
+        default_options = [
+            f"--cov={self.params.coverage_root}",
+            "--cov-context=test",
+        ] + self.params.execute_tests_options
         all_labels = set(
             result.absent_labels
             + result.present_diff_labels
@@ -212,7 +224,10 @@ class PythonStandardRunner(LabelAnalysisRunnerInterface):
         command_array = default_options + [
             label.split("[")[0] if "[" in label else label for label in all_labels
         ]
-        logger.info("Running tests")
+        logger.info(
+            "Running tests",
+            extra=dict(extra_log_attributes=dict(command_options=default_options)),
+        )
         logger.debug(
             "Pytest command",
             extra=dict(extra_log_attributes=dict(command_array=command_array)),

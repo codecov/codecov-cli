@@ -15,7 +15,7 @@ class FakeProvider(CIAdapterBase):
             FallbackFieldEnum.branch: "BUILD_BRANCH",
             FallbackFieldEnum.build_code: "BUILD_CODE",
             FallbackFieldEnum.build_url: "BUILD_URL",
-            FallbackFieldEnum.commit_sha: "COMMIT_SHA",
+            FallbackFieldEnum.commit_sha: "1111111111111111111111111111111111111111",
             FallbackFieldEnum.slug: "REPO_SLUG",
             FallbackFieldEnum.service: "FAKE_PROVIDER",
             FallbackFieldEnum.pull_request_number: "PR_NUMBER",

@@ -50,6 +50,8 @@ def get_labelanalysis_deps(mocker):
         "collected_labels": collected_labels,
     }
 
+FAKE_BASE_SHA="0111111111111111111111111111111111111110"
+
 
 class TestLabelAnalysisNotInvoke(object):
     def test_potentially_calculate_labels_recalculate(self):
@@ -156,8 +158,8 @@ class TestLabelAnalysisCommand(object):
             [
                 "label-analysis",
                 "--token=STATIC_TOKEN",
-                "--base-sha=commit-sha",
-                "--head-sha=commit-sha",
+                "--base-sha=1111111111111111111111111111111111111111",
+                "--head-sha=1111111111111111111111111111111111111111",
             ],
             obj={},
         )
@@ -205,7 +207,7 @@ class TestLabelAnalysisCommand(object):
             cli_runner = CliRunner()
             result = cli_runner.invoke(
                 cli,
-                ["label-analysis", "--token=STATIC_TOKEN", "--base-sha=BASE_SHA"],
+                ["label-analysis", "--token=STATIC_TOKEN", f"--base-sha={FAKE_BASE_SHA}"],
                 obj={},
             )
             assert result.exit_code == 0
@@ -256,7 +258,7 @@ class TestLabelAnalysisCommand(object):
                 [
                     "label-analysis",
                     "--token=STATIC_TOKEN",
-                    "--base-sha=BASE_SHA",
+                    f"--base-sha={FAKE_BASE_SHA}",
                     "--dry-run",
                 ],
                 obj={},
@@ -306,7 +308,7 @@ class TestLabelAnalysisCommand(object):
             cli_runner = CliRunner()
             result = cli_runner.invoke(
                 cli,
-                ["label-analysis", "--token=STATIC_TOKEN", "--base-sha=BASE_SHA"],
+                ["label-analysis", "--token=STATIC_TOKEN", f"--base-sha={FAKE_BASE_SHA}"],
                 obj={},
             )
             mock_get_runner.assert_called()
@@ -343,7 +345,7 @@ class TestLabelAnalysisCommand(object):
                 [
                     "label-analysis",
                     "--token=STATIC_TOKEN",
-                    "--base-sha=BASE_SHA",
+                    f"--base-sha={FAKE_BASE_SHA}",
                     "--dry-run",
                 ],
                 obj={},
@@ -394,7 +396,7 @@ class TestLabelAnalysisCommand(object):
             cli_runner = CliRunner()
             result = cli_runner.invoke(
                 cli,
-                ["label-analysis", "--token=STATIC_TOKEN", "--base-sha=BASE_SHA"],
+                ["label-analysis", "--token=STATIC_TOKEN", f"--base-sha={FAKE_BASE_SHA}"],
                 obj={},
             )
             mock_get_runner.assert_called()
@@ -447,7 +449,7 @@ class TestLabelAnalysisCommand(object):
                 [
                     "label-analysis",
                     "--token=STATIC_TOKEN",
-                    "--base-sha=BASE_SHA",
+                    f"--base-sha={FAKE_BASE_SHA}",
                     "--max-wait-time=5",
                 ],
                 obj={},
@@ -504,7 +506,7 @@ class TestLabelAnalysisCommand(object):
             cli_runner = CliRunner()
             result = cli_runner.invoke(
                 cli,
-                ["label-analysis", "--token=STATIC_TOKEN", "--base-sha=BASE_SHA"],
+                ["label-analysis", "--token=STATIC_TOKEN", f"--base-sha={FAKE_BASE_SHA}"],
                 obj={},
             )
             assert result.exit_code == 0

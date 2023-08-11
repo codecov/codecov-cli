@@ -8,6 +8,7 @@ from codecov_cli.runners.python_standard_runner import (
     PythonStandardRunner,
     _execute_pytest_subprocess,
 )
+from codecov_cli.runners.python_standard_runner import logger as runner_logger
 from codecov_cli.runners.python_standard_runner import stdout as pyrunner_stdout
 from codecov_cli.runners.types import LabelAnalysisRequestResult
 
@@ -323,6 +324,48 @@ class TestPythonStandardRunner(object):
             "test_global",
             "test_in_diff",
         ]
+
+    def test_process_label_analysis_result_with_options(self, mocker):
+        label_analysis_result = {
+            "present_report_labels": ["test_present"],
+            "absent_labels": ["test_absent"],
+            "present_diff_labels": ["test_in_diff"],
+            "global_level_labels": ["test_global"],
+        }
+        mock_execute = mocker.patch.object(PythonStandardRunner, "_execute_pytest")
+        mock_warning = mocker.patch.object(runner_logger, "warning")
+        mock_execute_strict = mocker.patch.object(
+            PythonStandardRunner, "_execute_pytest_strict"
+        )
+
+        runner_config = {
+            "execute_tests_options": ["-s", "--cov-report=xml", "--cov=something"]
+        }
+        runner = PythonStandardRunner(runner_config)
+        runner.process_labelanalysis_result(
+            LabelAnalysisRequestResult(label_analysis_result)
+        )
+        mock_execute_strict.assert_not_called()
+        args, kwargs = mock_execute.call_args
+        assert kwargs == {"capture_output": False}
+        assert isinstance(args[0], list)
+        actual_command = args[0]
+        assert actual_command[:5] == [
+            "--cov=./",
+            "--cov-context=test",
+            "-s",
+            "--cov-report=xml",
+            "--cov=something",
+        ]
+        assert sorted(actual_command[5:]) == [
+            "test_absent",
+            "test_global",
+            "test_in_diff",
+        ]
+        # The --cov option should trigger a warning
+        mock_warning.assert_called_with(
+            "--cov option detected when running tests. Please use coverage_root config option instead"
+        )
 
     def test_process_label_analysis_skip_all_tests(self, mocker):
         label_analysis_result = {

@@ -21,6 +21,7 @@ logger = logging.getLogger("codecovcli")
 @click.option(
     "--token",
     required=True,
+    envvar="CODECOV_STATIC_TOKEN",
     help="The static analysis token (NOT the same token as upload)",
 )
 @click.option(

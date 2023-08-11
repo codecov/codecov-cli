@@ -38,7 +38,12 @@ logger = logging.getLogger("codecovcli")
     multiple=True,
     default=[],
 )
-@click.option("--token")
+@click.option(
+    "--token",
+    required=True,
+    envvar="CODECOV_STATIC_TOKEN",
+    help="The static analysis token (NOT the same token as upload)",
+)
 @click.pass_context
 def static_analysis(
     ctx,

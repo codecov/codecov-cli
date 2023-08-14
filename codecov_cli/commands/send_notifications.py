@@ -15,7 +15,7 @@ logger = logging.getLogger("codecovcli")
 @click.command()
 @global_options
 @click.pass_context
-def upload_completion(
+def send_notifications(
     ctx,
     commit_sha: str,
     slug: typing.Optional[str],
@@ -25,7 +25,7 @@ def upload_completion(
 ):
     enterprise_url = ctx.obj.get("enterprise_url")
     logger.debug(
-        "Completing upload process",
+        "Sending notifications process has started",
         extra=dict(
             extra_log_attributes=dict(
                 commit_sha=commit_sha,

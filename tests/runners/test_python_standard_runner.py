@@ -122,7 +122,10 @@ class TestPythonStandardRunner(object):
 
         with pytest.raises(Exception) as exp:
             _ = self.runner._execute_pytest_strict(["--option", "--ignore=batata"])
-        assert str(exp.value) == "Pytest did not run correctly"
+        assert (
+            str(exp.value)
+            == "Pytest exited with non-zero code 3.\nThis is likely not a problem with label-analysis. Check pytest's output and options.\n(you can check pytest options on the logs before the test session start)"
+        )
         mock_get_context.return_value.Queue.assert_called_with(2)
         mock_get_context.return_value.Process.assert_called_with(
             target=_execute_pytest_subprocess,
@@ -141,7 +144,10 @@ class TestPythonStandardRunner(object):
 
         with pytest.raises(Exception) as exp:
             _ = self.runner._execute_pytest(["--option", "--ignore=batata"])
-        assert str(exp.value) == "Pytest did not run correctly"
+        assert (
+            str(exp.value)
+            == "Pytest exited with non-zero code 2.\nThis is likely not a problem with label-analysis. Check pytest's output and options.\n(you can check pytest options on the logs before the test session start)"
+        )
 
     @patch("codecov_cli.runners.python_standard_runner.getcwd")
     @patch("codecov_cli.runners.python_standard_runner.path")

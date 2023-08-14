@@ -8,6 +8,7 @@ import requests
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
 from codecov_cli.helpers.config import CODECOV_API_URL
+from codecov_cli.helpers.validators import validate_commit_sha
 from codecov_cli.runners import get_runner
 from codecov_cli.runners.types import (
     LabelAnalysisRequestResult,
@@ -30,6 +31,7 @@ logger = logging.getLogger("codecovcli")
     help="Commit SHA (with 40 chars)",
     cls=CodecovOption,
     fallback_field=FallbackFieldEnum.commit_sha,
+    callback=validate_commit_sha,
     required=True,
 )
 @click.option(
@@ -37,6 +39,7 @@ logger = logging.getLogger("codecovcli")
     "base_commit_sha",
     help="Commit SHA (with 40 chars)",
     cls=CodecovOption,
+    callback=validate_commit_sha,
     required=True,
 )
 @click.option(

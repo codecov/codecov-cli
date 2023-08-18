@@ -1,4 +1,5 @@
 import logging
+import os
 import typing
 import uuid
 from pathlib import Path
@@ -15,6 +16,7 @@ from codecov_cli.services.upload.legacy_upload_sender import LegacyUploadSender
 from codecov_cli.services.upload.network_finder import select_network_finder
 from codecov_cli.services.upload.upload_collector import UploadCollector
 from codecov_cli.services.upload.upload_sender import UploadSender
+from codecov_cli.services.upload_completion import upload_completion_logic
 from codecov_cli.types import RequestResult
 
 logger = logging.getLogger("codecovcli")
@@ -60,7 +62,24 @@ def do_upload_logic(
     collector = UploadCollector(
         preparation_plugins, network_finder, coverage_file_selector
     )
-    upload_data = collector.generate_upload_data()
+    try:
+        upload_data = collector.generate_upload_data()
+    except click.ClickException as exc:
+        if os.getenv("NO_LABELS_TO_RUN"):
+            logger.info(
+                "Label analysis doesn't have any tests to run. Aborting upload and triggering notifications without uploading"
+            )
+            upload_completion_logic(
+                commit_sha=commit_sha,
+                slug=slug,
+                token=token,
+                git_service=git_service,
+                enterprise_url=enterprise_url,
+                fail_on_error=fail_on_error,
+            )
+            exit(0)
+        else:
+            raise exc
     if use_legacy_uploader:
         sender = LegacyUploadSender()
     else:

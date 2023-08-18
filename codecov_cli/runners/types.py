@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 
@@ -30,3 +31,6 @@ class LabelAnalysisRunnerInterface(object):
 
     def process_labelanalysis_result(self, result: LabelAnalysisRequestResult):
         raise NotImplementedError()
+
+    def handle_no_labels_to_run(self):
+        os.environ["NO_LABELS_TO_RUN"] = "true"

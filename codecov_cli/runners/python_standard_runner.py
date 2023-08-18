@@ -1,4 +1,5 @@
 import logging
+import os
 import random
 import subprocess
 from contextlib import redirect_stdout
@@ -220,11 +221,11 @@ class PythonStandardRunner(LabelAnalysisRunnerInterface):
             )
 
         if len(all_labels) == 0:
-            all_labels = [random.choice(result.present_report_labels)]
             logger.info(
-                "All tests are being skipped. Selected random label to run",
-                extra=dict(extra_log_attributes=dict(selected_label=all_labels[0])),
+                "All tests are being skipped.",
             )
+            self.handle_no_labels_to_run()
+            return
         tests_to_run = [
             label.split("[")[0] if "[" in label else label for label in all_labels
         ]

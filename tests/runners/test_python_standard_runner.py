@@ -1,3 +1,4 @@
+import os
 from subprocess import CalledProcessError
 from unittest.mock import MagicMock, call, patch
 
@@ -380,19 +381,7 @@ class TestPythonStandardRunner(object):
             "present_diff_labels": [],
             "global_level_labels": [],
         }
-        mock_execute = mocker.patch.object(PythonStandardRunner, "_execute_pytest")
-
         self.runner.process_labelanalysis_result(
             LabelAnalysisRequestResult(label_analysis_result)
         )
-        args, kwargs = mock_execute.call_args
-        assert kwargs == {"capture_output": False}
-        assert isinstance(args[0], list)
-        actual_command = args[0]
-        assert actual_command[:2] == [
-            "--cov=./",
-            "--cov-context=test",
-        ]
-        assert sorted(actual_command[2:]) == [
-            "test_present",
-        ]
+        assert os.getenv("NO_LABELS_TO_RUN") == "true"

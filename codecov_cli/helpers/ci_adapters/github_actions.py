@@ -66,22 +66,11 @@ class GithubActionsCIAdapter(CIAdapterBase):
         return os.getenv("GITHUB_REPOSITORY")
 
     def _get_branch(self):
-        branch = os.getenv("GITHUB_HEAD_REF")
-        if branch:
-            return branch
-
-        branch_ref = os.getenv("GITHUB_REF")
-
-        if not branch_ref:
-            return None
-
-        match = re.search(r"refs/heads/(.*)", branch_ref)
-
-        if match is None:
-            return None
-
-        branch = match.group(1)
-        return branch or None
+        trigger_name = os.getenv("GITHUB_EVENT_NAME")
+        if trigger_name == "pull_request" or trigger_name == "pull_request_target":
+            return os.getenv("GITHUB_REF")
+        else:
+            return os.getenv("GITHUB_REF_NAME")
 
     def _get_service(self):
         return "github-actions"

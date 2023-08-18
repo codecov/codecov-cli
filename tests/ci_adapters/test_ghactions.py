@@ -7,6 +7,7 @@ from codecov_cli.fallbacks import FallbackFieldEnum
 from codecov_cli.helpers.ci_adapters import GithubActionsCIAdapter
 
 
+# https://docs.github.com/en/actions/learn-github-actions/variables
 class GithubActionsEnvEnum(str, Enum):
     GITHUB_SHA = "GITHUB_SHA"
     GITHUB_SERVER_URL = "GITHUB_SERVER_URL"
@@ -16,6 +17,8 @@ class GithubActionsEnvEnum(str, Enum):
     GITHUB_REF = "GITHUB_REF"
     GITHUB_REPOSITORY = "GITHUB_REPOSITORY"
     GITHUB_ACTIONS = "GITHUB_ACTIONS"
+    GITHUB_REF_NAME = "GITHUB_REF_NAME"
+    GITHUB_EVENT_NAME = "GITHUB_EVENT_NAME"
 
 
 class TestGithubActions(object):
@@ -203,10 +206,21 @@ class TestGithubActions(object):
         "env_dict,expected",
         [
             ({}, None),
-            ({GithubActionsEnvEnum.GITHUB_HEAD_REF: "random"}, "random"),
-            ({GithubActionsEnvEnum.GITHUB_REF: r"doesn't_match"}, None),
-            ({GithubActionsEnvEnum.GITHUB_REF: r"refs/heads/"}, None),
-            ({GithubActionsEnvEnum.GITHUB_REF: r"refs/heads/abc"}, "abc"),
+            (
+                {
+                    GithubActionsEnvEnum.GITHUB_EVENT_NAME: "pull_request",
+                    GithubActionsEnvEnum.GITHUB_REF: "refs/pulls/13/merge",
+                },
+                "refs/pulls/13/merge",
+            ),
+            (
+                {
+                    GithubActionsEnvEnum.GITHUB_EVENT_NAME: "pull_request_target",
+                    GithubActionsEnvEnum.GITHUB_REF: "refs/pulls/13/merge",
+                },
+                "refs/pulls/13/merge",
+            ),
+            ({GithubActionsEnvEnum.GITHUB_REF_NAME: "my-feature"}, "my-feature"),
         ],
     )
     def test_branch(self, env_dict, expected, mocker):

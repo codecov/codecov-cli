@@ -10,6 +10,7 @@ def test_existing_commands():
         "empty-upload",
         "get-report-results",
         "label-analysis",
+        "patch-coverage",
         "pr-base-picking",
         "send-notifications",
         "static-analysis",

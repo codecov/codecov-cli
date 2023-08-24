@@ -70,7 +70,11 @@ class PatchCoverageService(object):
         total_removes = 0
         all_uncovered_lines = []
         for file in files_in_diff + untracked_files:
-            if file.state in [FileState.modified, FileState.untracked]:
+            if file.state in [
+                FileState.modified,
+                FileState.untracked,
+                FileState.created,
+            ]:
                 coverage_info = (
                     parse_xml_report.get_covered_lines_in_patch_for_diff_file(file)
                 )

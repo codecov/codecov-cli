@@ -91,6 +91,20 @@ class TestDiffParsing(object):
         "                 obj={},",
         "             )",
         "             mock_get_runner.assert_called()",
+        "diff --git a/codecov_cli/services/patch_coverage/new_file.py b/codecov_cli/services/patch_coverage/new_file.py",
+        "new file mode 100644",
+        "index 0000000..5e9b371",
+        "--- /dev/null",
+        "+++ b/codecov_cli/services/patch_coverage/new_file.py",
+        "@@ -0,0 +1,8 @@",
+        "+",
+        "+def cachorro(a, b):",
+        "+    return a - b",
+        "+",
+        "+# comment comment",
+        "+# comment comment",
+        "+",
+        "+CONST = 42",
     ]
 
     @pytest.mark.parametrize(
@@ -236,6 +250,12 @@ class TestDiffParsing(object):
                     320,
                 ],
                 removed_lines=[53, 210, 311],
+            ),
+            DiffFileFactory(
+                path=Path("codecov_cli/services/patch_coverage/new_file.py"),
+                state=FileState.created,
+                added_lines=[1, 2, 3, 4, 5, 6, 7, 8],
+                removed_lines=[],
             ),
         ]
         result = get_files_in_diff(self.example_diff)

@@ -10,7 +10,6 @@ from codecov_cli.services.patch_coverage.types import DiffFile, FileState
 
 # TODO: Handle renamed files
 # TODO: Test file with removals only
-# TODO: Handle created files
 
 
 def get_files_in_diff(diff_lines: List[str]) -> List[DiffFile]:
@@ -58,6 +57,13 @@ def parse_diff_file(raw_file_diff: List[str]) -> DiffFile:
             idx += max_context_size
         elif line.startswith("deleted"):
             diff_file.state = FileState.deleted
+        elif line.startswith("new file mode"):
+            diff_file.state = FileState.created
+            # Skip the lines
+            # "index 0000000..5e9b371",
+            # "--- /dev/null",
+            # "+++ b/path/to/file
+            idx += 3
         idx += 1
     return diff_file
 

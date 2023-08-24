@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import Dict, List, NamedTuple
@@ -20,7 +21,11 @@ FileStats = NamedTuple(
 )
 
 ReportAndTree = NamedTuple(
-    "ReportAndTree", report=Path, tree=ET.Element, file_map=Dict[str, ET.Element]
+    "ReportAndTree",
+    report=Path,
+    tree=ET.Element,
+    file_map=Dict[str, ET.Element],
+    last_modified=datetime,
 )
 
 
@@ -30,6 +35,7 @@ class DiffFile(object):
     removed_lines: List[int]
     state: FileState
     path: Path
+    last_modified: datetime
 
     def __init__(self) -> None:
         self.added_lines = []
@@ -37,3 +43,4 @@ class DiffFile(object):
         self.removed_lines = []
         self.state = None
         self.path = None
+        self.last_modified = None

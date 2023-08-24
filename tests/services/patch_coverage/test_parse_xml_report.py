@@ -1,3 +1,5 @@
+from datetime import datetime
+from os import stat_result
 from pathlib import Path
 from unittest.mock import MagicMock, call, patch
 
@@ -109,6 +111,24 @@ class TestParseXMLReport(object):
 
     @patch("codecov_cli.services.patch_coverage.parse_coverage_report.search_files")
     def test_load_reports(self, mock_search_files, mocker):
+        mocker.patch.object(
+            Path,
+            "stat",
+            return_value=stat_result(
+                [
+                    33188,
+                    39975008,
+                    16777232,
+                    1,
+                    501,
+                    20,
+                    5225,
+                    1692901142,
+                    1692900660,
+                    1692900660,
+                ]
+            ),
+        )
         mock_root = MagicMock(name="root")
         mock_tree = MagicMock(name="tree", getroot=MagicMock(return_value=mock_root))
         mock_et_parse = mocker.patch.object(ET, "parse", return_value=mock_tree)
@@ -128,6 +148,8 @@ class TestParseXMLReport(object):
         assert mock_et_parse.call_count == 2
         assert mock__build_file_map.call_count == 2
         mock__build_file_map.assert_called_with(mock_root)
+        for report in reports:
+            assert report.last_modified == datetime.fromtimestamp(1692900660)
         # Running again uses the cached version
         reports = parse_report.load_reports()
         assert len(reports) == 2
@@ -141,15 +163,25 @@ class TestParseXMLReport(object):
         assert len(file_map.keys()) == 2
         assert list(file_map.keys()) == ["setup.py", "awesome.py"]
 
-    def test_get_covered_lines_in_patch_for_diff_file(self):
+    def test_get_covered_lines_in_patch_for_diff_file(self, mocker):
+        mocker.patch.object(ParseXMLReport, "possibly_warn_if_old_reports")
         root = ET.fromstring(self.example_report)
         parse_report = ParseXMLReport()
         file_map = parse_report._build_file_map(root)
-        parse_report.reports = [ReportAndTree(Path("coverage.xml"), root, file_map)]
+        parse_report.reports = [
+            ReportAndTree(
+                Path("coverage.xml"), root, file_map, datetime.fromtimestamp(1692900660)
+            )
+        ]
         root = ET.fromstring(self.example_report_alternate)
         file_map = parse_report._build_file_map(root)
         parse_report.reports.append(
-            ReportAndTree(Path("alternate/coverage.xml"), root, file_map)
+            ReportAndTree(
+                Path("alternate/coverage.xml"),
+                root,
+                file_map,
+                datetime.fromtimestamp(1692900660),
+            )
         )
         # awesome.py
         file_to_test = DiffFile()
@@ -186,3 +218,12 @@ class TestParseXMLReport(object):
         file_to_test.path = Path("missing.py")
         lines_info = parse_report.get_covered_lines_in_patch_for_diff_file(file_to_test)
         assert lines_info == {}
+
+    @pytest.mark.parametrize(
+        "diff_file_timestamp, expected", [(1692900990, True), (1692900660, False)]
+    )
+    def test_possibly_warn_if_old_reports(self, diff_file_timestamp, expected):
+        report = MagicMock(last_modified=datetime.fromtimestamp(1692900660))
+        diff_file = MagicMock(last_modified=datetime.fromtimestamp(diff_file_timestamp))
+        parse_report = ParseXMLReport()
+        assert parse_report.possibly_warn_if_old_reports(report, diff_file) == expected

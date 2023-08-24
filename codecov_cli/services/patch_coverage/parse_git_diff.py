@@ -2,11 +2,15 @@
     Git diff is obtained via the `git diff` command.
     Files that are UNTRACKED are not part of the diff.
 """
+import logging
 import re
+from datetime import datetime
 from pathlib import Path
 from typing import List, Tuple
 
 from codecov_cli.services.patch_coverage.types import DiffFile, FileState
+
+logger = logging.getLogger("codecovcli")
 
 # TODO: Handle renamed files
 # TODO: Test file with removals only
@@ -38,6 +42,9 @@ def parse_diff_file(raw_file_diff: List[str]) -> DiffFile:
         line = raw_file_diff[idx]
         if line.startswith("diff"):
             diff_file.path = get_file_path(line)
+            if diff_file.path.exists():
+                stat = diff_file.path.stat()
+                diff_file.last_modified = datetime.fromtimestamp(stat.st_mtime)
         elif line.startswith("---") and raw_file_diff[idx + 1].startswith("+++"):
             # This file was modified
             diff_file.state = FileState.modified
@@ -71,7 +78,13 @@ def parse_diff_file(raw_file_diff: List[str]) -> DiffFile:
 def get_file_path(diff_header: str) -> Path:
     line_parts = diff_header.split(" ")
     uncommited_changes_path = line_parts[3]
-    return Path(uncommited_changes_path.replace("b/", ""))
+    path = Path(uncommited_changes_path.replace("b/", ""))
+    if not path.exists():
+        logger.warning(
+            "File path listed in diff doesn't exist",
+            extra=dict(extra_log_attributes=dict(path=path)),
+        )
+    return path
 
 
 def parse_diff_chunk_header(chunk_header: str) -> Tuple[int, int, int]:

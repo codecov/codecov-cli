@@ -1,3 +1,5 @@
+from datetime import datetime
+from os import stat_result
 from pathlib import Path
 from typing import List
 
@@ -18,12 +20,14 @@ def DiffFileFactory(
     removed_lines: List[int],
     state: FileState,
     path: Path,
+    last_modified: datetime,
 ) -> DiffFile:
     obj = DiffFile()
     obj.added_lines = added_lines
     obj.removed_lines = removed_lines
     obj.state = state
     obj.path = path
+    obj.last_modified = last_modified
     return obj
 
 
@@ -161,6 +165,10 @@ class TestDiffParsing(object):
                 "diff --git a/codecov_cli/fallbacks.py b/codecov_cli/fallbacks.py",
                 Path("codecov_cli/fallbacks.py"),
             ),
+            (
+                "diff --git a/awesome.py b/awesome.py",
+                Path("awesome.py"),
+            ),
         ],
     )
     def test_get_file_path(self, line, expected):
@@ -218,19 +226,39 @@ class TestDiffParsing(object):
         ]
         assert diff_file.removed_lines == [53, 210, 311]
 
-    def test_parse_diff_into_chunks(self):
+    def test_parse_diff_into_chunks(self, mocker):
+        mocker.patch.object(
+            Path,
+            "stat",
+            return_value=stat_result(
+                [
+                    33188,
+                    39975008,
+                    16777232,
+                    1,
+                    501,
+                    20,
+                    5225,
+                    1692901142,
+                    1692900660,
+                    1692900660,
+                ]
+            ),
+        )
         expected_result = [
             DiffFileFactory(
                 path=Path("codecov_cli/fallbacks.py"),
                 state=FileState.modified,
                 added_lines=[14, 43, 44],
                 removed_lines=[],
+                last_modified=datetime.fromtimestamp(1692900660),
             ),
             DiffFileFactory(
                 path=Path("codecov_cli/services/__init__.py"),
                 state=FileState.deleted,
                 added_lines=[],
                 removed_lines=[],
+                last_modified=datetime.fromtimestamp(1692900660),
             ),
             DiffFileFactory(
                 path=Path("tests/commands/test_invoke_labelanalysis.py"),
@@ -250,12 +278,14 @@ class TestDiffParsing(object):
                     320,
                 ],
                 removed_lines=[53, 210, 311],
+                last_modified=datetime.fromtimestamp(1692900660),
             ),
             DiffFileFactory(
                 path=Path("codecov_cli/services/patch_coverage/new_file.py"),
                 state=FileState.created,
                 added_lines=[1, 2, 3, 4, 5, 6, 7, 8],
                 removed_lines=[],
+                last_modified=datetime.fromtimestamp(1692900660),
             ),
         ]
         result = get_files_in_diff(self.example_diff)
@@ -265,3 +295,4 @@ class TestDiffParsing(object):
             assert received.state == expected.state
             assert received.added_lines == expected.added_lines
             assert received.removed_lines == expected.removed_lines
+            assert received.last_modified == expected.last_modified

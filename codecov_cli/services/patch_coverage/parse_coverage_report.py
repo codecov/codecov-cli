@@ -39,7 +39,6 @@ class ParseXMLReport(object):
             search_for_directories=False,
         )
         for report in reports:
-            print(report)
             if self._is_report_supported(report):
                 tree = ET.parse(report)
                 file_map = self._build_file_map(tree.getroot())

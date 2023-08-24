@@ -33,9 +33,18 @@ class TestPatchCoverageService(object):
         )
         mock_get_files_in_diff.return_value = ["DiffFile_1", "DiffFIle_2"]
         patch_coverage_service = PatchCoverageService()
-        files_in_diff = patch_coverage_service.get_files_in_diff()
+        files_in_diff = patch_coverage_service.get_files_in_diff(staged=False)
         assert files_in_diff == ["DiffFile_1", "DiffFIle_2"]
         mock_subprocess.run.assert_called_with(["git", "diff"], capture_output=True)
+        mock_get_files_in_diff.assert_called_with(
+            ["diff line 1", "diff line 2", "diff line 3"]
+        )
+        # If staged=True
+        files_in_diff = patch_coverage_service.get_files_in_diff(staged=True)
+        assert files_in_diff == ["DiffFile_1", "DiffFIle_2"]
+        mock_subprocess.run.assert_called_with(
+            ["git", "diff", "--staged"], capture_output=True
+        )
         mock_get_files_in_diff.assert_called_with(
             ["diff line 1", "diff line 2", "diff line 3"]
         )

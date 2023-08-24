@@ -58,10 +58,10 @@ class PatchCoverageService(object):
             uncovered_lines,
         )
 
-    def run_patch_coverage_command(self):
+    def run_patch_coverage_command(self, staged: bool):
         parse_xml_report = ParseXMLReport()
         parse_xml_report.load_reports()
-        files_in_diff = self.get_files_in_diff()
+        files_in_diff = self.get_files_in_diff(staged)
         untracked_files = self.get_untracked_files()
 
         total_lines_coverable = 0
@@ -121,6 +121,9 @@ class PatchCoverageService(object):
             diff_files.append(diff_file)
         return diff_files
 
-    def get_files_in_diff(self) -> List[DiffFile]:
-        raw_diff = self._execute_git(["diff"]).splitlines()
+    def get_files_in_diff(self, staged: bool) -> List[DiffFile]:
+        cmd_options = ["diff"]
+        if staged:
+            cmd_options.append("--staged")
+        raw_diff = self._execute_git(cmd_options).splitlines()
         return get_files_in_diff(raw_diff)

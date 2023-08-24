@@ -8,7 +8,7 @@ from typing import List, Tuple
 
 from codecov_cli.services.patch_coverage.types import DiffFile, FileState
 
-# TODO: Check how to handle renamed files
+# TODO: Handle renamed files
 # TODO: Test file with removals only
 # TODO: Handle created files
 

@@ -83,5 +83,5 @@ class ParseXMLReport(object):
                     idx = int(line.attrib["number"])
                     lines_info[idx] = lines_info[idx] or (line.attrib["hits"] == "1")
             else:
-                print(f"Can't find file {file_map} in XML report")
+                logger.error(f"Can't find file {diff_file.path} in XML report")
         return lines_info

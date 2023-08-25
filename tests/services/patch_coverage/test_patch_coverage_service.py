@@ -1,9 +1,12 @@
+from datetime import datetime
+from os import stat_result
 from pathlib import Path
 from subprocess import CompletedProcess
-from unittest.mock import patch
+from unittest.mock import call, patch
 
-from codecov_cli.services.patch_coverage import PatchCoverageService
+from codecov_cli.services.patch_coverage import PatchCoverageService, click
 from codecov_cli.services.patch_coverage.types import DiffFile, FileState, FileStats
+from tests.services.patch_coverage.factory import DiffFileFactory
 
 
 class TestPatchCoverageService(object):
@@ -79,7 +82,25 @@ class TestPatchCoverageService(object):
         )
 
     @patch("codecov_cli.services.patch_coverage.subprocess")
-    def test_get_untracked_files(self, mock_subprocess):
+    def test_get_untracked_files(self, mock_subprocess, mocker):
+        mocker.patch.object(
+            Path,
+            "stat",
+            return_value=stat_result(
+                [
+                    33188,
+                    39975008,
+                    16777232,
+                    1,
+                    501,
+                    20,
+                    5225,
+                    1692901142,
+                    1692900660,
+                    1692900660,
+                ]
+            ),
+        )
         mock_subprocess.run.return_value = CompletedProcess(
             args=["git"], returncode=0, stdout=b"new_file.py\nsubmodule/awesome_idea.py"
         )
@@ -96,6 +117,7 @@ class TestPatchCoverageService(object):
             assert isinstance(received, DiffFile)
             assert received.state == FileState.untracked
             assert received.path == expected_path
+            assert received.last_modified == datetime.fromtimestamp(1692900660)
 
     def test_get_file_stats_and_uncovered_lines_untracked_file(self):
         untracked_file = DiffFile()
@@ -174,4 +196,242 @@ class TestPatchCoverageService(object):
                 total_removes=3,
             ),
             ["awesome.py:4", "awesome.py:5"],
+        )
+
+    @patch("codecov_cli.services.patch_coverage.ParseXMLReport")
+    def test_run_command(self, mock_parse_report, mocker):
+        untracked_file = DiffFileFactory(
+            path=Path("untracked.py"),
+            state=FileState.untracked,
+            added_lines=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            removed_lines=[],
+            last_modified=datetime(2023, 8, 25, 13, 44, 22, 840706),
+        )
+        modified_file = DiffFileFactory(
+            path=Path("modified.py"),
+            state=FileState.modified,
+            added_lines=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            removed_lines=[2, 3, 4],
+            last_modified=datetime(2023, 8, 25, 13, 44, 22, 840706),
+        )
+        deleted_file = DiffFileFactory(
+            path=Path("deleted.py"),
+            state=FileState.deleted,
+            added_lines=[],
+            removed_lines=[],
+            last_modified=datetime(2023, 8, 25, 13, 44, 22, 840706),
+        )
+
+        mock_get_files_in_diff = mocker.patch.object(
+            PatchCoverageService,
+            "get_files_in_diff",
+            return_value=[modified_file, deleted_file],
+        )
+        mock_get_untracked_files = mocker.patch.object(
+            PatchCoverageService, "get_untracked_files", return_value=[untracked_file]
+        )
+
+        mock_echo = mocker.patch.object(click, "echo")
+
+        def mock_coverage_info_for_file(file: DiffFile):
+            if file == untracked_file:
+                return {
+                    1: True,
+                    2: True,
+                    3: True,
+                    6: True,
+                    7: True,
+                    8: False,
+                    9: False,
+                    10: True,
+                }
+            if file == modified_file:
+                return {
+                    1: True,
+                    2: True,
+                    3: True,
+                    5: False,
+                    6: True,
+                    8: False,
+                    9: False,
+                    10: True,
+                }
+
+        mock_get_covered_lines_in_patch_for_diff_file = (
+            mock_parse_report.return_value.get_covered_lines_in_patch_for_diff_file
+        )
+        mock_get_covered_lines_in_patch_for_diff_file.side_effect = (
+            mock_coverage_info_for_file
+        )
+
+        service = PatchCoverageService()
+        service.run_patch_coverage_command(staged=False, diff_base=None)
+        mock_get_files_in_diff.assert_called_with(False, None)
+        mock_get_untracked_files.assert_called()
+        assert mock_get_covered_lines_in_patch_for_diff_file.call_count == 2
+        mock_get_covered_lines_in_patch_for_diff_file.assert_has_calls(
+            [
+                call(modified_file),
+                call(untracked_file),
+            ]
+        )
+        mock_echo.assert_has_calls(
+            [
+                call("\n5 Uncovered lines"),
+                call(
+                    "modified.py:5\nmodified.py:8\nmodified.py:9\nuntracked.py:8\nuntracked.py:9"
+                ),
+                call("5 Uncovered lines ☝️"),
+                call(f"\nPatch coverage: {(11 / 16) * 100:.3f}%"),
+                call(f"Lines coverable: {16}; Lines covered: {11}"),
+                call(
+                    f"Adds: {18}; Removes: {3} (doesn't include lines from deleted files)"
+                ),
+            ]
+        )
+
+    @patch("codecov_cli.services.patch_coverage.ParseXMLReport")
+    def test_run_command_no_uncovered_lines(self, mock_parse_report, mocker):
+        untracked_file = DiffFileFactory(
+            path=Path("untracked.py"),
+            state=FileState.untracked,
+            added_lines=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            removed_lines=[],
+            last_modified=datetime(2023, 8, 25, 13, 44, 22, 840706),
+        )
+        modified_file = DiffFileFactory(
+            path=Path("modified.py"),
+            state=FileState.modified,
+            added_lines=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            removed_lines=[2, 3, 4],
+            last_modified=datetime(2023, 8, 25, 13, 44, 22, 840706),
+        )
+        deleted_file = DiffFileFactory(
+            path=Path("deleted.py"),
+            state=FileState.deleted,
+            added_lines=[],
+            removed_lines=[],
+            last_modified=datetime(2023, 8, 25, 13, 44, 22, 840706),
+        )
+
+        mock_get_files_in_diff = mocker.patch.object(
+            PatchCoverageService,
+            "get_files_in_diff",
+            return_value=[modified_file, deleted_file],
+        )
+        mock_get_untracked_files = mocker.patch.object(
+            PatchCoverageService, "get_untracked_files", return_value=[untracked_file]
+        )
+
+        mock_echo = mocker.patch.object(click, "echo")
+
+        def mock_coverage_info_for_file(file: DiffFile):
+            if file == untracked_file:
+                return {
+                    1: True,
+                    2: True,
+                    3: True,
+                    6: True,
+                    7: True,
+                    8: True,
+                    9: True,
+                    10: True,
+                }
+            if file == modified_file:
+                return {
+                    1: True,
+                    2: True,
+                    3: True,
+                    5: True,
+                    6: True,
+                    8: True,
+                    9: True,
+                    10: True,
+                }
+
+        mock_get_covered_lines_in_patch_for_diff_file = (
+            mock_parse_report.return_value.get_covered_lines_in_patch_for_diff_file
+        )
+        mock_get_covered_lines_in_patch_for_diff_file.side_effect = (
+            mock_coverage_info_for_file
+        )
+
+        service = PatchCoverageService()
+        service.run_patch_coverage_command(staged=False, diff_base=None)
+        mock_get_files_in_diff.assert_called_with(False, None)
+        mock_get_untracked_files.assert_called()
+        assert mock_get_covered_lines_in_patch_for_diff_file.call_count == 2
+        mock_get_covered_lines_in_patch_for_diff_file.assert_has_calls(
+            [
+                call(modified_file),
+                call(untracked_file),
+            ]
+        )
+        mock_echo.assert_has_calls(
+            [
+                call("No uncovered lines :)"),
+                call(f"\nPatch coverage: {(16 / 16) * 100:.3f}%"),
+                call(f"Lines coverable: {16}; Lines covered: {16}"),
+                call(
+                    f"Adds: {18}; Removes: {3} (doesn't include lines from deleted files)"
+                ),
+            ]
+        )
+
+    @patch("codecov_cli.services.patch_coverage.ParseXMLReport")
+    def test_run_command_no_coverable_lines(self, mock_parse_report, mocker):
+        untracked_file = DiffFileFactory(
+            path=Path("untracked.py"),
+            state=FileState.untracked,
+            added_lines=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            removed_lines=[],
+            last_modified=datetime(2023, 8, 25, 13, 44, 22, 840706),
+        )
+        modified_file = DiffFileFactory(
+            path=Path("modified.py"),
+            state=FileState.modified,
+            added_lines=[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+            removed_lines=[2, 3, 4],
+            last_modified=datetime(2023, 8, 25, 13, 44, 22, 840706),
+        )
+        deleted_file = DiffFileFactory(
+            path=Path("deleted.py"),
+            state=FileState.deleted,
+            added_lines=[],
+            removed_lines=[],
+            last_modified=datetime(2023, 8, 25, 13, 44, 22, 840706),
+        )
+
+        mock_get_files_in_diff = mocker.patch.object(
+            PatchCoverageService,
+            "get_files_in_diff",
+            return_value=[modified_file, deleted_file],
+        )
+        mock_get_untracked_files = mocker.patch.object(
+            PatchCoverageService, "get_untracked_files", return_value=[untracked_file]
+        )
+
+        mock_echo = mocker.patch.object(click, "echo")
+
+        mock_get_covered_lines_in_patch_for_diff_file = (
+            mock_parse_report.return_value.get_covered_lines_in_patch_for_diff_file
+        )
+        mock_get_covered_lines_in_patch_for_diff_file.return_value = {}
+
+        service = PatchCoverageService()
+        service.run_patch_coverage_command(staged=False, diff_base=None)
+        mock_get_files_in_diff.assert_called_with(False, None)
+        mock_get_untracked_files.assert_called()
+        assert mock_get_covered_lines_in_patch_for_diff_file.call_count == 2
+        mock_get_covered_lines_in_patch_for_diff_file.assert_has_calls(
+            [
+                call(modified_file),
+                call(untracked_file),
+            ]
+        )
+        mock_echo.assert_has_calls(
+            [
+                call("No uncovered lines :)"),
+                call("Could not find any coverable lines in the git diff"),
+            ]
         )

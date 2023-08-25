@@ -39,11 +39,40 @@ class TestPatchCoverageService(object):
         mock_get_files_in_diff.assert_called_with(
             ["diff line 1", "diff line 2", "diff line 3"]
         )
-        # If staged=True
+
+    @patch("codecov_cli.services.patch_coverage.get_files_in_diff")
+    @patch("codecov_cli.services.patch_coverage.subprocess")
+    def test_get_files_in_diff_staged(self, mock_subprocess, mock_get_files_in_diff):
+        mock_subprocess.run.return_value = CompletedProcess(
+            args=["git"], returncode=0, stdout=b"diff line 1\ndiff line 2\ndiff line 3"
+        )
+        mock_get_files_in_diff.return_value = ["DiffFile_1", "DiffFIle_2"]
+        patch_coverage_service = PatchCoverageService()
         files_in_diff = patch_coverage_service.get_files_in_diff(staged=True)
         assert files_in_diff == ["DiffFile_1", "DiffFIle_2"]
         mock_subprocess.run.assert_called_with(
             ["git", "diff", "--staged"], capture_output=True
+        )
+        mock_get_files_in_diff.assert_called_with(
+            ["diff line 1", "diff line 2", "diff line 3"]
+        )
+
+    @patch("codecov_cli.services.patch_coverage.get_files_in_diff")
+    @patch("codecov_cli.services.patch_coverage.subprocess")
+    def test_get_files_in_diff_staged_some_base(
+        self, mock_subprocess, mock_get_files_in_diff
+    ):
+        mock_subprocess.run.return_value = CompletedProcess(
+            args=["git"], returncode=0, stdout=b"diff line 1\ndiff line 2\ndiff line 3"
+        )
+        mock_get_files_in_diff.return_value = ["DiffFile_1", "DiffFIle_2"]
+        patch_coverage_service = PatchCoverageService()
+        files_in_diff = patch_coverage_service.get_files_in_diff(
+            staged=True, diff_base="main"
+        )
+        assert files_in_diff == ["DiffFile_1", "DiffFIle_2"]
+        mock_subprocess.run.assert_called_with(
+            ["git", "diff", "--staged", "main"], capture_output=True
         )
         mock_get_files_in_diff.assert_called_with(
             ["diff line 1", "diff line 2", "diff line 3"]

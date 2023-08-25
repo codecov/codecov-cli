@@ -1,6 +1,6 @@
 import subprocess
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from codecov_cli.services.patch_coverage.parse_coverage_report import ParseXMLReport
 from codecov_cli.services.patch_coverage.parse_git_diff import get_files_in_diff
@@ -58,10 +58,10 @@ class PatchCoverageService(object):
             uncovered_lines,
         )
 
-    def run_patch_coverage_command(self, staged: bool):
+    def run_patch_coverage_command(self, staged: bool, diff_base: str):
         parse_xml_report = ParseXMLReport()
         parse_xml_report.load_reports()
-        files_in_diff = self.get_files_in_diff(staged)
+        files_in_diff = self.get_files_in_diff(staged, diff_base)
         untracked_files = self.get_untracked_files()
 
         total_lines_coverable = 0
@@ -125,9 +125,13 @@ class PatchCoverageService(object):
             diff_files.append(diff_file)
         return diff_files
 
-    def get_files_in_diff(self, staged: bool) -> List[DiffFile]:
+    def get_files_in_diff(
+        self, staged: bool, diff_base: Optional[str] = None
+    ) -> List[DiffFile]:
         cmd_options = ["diff"]
         if staged:
             cmd_options.append("--staged")
+        if diff_base:
+            cmd_options.append(diff_base)
         raw_diff = self._execute_git(cmd_options).splitlines()
         return get_files_in_diff(raw_diff)

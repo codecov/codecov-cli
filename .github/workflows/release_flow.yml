@@ -20,10 +20,10 @@ jobs:
     - name: Set up Python 3.10
       uses: actions/setup-python@v4
       with:
-        python-version: "3.10" 
+        python-version: "3.10"
     - name: Install dependencies
       run: |
-        pip install -r requirements.txt  
+        pip install -r requirements.txt
         python setup.py build
         python setup.py develop
     - name: Build distributions for different platforms
@@ -55,7 +55,7 @@ jobs:
             CMD_BUILD: >
               STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
               pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:. --hidden-import staticcodecov_languages -F codecov_cli/main.py &&
-              cp ./dist/main ./dist/codecovcli_linux      
+              cp ./dist/main ./dist/codecovcli_linux
             OUT_FILE_NAME: codecovcli_linux
             ASSET_MIME: application/octet-stream
           - os: windows-latest
@@ -72,10 +72,10 @@ jobs:
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
       with:
-        python-version: "3.10"   
+        python-version: "3.10"
     - name: Install dependencies
       run: |
-        pip install -r requirements.txt  
+        pip install -r requirements.txt
         python setup.py build
     - name: Install pyinstaller
       run: pip install pyinstaller
@@ -90,7 +90,7 @@ jobs:
         asset_name: ${{ matrix.OUT_FILE_NAME }}
         tag: ${{ github.ref }}
         overwrite: true
-  
+
   publish_release:
     name: Publish release
     needs: [buildassets, build_and_publish_to_pipy]
@@ -109,7 +109,7 @@ jobs:
 
       # Publish the release tag to a Pub/Sub topic
       - name: Publish a message to a Pub/Sub topic
-        env: 
+        env:
           CLOUDSDK_CORE_PROJECT: ${{ secrets.GCLOUD_UPLOADER_PROJECT_ID }}
         run: |
           gcloud pubsub topics publish ${{ secrets.GCLOUD_UPLOADER_PUBSUB_TOPIC }} --message '{"release":"'"${{ github.ref_name }}"'", "latest":true}'

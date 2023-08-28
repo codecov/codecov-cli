@@ -110,6 +110,8 @@ def test_upload_process_options(mocker):
             "  -d, --dry-run                   Don't upload files to Codecov",
             "  --legacy, --use-legacy-uploader",
             "                                  Use the legacy upload endpoint",
+            "  --handle-no-reports-found       Raise no excpetions when no coverage reports",
+            "                                  found.",
             "  --parent-sha TEXT               SHA (with 40 chars) of what should be the",
             "                                  parent of this commit",
             "  -h, --help                      Show this message and exit.",

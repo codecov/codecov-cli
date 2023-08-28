@@ -47,6 +47,7 @@ def upload_process(
     dry_run: bool,
     git_service: typing.Optional[str],
     parent_sha: typing.Optional[str],
+    handle_no_reports_found: bool,
 ):
     logger.debug(
         "Starting upload process",
@@ -72,6 +73,7 @@ def upload_process(
                 git_service=git_service,
                 disable_search=disable_search,
                 fail_on_error=fail_on_error,
+                handle_no_reports_found=handle_no_reports_found,
             )
         ),
     )
@@ -120,4 +122,5 @@ def upload_process(
         fail_on_error=fail_on_error,
         dry_run=dry_run,
         git_service=git_service,
+        handle_no_reports_found=handle_no_reports_found,
     )

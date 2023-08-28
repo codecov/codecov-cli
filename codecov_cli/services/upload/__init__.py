@@ -15,6 +15,7 @@ from codecov_cli.services.upload.legacy_upload_sender import LegacyUploadSender
 from codecov_cli.services.upload.network_finder import select_network_finder
 from codecov_cli.services.upload.upload_collector import UploadCollector
 from codecov_cli.services.upload.upload_sender import UploadSender
+from codecov_cli.services.upload_completion import upload_completion_logic
 from codecov_cli.types import RequestResult
 
 logger = logging.getLogger("codecovcli")
@@ -48,6 +49,7 @@ def do_upload_logic(
     git_service: typing.Optional[str],
     enterprise_url: typing.Optional[str],
     disable_search: bool = False,
+    handle_no_reports_found: bool = False,
 ):
     preparation_plugins = select_preparation_plugins(cli_config, plugin_names)
     coverage_file_selector = select_coverage_file_finder(
@@ -60,7 +62,29 @@ def do_upload_logic(
     collector = UploadCollector(
         preparation_plugins, network_finder, coverage_file_selector
     )
-    upload_data = collector.generate_upload_data()
+    try:
+        upload_data = collector.generate_upload_data()
+    except click.ClickException as exp:
+        if handle_no_reports_found:
+            logger.info(
+                "No coverage reports found. Triggering notificaions without uploading."
+            )
+            upload_completion_logic(
+                commit_sha=commit_sha,
+                slug=slug,
+                token=token,
+                git_service=git_service,
+                enterprise_url=enterprise_url,
+                fail_on_error=fail_on_error,
+            )
+            return RequestResult(
+                error=None,
+                warnings=None,
+                status_code=200,
+                text="No coverage reports found. Triggering notificaions without uploading.",
+            )
+        else:
+            raise exp
     if use_legacy_uploader:
         sender = LegacyUploadSender()
     else:

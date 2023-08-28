@@ -42,7 +42,7 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          - os: macos-latest
+          - os: macos-11
             TARGET: macos
             CMD_BUILD: >
               STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
@@ -50,7 +50,7 @@ jobs:
               mv dist/main dist/codecovcli_macos
             OUT_FILE_NAME: codecovcli_macos
             ASSET_MIME: application/octet-stream
-          - os: ubuntu-latest
+          - os: ubuntu-20.04
             TARGET: ubuntu
             CMD_BUILD: >
               STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
@@ -81,6 +81,10 @@ jobs:
       run: pip install pyinstaller
     - name: Build with pyinstaller for ${{matrix.TARGET}}
       run: ${{matrix.CMD_BUILD}}
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        path: ./dist/${{ matrix.OUT_FILE_NAME }}
     - name: Upload Release Asset
       id: upload-release-asset
       uses: svenstaro/upload-release-action@v2

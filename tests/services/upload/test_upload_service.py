@@ -1,5 +1,5 @@
-import logging
-
+import click
+import pytest
 from click.testing import CliRunner
 
 from codecov_cli.services.upload import (
@@ -315,3 +315,147 @@ def test_do_upload_logic_verbose(mocker, use_verbose_option):
         status_code=200,
         text="Data NOT sent to Codecov because of dry-run option",
     )
+
+
+def test_do_upload_no_cov_reports_found(mocker):
+    mock_select_preparation_plugins = mocker.patch(
+        "codecov_cli.services.upload.select_preparation_plugins"
+    )
+    mock_select_coverage_file_finder = mocker.patch(
+        "codecov_cli.services.upload.select_coverage_file_finder",
+    )
+    mock_select_network_finder = mocker.patch(
+        "codecov_cli.services.upload.select_network_finder"
+    )
+
+    def side_effect(*args, **kwargs):
+        raise click.ClickException("error")
+
+    mock_generate_upload_data = mocker.patch(
+        "codecov_cli.services.upload.UploadCollector.generate_upload_data",
+        side_effect=side_effect,
+    )
+    mock_upload_completion_call = mocker.patch(
+        "codecov_cli.services.upload.upload_completion_logic"
+    )
+    cli_config = {}
+    versioning_system = mocker.MagicMock()
+    ci_adapter = mocker.MagicMock()
+    ci_adapter.get_fallback_value.return_value = "service"
+    runner = CliRunner()
+    with runner.isolation() as outstreams:
+        res = do_upload_logic(
+            cli_config,
+            versioning_system,
+            ci_adapter,
+            commit_sha="commit_sha",
+            report_code="report_code",
+            build_code="build_code",
+            build_url="build_url",
+            job_code="job_code",
+            env_vars=None,
+            flags=None,
+            name="name",
+            network_root_folder=None,
+            coverage_files_search_root_folder=None,
+            coverage_files_search_exclude_folders=None,
+            coverage_files_search_explicitly_listed_files=None,
+            plugin_names=["first_plugin", "another", "forth"],
+            token="token",
+            branch="branch",
+            slug="slug",
+            pull_request_number="pr",
+            git_service="git_service",
+            enterprise_url=None,
+            handle_no_reports_found=True,
+        )
+    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+    assert out_bytes == [
+        (
+            "info",
+            "No coverage reports found. Triggering notificaions without uploading.",
+        ),
+    ]
+    assert res == RequestResult(
+        error=None,
+        warnings=None,
+        status_code=200,
+        text="No coverage reports found. Triggering notificaions without uploading.",
+    )
+    mock_select_preparation_plugins.assert_called_with(
+        cli_config, ["first_plugin", "another", "forth"]
+    )
+    mock_select_coverage_file_finder.assert_called_with(None, None, None, False)
+    mock_select_network_finder.assert_called_with(versioning_system)
+    mock_generate_upload_data.assert_called_with()
+    mock_upload_completion_call.assert_called_with(
+        commit_sha="commit_sha",
+        slug="slug",
+        token="token",
+        git_service="git_service",
+        enterprise_url=None,
+        fail_on_error=False,
+    )
+
+
+def test_do_upload_rase_no_cov_reports_found_error(mocker):
+    mock_select_preparation_plugins = mocker.patch(
+        "codecov_cli.services.upload.select_preparation_plugins"
+    )
+    mock_select_coverage_file_finder = mocker.patch(
+        "codecov_cli.services.upload.select_coverage_file_finder",
+    )
+    mock_select_network_finder = mocker.patch(
+        "codecov_cli.services.upload.select_network_finder"
+    )
+
+    def side_effect(*args, **kwargs):
+        raise click.ClickException(
+            "No coverage reports found. Please make sure you're generating reports successfully."
+        )
+
+    mock_generate_upload_data = mocker.patch(
+        "codecov_cli.services.upload.UploadCollector.generate_upload_data",
+        side_effect=side_effect,
+    )
+    cli_config = {}
+    versioning_system = mocker.MagicMock()
+    ci_adapter = mocker.MagicMock()
+    ci_adapter.get_fallback_value.return_value = "service"
+
+    with pytest.raises(click.ClickException) as exp:
+        res = do_upload_logic(
+            cli_config,
+            versioning_system,
+            ci_adapter,
+            commit_sha="commit_sha",
+            report_code="report_code",
+            build_code="build_code",
+            build_url="build_url",
+            job_code="job_code",
+            env_vars=None,
+            flags=None,
+            name="name",
+            network_root_folder=None,
+            coverage_files_search_root_folder=None,
+            coverage_files_search_exclude_folders=None,
+            coverage_files_search_explicitly_listed_files=None,
+            plugin_names=["first_plugin", "another", "forth"],
+            token="token",
+            branch="branch",
+            slug="slug",
+            pull_request_number="pr",
+            git_service="git_service",
+            enterprise_url=None,
+            handle_no_reports_found=False,
+        )
+    assert (
+        str(exp.value)
+        == "No coverage reports found. Please make sure you're generating reports successfully."
+    )
+    mock_select_preparation_plugins.assert_called_with(
+        cli_config, ["first_plugin", "another", "forth"]
+    )
+    mock_select_coverage_file_finder.assert_called_with(None, None, None, False)
+    mock_select_network_finder.assert_called_with(versioning_system)
+    mock_generate_upload_data.assert_called_with()

@@ -144,6 +144,12 @@ _global_upload_options = [
         is_flag=True,
         help="Use the legacy upload endpoint",
     ),
+    click.option(
+        "--handle-no-reports-found",
+        "handle_no_reports_found",
+        is_flag=True,
+        help="Raise no excpetions when no coverage reports found.",
+    ),
 ]
 
 
@@ -181,6 +187,7 @@ def do_upload(
     fail_on_error: bool,
     dry_run: bool,
     git_service: typing.Optional[str],
+    handle_no_reports_found: bool,
 ):
     versioning_system = ctx.obj["versioning_system"]
     codecov_yaml = ctx.obj["codecov_yaml"] or {}
@@ -211,6 +218,7 @@ def do_upload(
                 git_service=git_service,
                 enterprise_url=enterprise_url,
                 disable_search=disable_search,
+                handle_no_reports_found=handle_no_reports_found,
             )
         ),
     )
@@ -245,4 +253,5 @@ def do_upload(
         git_service=git_service,
         enterprise_url=enterprise_url,
         disable_search=disable_search,
+        handle_no_reports_found=handle_no_reports_found,
     )

@@ -21,6 +21,7 @@ def empty_upload(
     slug: typing.Optional[str],
     token: typing.Optional[uuid.UUID],
     git_service: typing.Optional[str],
+    fail_on_error: typing.Optional[bool],
 ):
     enterprise_url = ctx.obj.get("enterprise_url")
     logger.debug(
@@ -32,7 +33,10 @@ def empty_upload(
                 token=token,
                 service=git_service,
                 enterprise_url=enterprise_url,
+                fail_on_error=fail_on_error,
             )
         ),
     )
-    return empty_upload_logic(commit_sha, slug, token, git_service, enterprise_url)
+    return empty_upload_logic(
+        commit_sha, slug, token, git_service, enterprise_url, fail_on_error
+    )

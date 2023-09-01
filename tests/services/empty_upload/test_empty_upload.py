@@ -21,7 +21,7 @@ def test_empty_upload_with_warnings(mocker):
     runner = CliRunner()
     with runner.isolation() as outstreams:
         res = empty_upload_logic(
-            "commit_sha", "owner/repo", uuid.uuid4(), "service", None
+            "commit_sha", "owner/repo", uuid.uuid4(), "service", None, False
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
@@ -50,10 +50,9 @@ def test_empty_upload_with_error(mocker):
     runner = CliRunner()
     with runner.isolation() as outstreams:
         res = empty_upload_logic(
-            "commit_sha", "owner/repo", uuid.uuid4(), "service", None
+            "commit_sha", "owner/repo", uuid.uuid4(), "service", None, False
         )
 
-    print(outstreams)
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
         ("info", "Process Empty Upload complete"),
@@ -77,7 +76,7 @@ def test_empty_upload_200(mocker):
     token = uuid.uuid4()
     runner = CliRunner()
     with runner.isolation() as outstreams:
-        res = empty_upload_logic("commit_sha", "owner/repo", token, "service", None)
+        res = empty_upload_logic("commit_sha", "owner/repo", token, "service", None, False)
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
         ("info", "Process Empty Upload complete"),
@@ -95,7 +94,7 @@ def test_empty_upload_403(mocker):
         return_value=mocker.MagicMock(status_code=403, text="Permission denied"),
     )
     token = uuid.uuid4()
-    res = empty_upload_logic("commit_sha", "owner/repo", token, "service", None)
+    res = empty_upload_logic("commit_sha", "owner/repo", token, "service", None, False)
     assert res.error == RequestError(
         code="HTTP Error 403",
         description="Permission denied",

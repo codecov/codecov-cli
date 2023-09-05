@@ -63,9 +63,9 @@ class NodeVisitor(object):
             if node.type == "do_statement":
                 do_statement_body = node.child_by_field_name("body")
                 if do_statement_body.type == "statement_block":
-                    first_statement = do_statement_body.children[1]
+                    do_statement_body = do_statement_body.children[1]
                 elif do_statement_body.type == "expression_statement":
-                    first_statement = do_statement_body.children[0]
+                    do_statement_body = do_statement_body.children[0]
                 self.analyzer.line_surety_ancestorship[
-                    first_statement.start_point[0] + 1
+                    do_statement_body.start_point[0] + 1
                 ] = current_line_number

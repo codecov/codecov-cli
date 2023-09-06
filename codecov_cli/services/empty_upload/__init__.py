@@ -12,13 +12,15 @@ from codecov_cli.helpers.request import (
 logger = logging.getLogger("codecovcli")
 
 
-def empty_upload_logic(commit_sha, slug, token, git_service, enterprise_url):
+def empty_upload_logic(
+    commit_sha, slug, token, git_service, enterprise_url, fail_on_error
+):
     encoded_slug = encode_slug(slug)
     headers = get_token_header_or_fail(token)
     upload_url = enterprise_url or CODECOV_API_URL
     url = f"{upload_url}/upload/{git_service}/{encoded_slug}/commits/{commit_sha}/empty-upload"
     sending_result = send_post_request(url=url, headers=headers)
-    log_warnings_and_errors_if_any(sending_result, "Empty Upload")
+    log_warnings_and_errors_if_any(sending_result, "Empty Upload", fail_on_error)
     if sending_result.status_code == 200:
         response_json = json.loads(sending_result.text)
         logger.info(response_json.get("result"))

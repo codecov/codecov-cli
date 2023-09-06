@@ -59,3 +59,7 @@ do {
 do
   console.log("The value of i is: " + i);
 while (i < 5);
+
+do 
+  for (j = 0; j < i; j++) console.log('X');
+while (i < 5);

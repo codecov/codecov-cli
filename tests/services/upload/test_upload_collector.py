@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest.mock import patch
 
 from codecov_cli.services.upload.upload_collector import UploadCollector
 
@@ -45,6 +46,21 @@ def test_fix_go_files():
             (23, "*/\n"),
         ]
     )
+
+
+@patch("codecov_cli.services.upload.upload_collector.open")
+def test_fix_bad_encoding_files(mock_open):
+    mock_open.side_effect = UnicodeDecodeError("", bytes(), 0, 0, "")
+    go_file = Path("tests/data/files_to_fix_examples/bad_encoding.go")
+
+    col = UploadCollector(None, None, None)
+
+    fixes = col._produce_file_fixes_for_network([str(go_file)])
+    assert len(fixes) == 1
+    fixes_for_go_file = fixes[0]
+    assert fixes_for_go_file.eof is None
+    assert fixes_for_go_file.fixed_lines_without_reason == set([])
+    assert fixes_for_go_file.fixed_lines_with_reason == set([])
 
 
 def test_fix_php_files():

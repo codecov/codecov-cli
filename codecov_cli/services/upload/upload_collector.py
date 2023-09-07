@@ -108,21 +108,30 @@ class UploadCollector(object):
         fixed_lines_with_reason = set()
         eof = None
 
-        with open(filename, "r", encoding="utf8") as f:
-            for lineno, line_content in enumerate(f):
-                if any(
-                    pattern.match(line_content)
-                    for pattern in fix_patterns_to_apply.with_reason
-                ):
-                    fixed_lines_with_reason.add((lineno + 1, line_content))
-                elif any(
-                    pattern.match(line_content)
-                    for pattern in fix_patterns_to_apply.without_reason
-                ):
-                    fixed_lines_without_reason.add(lineno + 1)
+        try:
+            with open(filename, "r") as f:
+                for lineno, line_content in enumerate(f):
+                    if any(
+                        pattern.match(line_content)
+                        for pattern in fix_patterns_to_apply.with_reason
+                    ):
+                        fixed_lines_with_reason.add((lineno + 1, line_content))
+                    elif any(
+                        pattern.match(line_content)
+                        for pattern in fix_patterns_to_apply.without_reason
+                    ):
+                        fixed_lines_without_reason.add(lineno + 1)
 
-            if fix_patterns_to_apply.eof:
-                eof = lineno + 1
+                if fix_patterns_to_apply.eof:
+                    eof = lineno + 1
+        except UnicodeDecodeError as err:
+            logger.warning(
+                f"There was an issue decoding: {filename}, file fixes were not applied to this file.",
+                extra=dict(
+                    encoding=err.encoding,
+                    reason=err.reason,
+                ),
+            )
 
         return UploadCollectionResultFileFixer(
             path, fixed_lines_without_reason, fixed_lines_with_reason, eof

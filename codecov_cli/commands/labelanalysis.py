@@ -154,10 +154,10 @@ def label_analysis(
             request_result = _potentially_calculate_absent_labels(
                 resp_data.json()["result"], requested_labels
             )
-            if not dry_run:
-                runner.process_labelanalysis_result(request_result)
-            else:
-                _dry_run_output(LabelAnalysisRequestResult(request_result))
+            if dry_run:
+                return _dry_run_output(LabelAnalysisRequestResult(request_result))
+
+            runner.process_labelanalysis_result(request_result)
             return
         if resp_json["state"] == "error":
             logger.error(
@@ -286,6 +286,7 @@ def _send_labelanalysis_request(payload, url, token_header):
 
 
 def _dry_run_output(result: LabelAnalysisRequestResult):
+    result_as_json = json.dumps(result)
     logger.info(
         "Not executing tests because '--dry-run' is on. List of labels selected for running below."
     )
@@ -298,7 +299,8 @@ def _dry_run_output(result: LabelAnalysisRequestResult):
     logger.info("- global_level_labels: Set of labels that possibly touch global code")
     logger.info("- present_report_labels: Set of labels previously uploaded")
     logger.info("")
-    logger.info(json.dumps(result))
+    logger.info(result_as_json)
+    return result_as_json
 
 
 def _fallback_to_collected_labels(

@@ -34,6 +34,7 @@ logger = logging.getLogger("codecovcli")
 @click.option(
     "--codecov-yml-path",
     type=click.Path(path_type=pathlib.Path),
+    default=pathlib.Path("codecov.yml"),
 )
 @click.option(
     "--enterprise-url", "--url", "-u", help="Change the upload host (Enterprise use)"
@@ -52,9 +53,7 @@ def cli(
     ctx.help_option_names = ["-h", "--help"]
     ctx.obj["ci_adapter"] = get_ci_adapter(auto_load_params_from)
     ctx.obj["versioning_system"] = get_versioning_system()
-    ctx.obj["codecov_yaml"] = (
-        load_cli_config(codecov_yml_path) if codecov_yml_path else None
-    )
+    ctx.obj["codecov_yaml"] = load_cli_config(codecov_yml_path)
     if ctx.obj["codecov_yaml"] is None:
         logger.debug("No codecov_yaml found")
     ctx.obj["enterprise_url"] = enterprise_url

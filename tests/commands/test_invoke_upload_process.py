@@ -63,7 +63,7 @@ def test_upload_process_options(mocker):
         assert result.exit_code == 0
         print(result.output)
 
-        assert result.output.split("\n") == [
+        assert result.output.split("\n")[1:] == [
             "Usage: cli upload-process [OPTIONS]",
             "",
             "Options:",

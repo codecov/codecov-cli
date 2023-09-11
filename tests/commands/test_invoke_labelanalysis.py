@@ -50,7 +50,8 @@ def get_labelanalysis_deps(mocker):
         "collected_labels": collected_labels,
     }
 
-FAKE_BASE_SHA="0111111111111111111111111111111111111110"
+
+FAKE_BASE_SHA = "0111111111111111111111111111111111111110"
 
 
 class TestLabelAnalysisNotInvoke(object):
@@ -207,7 +208,11 @@ class TestLabelAnalysisCommand(object):
             cli_runner = CliRunner()
             result = cli_runner.invoke(
                 cli,
-                ["label-analysis", "--token=STATIC_TOKEN", f"--base-sha={FAKE_BASE_SHA}"],
+                [
+                    "label-analysis",
+                    "--token=STATIC_TOKEN",
+                    f"--base-sha={FAKE_BASE_SHA}",
+                ],
                 obj={},
             )
             assert result.exit_code == 0
@@ -308,7 +313,11 @@ class TestLabelAnalysisCommand(object):
             cli_runner = CliRunner()
             result = cli_runner.invoke(
                 cli,
-                ["label-analysis", "--token=STATIC_TOKEN", f"--base-sha={FAKE_BASE_SHA}"],
+                [
+                    "label-analysis",
+                    "--token=STATIC_TOKEN",
+                    f"--base-sha={FAKE_BASE_SHA}",
+                ],
                 obj={},
             )
             mock_get_runner.assert_called()
@@ -396,7 +405,11 @@ class TestLabelAnalysisCommand(object):
             cli_runner = CliRunner()
             result = cli_runner.invoke(
                 cli,
-                ["label-analysis", "--token=STATIC_TOKEN", f"--base-sha={FAKE_BASE_SHA}"],
+                [
+                    "label-analysis",
+                    "--token=STATIC_TOKEN",
+                    f"--base-sha={FAKE_BASE_SHA}",
+                ],
                 obj={},
             )
             mock_get_runner.assert_called()
@@ -506,7 +519,11 @@ class TestLabelAnalysisCommand(object):
             cli_runner = CliRunner()
             result = cli_runner.invoke(
                 cli,
-                ["label-analysis", "--token=STATIC_TOKEN", f"--base-sha={FAKE_BASE_SHA}"],
+                [
+                    "label-analysis",
+                    "--token=STATIC_TOKEN",
+                    f"--base-sha={FAKE_BASE_SHA}",
+                ],
                 obj={},
             )
             assert result.exit_code == 0

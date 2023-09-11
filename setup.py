@@ -25,7 +25,7 @@ setup(
         "httpx==0.23.*",
         "ijson==3.*",
         "pytest==7.*",
-        "pytest-cov==3.*",
+        "pytest-cov>=3",
         "pyyaml==6.*",
         "responses==0.21.*",
         "smart-open==6.*",

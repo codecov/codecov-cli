@@ -76,7 +76,9 @@ def test_empty_upload_200(mocker):
     token = uuid.uuid4()
     runner = CliRunner()
     with runner.isolation() as outstreams:
-        res = empty_upload_logic("commit_sha", "owner/repo", token, "service", None, False)
+        res = empty_upload_logic(
+            "commit_sha", "owner/repo", token, "service", None, False
+        )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
         ("info", "Process Empty Upload complete"),

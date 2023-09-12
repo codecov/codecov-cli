@@ -15,6 +15,6 @@ def load_cli_config(codecov_yml_path: pathlib.Path):
         with open(codecov_yml_path, "r") as file_stream:
             return yaml.safe_load(file_stream.read())
     logger.warning(
-        f"File {codecov_yml_path} not found, or is not a file. Ignoring config."
+        f"Config file {codecov_yml_path} not found, or is not a file. Ignoring config."
     )
     return None

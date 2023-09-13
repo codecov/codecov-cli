@@ -53,30 +53,21 @@ class PythonStandardRunnerConfigParams(dict):
         """
         return self.get("strict_mode", False)
 
-    @property
-    def include_curr_dir(self) -> bool:
-        """
-        Only valid for 'strict mode'
-        Account for the difference 'pytest' vs 'python -m pytest'
-        https://docs.pytest.org/en/7.1.x/how-to/usage.html#calling-pytest-through-python-m-pytest
-        """
-        return self.get("include_curr_dir", True)
-
 
 def _include_curr_dir(method):
     """
     Account for the difference 'pytest' vs 'python -m pytest'
     https://docs.pytest.org/en/7.1.x/how-to/usage.html#calling-pytest-through-python-m-pytest
+    Used only in strict_mode
     """
 
     def call_method(self, *args, **kwargs):
-        include_curr_dir = self.params.include_curr_dir
         curr_dir = getcwd()
-        if include_curr_dir:
-            path.append(curr_dir)
+        path.append(curr_dir)
+
         result = method(self, *args, **kwargs)
-        if include_curr_dir:
-            path.remove(curr_dir)
+
+        path.remove(curr_dir)
         return result
 
     return call_method

@@ -49,11 +49,11 @@ class TestPythonStandardRunner(object):
 
     def test_init_with_params(self):
         assert self.runner.params.collect_tests_options == []
-        assert self.runner.params.include_curr_dir == True
+        assert self.runner.params.strict_mode == False
+        assert self.runner.params.coverage_root == "./"
 
         config_params = dict(
             collect_tests_options=["--option=value", "-option"],
-            include_curr_dir=False,
         )
         runner_with_params = PythonStandardRunner(config_params)
         assert runner_with_params.params == config_params
@@ -244,34 +244,6 @@ class TestPythonStandardRunner(object):
     )
     def test_parse_captured_output_error(self, error, expected):
         assert self.runner.parse_captured_output_error(error) == expected
-
-    @patch("codecov_cli.runners.python_standard_runner.getcwd")
-    @patch("codecov_cli.runners.python_standard_runner.path")
-    @patch("codecov_cli.runners.python_standard_runner.get_context")
-    def test_execute_pytest_strict_NOT_include_curr_dir(
-        self, mock_get_context, mock_sys_path, mock_getcwd
-    ):
-        output = "Output in stdout"
-        mock_queue = MagicMock()
-        mock_queue.get.side_effect = [{"output": output}, {"result": ExitCode.OK}]
-        mock_process = MagicMock()
-        mock_process.exitcode = 0
-        mock_get_context.return_value.Queue.return_value = mock_queue
-        mock_get_context.return_value.Process.return_value = mock_process
-
-        config_params = dict(include_curr_dir=False)
-        runner = PythonStandardRunner(config_params=config_params)
-        result = runner._execute_pytest_strict(["--option", "--ignore=batata"])
-        mock_get_context.return_value.Queue.assert_called_with(2)
-        mock_get_context.return_value.Process.assert_called_with(
-            target=_execute_pytest_subprocess,
-            args=[["--option", "--ignore=batata"], mock_queue, pyrunner_stdout, True],
-        )
-        assert mock_queue.get.call_count == 2
-        assert result == output
-        mock_sys_path.append.assert_not_called()
-        mock_getcwd.assert_called()
-        assert result == output
 
     def test_collect_tests(self, mocker):
         collected_test_list = [

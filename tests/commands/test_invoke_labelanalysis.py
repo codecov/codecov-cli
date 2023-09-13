@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 import click
 import pytest
@@ -258,21 +259,31 @@ class TestLabelAnalysisCommand(object):
                 json={"state": "finished", "result": label_analysis_result},
             )
             cli_runner = CliRunner()
-            result = cli_runner.invoke(
-                cli,
-                [
-                    "label-analysis",
-                    "--token=STATIC_TOKEN",
-                    f"--base-sha={FAKE_BASE_SHA}",
-                    "--dry-run",
-                ],
-                obj={},
-            )
-            mock_get_runner.assert_called()
-            fake_runner.process_labelanalysis_result.assert_not_called()
+            with cli_runner.isolated_filesystem():
+                result = cli_runner.invoke(
+                    cli,
+                    [
+                        "label-analysis",
+                        "--token=STATIC_TOKEN",
+                        f"--base-sha={FAKE_BASE_SHA}",
+                        "--dry-run",
+                    ],
+                    obj={},
+                )
+                mock_get_runner.assert_called()
+                fake_runner.process_labelanalysis_result.assert_not_called()
+                labels_file = Path("ATS_TESTS_TO_RUN")
+                assert labels_file.exists() and labels_file.is_file()
+                with open(labels_file, "r") as fd:
+                    assert fd.readlines() == [
+                        "--labels test_absent test_global test_in_diff\n"
+                    ]
         print(result.output)
         assert result.exit_code == 0
-        assert json.dumps(label_analysis_result) in result.output
+        assert (
+            'ATS_TESTS_TO_RUN="--labels test_absent test_global test_in_diff'
+            in result.output
+        )
 
     def test_fallback_to_collected_labels(self, mocker):
         mock_runner = mocker.MagicMock()
@@ -367,7 +378,8 @@ class TestLabelAnalysisCommand(object):
                     "absent_labels": collected_labels,
                     "present_diff_labels": [],
                     "global_level_labels": [],
-                }
+                },
+                fake_runner,
             )
         assert result.exit_code == 0
 

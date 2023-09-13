@@ -157,7 +157,7 @@ def label_analysis(
             if not dry_run:
                 runner.process_labelanalysis_result(request_result)
             else:
-                _dry_run_output(LabelAnalysisRequestResult(request_result))
+                _dry_run_output(LabelAnalysisRequestResult(request_result), runner)
             return
         if resp_json["state"] == "error":
             logger.error(
@@ -285,20 +285,20 @@ def _send_labelanalysis_request(payload, url, token_header):
     return eid
 
 
-def _dry_run_output(result: LabelAnalysisRequestResult):
-    logger.info(
-        "Not executing tests because '--dry-run' is on. List of labels selected for running below."
+def _dry_run_output(
+    result: LabelAnalysisRequestResult, runner: LabelAnalysisRunnerInterface
+):
+    labels_to_run = list(
+        set(
+            result.absent_labels
+            + result.global_level_labels
+            + result.present_diff_labels
+        )
     )
-    logger.info("")
-    logger.info("Label groups:")
-    logger.info(
-        "- absent_labels: Set of new labels found in HEAD that are not present in BASE"
-    )
-    logger.info("- present_diff_labels: Set of labels affected by the git diff")
-    logger.info("- global_level_labels: Set of labels that possibly touch global code")
-    logger.info("- present_report_labels: Set of labels previously uploaded")
-    logger.info("")
-    logger.info(json.dumps(result))
+    output = runner.dry_run_runner_options + sorted(labels_to_run)
+    with open("ATS_TESTS_TO_RUN", "w") as fd:
+        fd.write(" ".join(output) + "\n")
+    click.echo(f"ATS_TESTS_TO_RUN=\"{' '.join(output)}\"")
 
 
 def _fallback_to_collected_labels(
@@ -321,6 +321,6 @@ def _fallback_to_collected_labels(
         if not dry_run:
             return runner.process_labelanalysis_result(fake_response)
         else:
-            return _dry_run_output(LabelAnalysisRequestResult(fake_response))
+            return _dry_run_output(LabelAnalysisRequestResult(fake_response), runner)
     logger.error("Cannot fallback to collected labels because no labels were collected")
     raise click.ClickException("Failed to get list of labels to run")

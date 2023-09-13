@@ -150,9 +150,24 @@ class PythonStandardRunner(LabelAnalysisRunnerInterface):
         if p.exitcode != 0 or (result != pytest.ExitCode.OK and result != 0):
             message = f"Pytest exited with non-zero code {result}."
             message += "\nThis is likely not a problem with label-analysis. Check pytest's output and options."
-            message += "\n(you can check pytest options on the logs before the test session start)"
+            if capture_output:
+                # If pytest failed but we captured its output the user won't know what's wrong
+                # So we need to include that in the error message
+                message += "\nPYTEST OUTPUT:"
+                message += "\n" + output
+            else:
+                message += "\n(you can check pytest options on the logs before the test session start)"
             raise click.ClickException(message)
         return output
+
+    def parse_captured_output_error(self, exp: CalledProcessError) -> str:
+        result = ""
+        for out_stream in [exp.stdout, exp.stderr]:
+            if out_stream:
+                if type(out_stream) is bytes:
+                    out_stream = out_stream.decode()
+                result += "\n" + out_stream
+        return result
 
     def _execute_pytest(self, pytest_args: List[str], capture_output: bool = True):
         """Handles calling pytest using subprocess.run.
@@ -170,7 +185,14 @@ class PythonStandardRunner(LabelAnalysisRunnerInterface):
         except CalledProcessError as exp:
             message = f"Pytest exited with non-zero code {exp.returncode}."
             message += "\nThis is likely not a problem with label-analysis. Check pytest's output and options."
-            message += "\n(you can check pytest options on the logs before the test session start)"
+
+            if capture_output:
+                # If pytest failed but we captured its output the user won't know what's wrong
+                # So we need to include that in the error message
+                message += "\nPYTEST OUTPUT:"
+                message += self.parse_captured_output_error(exp)
+            else:
+                message += "\n(you can check pytest options on the logs before the test session start)"
             raise click.ClickException(message)
         if capture_output:
             return result.stdout.decode()

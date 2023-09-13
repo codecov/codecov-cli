@@ -1,6 +1,7 @@
 from subprocess import CalledProcessError
 from unittest.mock import MagicMock, call, patch
 
+import click
 import pytest
 from pytest import ExitCode
 
@@ -106,7 +107,7 @@ class TestPythonStandardRunner(object):
     )
     @patch("codecov_cli.runners.python_standard_runner.path")
     @patch("codecov_cli.runners.python_standard_runner.get_context")
-    def test_execute_pytest_fail_strict_mode(
+    def test_execute_pytest_fail_strict_mode_collection(
         self, mock_get_context, mock_sys_path, mock_getcwd
     ):
         output = "Output in stdout"
@@ -124,7 +125,7 @@ class TestPythonStandardRunner(object):
             _ = self.runner._execute_pytest_strict(["--option", "--ignore=batata"])
         assert (
             str(exp.value)
-            == "Pytest exited with non-zero code 3.\nThis is likely not a problem with label-analysis. Check pytest's output and options.\n(you can check pytest options on the logs before the test session start)"
+            == "Pytest exited with non-zero code 3.\nThis is likely not a problem with label-analysis. Check pytest's output and options.\nPYTEST OUTPUT:\nOutput in stdout"
         )
         mock_get_context.return_value.Queue.assert_called_with(2)
         mock_get_context.return_value.Process.assert_called_with(
@@ -133,11 +134,49 @@ class TestPythonStandardRunner(object):
         )
         mock_sys_path.append.assert_called_with("current directory")
 
+    @patch(
+        "codecov_cli.runners.python_standard_runner.getcwd",
+        return_value="current directory",
+    )
+    @patch("codecov_cli.runners.python_standard_runner.path")
+    @patch("codecov_cli.runners.python_standard_runner.get_context")
+    def test_execute_pytest_fail_strict_mode_execution(
+        self, mock_get_context, mock_sys_path, mock_getcwd
+    ):
+        output = "Output in stdout"
+        mock_queue = MagicMock()
+        mock_queue.get.side_effect = [
+            {"output": output},
+            {"result": ExitCode.INTERNAL_ERROR},
+        ]
+        mock_process = MagicMock()
+        mock_process.exitcode = 0
+        mock_get_context.return_value.Queue.return_value = mock_queue
+        mock_get_context.return_value.Process.return_value = mock_process
+
+        with pytest.raises(Exception) as exp:
+            _ = self.runner._execute_pytest_strict(
+                ["--option", "--ignore=batata"], capture_output=False
+            )
+        assert (
+            str(exp.value)
+            == "Pytest exited with non-zero code 3.\nThis is likely not a problem with label-analysis. Check pytest's output and options.\n(you can check pytest options on the logs before the test session start)"
+        )
+        mock_get_context.return_value.Queue.assert_called_with(2)
+        mock_get_context.return_value.Process.assert_called_with(
+            target=_execute_pytest_subprocess,
+            args=[["--option", "--ignore=batata"], mock_queue, pyrunner_stdout, False],
+        )
+        mock_sys_path.append.assert_called_with("current directory")
+
     @patch("codecov_cli.runners.python_standard_runner.subprocess")
-    def test_execute_pytest_fail(self, mock_subprocess):
+    def test_execute_pytest_fail_collection(self, mock_subprocess):
         def side_effect(command, *args, **kwargs):
             raise CalledProcessError(
-                cmd=command, returncode=2, stderr="Some error occured"
+                cmd=command,
+                returncode=2,
+                output=b"Process running up to here...",
+                stderr=b"Some error occured",
             )
 
         mock_subprocess.run.side_effect = side_effect
@@ -146,8 +185,65 @@ class TestPythonStandardRunner(object):
             _ = self.runner._execute_pytest(["--option", "--ignore=batata"])
         assert (
             str(exp.value)
+            == "Pytest exited with non-zero code 2.\nThis is likely not a problem with label-analysis. Check pytest's output and options.\nPYTEST OUTPUT:\nProcess running up to here...\nSome error occured"
+        )
+
+    @patch("codecov_cli.runners.python_standard_runner.subprocess")
+    def test_execute_pytest_fail_execution(self, mock_subprocess):
+        def side_effect(command, *args, **kwargs):
+            # In this scenario the regular output AND the stderr message will have been printed
+            # to the user terminal already
+            click.echo("Regular pytest output")
+            raise CalledProcessError(
+                cmd=command,
+                returncode=2,
+                stderr=b"Some error occured",
+            )
+
+        mock_subprocess.run.side_effect = side_effect
+
+        with pytest.raises(Exception) as exp:
+            _ = self.runner._execute_pytest(
+                ["--option", "--ignore=batata"], capture_output=False
+            )
+        assert (
+            str(exp.value)
             == "Pytest exited with non-zero code 2.\nThis is likely not a problem with label-analysis. Check pytest's output and options.\n(you can check pytest options on the logs before the test session start)"
         )
+
+    @pytest.mark.parametrize(
+        "error, expected",
+        [
+            (
+                CalledProcessError(
+                    cmd=["python", "-m", "pytest", "missing_label"],
+                    returncode=2,
+                    output=b"Process running up to here...",
+                    stderr=b"Some error occured",
+                ),
+                "\nProcess running up to here...\nSome error occured",
+            ),
+            (
+                CalledProcessError(
+                    cmd=["python", "-m", "pytest", "missing_label"],
+                    returncode=2,
+                    output="Process running up to here...",
+                    stderr="Some error occured",
+                ),
+                "\nProcess running up to here...\nSome error occured",
+            ),
+            (
+                CalledProcessError(
+                    cmd=["python", "-m", "pytest", "missing_label"],
+                    returncode=2,
+                    stderr=b"Some error occured",
+                ),
+                "\nSome error occured",
+            ),
+        ],
+    )
+    def test_parse_captured_output_error(self, error, expected):
+        assert self.runner.parse_captured_output_error(error) == expected
 
     @patch("codecov_cli.runners.python_standard_runner.getcwd")
     @patch("codecov_cli.runners.python_standard_runner.path")

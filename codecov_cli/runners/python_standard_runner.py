@@ -229,7 +229,9 @@ class PythonStandardRunner(LabelAnalysisRunnerInterface):
             label.split("[")[0] if "[" in label else label for label in all_labels
         ]
         command_array = default_options + tests_to_run
-        logger.info("Running tests. (run in verbose mode to get list of tests executed)")
+        logger.info(
+            "Running tests. (run in verbose mode to get list of tests executed)"
+        )
         logger.info(f"  pytest options: \"{' '.join(default_options)}\"")
         logger.info(f"  executed tests: {len(tests_to_run)}")
         logger.debug(

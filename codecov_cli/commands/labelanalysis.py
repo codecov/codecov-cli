@@ -1,7 +1,7 @@
-import json
 import logging
+import pathlib
 import time
-from typing import List
+from typing import List, Optional
 
 import click
 import requests
@@ -55,8 +55,15 @@ logger = logging.getLogger("codecovcli")
 @click.option(
     "--dry-run",
     "dry_run",
-    help="Userful during setup. This will run the label analysis, but will print the result to stdout and terminate instead of calling the runner.process_labelanalysis_result",
+    help='Print list of tests to run and options that need to be added to the test runner as a space-separated list to stdout. Format is ATS_TESTS_TO_RUN="<options> <test_1> <test_2> ... <test_n>"',
     is_flag=True,
+)
+@click.option(
+    "--dry-run-output-path",
+    "dry_run_output_path",
+    help="Prints the dry-run list into dry_run_output_path (in addition to stdout)",
+    type=pathlib.Path,
+    default=None,
 )
 @click.pass_context
 def label_analysis(
@@ -67,6 +74,7 @@ def label_analysis(
     runner_name: str,
     max_wait_time: str,
     dry_run: bool,
+    dry_run_output_path: Optional[pathlib.Path],
 ):
     enterprise_url = ctx.obj.get("enterprise_url")
     logger.debug(
@@ -137,7 +145,12 @@ def label_analysis(
         # Retry it
         eid = _send_labelanalysis_request(payload, url, token_header)
         if eid is None:
-            _fallback_to_collected_labels(requested_labels, runner, dry_run=dry_run)
+            _fallback_to_collected_labels(
+                requested_labels,
+                runner,
+                dry_run=dry_run,
+                dry_run_output_path=dry_run_output_path,
+            )
             return
 
     has_result = False
@@ -157,7 +170,11 @@ def label_analysis(
             if not dry_run:
                 runner.process_labelanalysis_result(request_result)
             else:
-                _dry_run_output(LabelAnalysisRequestResult(request_result))
+                _dry_run_output(
+                    LabelAnalysisRequestResult(request_result),
+                    runner,
+                    dry_run_output_path,
+                )
             return
         if resp_json["state"] == "error":
             logger.error(
@@ -165,7 +182,10 @@ def label_analysis(
                 extra=dict(extra_log_attributes=dict(resp_json=resp_json)),
             )
             _fallback_to_collected_labels(
-                collected_labels=requested_labels, runner=runner, dry_run=dry_run
+                collected_labels=requested_labels,
+                runner=runner,
+                dry_run=dry_run,
+                dry_run_output_path=dry_run_output_path,
             )
             return
         if max_wait_time and (time.monotonic() - start_wait) > max_wait_time:
@@ -173,7 +193,10 @@ def label_analysis(
                 f"Exceeded max waiting time of {max_wait_time} seconds. Running all tests.",
             )
             _fallback_to_collected_labels(
-                collected_labels=requested_labels, runner=runner, dry_run=dry_run
+                collected_labels=requested_labels,
+                runner=runner,
+                dry_run=dry_run,
+                dry_run_output_path=dry_run_output_path,
             )
             return
         logger.info("Waiting more time for result...")
@@ -285,20 +308,23 @@ def _send_labelanalysis_request(payload, url, token_header):
     return eid
 
 
-def _dry_run_output(result: LabelAnalysisRequestResult):
-    logger.info(
-        "Not executing tests because '--dry-run' is on. List of labels selected for running below."
+def _dry_run_output(
+    result: LabelAnalysisRequestResult,
+    runner: LabelAnalysisRunnerInterface,
+    dry_run_output_path: Optional[pathlib.Path],
+):
+    labels_to_run = list(
+        set(
+            result.absent_labels
+            + result.global_level_labels
+            + result.present_diff_labels
+        )
     )
-    logger.info("")
-    logger.info("Label groups:")
-    logger.info(
-        "- absent_labels: Set of new labels found in HEAD that are not present in BASE"
-    )
-    logger.info("- present_diff_labels: Set of labels affected by the git diff")
-    logger.info("- global_level_labels: Set of labels that possibly touch global code")
-    logger.info("- present_report_labels: Set of labels previously uploaded")
-    logger.info("")
-    logger.info(json.dumps(result))
+    output = runner.dry_run_runner_options + sorted(labels_to_run)
+    if dry_run_output_path is not None:
+        with open(dry_run_output_path, "w") as fd:
+            fd.write(" ".join(output) + "\n")
+    click.echo(f"ATS_TESTS_TO_RUN=\"{' '.join(output)}\"")
 
 
 def _fallback_to_collected_labels(
@@ -306,6 +332,7 @@ def _fallback_to_collected_labels(
     runner: LabelAnalysisRunnerInterface,
     *,
     dry_run: bool = False,
+    dry_run_output_path: Optional[pathlib.Path] = None,
 ) -> dict:
     logger.info("Trying to fallback on collected labels")
     if collected_labels:
@@ -321,6 +348,8 @@ def _fallback_to_collected_labels(
         if not dry_run:
             return runner.process_labelanalysis_result(fake_response)
         else:
-            return _dry_run_output(LabelAnalysisRequestResult(fake_response))
+            return _dry_run_output(
+                LabelAnalysisRequestResult(fake_response), runner, dry_run_output_path
+            )
     logger.error("Cannot fallback to collected labels because no labels were collected")
     raise click.ClickException("Failed to get list of labels to run")

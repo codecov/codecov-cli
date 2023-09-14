@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict, List
 
 
 # This is supposed to be a TypedDict,
@@ -23,7 +23,8 @@ class LabelAnalysisRequestResult(dict):
 
 
 class LabelAnalysisRunnerInterface(object):
-    params = None
+    params: Dict = None
+    dry_run_runner_options: List[str] = []
 
     def collect_tests(self) -> List[str]:
         raise NotImplementedError()

@@ -97,6 +97,9 @@ def _execute_pytest_subprocess(
 
 
 class PythonStandardRunner(LabelAnalysisRunnerInterface):
+
+    dry_run_runner_options = ["--cov-context=test"]
+
     def __init__(self, config_params: Optional[dict] = None) -> None:
         super().__init__()
         if config_params is None:

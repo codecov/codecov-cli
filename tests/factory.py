@@ -75,6 +75,8 @@ class FakeVersioningSystem(VersioningSystemInterface):
 
 
 class FakeRunner(LabelAnalysisRunnerInterface):
+    dry_run_runner_options = ["--labels"]
+
     def __init__(self, collect_tests_response: List[str]) -> None:
         super().__init__()
         self.collect_tests_response = collect_tests_response

@@ -1,4 +1,5 @@
 import hashlib
+from collections import deque
 
 
 class BaseAnalyzer(object):
@@ -16,10 +17,26 @@ class BaseAnalyzer(object):
             count += 1
         return count
 
-    def _get_max_nested_conditional(self, node):
-        return (1 if node.type in self.condition_statements else 0) + max(
-            (self._get_max_nested_conditional(x) for x in node.children), default=0
-        )
+    def _get_max_nested_conditional(self, head):
+        """Iterates over all nodes in a function body and returns the max nested conditional depth.
+        Uses BFS to avoid recursion calls (so we don't throw RecursionError)
+        """
+        nodes_to_visit = deque()
+        nodes_to_visit.append([head, 0])
+        max_nested_depth = 0
+
+        while nodes_to_visit:
+            curr_node, curr_depth = nodes_to_visit.popleft()
+            max_nested_depth = max(max_nested_depth, curr_depth)
+            # Here is where the depth might change
+            # If the current node is a conditional
+            is_curr_conditional = curr_node.type in self.condition_statements
+
+            # Enqueue all child nodes of the curr_node
+            for child in curr_node.children:
+                nodes_to_visit.append([child, curr_depth + is_curr_conditional])
+
+        return max_nested_depth
 
     def _get_complexity_metrics(self, body_node):
         number_conditions = self._count_elements(

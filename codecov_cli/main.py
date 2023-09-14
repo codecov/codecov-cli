@@ -4,6 +4,8 @@ import typing
 
 import click
 
+from . import __version__
+
 from codecov_cli.commands.base_picking import pr_base_picking
 from codecov_cli.commands.commit import create_commit
 from codecov_cli.commands.create_report_result import create_report_results
@@ -21,7 +23,6 @@ from codecov_cli.helpers.logging_utils import configure_logger
 from codecov_cli.helpers.versioning_systems import get_versioning_system
 
 logger = logging.getLogger("codecovcli")
-
 
 @click.group()
 @click.option(
@@ -41,7 +42,7 @@ logger = logging.getLogger("codecovcli")
 )
 @click.option("-v", "--verbose", "verbose", help="Use verbose logging", is_flag=True)
 @click.pass_context
-@click.version_option()
+@click.version_option(__version__, prog_name="codecovcli")
 def cli(
     ctx: click.Context,
     auto_load_params_from: typing.Optional[str],

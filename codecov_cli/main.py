@@ -24,6 +24,7 @@ from codecov_cli.helpers.versioning_systems import get_versioning_system
 
 logger = logging.getLogger("codecovcli")
 
+
 @click.group()
 @click.option(
     "--auto-load-params-from",

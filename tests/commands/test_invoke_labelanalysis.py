@@ -123,10 +123,13 @@ class TestLabelAnalysisCommand(object):
             "  --max-wait-time INTEGER       Max time (in seconds) to wait for the label",
             "                                analysis result before falling back to running",
             "                                all tests. Default is to wait forever.",
-            "  --dry-run                     Userful during setup. This will run the label",
-            "                                analysis, but will print the result to stdout",
-            "                                and terminate instead of calling the",
-            "                                runner.process_labelanalysis_result",
+            "  --dry-run                     Print list of tests to run and options that need",
+            "                                to be added to the test runner as a space-",
+            "                                separated list to stdout. Format is",
+            '                                ATS_TESTS_TO_RUN="<options> <test_1> <test_2>',
+            '                                ... <test_n>"',
+            "  --dry-run-output-path PATH    Prints the dry-run list into dry_run_output_path",
+            "                                (in addition to stdout)",
             "  -h, --help                    Show this message and exit.",
             "",
         ]
@@ -272,12 +275,71 @@ class TestLabelAnalysisCommand(object):
                 )
                 mock_get_runner.assert_called()
                 fake_runner.process_labelanalysis_result.assert_not_called()
-                labels_file = Path("ATS_TESTS_TO_RUN")
+        print(result.output)
+        assert result.exit_code == 0
+        assert (
+            'ATS_TESTS_TO_RUN="--labels test_absent test_global test_in_diff'
+            in result.output
+        )
+
+    def test_invoke_label_analysis_dry_run_with_output_path(
+        self, get_labelanalysis_deps, mocker
+    ):
+        mock_get_runner = get_labelanalysis_deps["mock_get_runner"]
+        fake_runner = get_labelanalysis_deps["fake_runner"]
+
+        label_analysis_result = {
+            "present_report_labels": ["test_present"],
+            "absent_labels": ["test_absent"],
+            "present_diff_labels": ["test_in_diff"],
+            "global_level_labels": ["test_global"],
+        }
+
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                responses.POST,
+                "https://api.codecov.io/labels/labels-analysis",
+                json={"external_id": "label-analysis-request-id"},
+                status=201,
+                match=[
+                    matchers.header_matcher({"Authorization": "Repotoken STATIC_TOKEN"})
+                ],
+            )
+            rsps.add(
+                responses.PATCH,
+                "https://api.codecov.io/labels/labels-analysis/label-analysis-request-id",
+                json={"external_id": "label-analysis-request-id"},
+                status=201,
+                match=[
+                    matchers.header_matcher({"Authorization": "Repotoken STATIC_TOKEN"})
+                ],
+            )
+            rsps.add(
+                responses.GET,
+                "https://api.codecov.io/labels/labels-analysis/label-analysis-request-id",
+                json={"state": "finished", "result": label_analysis_result},
+            )
+            cli_runner = CliRunner()
+            with cli_runner.isolated_filesystem():
+                result = cli_runner.invoke(
+                    cli,
+                    [
+                        "label-analysis",
+                        "--token=STATIC_TOKEN",
+                        f"--base-sha={FAKE_BASE_SHA}",
+                        "--dry-run",
+                        "--dry-run-output-path=ats_output_path",
+                    ],
+                    obj={},
+                )
+                labels_file = Path("ats_output_path")
                 assert labels_file.exists() and labels_file.is_file()
                 with open(labels_file, "r") as fd:
                     assert fd.readlines() == [
                         "--labels test_absent test_global test_in_diff\n"
                     ]
+                mock_get_runner.assert_called()
+                fake_runner.process_labelanalysis_result.assert_not_called()
         print(result.output)
         assert result.exit_code == 0
         assert (
@@ -380,6 +442,7 @@ class TestLabelAnalysisCommand(object):
                     "global_level_labels": [],
                 },
                 fake_runner,
+                None,
             )
         assert result.exit_code == 0
 

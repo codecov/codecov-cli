@@ -27,3 +27,9 @@ assert a
 c = 0
 while c < 1:
     print("b")
+
+def nested_conditionals(val):
+    if val > 10:
+        if val > 100:
+            if val > 1000:
+                return 'large value'

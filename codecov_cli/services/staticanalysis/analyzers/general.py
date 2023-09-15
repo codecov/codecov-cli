@@ -22,7 +22,7 @@ class BaseAnalyzer(object):
         Uses BFS to avoid recursion calls (so we don't throw RecursionError)
         """
         nodes_to_visit = deque()
-        nodes_to_visit.append([head, 0])
+        nodes_to_visit.append([head, int(head.type in self.condition_statements)])
         max_nested_depth = 0
 
         while nodes_to_visit:

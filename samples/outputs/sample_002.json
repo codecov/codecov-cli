@@ -45,10 +45,22 @@
                     "returns": 0,
                     "max_nested_conditional": 0
                 }
+            },
+            {
+                "identifier": "nested_conditionals",
+                "start_line": 31,
+                "end_line": 35,
+                "code_hash": "9ee2ce7f737ad1adf8e8e6be70be534b",
+                "complexity_metrics": {
+                    "conditions": 3,
+                    "max_nested_conditional": 3,
+                    "mccabe_cyclomatic_complexity": 4,
+                    "returns": 1
+                }
             }
         ],
-        "hash": "97be1c2949c8f328b8ba5673eba21a84",
-        "number_lines": 30,
+        "hash": "9fb6bbc43350a18531adfb399f5cc0ae",
+        "number_lines": 35,
         "statements": [
             [
                 9,
@@ -199,6 +211,46 @@
                     "len": 0,
                     "extra_connected_lines": []
                 }
+            ],
+            [
+                32,
+                {
+                    "extra_connected_lines": [],
+                    "len": 3,
+                    "line_hash": "9ee2ce7f737ad1adf8e8e6be70be534b",
+                    "line_surety_ancestorship": null,
+                    "start_column": 4
+                }
+            ],
+            [
+                33,
+                {
+                    "extra_connected_lines": [],
+                    "len": 2,
+                    "line_hash": "3d1fa1be2935c716122a2a63eb0070f3",
+                    "line_surety_ancestorship": 32,
+                    "start_column": 8
+                }
+            ],
+            [
+                34,
+                {
+                    "extra_connected_lines": [],
+                    "len": 1,
+                    "line_hash": "20a6f68248783caeab8abb2ccda43cb3",
+                    "line_surety_ancestorship": 33,
+                    "start_column": 12
+                }
+            ],
+            [
+                35,
+                {
+                    "extra_connected_lines": [],
+                    "len": 0,
+                    "line_hash": "6c92ccd39eaa87eb873f2de3e475db82",
+                    "line_surety_ancestorship": 34,
+                    "start_column": 16
+                }
             ]
         ],
         "definition_lines": [
@@ -213,6 +265,10 @@
             [
                 17,
                 1
+            ],
+            [
+                31,
+                4
             ]
         ],
         "import_lines": [

@@ -4,6 +4,7 @@ import typing
 
 import click
 
+from codecov_cli import __version__
 from codecov_cli.commands.base_picking import pr_base_picking
 from codecov_cli.commands.commit import create_commit
 from codecov_cli.commands.create_report_result import create_report_results
@@ -19,8 +20,6 @@ from codecov_cli.helpers.ci_adapters import get_ci_adapter, get_ci_providers_lis
 from codecov_cli.helpers.config import load_cli_config
 from codecov_cli.helpers.logging_utils import configure_logger
 from codecov_cli.helpers.versioning_systems import get_versioning_system
-
-from . import __version__
 
 logger = logging.getLogger("codecovcli")
 

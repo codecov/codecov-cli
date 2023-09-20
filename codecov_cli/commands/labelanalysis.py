@@ -164,8 +164,16 @@ def label_analysis(
         )
         resp_json = resp_data.json()
         if resp_json["state"] == "finished":
+            logger.info(
+                "Received list of tests from Codecov",
+                extra=dict(
+                    extra_log_attributes=dict(
+                        processing_errors=resp_json.get("errors", [])
+                    )
+                ),
+            )
             request_result = _potentially_calculate_absent_labels(
-                resp_data.json()["result"], requested_labels
+                resp_json["result"], requested_labels
             )
             if not dry_run:
                 runner.process_labelanalysis_result(request_result)
@@ -206,14 +214,6 @@ def label_analysis(
 def _potentially_calculate_absent_labels(
     request_result, requested_labels
 ) -> LabelAnalysisRequestResult:
-    logger.info(
-        "Received list of tests from Codecov",
-        extra=dict(
-            extra_log_attributes=dict(
-                processing_errors=request_result.get("errors", [])
-            )
-        ),
-    )
     if request_result["absent_labels"]:
         # This means that Codecov already calculated everything for us
         final_result = LabelAnalysisRequestResult(request_result)

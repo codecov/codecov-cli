@@ -18,6 +18,7 @@ here_parent = here.parent
         ("samples/inputs/sample_002.py", "samples/outputs/sample_002.json"),
         ("samples/inputs/sample_003.js", "samples/outputs/sample_003.json"),
         ("samples/inputs/sample_004.js", "samples/outputs/sample_004.json"),
+        ("samples/inputs/sample_005.py", "samples/outputs/sample_005.json"),
     ],
 )
 def test_sample_analysis(input_filename, output_filename):

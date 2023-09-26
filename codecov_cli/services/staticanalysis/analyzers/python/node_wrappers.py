@@ -15,6 +15,9 @@ class NodeVisitor(object):
         Pytest doesn't include them in the report, so I don't think we should either,
         at least for now.
         """
+        # Docstrings have type 'expression_statement
+        if node.type != "expression_statement":
+            return False
         # Docstrings for a module are OK - they show up in pytest result
         # Docstrings for a class are OK - they show up in pytest result
         # Docstrings for functions are NOT OK - they DONT show up in pytest result
@@ -25,9 +28,7 @@ class NodeVisitor(object):
         parent_is_block = node.parent.type == "block"
         first_exp_in_block = node.prev_named_sibling is None
         is_in_function_context = (
-            node.parent.parent.type == "function_definition"
-            if parent_is_block and node.parent is not None
-            else False
+            parent_is_block and node.parent.parent.type == "function_definition"
         )
 
         return (
@@ -56,9 +57,8 @@ class NodeVisitor(object):
                 "for_statement",
                 "while_statement",
             ):
-                if node.type == "expression_statement" and self._is_function_docstring(
-                    node
-                ):
+                if self._is_function_docstring(node):
+                    # We ignore these
                     return
                 closest_named_sibling_not_comment_that_is_in_statements = (
                     self._get_previous_sibling_that_is_not_comment_not_func_docstring(

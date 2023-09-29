@@ -36,24 +36,15 @@ async def run_analysis_entrypoint(
 ):
     ff = select_file_finder(config)
     files = list(ff.find_files(folder, pattern, folders_to_exclude))
-    logger.info(f"Running the analyzer on {len(files)} files")
-    mapped_func = partial(analyze_file, config)
-    all_data = {}
-    file_metadata = []
-    with click.progressbar(
-        length=len(files),
-        label="Analyzing files",
-    ) as bar:
-        with get_context("fork").Pool(processes=numberprocesses) as pool:
-            file_results = pool.imap_unordered(mapped_func, files)
-            for x in file_results:
-                bar.update(1, x)
-                if x is not None:
-                    res = x.asdict()["result"]
-                    all_data[x.filename] = res
-                    file_metadata.append(
-                        {"filepath": x.filename, "file_hash": res["hash"]}
-                    )
+    processing_results = await process_files(files, numberprocesses, config)
+    # Let users know if there were processing errors
+    # This is here and not in the funcition so we can add an option to ignore those (possibly)
+    # Also makes the function easier to test
+    processing_errors = processing_results["processing_errors"]
+    log_processing_errors(processing_errors)
+    # Upload results metadata to codecov to get list of files that we need to upload
+    file_metadata = processing_results["file_metadata"]
+    all_data = processing_results["all_data"]
     try:
         json_output = {"commit": commit, "filepaths": file_metadata}
         logger.debug(
@@ -150,6 +141,51 @@ async def run_analysis_entrypoint(
             extra_log_attributes=dict(time_taken=response.elapsed.total_seconds())
         ),
     )
+    log_processing_errors(processing_errors)
+
+
+def log_processing_errors(processing_errors: typing.Dict[str, str]) -> None:
+    if len(processing_errors) > 0:
+        logger.error(
+            f"{len(processing_errors)} files have processing errors and have been IGNORED."
+        )
+        for file, error in processing_errors.items():
+            logger.error(f"-> {file}: ERROR {error}")
+
+
+async def process_files(
+    files_to_analyze: typing.List[FileAnalysisRequest],
+    numberprocesses: int,
+    config: typing.Optional[typing.Dict],
+):
+    logger.info(f"Running the analyzer on {len(files_to_analyze)} files")
+    mapped_func = partial(analyze_file, config)
+    all_data = {}
+    file_metadata = []
+    errors = {}
+    with click.progressbar(
+        length=len(files_to_analyze),
+        label="Analyzing files",
+    ) as bar:
+        with get_context("fork").Pool(processes=numberprocesses) as pool:
+            file_results = pool.imap_unordered(mapped_func, files_to_analyze)
+            for result in file_results:
+                bar.update(1, result)
+                if result is not None:
+                    if result.result:
+                        all_data[result.filename] = result.result
+                        file_metadata.append(
+                            {
+                                "filepath": result.filename,
+                                "file_hash": result.result["hash"],
+                            }
+                        )
+                    elif result.error:
+                        errors[result.filename] = result.error
+    logger.info("All files have been processed")
+    return dict(
+        all_data=all_data, file_metadata=file_metadata, processing_errors=errors
+    )
 
 
 async def send_single_upload_put(client, all_data, el):
@@ -205,7 +241,9 @@ def send_finish_signal(response_json, upload_url: str, token: str):
     return response
 
 
-def analyze_file(config, filename: FileAnalysisRequest):
+def analyze_file(
+    config, filename: FileAnalysisRequest
+) -> typing.Optional[FileAnalysisResult]:
     try:
         with open(filename.actual_filepath, "rb") as file:
             actual_code = file.read()
@@ -219,7 +257,7 @@ def analyze_file(config, filename: FileAnalysisRequest):
     except AnalysisError as e:
         error_dict = {
             "filename": str(filename.result_filename),
-            "error_class": str(type(e)),
+            "error": str(e),
         }
         return FileAnalysisResult(
             filename=str(filename.result_filename), error=error_dict

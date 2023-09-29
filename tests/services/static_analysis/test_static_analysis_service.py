@@ -7,11 +7,65 @@ import requests
 import responses
 from responses import matchers
 
-from codecov_cli.services.staticanalysis import run_analysis_entrypoint
-from codecov_cli.services.staticanalysis.types import FileAnalysisRequest
+from codecov_cli.services.staticanalysis import process_files, run_analysis_entrypoint
+from codecov_cli.services.staticanalysis.types import (
+    FileAnalysisRequest,
+    FileAnalysisResult,
+)
 
 
 class TestStaticAnalysisService:
+    @pytest.mark.asyncio
+    async def test_process_files_with_error(self, mocker):
+        files_found = list(
+            map(
+                lambda filename: FileAnalysisRequest(str(filename), Path(filename)),
+                [
+                    "correct_file.py",
+                    "error_file.py",
+                ],
+            )
+        )
+        mock_get_context = mocker.patch(
+            "codecov_cli.services.staticanalysis.get_context"
+        )
+
+        def side_effect(config, filename: FileAnalysisRequest):
+            if filename.result_filename == "correct_file.py":
+                return FileAnalysisResult(
+                    filename=filename.result_filename, result={"hash": "abc123"}
+                )
+            if filename.result_filename == "error_file.py":
+                return FileAnalysisResult(
+                    filename=filename.result_filename, error="some error @ line 12"
+                )
+            # Should not get here, so fail test
+            assert False
+
+        mock_analyze_function = mocker.patch(
+            "codecov_cli.services.staticanalysis.analyze_file"
+        )
+        mock_analyze_function.side_effect = side_effect
+
+        def imap_side_effect(mapped_func, files):
+            results = []
+            for file in files:
+                results.append(mapped_func(file))
+            return results
+
+        mock_get_context.return_value.Pool.return_value.__enter__.return_value.imap_unordered.side_effect = (
+            imap_side_effect
+        )
+
+        results = await process_files(files_found, 1, {})
+        mock_get_context.return_value.Pool.return_value.__enter__.return_value.imap_unordered.assert_called()
+        assert mock_analyze_function.call_count == 2
+        assert results == dict(
+            all_data={"correct_file.py": {"hash": "abc123"}},
+            file_metadata=[{"file_hash": "abc123", "filepath": "correct_file.py"}],
+            processing_errors={"error_file.py": "some error @ line 12"},
+        )
+
     @pytest.mark.asyncio
     async def test_static_analysis_service(self, mocker):
         mock_file_finder = mocker.patch(

@@ -7,6 +7,7 @@ from codecov_cli.services.staticanalysis.analyzers.general import BaseAnalyzer
 from codecov_cli.services.staticanalysis.analyzers.python.node_wrappers import (
     NodeVisitor,
 )
+from codecov_cli.services.staticanalysis.types import FileAnalysisRequest
 
 _function_query_str = """
 (function_definition
@@ -52,14 +53,16 @@ class PythonAnalyzer(BaseAnalyzer):
     ]
     wrappers = ["class_definition", "function_definition"]
 
-    def __init__(self, path, actual_code, **options):
+    def __init__(
+        self, file_analysis_request: FileAnalysisRequest, actual_code: bytes, **options
+    ):
         self.actual_code = actual_code
         self.lines = self.actual_code.split(b"\n")
         self.statements = []
         self.import_lines = set()
         self.definitions_lines = set()
         self.functions = []
-        self.path = path.result_filename
+        self.path = file_analysis_request.result_filename
         self.PY_LANGUAGE = Language(staticcodecov_languages.__file__, "python")
         self.parser = Parser()
         self.parser.set_language(self.PY_LANGUAGE)

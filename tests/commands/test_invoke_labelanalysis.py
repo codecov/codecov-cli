@@ -123,13 +123,19 @@ class TestLabelAnalysisCommand(object):
             "  --max-wait-time INTEGER       Max time (in seconds) to wait for the label",
             "                                analysis result before falling back to running",
             "                                all tests. Default is to wait forever.",
-            "  --dry-run                     Print list of tests to run and options that need",
-            "                                to be added to the test runner as a space-",
-            "                                separated list to stdout. Format is",
-            '                                ATS_TESTS_TO_RUN="<options> <test_1> <test_2>',
-            '                                ... <test_n>"',
-            "  --dry-run-output-path PATH    Prints the dry-run list into dry_run_output_path",
-            "                                (in addition to stdout)",
+            "  --dry-run                     Print list of tests to run AND tests skipped",
+            "                                (and options that need to be added to the test",
+            "                                runner) to stdout. Also prints the same",
+            "                                information in JSON format. JSON will have keys",
+            "                                'ats_tests_to_run', 'ats_tests_to_skip' and",
+            "                                'runner_options'. List of tests to run is",
+            "                                prefixed with ATS_TESTS_TO_RUN= List of tests to",
+            "                                skip is prefixed with ATS_TESTS_TO_SKIP=",
+            "  --dry-run-output-path PATH    Prints the dry-run list (ATS_TESTS_TO_RUN) into",
+            "                                dry_run_output_path (in addition to stdout) AND",
+            "                                prints ATS_TESTS_TO_SKIP into",
+            "                                dry_run_output_path_skipped AND prints dry-run",
+            "                                JSON output into dry_run_output_path.json",
             "  -h, --help                    Show this message and exit.",
             "",
         ]
@@ -231,7 +237,7 @@ class TestLabelAnalysisCommand(object):
         fake_runner = get_labelanalysis_deps["fake_runner"]
 
         label_analysis_result = {
-            "present_report_labels": ["test_present"],
+            "present_report_labels": ["test_present", "test_in_diff", "test_global"],
             "absent_labels": ["test_absent"],
             "present_diff_labels": ["test_in_diff"],
             "global_level_labels": ["test_global"],
@@ -278,9 +284,14 @@ class TestLabelAnalysisCommand(object):
         print(result.output)
         assert result.exit_code == 0
         assert (
-            'ATS_TESTS_TO_RUN="--labels test_absent test_global test_in_diff'
+            '{"runner_options": ["--labels"], "ats_tests_to_run": ["\\"test_absent\\"", "\\"test_global\\"", "\\"test_in_diff\\""], "ats_tests_to_skip": ["\\"test_present\\""]}'
             in result.output
         )
+        assert (
+            'ATS_TESTS_TO_RUN=--labels "test_absent" "test_global" "test_in_diff"'
+            in result.output
+        )
+        assert 'ATS_TESTS_TO_SKIP=--labels "test_present"' in result.output
 
     def test_invoke_label_analysis_dry_run_with_output_path(
         self, get_labelanalysis_deps, mocker
@@ -289,7 +300,7 @@ class TestLabelAnalysisCommand(object):
         fake_runner = get_labelanalysis_deps["fake_runner"]
 
         label_analysis_result = {
-            "present_report_labels": ["test_present"],
+            "present_report_labels": ["test_present", "test_in_diff", "test_global"],
             "absent_labels": ["test_absent"],
             "present_diff_labels": ["test_in_diff"],
             "global_level_labels": ["test_global"],
@@ -332,20 +343,38 @@ class TestLabelAnalysisCommand(object):
                     ],
                     obj={},
                 )
-                labels_file = Path("ats_output_path")
+                print(result)
+                print(result.output)
+                ats_output_path = "ats_output_path"
+                labels_file = Path(ats_output_path)
+                skip_labels_file = Path(ats_output_path + "_skipped")
+                json_output = Path(ats_output_path + ".json")
                 assert labels_file.exists() and labels_file.is_file()
+                assert skip_labels_file.exists() and skip_labels_file.is_file()
+                assert json_output.exists() and json_output.is_file()
                 with open(labels_file, "r") as fd:
                     assert fd.readlines() == [
-                        "--labels test_absent test_global test_in_diff\n"
+                        '--labels "test_absent" "test_global" "test_in_diff"\n'
+                    ]
+                with open(skip_labels_file, "r") as fd:
+                    assert fd.readlines() == ['--labels "test_present"\n']
+                with open(json_output, "r") as fd:
+                    assert fd.readlines() == [
+                        '{"runner_options": ["--labels"], "ats_tests_to_run": ["\\"test_absent\\"", "\\"test_global\\"", "\\"test_in_diff\\""], "ats_tests_to_skip": ["\\"test_present\\""]}\n'
                     ]
                 mock_get_runner.assert_called()
                 fake_runner.process_labelanalysis_result.assert_not_called()
         print(result.output)
         assert result.exit_code == 0
         assert (
-            'ATS_TESTS_TO_RUN="--labels test_absent test_global test_in_diff'
+            '{"runner_options": ["--labels"], "ats_tests_to_run": ["\\"test_absent\\"", "\\"test_global\\"", "\\"test_in_diff\\""], "ats_tests_to_skip": ["\\"test_present\\""]}'
             in result.output
         )
+        assert (
+            'ATS_TESTS_TO_RUN=--labels "test_absent" "test_global" "test_in_diff"'
+            in result.output
+        )
+        assert 'ATS_TESTS_TO_SKIP=--labels "test_present"' in result.output
 
     def test_fallback_to_collected_labels(self, mocker):
         mock_runner = mocker.MagicMock()

@@ -1,3 +1,4 @@
+import json
 import logging
 import pathlib
 import time
@@ -55,13 +56,23 @@ logger = logging.getLogger("codecovcli")
 @click.option(
     "--dry-run",
     "dry_run",
-    help='Print list of tests to run and options that need to be added to the test runner as a space-separated list to stdout. Format is ATS_TESTS_TO_RUN="<options> <test_1> <test_2> ... <test_n>"',
+    help=(
+        "Print list of tests to run AND tests skipped (and options that need to be added to the test runner) to stdout. "
+        + "Also prints the same information in JSON format. "
+        + "JSON will have keys 'ats_tests_to_run', 'ats_tests_to_skip' and 'runner_options'. "
+        + "List of tests to run is prefixed with ATS_TESTS_TO_RUN= "
+        + "List of tests to skip is prefixed with ATS_TESTS_TO_SKIP="
+    ),
     is_flag=True,
 )
 @click.option(
     "--dry-run-output-path",
     "dry_run_output_path",
-    help="Prints the dry-run list into dry_run_output_path (in addition to stdout)",
+    help=(
+        "Prints the dry-run list (ATS_TESTS_TO_RUN) into dry_run_output_path (in addition to stdout)\n"
+        + "AND prints ATS_TESTS_TO_SKIP into dry_run_output_path_skipped\n"
+        + "AND prints dry-run JSON output into dry_run_output_path.json"
+    ),
     type=pathlib.Path,
     default=None,
 )
@@ -313,18 +324,50 @@ def _dry_run_output(
     runner: LabelAnalysisRunnerInterface,
     dry_run_output_path: Optional[pathlib.Path],
 ):
-    labels_to_run = list(
-        set(
-            result.absent_labels
-            + result.global_level_labels
-            + result.present_diff_labels
-        )
+    labels_to_run = set(
+        result.absent_labels + result.global_level_labels + result.present_diff_labels
     )
-    output = runner.dry_run_runner_options + sorted(labels_to_run)
+    labels_skipped = set(result.present_report_labels) - labels_to_run
+    # If the test label can contain spaces and dashes the test runner might
+    # interpret it as an option and not a label
+    # So we wrap it in doublequotes just to be extra sure
+    labels_run_wrapped_double_quotes = sorted(
+        map(lambda l: '"' + l + '"', labels_to_run)
+    )
+    labels_skip_wrapped_double_quotes = sorted(
+        map(lambda l: '"' + l + '"', labels_skipped)
+    )
+
+    output_as_dict = dict(
+        runner_options=runner.dry_run_runner_options,
+        ats_tests_to_run=labels_run_wrapped_double_quotes,
+        ats_tests_to_skip=labels_skip_wrapped_double_quotes,
+    )
     if dry_run_output_path is not None:
         with open(dry_run_output_path, "w") as fd:
-            fd.write(" ".join(output) + "\n")
-    click.echo(f"ATS_TESTS_TO_RUN=\"{' '.join(output)}\"")
+            fd.write(
+                " ".join(
+                    runner.dry_run_runner_options + labels_run_wrapped_double_quotes
+                )
+                + "\n"
+            )
+        with open(str(dry_run_output_path) + "_skipped", "w") as fd:
+            fd.write(
+                " ".join(
+                    runner.dry_run_runner_options + labels_skip_wrapped_double_quotes
+                )
+                + "\n"
+            )
+        with open(str(dry_run_output_path) + ".json", "w") as fd:
+            fd.write(json.dumps(output_as_dict) + "\n")
+
+    click.echo(json.dumps(output_as_dict))
+    click.echo(
+        f"ATS_TESTS_TO_RUN={' '.join(runner.dry_run_runner_options + labels_run_wrapped_double_quotes)}"
+    )
+    click.echo(
+        f"ATS_TESTS_TO_SKIP={' '.join(runner.dry_run_runner_options + labels_skip_wrapped_double_quotes)}"
+    )
 
 
 def _fallback_to_collected_labels(

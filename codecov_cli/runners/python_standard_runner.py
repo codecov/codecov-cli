@@ -1,17 +1,13 @@
 import logging
 import random
 import subprocess
-from contextlib import redirect_stdout
-from io import StringIO, TextIOWrapper
-from multiprocessing import Process, Queue, get_context
-from os import getcwd
+from multiprocessing import Process, Queue
 from queue import Empty
 from subprocess import CalledProcessError
 from sys import path, stdout
 from typing import List, Optional
 
 import click
-import pytest
 
 from codecov_cli.runners.types import (
     LabelAnalysisRequestResult,
@@ -43,58 +39,6 @@ class PythonStandardRunnerConfigParams(dict):
         """
         return self.get("coverage_root", "./")
 
-    @property
-    def strict_mode(self) -> bool:
-        """
-        Run pytest from within Python instead of using subprocess.run
-        This is potentailly safer than using subprocess.run because it guarantees better that
-        the program running is indeed pytest.
-        But it might not work everytime due to import issues related to Python caching modules.
-        """
-        return self.get("strict_mode", False)
-
-
-def _include_curr_dir(method):
-    """
-    Account for the difference 'pytest' vs 'python -m pytest'
-    https://docs.pytest.org/en/7.1.x/how-to/usage.html#calling-pytest-through-python-m-pytest
-    Used only in strict_mode
-    """
-
-    def call_method(self, *args, **kwargs):
-        curr_dir = getcwd()
-        path.append(curr_dir)
-
-        result = method(self, *args, **kwargs)
-
-        path.remove(curr_dir)
-        return result
-
-    return call_method
-
-
-def _execute_pytest_subprocess(
-    pytest_args: List[str],
-    queue: Queue,
-    parent_stdout: TextIOWrapper,
-    capture_output: bool = True,
-):
-    """Runs pytest from python in a subprocess.
-    This is because we call it twice in the label-analysis process,
-    so we might have import errors if calling it directly.
-    Check the warning: https://docs.pytest.org/en/7.1.x/how-to/usage.html#calling-pytest-from-python-code
-
-    Returns the output value and pytest exit code via queue
-    """
-    subproces_stdout = parent_stdout
-    if capture_output:
-        subproces_stdout = StringIO()
-    with redirect_stdout(subproces_stdout):
-        result = pytest.main(pytest_args)
-    if capture_output:
-        queue.put({"output": subproces_stdout.getvalue()})
-    queue.put({"result": result})
-
 
 class PythonStandardRunner(LabelAnalysisRunnerInterface):
 
@@ -124,35 +68,6 @@ class PythonStandardRunner(LabelAnalysisRunnerInterface):
                 break
         pytest_process.join()
         return result, output
-
-    @_include_curr_dir
-    def _execute_pytest_strict(
-        self, pytest_args: List[str], capture_output: bool = True
-    ) -> str:
-        """Handles calling pytest from Python in a subprocess.
-        Raises Exception if pytest fails
-        Returns the complete pytest output
-        """
-        ctx = get_context(method="fork")
-        queue = ctx.Queue(2)
-        p = ctx.Process(
-            target=_execute_pytest_subprocess,
-            args=[pytest_args, queue, stdout, capture_output],
-        )
-        result, output = self._wait_pytest(p, queue)
-
-        if p.exitcode != 0 or (result != pytest.ExitCode.OK and result != 0):
-            message = f"Pytest exited with non-zero code {result}."
-            message += "\nThis is likely not a problem with label-analysis. Check pytest's output and options."
-            if capture_output:
-                # If pytest failed but we captured its output the user won't know what's wrong
-                # So we need to include that in the error message
-                message += "\nPYTEST OUTPUT:"
-                message += "\n" + output
-            else:
-                message += "\n(you can check pytest options on the logs before the test session start)"
-            raise click.ClickException(message)
-        return output
 
     def parse_captured_output_error(self, exp: CalledProcessError) -> str:
         result = ""
@@ -202,10 +117,7 @@ class PythonStandardRunner(LabelAnalysisRunnerInterface):
             ),
         )
 
-        if self.params.strict_mode:
-            output = self._execute_pytest_strict(options_to_use)
-        else:
-            output = self._execute_pytest(options_to_use)
+        output = self._execute_pytest(options_to_use)
         lines = output.split(sep="\n")
         test_names = list(line for line in lines if ("::" in line and "test" in line))
         return test_names
@@ -254,10 +166,7 @@ class PythonStandardRunner(LabelAnalysisRunnerInterface):
             "List of tests executed",
             extra=dict(extra_log_attributes=dict(executed_tests=tests_to_run)),
         )
-        if self.params.strict_mode:
-            output = self._execute_pytest_strict(command_array, capture_output=False)
-        else:
-            output = self._execute_pytest(command_array, capture_output=False)
+        output = self._execute_pytest(command_array, capture_output=False)
         logger.info(f"Finished running {len(tests_to_run)} tests successfully")
         logger.info(f"  pytest options: \"{' '.join(default_options)}\"")
         logger.debug(output)

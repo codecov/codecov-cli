@@ -24,7 +24,6 @@ class TestRunners(object):
             runner_instance.params.collect_tests_options
             == config_params["collect_tests_options"]
         )
-        assert runner_instance.params.strict_mode == False
         assert runner_instance.params.coverage_root == "./"
 
     def test_get_dan_runner_with_params(self):

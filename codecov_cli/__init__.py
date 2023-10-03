@@ -1,1 +1,4 @@
-__version__ = "0.3.3"
+with open("VERSION", encoding="utf-8") as f:
+    version_number = f.readline().strip()
+
+__version__ = version_number

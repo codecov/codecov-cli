@@ -1,0 +1,14 @@
+name: Create CLI Release PR
+
+on:
+  workflow_dispatch:
+    inputs:
+      versionName:
+        description: 'Name of version  (ie 23.9.5)'
+        required: true
+
+jobs:
+  create-release-pr:
+    name: Create PR for Release ${{ github.event.inputs.versionName }}
+    uses: codecov/gha-workflows/.github/workflows/create-self-hosted-pr.yml@v1.0.0
+    secrets: inherit

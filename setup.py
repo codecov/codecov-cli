@@ -8,8 +8,8 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
-with open(path.join(here, "codecov_cli/__init__.py"), encoding="utf-8") as f:
-    version = f.read().split('"')[1]
+with open(path.join(here, "VERSION"), encoding="utf-8") as f:
+    version = f.readline().strip()
 
 setup(
     name="codecov-cli",

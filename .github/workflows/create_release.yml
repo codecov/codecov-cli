@@ -1,0 +1,14 @@
+name: Create CLI Release
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [closed]
+
+jobs:
+  create-release:
+    name: Tag Release ${{ github.head_ref }}
+    if: ${{ github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/') && github.repository_owner == 'codecov' }}
+    uses: codecov/gha-workflows/.github/workflows/create-release.yml@v1.1.0
+    secrets: inherit

@@ -1,10 +1,8 @@
 import logging
 import random
 import subprocess
-from multiprocessing import Process, Queue
-from queue import Empty
 from subprocess import CalledProcessError
-from sys import path, stdout
+from sys import stdout
 from typing import List, Optional
 
 import click
@@ -49,25 +47,6 @@ class PythonStandardRunner(LabelAnalysisRunnerInterface):
         if config_params is None:
             config_params = {}
         self.params = PythonStandardRunnerConfigParams(config_params)
-
-    def _wait_pytest(self, pytest_process: Process, queue: Queue):
-        pytest_process.start()
-        result = None
-        output = None
-        while pytest_process.exitcode == 0 or pytest_process.exitcode == None:
-            from_queue = None
-            try:
-                from_queue = queue.get(timeout=1)
-            except Empty:
-                pass
-            if from_queue and "output" in from_queue:
-                output = from_queue["output"]
-            if from_queue and "result" in from_queue:
-                result = from_queue["result"]
-            if result is not None:
-                break
-        pytest_process.join()
-        return result, output
 
     def parse_captured_output_error(self, exp: CalledProcessError) -> str:
         result = ""

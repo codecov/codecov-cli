@@ -109,7 +109,14 @@ async def run_analysis_entrypoint(
                 for el in files_that_need_upload:
                     all_tasks.append(send_single_upload_put(client, all_data, el))
                     bar.update(1, all_data[el["filepath"]])
-                resps = await asyncio.gather(*all_tasks)
+                try:
+                    resps = await asyncio.gather(*all_tasks)
+                except asyncio.CancelledError:
+                    message = (
+                        "Unknown error cancelled the upload tasks.\n"
+                        + f"Uploaded {len(uploaded_files)}/{len(files_that_need_upload)} files successfully."
+                    )
+                    raise click.ClickException(message)
             for resp in resps:
                 if resp["succeeded"]:
                     uploaded_files.append(resp["filepath"])

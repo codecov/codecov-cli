@@ -5,43 +5,10 @@ import click
 import pytest
 from pytest import ExitCode
 
-from codecov_cli.runners.python_standard_runner import (
-    PythonStandardRunner,
-    _execute_pytest_subprocess,
-)
+from codecov_cli.runners.python_standard_runner import PythonStandardRunner
 from codecov_cli.runners.python_standard_runner import logger as runner_logger
 from codecov_cli.runners.python_standard_runner import stdout as pyrunner_stdout
 from codecov_cli.runners.types import LabelAnalysisRequestResult
-
-
-@patch("codecov_cli.runners.python_standard_runner.pytest")
-def test_execute_pytest_subprocess(mock_pytest, mocker):
-    def side_effect(*args, **kwargs):
-        print("Pytest output")
-        return ExitCode.OK
-
-    mock_pytest.main.side_effect = side_effect
-    mock_queue = MagicMock()
-    _execute_pytest_subprocess(["pytest", "args"], mock_queue, MagicMock())
-    mock_pytest.main.assert_called_with(["pytest", "args"])
-    assert mock_queue.put.call_count == 2
-    mock_queue.put.assert_has_calls(
-        [call({"output": "Pytest output\n"}), call({"result": ExitCode.OK})]
-    )
-
-
-@patch("codecov_cli.runners.python_standard_runner.pytest")
-def test_execute_pytest_subprocess_no_capture_stdout(mock_pytest, mocker):
-    def side_effect(*args, **kwargs):
-        print("Pytest output")
-        return ExitCode.OK
-
-    mock_pytest.main.side_effect = side_effect
-    mock_queue = MagicMock()
-    _execute_pytest_subprocess(["pytest", "args"], mock_queue, MagicMock(), False)
-    mock_pytest.main.assert_called_with(["pytest", "args"])
-    assert mock_queue.put.call_count == 1
-    mock_queue.put.assert_has_calls([call({"result": ExitCode.OK})])
 
 
 class TestPythonStandardRunner(object):
@@ -49,7 +16,6 @@ class TestPythonStandardRunner(object):
 
     def test_init_with_params(self):
         assert self.runner.params.collect_tests_options == []
-        assert self.runner.params.strict_mode == False
         assert self.runner.params.coverage_root == "./"
 
         config_params = dict(
@@ -72,102 +38,6 @@ class TestPythonStandardRunner(object):
             stdout=None,
         )
         assert result == output
-
-    @patch(
-        "codecov_cli.runners.python_standard_runner.getcwd",
-        return_value="current directory",
-    )
-    @patch("codecov_cli.runners.python_standard_runner.path")
-    @patch("codecov_cli.runners.python_standard_runner.get_context")
-    def test_execute_pytest_strict_mode(
-        self, mock_get_context, mock_sys_path, mock_getcwd
-    ):
-        output = "Output in stdout"
-        mock_queue = MagicMock()
-        mock_queue.get.side_effect = [{"output": output}, {"result": ExitCode.OK}]
-        mock_process = MagicMock()
-        mock_process.exitcode = 0
-        mock_get_context.return_value.Queue.return_value = mock_queue
-        mock_get_context.return_value.Process.return_value = mock_process
-
-        result = self.runner._execute_pytest_strict(["--option", "--ignore=batata"])
-        mock_get_context.return_value.Queue.assert_called_with(2)
-        mock_get_context.return_value.Process.assert_called_with(
-            target=_execute_pytest_subprocess,
-            args=[["--option", "--ignore=batata"], mock_queue, pyrunner_stdout, True],
-        )
-        mock_sys_path.append.assert_called_with("current directory")
-        mock_sys_path.remove.assert_called_with("current directory")
-        assert mock_queue.get.call_count == 2
-        assert result == output
-
-    @patch(
-        "codecov_cli.runners.python_standard_runner.getcwd",
-        return_value="current directory",
-    )
-    @patch("codecov_cli.runners.python_standard_runner.path")
-    @patch("codecov_cli.runners.python_standard_runner.get_context")
-    def test_execute_pytest_fail_strict_mode_collection(
-        self, mock_get_context, mock_sys_path, mock_getcwd
-    ):
-        output = "Output in stdout"
-        mock_queue = MagicMock()
-        mock_queue.get.side_effect = [
-            {"output": output},
-            {"result": ExitCode.INTERNAL_ERROR},
-        ]
-        mock_process = MagicMock()
-        mock_process.exitcode = 0
-        mock_get_context.return_value.Queue.return_value = mock_queue
-        mock_get_context.return_value.Process.return_value = mock_process
-
-        with pytest.raises(Exception) as exp:
-            _ = self.runner._execute_pytest_strict(["--option", "--ignore=batata"])
-        assert (
-            str(exp.value)
-            == "Pytest exited with non-zero code 3.\nThis is likely not a problem with label-analysis. Check pytest's output and options.\nPYTEST OUTPUT:\nOutput in stdout"
-        )
-        mock_get_context.return_value.Queue.assert_called_with(2)
-        mock_get_context.return_value.Process.assert_called_with(
-            target=_execute_pytest_subprocess,
-            args=[["--option", "--ignore=batata"], mock_queue, pyrunner_stdout, True],
-        )
-        mock_sys_path.append.assert_called_with("current directory")
-
-    @patch(
-        "codecov_cli.runners.python_standard_runner.getcwd",
-        return_value="current directory",
-    )
-    @patch("codecov_cli.runners.python_standard_runner.path")
-    @patch("codecov_cli.runners.python_standard_runner.get_context")
-    def test_execute_pytest_fail_strict_mode_execution(
-        self, mock_get_context, mock_sys_path, mock_getcwd
-    ):
-        output = "Output in stdout"
-        mock_queue = MagicMock()
-        mock_queue.get.side_effect = [
-            {"output": output},
-            {"result": ExitCode.INTERNAL_ERROR},
-        ]
-        mock_process = MagicMock()
-        mock_process.exitcode = 0
-        mock_get_context.return_value.Queue.return_value = mock_queue
-        mock_get_context.return_value.Process.return_value = mock_process
-
-        with pytest.raises(Exception) as exp:
-            _ = self.runner._execute_pytest_strict(
-                ["--option", "--ignore=batata"], capture_output=False
-            )
-        assert (
-            str(exp.value)
-            == "Pytest exited with non-zero code 3.\nThis is likely not a problem with label-analysis. Check pytest's output and options.\n(you can check pytest options on the logs before the test session start)"
-        )
-        mock_get_context.return_value.Queue.assert_called_with(2)
-        mock_get_context.return_value.Process.assert_called_with(
-            target=_execute_pytest_subprocess,
-            args=[["--option", "--ignore=batata"], mock_queue, pyrunner_stdout, False],
-        )
-        mock_sys_path.append.assert_called_with("current directory")
 
     @patch("codecov_cli.runners.python_standard_runner.subprocess")
     def test_execute_pytest_fail_collection(self, mock_subprocess):
@@ -257,40 +127,9 @@ class TestPythonStandardRunner(object):
             "_execute_pytest",
             return_value="\n".join(collected_test_list),
         )
-        mock_execute_strict = mocker.patch.object(
-            PythonStandardRunner,
-            "_execute_pytest_strict",
-            return_value="\n".join(collected_test_list),
-        )
 
         collected_tests_from_runner = self.runner.collect_tests()
         mock_execute.assert_called_with(["-q", "--collect-only"])
-        mock_execute_strict.assert_not_called()
-        assert collected_tests_from_runner == collected_test_list
-
-    def test_collect_tests_strict(self, mocker):
-        collected_test_list = [
-            "tests/services/upload/test_upload_service.py::test_do_upload_logic_happy_path_legacy_uploader"
-            "tests/services/upload/test_upload_service.py::test_do_upload_logic_happy_path"
-            "tests/services/upload/test_upload_service.py::test_do_upload_logic_dry_run"
-            "tests/services/upload/test_upload_service.py::test_do_upload_logic_verbose"
-        ]
-        mock_execute = mocker.patch.object(
-            PythonStandardRunner,
-            "_execute_pytest",
-            return_value="\n".join(collected_test_list),
-        )
-        mock_execute_strict = mocker.patch.object(
-            PythonStandardRunner,
-            "_execute_pytest_strict",
-            return_value="\n".join(collected_test_list),
-        )
-
-        runner_config = {"strict_mode": True}
-        runner = PythonStandardRunner(runner_config)
-        collected_tests_from_runner = runner.collect_tests()
-        mock_execute_strict.assert_called_with(["-q", "--collect-only"])
-        mock_execute.assert_not_called()
         assert collected_tests_from_runner == collected_test_list
 
     def test_collect_tests_with_options(self, mocker):
@@ -367,38 +206,6 @@ class TestPythonStandardRunner(object):
             "test_in_diff",
         ]
 
-    def test_process_label_analysis_result_strict(self, mocker):
-        label_analysis_result = {
-            "present_report_labels": ["test_present"],
-            "absent_labels": ["test_absent"],
-            "present_diff_labels": ["test_in_diff"],
-            "global_level_labels": ["test_global"],
-        }
-        mock_execute = mocker.patch.object(PythonStandardRunner, "_execute_pytest")
-        mock_execute_strict = mocker.patch.object(
-            PythonStandardRunner, "_execute_pytest_strict"
-        )
-
-        runner_config = {"strict_mode": True}
-        runner = PythonStandardRunner(runner_config)
-        runner.process_labelanalysis_result(
-            LabelAnalysisRequestResult(label_analysis_result)
-        )
-        mock_execute.assert_not_called()
-        args, kwargs = mock_execute_strict.call_args
-        assert kwargs == {"capture_output": False}
-        assert isinstance(args[0], list)
-        actual_command = args[0]
-        assert actual_command[:2] == [
-            "--cov=./",
-            "--cov-context=test",
-        ]
-        assert sorted(actual_command[2:]) == [
-            "test_absent",
-            "test_global",
-            "test_in_diff",
-        ]
-
     def test_process_label_analysis_result_with_options(self, mocker):
         label_analysis_result = {
             "present_report_labels": ["test_present"],
@@ -408,9 +215,6 @@ class TestPythonStandardRunner(object):
         }
         mock_execute = mocker.patch.object(PythonStandardRunner, "_execute_pytest")
         mock_warning = mocker.patch.object(runner_logger, "warning")
-        mock_execute_strict = mocker.patch.object(
-            PythonStandardRunner, "_execute_pytest_strict"
-        )
 
         runner_config = {
             "execute_tests_options": ["-s", "--cov-report=xml", "--cov=something"]
@@ -419,7 +223,6 @@ class TestPythonStandardRunner(object):
         runner.process_labelanalysis_result(
             LabelAnalysisRequestResult(label_analysis_result)
         )
-        mock_execute_strict.assert_not_called()
         args, kwargs = mock_execute.call_args
         assert kwargs == {"capture_output": False}
         assert isinstance(args[0], list)

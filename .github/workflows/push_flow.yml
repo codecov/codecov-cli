@@ -101,7 +101,7 @@ jobs:
           pip install codecov-cli
       - name: Label Analysis
         run: |
-          BASE_SHA=$(git merge-base HEAD^ origin/master)
+          BASE_SHA=$(git merge-base HEAD^ origin/main)
           echo $BASE_SHA
           codecovcli label-analysis --token ${{ secrets.STATIC_TOKEN }} --base-sha=$BASE_SHA --max-wait-time=120
       - name: Upload smart-labels

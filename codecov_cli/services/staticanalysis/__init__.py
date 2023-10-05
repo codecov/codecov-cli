@@ -109,7 +109,14 @@ async def run_analysis_entrypoint(
                 for el in files_that_need_upload:
                     all_tasks.append(send_single_upload_put(client, all_data, el))
                     bar.update(1, all_data[el["filepath"]])
-                resps = await asyncio.gather(*all_tasks)
+                try:
+                    resps = await asyncio.gather(*all_tasks)
+                except asyncio.CancelledError:
+                    message = (
+                        "Unknown error cancelled the upload tasks.\n"
+                        + f"Uploaded {len(uploaded_files)}/{len(files_that_need_upload)} files successfully."
+                    )
+                    raise click.ClickException(message)
             for resp in resps:
                 if resp["succeeded"]:
                     uploaded_files.append(resp["filepath"])
@@ -188,35 +195,44 @@ async def process_files(
     )
 
 
-async def send_single_upload_put(client, all_data, el):
+async def send_single_upload_put(client, all_data, el) -> typing.Dict:
     retryable_statuses = (429,)
     presigned_put = el["raw_upload_location"]
     number_retries = 5
-    for current_retry in range(number_retries):
-        response = await client.put(
-            presigned_put, data=json.dumps(all_data[el["filepath"]])
-        )
-        if response.status_code < 300:
-            return {
-                "status_code": response.status_code,
-                "filepath": el["filepath"],
-                "succeeded": True,
-            }
-        if response.status_code in retryable_statuses:
-            await asyncio.sleep(2**current_retry)
+    try:
+        for current_retry in range(number_retries):
+            response = await client.put(
+                presigned_put, data=json.dumps(all_data[el["filepath"]])
+            )
+            if response.status_code < 300:
+                return {
+                    "status_code": response.status_code,
+                    "filepath": el["filepath"],
+                    "succeeded": True,
+                }
+            if response.status_code in retryable_statuses:
+                await asyncio.sleep(2**current_retry)
+        status_code = response.status_code
+        message_to_warn = response.text
+        exception = None
+    except httpx.HTTPError as exp:
+        status_code = None
+        exception = type(exp)
+        message_to_warn = str(exp)
     logger.warning(
-        "Unable to send data",
+        "Unable to send single_upload_put",
         extra=dict(
             extra_log_attributes=dict(
-                response=response.text,
+                message=message_to_warn,
+                exception=exception,
                 filepath=el["filepath"],
-                url=presigned_put,
-                latest_status_code=response.status_code,
+                latest_status_code=status_code,
             )
         ),
     )
     return {
-        "status_code": response.status_code,
+        "status_code": status_code,
+        "exception": exception,
         "filepath": el["filepath"],
         "succeeded": False,
     }

@@ -1,13 +1,19 @@
+from asyncio import CancelledError
 from pathlib import Path
 from unittest.mock import MagicMock
 
 import click
+import httpx
 import pytest
 import requests
 import responses
 from responses import matchers
 
-from codecov_cli.services.staticanalysis import process_files, run_analysis_entrypoint
+from codecov_cli.services.staticanalysis import (
+    process_files,
+    run_analysis_entrypoint,
+    send_single_upload_put,
+)
 from codecov_cli.services.staticanalysis.types import (
     FileAnalysisRequest,
     FileAnalysisResult,
@@ -67,7 +73,7 @@ class TestStaticAnalysisService:
         )
 
     @pytest.mark.asyncio
-    async def test_static_analysis_service(self, mocker):
+    async def test_static_analysis_service_success(self, mocker):
         mock_file_finder = mocker.patch(
             "codecov_cli.services.staticanalysis.select_file_finder"
         )
@@ -141,6 +147,168 @@ class TestStaticAnalysisService:
             "state": "created",
             "filepath": "samples/inputs/sample_001.py",
             "raw_upload_location": "http://storage-url",
+        }
+
+    @pytest.mark.asyncio
+    async def test_static_analysis_service_CancelledError(self, mocker):
+        mock_file_finder = mocker.patch(
+            "codecov_cli.services.staticanalysis.select_file_finder"
+        )
+        mock_send_upload_put = mocker.patch(
+            "codecov_cli.services.staticanalysis.send_single_upload_put"
+        )
+
+        async def side_effect(client, all_data, el):
+            if el["filepath"] == "samples/inputs/sample_001.py":
+                return {
+                    "status_code": 204,
+                    "filepath": el["filepath"],
+                    "succeeded": True,
+                }
+            raise CancelledError("Pretending something cancelled this task")
+
+        mock_send_upload_put.side_effect = side_effect
+
+        files_found = map(
+            lambda filename: FileAnalysisRequest(str(filename), Path(filename)),
+            [
+                "samples/inputs/sample_001.py",
+                "samples/inputs/sample_002.py",
+            ],
+        )
+        mock_file_finder.return_value.find_files = MagicMock(return_value=files_found)
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                responses.POST,
+                "https://api.codecov.io/staticanalysis/analyses",
+                json={
+                    "external_id": "externalid",
+                    "filepaths": [
+                        {
+                            "state": "created",
+                            "filepath": "samples/inputs/sample_001.py",
+                            "raw_upload_location": "http://storage-url-001",
+                        },
+                        {
+                            "state": "created",
+                            "filepath": "samples/inputs/sample_002.py",
+                            "raw_upload_location": "http://storage-url-002",
+                        },
+                    ],
+                },
+                status=200,
+                match=[
+                    matchers.header_matcher({"Authorization": "Repotoken STATIC_TOKEN"})
+                ],
+            )
+
+            with pytest.raises(click.ClickException) as exp:
+                await run_analysis_entrypoint(
+                    config={},
+                    folder=".",
+                    numberprocesses=1,
+                    pattern="*.py",
+                    token="STATIC_TOKEN",
+                    commit="COMMIT",
+                    should_force=False,
+                    folders_to_exclude=[],
+                    enterprise_url=None,
+                )
+        assert "Unknown error cancelled the upload tasks." in str(exp.value)
+        mock_file_finder.assert_called_with({})
+        mock_file_finder.return_value.find_files.assert_called()
+        assert mock_send_upload_put.call_count == 2
+
+    @pytest.mark.asyncio
+    async def test_send_single_upload_put_success(self, mocker):
+        mock_client = MagicMock()
+
+        async def side_effect(presigned_put, data):
+            if presigned_put == "http://storage-url-001":
+                return httpx.Response(status_code=204)
+
+        mock_client.put.side_effect = side_effect
+
+        all_data = {
+            "file-001": {"some": "data", "id": "1"},
+            "file-002": {"some": "data", "id": "2"},
+            "file-003": {"some": "data", "id": "3"},
+        }
+
+        success_response = await send_single_upload_put(
+            mock_client,
+            all_data=all_data,
+            el={
+                "filepath": "file-001",
+                "raw_upload_location": "http://storage-url-001",
+            },
+        )
+        assert success_response == {
+            "status_code": 204,
+            "filepath": "file-001",
+            "succeeded": True,
+        }
+
+    @pytest.mark.asyncio
+    async def test_send_single_upload_put_fail_401(self, mocker):
+        mock_client = MagicMock()
+
+        async def side_effect(presigned_put, data):
+            if presigned_put == "http://storage-url-002":
+                return httpx.Response(status_code=401)
+
+        mock_client.put.side_effect = side_effect
+
+        all_data = {
+            "file-001": {"some": "data", "id": "1"},
+            "file-002": {"some": "data", "id": "2"},
+            "file-003": {"some": "data", "id": "3"},
+        }
+
+        fail_401_response = await send_single_upload_put(
+            mock_client,
+            all_data=all_data,
+            el={
+                "filepath": "file-002",
+                "raw_upload_location": "http://storage-url-002",
+            },
+        )
+        assert fail_401_response == {
+            "status_code": 401,
+            "exception": None,
+            "filepath": "file-002",
+            "succeeded": False,
+        }
+
+    @pytest.mark.asyncio
+    async def test_send_single_upload_put_fail_exception(self, mocker):
+        mock_client = MagicMock()
+
+        async def side_effect(presigned_put, data):
+            if presigned_put == "http://storage-url-003":
+                raise httpx.HTTPError("Some error occured in the request")
+
+        mock_client.put.side_effect = side_effect
+
+        all_data = {
+            "file-001": {"some": "data", "id": "1"},
+            "file-002": {"some": "data", "id": "2"},
+            "file-003": {"some": "data", "id": "3"},
+        }
+
+        fail_401_response = await send_single_upload_put(
+            mock_client,
+            all_data=all_data,
+            el={
+                "filepath": "file-003",
+                "raw_upload_location": "http://storage-url-003",
+            },
+        )
+        assert fail_401_response == {
+            "status_code": None,
+            "exception": httpx.HTTPError,
+            "filepath": "file-003",
+            "succeeded": False,
         }
 
     @pytest.mark.asyncio

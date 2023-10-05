@@ -7,12 +7,12 @@ def cachorro() -> int:
     a = 1
     a = 1 + 1
     if (
-        "a"
-        or "b"
-        or "c"
-        or "sdnajdjsadadsajdas" in "dsadnsadsadsaudauda"
-        or (True and False)
-        and 1 > 0
+            "a"
+            or "b"
+            or "c"
+            or "sdnajdjsadadsajdas" in "dsadnsadsadsaudauda"
+            or (True and False)
+            and 1 > 0
     ):
         print("yell")
     print("au au",)
@@ -23,18 +23,16 @@ def cachorro() -> int:
                 for k in range(100):
                     print(x)
         x += 1
-
     def inner_function():
         return "b"
-
     return 2 if lru_cache else 1
 
 
 class Super(object):
     def itsbanana(self):
         a = (
-            "dsadusdhiuahdb abshdu huidahsu aks shabdh ada"
-            + "adbjab bsdab khdsb kbas bkasd a"
+                "dsadusdhiuahdb abshdu huidahsu aks shabdh ada"
+                + "adbjab bsdab khdsb kbas bkasd a"
         )
         calculate(1, 2, "dsadsadsadsa", 56, "094329843432", [None] * 100)
         return 1 + 0
@@ -52,7 +50,6 @@ def ifsandbuts(input_data):
         return 2
     return b
 
-
 def forsandstuff(aaa):
     i = 0
     while i < aaa:
@@ -69,29 +66,25 @@ def forsandstuff(aaa):
     aaa += i
     return
 
-
 def single_line(): return 1
-
 
 def comma_at_end(v,):
     print(v)
-
 
 @lru_cache
 def decorated_function(simple: str):
     return 3
 
-
 # pokemon
 
 
 def unusual_function(
-    a: int,
-    commit: str,
-    smt: Optional[int],
-    should_ha: Super,
-    *,
-    upload: int,
+        a: int,
+        commit: str,
+        smt: Optional[int],
+        should_ha: Super,
+        *,
+        upload: int,
 ):
     return a + 1
 

@@ -50,6 +50,7 @@ def do_upload_logic(
     enterprise_url: typing.Optional[str],
     disable_search: bool = False,
     handle_no_reports_found: bool = False,
+    disable_file_fixes: bool = False,
 ):
     preparation_plugins = select_preparation_plugins(cli_config, plugin_names)
     coverage_file_selector = select_coverage_file_finder(
@@ -60,7 +61,7 @@ def do_upload_logic(
     )
     network_finder = select_network_finder(versioning_system)
     collector = UploadCollector(
-        preparation_plugins, network_finder, coverage_file_selector
+        preparation_plugins, network_finder, coverage_file_selector, disable_file_fixes
     )
     try:
         upload_data = collector.generate_upload_data()

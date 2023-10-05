@@ -92,6 +92,8 @@ def test_upload_process_options(mocker):
             "  --disable-search                Disable search for coverage files. This is",
             "                                  helpful when specifying what files you want to",
             "                                  uload with the --file option.",
+            "  --disable-file-fixes            Disable file fixes to ignore common lines from",
+            "                                  coverage (e.g. blank lines or empty brackets)",
             "  -b, --build, --build-code TEXT  Specify the build number manually",
             "  --build-url TEXT                The URL of the build where this is running",
             "  --job-code TEXT",

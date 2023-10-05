@@ -66,6 +66,12 @@ _global_upload_options = [
         default=False,
     ),
     click.option(
+        "--disable-file-fixes",
+        help="Disable file fixes to ignore common lines from coverage (e.g. blank lines or empty brackets)",
+        is_flag=True,
+        default=False,
+    ),
+    click.option(
         "-b",
         "--build",
         "--build-code",
@@ -178,6 +184,7 @@ def do_upload(
     coverage_files_search_exclude_folders: typing.List[pathlib.Path],
     coverage_files_search_explicitly_listed_files: typing.List[pathlib.Path],
     disable_search: bool,
+    disable_file_fixes: bool,
     token: typing.Optional[uuid.UUID],
     plugin_names: typing.List[str],
     branch: typing.Optional[str],
@@ -218,6 +225,7 @@ def do_upload(
                 git_service=git_service,
                 enterprise_url=enterprise_url,
                 disable_search=disable_search,
+                disable_file_fixes=disable_file_fixes,
                 handle_no_reports_found=handle_no_reports_found,
             )
         ),
@@ -254,4 +262,5 @@ def do_upload(
         enterprise_url=enterprise_url,
         disable_search=disable_search,
         handle_no_reports_found=handle_no_reports_found,
+        disable_file_fixes=disable_file_fixes,
     )

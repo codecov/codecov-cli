@@ -37,6 +37,7 @@ def upload_process(
     coverage_files_search_exclude_folders: typing.List[pathlib.Path],
     coverage_files_search_explicitly_listed_files: typing.List[pathlib.Path],
     disable_search: bool,
+    disable_file_fixes: bool,
     token: typing.Optional[uuid.UUID],
     plugin_names: typing.List[str],
     branch: typing.Optional[str],
@@ -72,6 +73,7 @@ def upload_process(
                 pull_request_number=pull_request_number,
                 git_service=git_service,
                 disable_search=disable_search,
+                disable_file_fixes=disable_file_fixes,
                 fail_on_error=fail_on_error,
                 handle_no_reports_found=handle_no_reports_found,
             )
@@ -123,4 +125,5 @@ def upload_process(
         dry_run=dry_run,
         git_service=git_service,
         handle_no_reports_found=handle_no_reports_found,
+        disable_file_fixes=disable_file_fixes,
     )

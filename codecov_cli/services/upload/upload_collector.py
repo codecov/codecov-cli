@@ -29,15 +29,17 @@ class UploadCollector(object):
         preparation_plugins: typing.List[PreparationPluginInterface],
         network_finder: NetworkFinder,
         coverage_file_finder: CoverageFileFinder,
+        disable_file_fixes: bool = False,
     ):
         self.preparation_plugins = preparation_plugins
         self.network_finder = network_finder
         self.coverage_file_finder = coverage_file_finder
+        self.disable_file_fixes = disable_file_fixes
 
     def _produce_file_fixes_for_network(
         self, network: typing.List[str]
     ) -> typing.List[UploadCollectionResultFileFixer]:
-        if not network:
+        if not network or self.disable_file_fixes:
             return []
         # patterns that we don't need to specify a reason for
         empty_line_regex = re.compile(r"^\s*$")

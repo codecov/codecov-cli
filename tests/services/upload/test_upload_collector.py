@@ -98,3 +98,14 @@ def test_fix_for_cpp_swift_vala(tmp_path):
             (7, "// LCOV_EXCL_START\n"),
         ]
     )
+
+
+def test_fix_when_disabled_fixes(tmp_path):
+    cpp_file = Path("tests/data/files_to_fix_examples/sample.cpp")
+
+    col = UploadCollector(None, None, None, True)
+
+    fixes = col._produce_file_fixes_for_network([str(cpp_file)])
+
+    assert len(fixes) == 0
+    assert fixes == []

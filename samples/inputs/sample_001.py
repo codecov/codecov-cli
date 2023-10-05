@@ -7,12 +7,12 @@ def cachorro() -> int:
     a = 1
     a = 1 + 1
     if (
-            "a"
-            or "b"
-            or "c"
-            or "sdnajdjsadadsajdas" in "dsadnsadsadsaudauda"
-            or (True and False)
-            and 1 > 0
+        "a"
+        or "b"
+        or "c"
+        or "sdnajdjsadadsajdas" in "dsadnsadsadsaudauda"
+        or (True and False)
+        and 1 > 0
     ):
         print("yell")
     print("au au",)
@@ -31,8 +31,8 @@ def cachorro() -> int:
 class Super(object):
     def itsbanana(self):
         a = (
-                "dsadusdhiuahdb abshdu huidahsu aks shabdh ada"
-                + "adbjab bsdab khdsb kbas bkasd a"
+            "dsadusdhiuahdb abshdu huidahsu aks shabdh ada"
+            + "adbjab bsdab khdsb kbas bkasd a"
         )
         calculate(1, 2, "dsadsadsadsa", 56, "094329843432", [None] * 100)
         return 1 + 0
@@ -79,12 +79,12 @@ def decorated_function(simple: str):
 
 
 def unusual_function(
-        a: int,
-        commit: str,
-        smt: Optional[int],
-        should_ha: Super,
-        *,
-        upload: int,
+    a: int,
+    commit: str,
+    smt: Optional[int],
+    should_ha: Super,
+    *,
+    upload: int,
 ):
     return a + 1
 

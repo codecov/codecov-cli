@@ -10,5 +10,11 @@ jobs:
   create-release:
     name: Tag Release ${{ github.head_ref }}
     if: ${{ github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/') && github.repository_owner == 'codecov' }}
-    uses: codecov/gha-workflows/.github/workflows/create-release.yml@v1.1.0
+    uses: codecov/gha-workflows/.github/workflows/create-release.yml@v1.2.1
+    secrets: inherit
+
+  release:
+    needs: [create-release]
+    if: ${{ github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/') && github.repository_owner == 'codecov' }}
+    uses: ./.github/workflows/release_flow.yml
     secrets: inherit

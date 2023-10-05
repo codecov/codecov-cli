@@ -1,4 +1,4 @@
 import importlib.metadata
 
 
-__version__ = importlib.metadata.version('codecov-cli')
+__version__ = importlib.metadata.version("codecov-cli")

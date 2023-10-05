@@ -1,4 +1,4 @@
-name: Build and Optionally Publish to PyPi
+name: Build Compiled Assets
 
 on:
   workflow_call:

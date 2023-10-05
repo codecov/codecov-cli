@@ -15,7 +15,9 @@ def cachorro() -> int:
         and 1 > 0
     ):
         print("yell")
-    print("au au",)
+    print(
+        "au au",
+    )
     x = 0
     while x < 100:
         if x > 2:
@@ -23,8 +25,10 @@ def cachorro() -> int:
                 for k in range(100):
                     print(x)
         x += 1
+
     def inner_function():
         return "b"
+
     return 2 if lru_cache else 1
 
 
@@ -50,6 +54,7 @@ def ifsandbuts(input_data):
         return 2
     return b
 
+
 def forsandstuff(aaa):
     i = 0
     while i < aaa:
@@ -66,14 +71,21 @@ def forsandstuff(aaa):
     aaa += i
     return
 
-def single_line(): return 1
 
-def comma_at_end(v,):
+def single_line():
+    return 1
+
+
+def comma_at_end(
+    v,
+):
     print(v)
+
 
 @lru_cache
 def decorated_function(simple: str):
     return 3
+
 
 # pokemon
 

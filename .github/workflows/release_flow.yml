@@ -57,7 +57,7 @@ jobs:
               lipo -archs dist/codecovcli_macos | grep -v 'x86_64 arm65' >> /dev/null && exit 1
             OUT_FILE_NAME: codecovcli_macos
             ASSET_MIME: application/octet-stream
-          - os: ubuntu-latest
+          - os: ubuntu-20.04
             TARGET: ubuntu
             CMD_REQS: >
               pip install -r requirements.txt

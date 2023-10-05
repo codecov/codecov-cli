@@ -5,7 +5,7 @@ from importlib import import_module
 import click
 
 from codecov_cli.runners.dan_runner import DoAnythingNowRunner
-from codecov_cli.runners.python_standard_runner import PythonStandardRunner
+from codecov_cli.runners.pytest_standard_runner import PytestStandardRunner
 from codecov_cli.runners.types import LabelAnalysisRunnerInterface
 
 logger = logging.getLogger("codecovcli")
@@ -42,9 +42,17 @@ def _load_runner_from_yaml(plugin_dict: typing.Dict) -> LabelAnalysisRunnerInter
 
 
 def get_runner(cli_config, runner_name) -> LabelAnalysisRunnerInterface:
-    if runner_name == "python":
-        config_params = cli_config.get("runners", {}).get("python", {})
-        return PythonStandardRunner(config_params)
+    if runner_name == "pytest":
+        config_params = cli_config.get("runners", {}).get("pytest", {})
+        # This is for backwards compatibility with versions <= 0.3.4
+        # In which the key for this config was 'python', not 'pytest'
+        if config_params == {}:
+            config_params = cli_config.get("runners", {}).get("python", {})
+            if config_params:
+                logger.warning(
+                    "Using 'python' to configure the PytestStandardRunner is deprecated. Please change to 'pytest'"
+                )
+        return PytestStandardRunner(config_params)
     elif runner_name == "dan":
         config_params = cli_config.get("runners", {}).get("dan", {})
         return DoAnythingNowRunner(config_params)

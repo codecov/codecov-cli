@@ -15,7 +15,7 @@ from codecov_cli.runners.types import (
 logger = logging.getLogger("codecovcli")
 
 
-class PythonStandardRunnerConfigParams(dict):
+class PytestStandardRunnerConfigParams(dict):
     @property
     def collect_tests_options(self) -> List[str]:
         return self.get("collect_tests_options", [])
@@ -38,7 +38,7 @@ class PythonStandardRunnerConfigParams(dict):
         return self.get("coverage_root", "./")
 
 
-class PythonStandardRunner(LabelAnalysisRunnerInterface):
+class PytestStandardRunner(LabelAnalysisRunnerInterface):
 
     dry_run_runner_options = ["--cov-context=test"]
 
@@ -46,7 +46,7 @@ class PythonStandardRunner(LabelAnalysisRunnerInterface):
         super().__init__()
         if config_params is None:
             config_params = {}
-        self.params = PythonStandardRunnerConfigParams(config_params)
+        self.params = PytestStandardRunnerConfigParams(config_params)
 
     def parse_captured_output_error(self, exp: CalledProcessError) -> str:
         result = ""

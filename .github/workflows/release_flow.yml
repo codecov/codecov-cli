@@ -81,10 +81,6 @@ jobs:
       run: pip install pyinstaller
     - name: Build with pyinstaller for ${{matrix.TARGET}}
       run: ${{matrix.CMD_BUILD}}
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v3.1.2
-      with:
-        path: ./dist/${{ matrix.OUT_FILE_NAME }}
     - name: Upload Release Asset
       id: upload-release-asset
       uses: svenstaro/upload-release-action@v2

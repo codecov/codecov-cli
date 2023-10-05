@@ -1,1 +1,4 @@
-__version__ = '0.3.6'
+import importlib.metadata
+
+
+__version__ = importlib.metadata.version('codecov-cli')

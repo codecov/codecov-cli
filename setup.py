@@ -1,5 +1,5 @@
-from platform import system
 from os import path
+from platform import system
 
 from setuptools import Extension, find_packages, setup
 

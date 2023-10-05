@@ -13,15 +13,11 @@ def some_more_if_stuff(val):
         val = val * 2
     else:
         val = val - 1
-    return val**2
+    return val ** 2
 
 
 def single_line_minecraft(bb):
-    k = 3
-    bb.matrix_blocks.render()
-    import minecraft
-
-    minecraft.run()
+    k = 3;bb.matrix_blocks.render(); import minecraft; minecraft.run()
 
 
 a = 3
@@ -40,4 +36,4 @@ def nested_conditionals(val):
     if val > 10:
         if val > 100:
             if val > 1000:
-                return "large value"
+                return 'large value'

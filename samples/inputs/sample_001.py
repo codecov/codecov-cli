@@ -15,9 +15,7 @@ def cachorro() -> int:
         and 1 > 0
     ):
         print("yell")
-    print(
-        "au au",
-    )
+    print("au au",)
     x = 0
     while x < 100:
         if x > 2:
@@ -72,13 +70,10 @@ def forsandstuff(aaa):
     return
 
 
-def single_line():
-    return 1
+def single_line(): return 1
 
 
-def comma_at_end(
-    v,
-):
+def comma_at_end(v,):
     print(v)
 
 

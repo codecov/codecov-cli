@@ -4,6 +4,7 @@
 name: Build-and-Release
 
 on:
+  workflow_call:
   release:
     types: created
 

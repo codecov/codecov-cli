@@ -21,14 +21,14 @@ jobs:
         with:
           gpg_private_key: ${{ secrets.RELEASER_GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.RELEASER_PASSPHRASE }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
 
-#      - name: Initialize mandatory git config
-#        run: |
-#          git config --global user.name "${{ steps.import-gpg.outputs.email }}"
-#          git config --global user.email "${{ steps.import-gpg.outputs.name }}"
-#          git config --global commit.gpgsign true
+      - name: Initialize mandatory git config
+        run: |
+          git config --global user.name "${{ steps.import-gpg.outputs.email }}"
+          git config --global user.email "${{ steps.import-gpg.outputs.name }}"
+          git config --global commit.gpgsign true
+          git config --global user.signingkey "${{ steps.import-gpg.outputs.keyid }}"
+          gpg --list-secret-keys --keyid-format=long
       - name: Create release branch
         run: git checkout -b release/${{ github.event.inputs.versionName }}
       - name: Update version file

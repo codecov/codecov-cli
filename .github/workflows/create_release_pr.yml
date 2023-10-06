@@ -27,7 +27,8 @@ jobs:
 
       - name: Create release branch
         run: git checkout -b release/${{ github.event.inputs.versionName }}
-      - name: Update version file
+
+      - name: Update version and push
         id: make-commit
         env:
           GITHUB_TOKEN: ${{ secrets.CODECOV_RELEASE_PAT }}
@@ -40,14 +41,14 @@ jobs:
           git add setup.py
           git commit -S --message "Prepare release ${{ github.event.inputs.versionName }}"
           echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-      - name: Push release branch
-        run: git push origin release/${{ github.event.inputs.versionName }}
+          git push origin release/${{ github.event.inputs.versionName }}
+
       - name: Create pull request into main
         uses: thomaseizinger/create-pull-request@1.3.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           head: release/${{ github.event.inputs.versionName }}
-          base: ${{ inputs.mainBranch }}
+          base: main
           title: Release ${{ github.event.inputs.versionName }}
           reviewers: ${{ github.event.issue.user.login }}
           body: |

@@ -9,6 +9,45 @@ on:
 
 jobs:
   create-release-pr:
-    name: Create PR for Release ${{ github.event.inputs.versionName }}
-    uses: codecov/gha-workflows/.github/workflows/create-release-pr.yml@v1.2.2
-    secrets: inherit
+    name: Create PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Import GPG key
+        id: import-gpg
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.RELEASER_GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.RELEASER_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+
+#      - name: Initialize mandatory git config
+#        run: |
+#          git config --global user.name "${{ steps.import-gpg.outputs.email }}"
+#          git config --global user.email "${{ steps.import-gpg.outputs.name }}"
+#          git config --global commit.gpgsign true
+      - name: Create release branch
+        run: git checkout -b release/${{ github.event.inputs.versionName }}
+      - name: Update version file
+        id: make-commit
+        run: |
+          sed -i 's/version="[0-9]\.[0-9]\.[0-9]"/version="${{ github.event.inputs.versionName }}"/g' setup.py
+          git add setup.py
+          git commit -S --message "Prepare release ${{ github.event.inputs.versionName }}"
+          echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Push release branch
+        run: git push origin release/${{ github.event.inputs.versionName }}
+      - name: Create pull request into main
+        uses: thomaseizinger/create-pull-request@1.3.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          head: release/${{ github.event.inputs.versionName }}
+          base: ${{ inputs.mainBranch }}
+          title: Release ${{ github.event.inputs.versionName }}
+          reviewers: ${{ github.event.issue.user.login }}
+          body: |
+            Release PR for ${{ github.event.inputs.versionName }}
+            I've updated the version name and committed: ${{ steps.make-commit.outputs.commit }}.

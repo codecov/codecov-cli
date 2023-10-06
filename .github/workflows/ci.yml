@@ -74,7 +74,7 @@ jobs:
     - name: Test with pytest
       run: |
         pytest --cov
-    - name: Dogfooding codecov-cli. Use codecov-cli to upload to codecov (new upload endpoint)
+    - name: Dogfooding codecov-cli
       run: |
         codecovcli do-upload --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
 

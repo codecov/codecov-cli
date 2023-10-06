@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - main
-      - feature/main-builds
 
 jobs:
   build_and_publish_to_pipy:

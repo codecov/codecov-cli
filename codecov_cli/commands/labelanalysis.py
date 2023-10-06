@@ -44,7 +44,7 @@ logger = logging.getLogger("codecovcli")
     required=True,
 )
 @click.option(
-    "--runner-name", "--runner", "runner_name", help="Runner to use", default="python"
+    "--runner-name", "--runner", "runner_name", help="Runner to use", default="pytest"
 )
 @click.option(
     "--max-wait-time",

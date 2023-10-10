@@ -1,4 +1,6 @@
 import json
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
 
 import click
@@ -8,6 +10,8 @@ from click.testing import CliRunner
 from responses import matchers
 
 from codecov_cli.commands.labelanalysis import (
+    _dry_run_json_output,
+    _dry_run_list_output,
     _fallback_to_collected_labels,
     _potentially_calculate_absent_labels,
     _send_labelanalysis_request,
@@ -102,6 +106,45 @@ class TestLabelAnalysisNotInvoke(object):
             with pytest.raises(click.ClickException):
                 _send_labelanalysis_request(payload, url, header)
 
+    def test__dry_run_json_output(self):
+        list_to_run = ["label_1", "label_2"]
+        list_to_skip = ["label_3", "label_4"]
+        runner_options = ["--option=1", "--option=2"]
+
+        with StringIO() as out:
+            with redirect_stdout(out):
+                _dry_run_json_output(
+                    labels_to_run=list_to_run,
+                    labels_to_skip=list_to_skip,
+                    runner_options=runner_options,
+                )
+                stdout = out.getvalue()
+
+        assert json.loads(stdout) == {
+            "runner_options": ["--option=1", "--option=2"],
+            "ats_tests_to_skip": ["label_3", "label_4"],
+            "ats_tests_to_run": ["label_1", "label_2"],
+        }
+
+    def test__dry_run_json_output(self):
+        list_to_run = ["label_1", "label_2"]
+        list_to_skip = ["label_3", "label_4"]
+        runner_options = ["--option=1", "--option=2"]
+
+        with StringIO() as out:
+            with redirect_stdout(out):
+                _dry_run_list_output(
+                    labels_to_run=list_to_run,
+                    labels_to_skip=list_to_skip,
+                    runner_options=runner_options,
+                )
+                stdout = out.getvalue()
+
+        assert (
+            stdout
+            == "TESTS_TO_RUN='--option=1' '--option=2' 'label_1' 'label_2'\nTESTS_TO_SKIP='--option=1' '--option=2' 'label_3' 'label_4'\n"
+        )
+
 
 class TestLabelAnalysisCommand(object):
     def test_labelanalysis_help(self, mocker, fake_ci_provider):
@@ -115,28 +158,24 @@ class TestLabelAnalysisCommand(object):
             "Usage: cli label-analysis [OPTIONS]",
             "",
             "Options:",
-            "  --token TEXT                  The static analysis token (NOT the same token as",
-            "                                upload)  [required]",
-            "  --head-sha TEXT               Commit SHA (with 40 chars)  [required]",
-            "  --base-sha TEXT               Commit SHA (with 40 chars)  [required]",
-            "  --runner-name, --runner TEXT  Runner to use",
-            "  --max-wait-time INTEGER       Max time (in seconds) to wait for the label",
-            "                                analysis result before falling back to running",
-            "                                all tests. Default is to wait forever.",
-            "  --dry-run                     Print list of tests to run AND tests skipped",
-            "                                (and options that need to be added to the test",
-            "                                runner) to stdout. Also prints the same",
-            "                                information in JSON format. JSON will have keys",
-            "                                'ats_tests_to_run', 'ats_tests_to_skip' and",
-            "                                'runner_options'. List of tests to run is",
-            "                                prefixed with ATS_TESTS_TO_RUN= List of tests to",
-            "                                skip is prefixed with ATS_TESTS_TO_SKIP=",
-            "  --dry-run-output-path PATH    Prints the dry-run list (ATS_TESTS_TO_RUN) into",
-            "                                dry_run_output_path (in addition to stdout) AND",
-            "                                prints ATS_TESTS_TO_SKIP into",
-            "                                dry_run_output_path_skipped AND prints dry-run",
-            "                                JSON output into dry_run_output_path.json",
-            "  -h, --help                    Show this message and exit.",
+            "  --token TEXT                    The static analysis token (NOT the same token",
+            "                                  as upload)  [required]",
+            "  --head-sha TEXT                 Commit SHA (with 40 chars)  [required]",
+            "  --base-sha TEXT                 Commit SHA (with 40 chars)  [required]",
+            "  --runner-name, --runner TEXT    Runner to use",
+            "  --max-wait-time INTEGER         Max time (in seconds) to wait for the label",
+            "                                  analysis result before falling back to running",
+            "                                  all tests. Default is to wait forever.",
+            "  --dry-run                       Print list of tests to run AND tests skipped",
+            "                                  (and options that need to be added to the test",
+            "                                  runner) to stdout. Also prints the same",
+            "                                  information in JSON format. JSON will have",
+            "                                  keys 'ats_tests_to_run', 'ats_tests_to_skip'",
+            "                                  and 'runner_options'. List of tests to run is",
+            "                                  prefixed with ATS_TESTS_TO_RUN= List of tests",
+            "                                  to skip is prefixed with ATS_TESTS_TO_SKIP=",
+            "  --dry-run-format [json|space-separated-list]",
+            "  -h, --help                      Show this message and exit.",
             "",
         ]
 
@@ -267,7 +306,7 @@ class TestLabelAnalysisCommand(object):
                 "https://api.codecov.io/labels/labels-analysis/label-analysis-request-id",
                 json={"state": "finished", "result": label_analysis_result},
             )
-            cli_runner = CliRunner()
+            cli_runner = CliRunner(mix_stderr=False)
             with cli_runner.isolated_filesystem():
                 result = cli_runner.invoke(
                     cli,
@@ -281,19 +320,15 @@ class TestLabelAnalysisCommand(object):
                 )
                 mock_get_runner.assert_called()
                 fake_runner.process_labelanalysis_result.assert_not_called()
-        print(result.output)
-        assert result.exit_code == 0
-        assert (
-            '{"runner_options": ["--labels"], "ats_tests_to_run": ["\\"test_absent\\"", "\\"test_global\\"", "\\"test_in_diff\\""], "ats_tests_to_skip": ["\\"test_present\\""]}'
-            in result.output
-        )
-        assert (
-            'ATS_TESTS_TO_RUN=--labels "test_absent" "test_global" "test_in_diff"'
-            in result.output
-        )
-        assert 'ATS_TESTS_TO_SKIP=--labels "test_present"' in result.output
+        # Dry run format defaults to json
+        print(result.stdout)
+        assert json.loads(result.stdout) == {
+            "runner_options": ["--labels"],
+            "ats_tests_to_run": ["test_absent", "test_global", "test_in_diff"],
+            "ats_tests_to_skip": ["test_present"],
+        }
 
-    def test_invoke_label_analysis_dry_run_with_output_path(
+    def test_invoke_label_analysis_dry_run_pytest_format(
         self, get_labelanalysis_deps, mocker
     ):
         mock_get_runner = get_labelanalysis_deps["mock_get_runner"]
@@ -330,7 +365,7 @@ class TestLabelAnalysisCommand(object):
                 "https://api.codecov.io/labels/labels-analysis/label-analysis-request-id",
                 json={"state": "finished", "result": label_analysis_result},
             )
-            cli_runner = CliRunner()
+            cli_runner = CliRunner(mix_stderr=False)
             with cli_runner.isolated_filesystem():
                 result = cli_runner.invoke(
                     cli,
@@ -339,42 +374,17 @@ class TestLabelAnalysisCommand(object):
                         "--token=STATIC_TOKEN",
                         f"--base-sha={FAKE_BASE_SHA}",
                         "--dry-run",
-                        "--dry-run-output-path=ats_output_path",
+                        "--dry-run-format=space-separated-list",
                     ],
                     obj={},
                 )
-                print(result)
-                print(result.output)
-                ats_output_path = "ats_output_path"
-                labels_file = Path(ats_output_path)
-                skip_labels_file = Path(ats_output_path + "_skipped")
-                json_output = Path(ats_output_path + ".json")
-                assert labels_file.exists() and labels_file.is_file()
-                assert skip_labels_file.exists() and skip_labels_file.is_file()
-                assert json_output.exists() and json_output.is_file()
-                with open(labels_file, "r") as fd:
-                    assert fd.readlines() == [
-                        '--labels "test_absent" "test_global" "test_in_diff"\n'
-                    ]
-                with open(skip_labels_file, "r") as fd:
-                    assert fd.readlines() == ['--labels "test_present"\n']
-                with open(json_output, "r") as fd:
-                    assert fd.readlines() == [
-                        '{"runner_options": ["--labels"], "ats_tests_to_run": ["\\"test_absent\\"", "\\"test_global\\"", "\\"test_in_diff\\""], "ats_tests_to_skip": ["\\"test_present\\""]}\n'
-                    ]
-                mock_get_runner.assert_called()
                 fake_runner.process_labelanalysis_result.assert_not_called()
-        print(result.output)
+        print(result.stdout)
         assert result.exit_code == 0
         assert (
-            '{"runner_options": ["--labels"], "ats_tests_to_run": ["\\"test_absent\\"", "\\"test_global\\"", "\\"test_in_diff\\""], "ats_tests_to_skip": ["\\"test_present\\""]}'
-            in result.output
+            result.stdout
+            == "TESTS_TO_RUN='--labels' 'test_absent' 'test_global' 'test_in_diff'\nTESTS_TO_SKIP='--labels' 'test_present'\n"
         )
-        assert (
-            'ATS_TESTS_TO_RUN=--labels "test_absent" "test_global" "test_in_diff"'
-            in result.output
-        )
-        assert 'ATS_TESTS_TO_SKIP=--labels "test_present"' in result.output
 
     def test_fallback_to_collected_labels(self, mocker):
         mock_runner = mocker.MagicMock()
@@ -471,7 +481,7 @@ class TestLabelAnalysisCommand(object):
                     "global_level_labels": [],
                 },
                 fake_runner,
-                None,
+                "json",
             )
         assert result.exit_code == 0
 

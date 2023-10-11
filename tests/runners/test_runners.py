@@ -4,22 +4,34 @@ import pytest
 
 from codecov_cli.runners import _load_runner_from_yaml, get_runner
 from codecov_cli.runners.dan_runner import DoAnythingNowRunner
-from codecov_cli.runners.python_standard_runner import PythonStandardRunner
+from codecov_cli.runners.pytest_standard_runner import PytestStandardRunner
 from tests.factory import FakeRunner
 
 
 class TestRunners(object):
     def test_get_standard_runners(self):
-        assert isinstance(get_runner({}, "python"), PythonStandardRunner)
+        assert isinstance(get_runner({}, "pytest"), PytestStandardRunner)
         assert isinstance(get_runner({}, "dan"), DoAnythingNowRunner)
         # TODO: Extend with other standard runners once we create them (e.g. JS)
 
-    def test_python_standard_runner_with_options(self):
+    def test_pytest_standard_runner_with_options_backwards_compatible(self):
         config_params = dict(
             collect_tests_options=["--option=value", "-option"],
         )
-        runner_instance = get_runner({"runners": {"python": config_params}}, "python")
-        assert isinstance(runner_instance, PythonStandardRunner)
+        runner_instance = get_runner({"runners": {"pytest": config_params}}, "pytest")
+        assert isinstance(runner_instance, PytestStandardRunner)
+        assert (
+            runner_instance.params.collect_tests_options
+            == config_params["collect_tests_options"]
+        )
+        assert runner_instance.params.coverage_root == "./"
+
+    def test_pytest_standard_runner_with_options_backwards_compatible(self):
+        config_params = dict(
+            collect_tests_options=["--option=value", "-option"],
+        )
+        runner_instance = get_runner({"runners": {"python": config_params}}, "pytest")
+        assert isinstance(runner_instance, PytestStandardRunner)
         assert (
             runner_instance.params.collect_tests_options
             == config_params["collect_tests_options"]

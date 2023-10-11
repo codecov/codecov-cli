@@ -103,8 +103,7 @@ async def run_analysis_entrypoint(
             length=len(files_that_need_upload),
             label="Uploading files",
         ) as bar:
-            limits = httpx.Limits(max_keepalive_connections=3, max_connections=5)
-            async with httpx.AsyncClient(limits=limits) as client:
+            async with httpx.AsyncClient() as client:
                 all_tasks = []
                 for el in files_that_need_upload:
                     all_tasks.append(send_single_upload_put(client, all_data, el))

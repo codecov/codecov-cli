@@ -1,0 +1,10 @@
+repos:
+- repo: local
+  hooks:
+  - id: lint
+    name: lint
+    description: "Lint and sort"
+    entry: make lint
+    pass_filenames: false
+    require_serial: true
+    language: system

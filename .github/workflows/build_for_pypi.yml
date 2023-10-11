@@ -1,0 +1,41 @@
+name: Build and Optionally Publish to PyPi
+
+on:
+  workflow_call:
+    inputs:
+      publish:
+        type: boolean
+        default: false
+        description: "Publish to PyPi"
+
+jobs:
+  build_for_pypi:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # This is required for requesting the JWT
+      contents: read  # This is required for actions/checkout
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          python setup.py build
+          python setup.py develop
+      - name: Build distributions for different platforms
+        run: |
+          pip install wheel
+          python setup.py sdist bdist_wheel --plat-name=manylinux2014_x86_64
+          python setup.py bdist_wheel --plat-name=macosx-12.6-x86_64
+          python setup.py bdist_wheel --plat-name=win_amd64
+      - name: Publish package to PyPi
+        if: inputs.publish == true
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+
+

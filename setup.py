@@ -1,5 +1,5 @@
-from platform import system
 from os import path
+from platform import system
 
 from setuptools import Extension, find_packages, setup
 
@@ -10,7 +10,7 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="codecov-cli",
-    version='0.3.7',
+    version="0.3.8",
     packages=find_packages(exclude=["contrib", "docs", "tests*"]),
     description="Codecov Command Line Interface",
     long_description=long_description,

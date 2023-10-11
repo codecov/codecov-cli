@@ -1,7 +1,7 @@
 # This workflow will install Python dependencies, run tests and lint with a variety of Python versions
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: Build-and-Release
+name: Build and Publish CLI Release
 
 on:
   release:
@@ -9,102 +9,25 @@ on:
       - created
 
 jobs:
-  build_and_publish_to_pipy:
-    runs-on: ubuntu-latest
+  build_and_publish_to_pypi:
     permissions:
       id-token: write # This is required for requesting the JWT
       contents: read  # This is required for actions/checkout
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.11"
-    - name: Install dependencies
-      run: |
-        pip install -r requirements.txt
-        python setup.py build
-        python setup.py develop
-    - name: Build distributions for different platforms
-      run: |
-        pip install wheel
-        python setup.py sdist bdist_wheel --plat-name=manylinux2014_x86_64
-        python setup.py bdist_wheel --plat-name=macosx-12.6-x86_64
-        python setup.py bdist_wheel --plat-name=win_amd64
-    - name: Publish package to PyPi
-      uses: pypa/gh-action-pypi-publish@release/v1
+    uses: ./.github/workflows/build_for_pypi.yml
+    with:
+      publish: true
+    secrets: inherit
 
   buildassets:
     name: Build packages
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: true
-      matrix:
-        include:
-          - os: macos-latest
-            env:
-              CFLAGS: '-arch arm64 -arch x86_64'
-            TARGET: macos
-            CMD_REQS: >
-              mkdir -p pip-packages && cd pip-packages && pip wheel --no-cache-dir -r ../requirements.txt && cd ..
-              pip install --no-deps --no-index --find-links=pip-packages pip-packages/*
-            CMD_BUILD: >
-              STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
-              pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:. --hidden-import staticcodecov_languages -F codecov_cli/main.py &&
-              mv dist/main dist/codecovcli_macos &&
-              lipo -archs dist/codecovcli_macos | grep -v 'x86_64 arm65' >> /dev/null && exit 1
-            OUT_FILE_NAME: codecovcli_macos
-            ASSET_MIME: application/octet-stream
-          - os: ubuntu-20.04
-            TARGET: ubuntu
-            CMD_REQS: >
-              pip install -r requirements.txt
-            CMD_BUILD: >
-              STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
-              pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:. --hidden-import staticcodecov_languages -F codecov_cli/main.py &&
-              cp ./dist/main ./dist/codecovcli_linux
-            OUT_FILE_NAME: codecovcli_linux
-            ASSET_MIME: application/octet-stream
-          - os: windows-latest
-            TARGET: windows
-            CMD_REQS: >
-              pip install -r requirements.txt
-            CMD_BUILD: >
-              pyinstaller --add-binary "build\lib.win-amd64-cpython-310\staticcodecov_languages.cp310-win_amd64.pyd;." --hidden-import staticcodecov_languages -F codecov_cli\main.py &&
-              Copy-Item -Path ".\dist\main.exe" -Destination ".\dist\codecovcli_windows.exe"
-            OUT_FILE_NAME: codecovcli_windows.exe
-            ASSET_MIME: application/vnd.microsoft.portable-executable
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: true
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.11"
-    - name: Install dependencies
-      run: |
-        ${{matrix.CMD_REQS}}
-        python setup.py build
-    - name: Install pyinstaller
-      run: pip install pyinstaller
-    - name: Build with pyinstaller for ${{matrix.TARGET}}
-      run: ${{matrix.CMD_BUILD}}
-    - name: Upload Release Asset
-      id: upload-release-asset
-      uses: svenstaro/upload-release-action@v2
-      with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: ./dist/${{ matrix.OUT_FILE_NAME }}
-        asset_name: ${{ matrix.OUT_FILE_NAME }}
-        tag: ${{ github.ref }}
-        overwrite: true
+    uses: ./.github/workflows/build_assets.yml
+    with:
+      release: true
+    secrets: inherit
 
   publish_release:
     name: Publish release
-    needs: [buildassets, build_and_publish_to_pipy]
+    needs: [buildassets, build_and_publish_to_pypi]
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'

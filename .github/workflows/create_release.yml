@@ -9,7 +9,6 @@ on:
 jobs:
   create-release:
     if: ${{ github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/') && github.repository_owner == 'codecov' }}
-
     env:
       GITHUB_TOKEN: ${{ secrets.CODECOV_RELEASE_PAT }}
     name: Create Github Release

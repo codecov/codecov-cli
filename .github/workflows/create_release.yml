@@ -17,4 +17,7 @@ jobs:
     needs: [create-release]
     if: ${{ github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/') && github.repository_owner == 'codecov' }}
     uses: ./.github/workflows/release_flow.yml
+    permissions:
+      id-token: write # This is required for requesting the JWT
+      contents: read  # This is required for actions/checkout
     secrets: inherit

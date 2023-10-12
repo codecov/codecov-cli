@@ -4,7 +4,6 @@
 name: Build and Publish CLI Release
 
 on:
-  workflow_call:
   release:
     types:
       - created

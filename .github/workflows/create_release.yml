@@ -20,7 +20,7 @@ jobs:
       - id: get-release-vars
         name: Configure Release Vars
         run: |
-          grep -E "version='(\d\.\d\.\d)'" setup.py | grep -Eo "\d.\d.\d" >> "$GITHUB_OUTPUT"
+          grep -E "version=\"(\d\.\d\.\d)\"" setup.py | grep -Eo "\d.\d.\d" >> "$GITHUB_OUTPUT"
 
       - name: Create GH Release
         uses: softprops/action-gh-release@v0.1.15

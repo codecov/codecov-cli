@@ -514,7 +514,12 @@ class TestLabelAnalysisCommand(object):
             rsps.add(
                 responses.GET,
                 "https://api.codecov.io/labels/labels-analysis/label-analysis-request-id",
-                json={"state": "error"},
+                json={
+                    "state": "error",
+                    "external_id": "uuid4-external-id",
+                    "base_commit": "BASE_COMMIT_SHA",
+                    "head_commit": "HEAD_COMMIT_SHA",
+                },
             )
             cli_runner = CliRunner()
             result = cli_runner.invoke(
@@ -526,6 +531,7 @@ class TestLabelAnalysisCommand(object):
                 ],
                 obj={},
             )
+            print(result)
             mock_get_runner.assert_called()
             fake_runner.process_labelanalysis_result.assert_called_with(
                 {

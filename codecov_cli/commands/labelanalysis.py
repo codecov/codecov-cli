@@ -193,7 +193,13 @@ def label_analysis(
         if resp_json["state"] == "error":
             logger.error(
                 "Request had problems calculating",
-                extra=dict(extra_log_attributes=dict(resp_json=resp_json)),
+                extra=dict(
+                    extra_log_attributes=dict(
+                        base_commit=resp_json["base_commit"],
+                        head_commit=resp_json["head_commit"],
+                        external_id=resp_json["external_id"],
+                    )
+                ),
             )
             _fallback_to_collected_labels(
                 collected_labels=requested_labels,

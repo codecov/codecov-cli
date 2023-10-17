@@ -9,7 +9,6 @@ from pathlib import Path
 import click
 import httpx
 import requests
-import yaml
 
 from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.services.staticanalysis.analyzers import get_best_analyzer
@@ -47,8 +46,16 @@ async def run_analysis_entrypoint(
     all_data = processing_results["all_data"]
     try:
         json_output = {"commit": commit, "filepaths": file_metadata}
+        logger.info(
+            "Sending files fingerprints to Codecov",
+            extra=dict(
+                extra_log_attributes=dict(
+                    files_effectively_analyzed=len(json_output["filepaths"])
+                )
+            ),
+        )
         logger.debug(
-            "Sending data for server",
+            "Data sent to Codecov",
             extra=dict(extra_log_attributes=dict(json_payload=json_output)),
         )
         upload_url = enterprise_url or CODECOV_API_URL
@@ -96,36 +103,42 @@ async def run_analysis_entrypoint(
         for el in response_json["filepaths"]
         if (el["state"].lower() == "created" or should_force)
     ]
+
     if files_that_need_upload:
         uploaded_files = []
-        failed_upload = []
+        failed_uploads = []
         with click.progressbar(
             length=len(files_that_need_upload),
-            label="Uploading files",
+            label=f"Upload info to storage",
         ) as bar:
-            async with httpx.AsyncClient() as client:
+            # It's better to have less files competing over CPU time when uploading
+            # Especially if we might have large files
+            limits = httpx.Limits(max_connections=20)
+            # Because there might be too many files to upload we will ignore most timeouts
+            timeout = httpx.Timeout(read=None, pool=None, connect=None, write=10.0)
+            async with httpx.AsyncClient(timeout=timeout, limits=limits) as client:
                 all_tasks = []
                 for el in files_that_need_upload:
                     all_tasks.append(send_single_upload_put(client, all_data, el))
-                    bar.update(1, all_data[el["filepath"]])
                 try:
-                    resps = await asyncio.gather(*all_tasks)
+                    for task in asyncio.as_completed(all_tasks):
+                        resp = await task
+                        bar.update(1, el["filepath"])
+                        if resp["succeeded"]:
+                            uploaded_files.append(resp["filepath"])
+                        else:
+                            failed_uploads.append(resp["filepath"])
                 except asyncio.CancelledError:
                     message = (
                         "Unknown error cancelled the upload tasks.\n"
                         + f"Uploaded {len(uploaded_files)}/{len(files_that_need_upload)} files successfully."
                     )
                     raise click.ClickException(message)
-            for resp in resps:
-                if resp["succeeded"]:
-                    uploaded_files.append(resp["filepath"])
-                else:
-                    failed_upload.append(resp["filepath"])
-        if failed_upload:
-            logger.warning(f"{len(failed_upload)} files failed to upload")
+        if failed_uploads:
+            logger.warning(f"{len(failed_uploads)} files failed to upload")
             logger.debug(
                 "Failed files",
-                extra=dict(extra_log_attributes=dict(filenames=failed_upload)),
+                extra=dict(extra_log_attributes=dict(filenames=failed_uploads)),
             )
         logger.info(
             f"Uploaded {len(uploaded_files)} files",

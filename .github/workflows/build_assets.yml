@@ -61,7 +61,7 @@ jobs:
         run: |
           ${{matrix.CMD_REQS}}
           python setup.py build
-          pip install --no-deps .
+          python setup.py develop
       - name: Install pyinstaller
         run: pip install pyinstaller
       - name: Build with pyinstaller for ${{matrix.TARGET}}

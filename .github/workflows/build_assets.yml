@@ -25,7 +25,7 @@ jobs:
               pip install --no-deps --no-index --find-links=pip-packages pip-packages/*
             CMD_BUILD: >
               STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
-              pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:. --copy-metadata codecov-cli --hidden-import staticcodecov_languages --target-arch universal2 -F codecov_cli/main.py &&
+              pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:. --copy-metadata codecov-cli --hidden-import staticcodecov_languages  --hidden-import click --target-arch universal2 -F codecov_cli/main.py &&
               mv dist/main dist/codecovcli_macos &&
               lipo -archs dist/codecovcli_macos | grep 'x86_64 arm64'
             OUT_FILE_NAME: codecovcli_macos
@@ -61,7 +61,7 @@ jobs:
         run: |
           ${{matrix.CMD_REQS}}
           python setup.py build
-          python setup.py develop
+          python install --no-deps .
       - name: Install pyinstaller
         run: pip install pyinstaller
       - name: Build with pyinstaller for ${{matrix.TARGET}}

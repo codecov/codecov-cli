@@ -21,7 +21,7 @@ jobs:
               CFLAGS: -arch arm64 -arch x86_64
             TARGET: macos
             CMD_REQS: >
-              mkdir -p pip-packages && cd pip-packages && pip wheel --no-cache-dir -r ../requirements.txt && pip wheel --no-cache-dir . && cd ..
+              mkdir -p pip-packages && cd pip-packages && pip wheel --no-cache-dir -r .. && cd ..
               pip install --no-deps --no-index --find-links=pip-packages pip-packages/*
             CMD_BUILD: >
               STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
@@ -34,6 +34,7 @@ jobs:
             TARGET: ubuntu
             CMD_REQS: >
               pip install -r requirements.txt
+              pip install .
             CMD_BUILD: >
               STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
               pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:. --copy-metadata codecov-cli --hidden-import staticcodecov_languages -F codecov_cli/main.py &&
@@ -44,6 +45,7 @@ jobs:
             TARGET: windows
             CMD_REQS: >
               pip install -r requirements.txt
+              pip install .
             CMD_BUILD: >
               pyinstaller --add-binary "build\lib.win-amd64-cpython-311\staticcodecov_languages.cp311-win_amd64.pyd;." --copy-metadata codecov-cli --hidden-import staticcodecov_languages -F codecov_cli\main.py &&
               Copy-Item -Path ".\dist\main.exe" -Destination ".\dist\codecovcli_windows.exe"

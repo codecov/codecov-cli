@@ -10,7 +10,7 @@ on:
 
 jobs:
   build_assets:
-    name: Build packages
+    name: Build packages - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
@@ -21,11 +21,11 @@ jobs:
               CFLAGS: -arch arm64 -arch x86_64
             TARGET: macos
             CMD_REQS: >
-              mkdir -p pip-packages && cd pip-packages && pip wheel --no-cache-dir -r ../requirements.txt && cd ..
+              mkdir -p pip-packages && cd pip-packages && pip wheel --no-cache-dir --no-binary tree_sitter,ijson,charset_normalizer,PyYAML .. && cd .. &&
               pip install --no-deps --no-index --find-links=pip-packages pip-packages/*
             CMD_BUILD: >
               STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
-              pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:. --hidden-import staticcodecov_languages --target-arch universal2 -F codecov_cli/main.py &&
+              pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:. --copy-metadata codecov-cli --hidden-import staticcodecov_languages --target-arch universal2 -F codecov_cli/main.py &&
               mv dist/main dist/codecovcli_macos &&
               lipo -archs dist/codecovcli_macos | grep 'x86_64 arm64'
             OUT_FILE_NAME: codecovcli_macos
@@ -34,9 +34,10 @@ jobs:
             TARGET: ubuntu
             CMD_REQS: >
               pip install -r requirements.txt
+              pip install .
             CMD_BUILD: >
               STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
-              pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:. --hidden-import staticcodecov_languages -F codecov_cli/main.py &&
+              pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:. --copy-metadata codecov-cli --hidden-import staticcodecov_languages -F codecov_cli/main.py &&
               cp ./dist/main ./dist/codecovcli_linux
             OUT_FILE_NAME: codecovcli_linux
             ASSET_MIME: application/octet-stream
@@ -44,8 +45,9 @@ jobs:
             TARGET: windows
             CMD_REQS: >
               pip install -r requirements.txt
+              pip install .
             CMD_BUILD: >
-              pyinstaller --add-binary "build\lib.win-amd64-cpython-311\staticcodecov_languages.cp311-win_amd64.pyd;." --hidden-import staticcodecov_languages -F codecov_cli\main.py &&
+              pyinstaller --add-binary "build\lib.win-amd64-cpython-311\staticcodecov_languages.cp311-win_amd64.pyd;." --copy-metadata codecov-cli --hidden-import staticcodecov_languages -F codecov_cli\main.py &&
               Copy-Item -Path ".\dist\main.exe" -Destination ".\dist\codecovcli_windows.exe"
             OUT_FILE_NAME: codecovcli_windows.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable

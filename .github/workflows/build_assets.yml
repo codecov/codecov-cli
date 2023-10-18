@@ -10,7 +10,7 @@ on:
 
 jobs:
   build_assets:
-    name: Build packages
+    name: Build packages - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true

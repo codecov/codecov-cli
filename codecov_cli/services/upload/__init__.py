@@ -13,6 +13,9 @@ from codecov_cli.plugins import select_preparation_plugins
 from codecov_cli.services.upload.coverage_file_finder import select_coverage_file_finder
 from codecov_cli.services.upload.legacy_upload_sender import LegacyUploadSender
 from codecov_cli.services.upload.network_finder import select_network_finder
+from codecov_cli.services.upload.testing_result_file_finder import (
+    select_testing_result_file_finder,
+)
 from codecov_cli.services.upload.upload_collector import UploadCollector
 from codecov_cli.services.upload.upload_sender import UploadSender
 from codecov_cli.services.upload_completion import upload_completion_logic
@@ -38,6 +41,7 @@ def do_upload_logic(
     coverage_files_search_root_folder: Path,
     coverage_files_search_exclude_folders: typing.List[Path],
     coverage_files_search_explicitly_listed_files: typing.List[Path],
+    test_result_files_search_explicitly_listed_files: typing.List[Path],
     plugin_names: typing.List[str],
     token: uuid.UUID,
     branch: typing.Optional[str],
@@ -49,6 +53,7 @@ def do_upload_logic(
     git_service: typing.Optional[str],
     enterprise_url: typing.Optional[str],
     disable_search: bool = False,
+    disable_test_search: bool = False,
     handle_no_reports_found: bool = False,
     disable_file_fixes: bool = False,
 ):
@@ -59,9 +64,23 @@ def do_upload_logic(
         coverage_files_search_explicitly_listed_files,
         disable_search,
     )
+
+    # only want to search for files specified by user right now
+    # TODO: add options for parity with coverage file search (exclude and folders to ignore)
+    testing_result_file_selector = select_testing_result_file_finder(
+        None,
+        None,
+        test_result_files_search_explicitly_listed_files,
+        disable_test_search,
+    )
+
     network_finder = select_network_finder(versioning_system)
     collector = UploadCollector(
-        preparation_plugins, network_finder, coverage_file_selector, disable_file_fixes
+        preparation_plugins,
+        network_finder,
+        coverage_file_selector,
+        testing_result_file_selector,
+        disable_file_fixes,
     )
     try:
         upload_data = collector.generate_upload_data()

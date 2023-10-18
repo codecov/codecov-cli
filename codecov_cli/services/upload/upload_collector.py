@@ -10,6 +10,9 @@ import click
 
 from codecov_cli.services.upload.coverage_file_finder import CoverageFileFinder
 from codecov_cli.services.upload.network_finder import NetworkFinder
+from codecov_cli.services.upload.testing_result_file_finder import (
+    TestingResultFileFinder,
+)
 from codecov_cli.types import (
     PreparationPluginInterface,
     UploadCollectionResult,
@@ -29,11 +32,13 @@ class UploadCollector(object):
         preparation_plugins: typing.List[PreparationPluginInterface],
         network_finder: NetworkFinder,
         coverage_file_finder: CoverageFileFinder,
+        testing_result_file_finder: TestingResultFileFinder,
         disable_file_fixes: bool = False,
     ):
         self.preparation_plugins = preparation_plugins
         self.network_finder = network_finder
         self.coverage_file_finder = coverage_file_finder
+        self.testing_result_file_finder = testing_result_file_finder
         self.disable_file_fixes = disable_file_fixes
 
     def _produce_file_fixes_for_network(
@@ -145,7 +150,8 @@ class UploadCollector(object):
             prep.run_preparation(self)
         logger.debug("Collecting relevant files")
         network = self.network_finder.find_files()
-        coverage_files = self.coverage_file_finder.find_coverage_files()
+        coverage_files = self.coverage_file_finder.find_files()
+        testing_result_files = self.testing_result_file_finder.find_files()
         logger.info(f"Found {len(coverage_files)} coverage files to upload")
         if not coverage_files:
             raise click.ClickException(
@@ -159,5 +165,6 @@ class UploadCollector(object):
         return UploadCollectionResult(
             network=network,
             coverage_files=coverage_files,
+            testing_result_files=testing_result_files,
             file_fixes=self._produce_file_fixes_for_network(network),
         )

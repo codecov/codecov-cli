@@ -269,6 +269,9 @@ def do_upload(
         coverage_files_search_explicitly_listed_files=list(
             coverage_files_search_explicitly_listed_files
         ),
+        test_result_files_search_explicitly_listed_files=list(
+            test_result_files_search_explicitly_listed_files
+        ),
         plugin_names=plugin_names,
         token=token,
         branch=branch,
@@ -280,6 +283,7 @@ def do_upload(
         git_service=git_service,
         enterprise_url=enterprise_url,
         disable_search=disable_search,
+        disable_test_search=disable_test_search,
         handle_no_reports_found=handle_no_reports_found,
         disable_file_fixes=disable_file_fixes,
     )

@@ -38,9 +38,10 @@ class UploadCollectionResultFileFixer(object):
 
 @dataclass
 class UploadCollectionResult(object):
-    __slots__ = ["network", "coverage_files", "file_fixes"]
+    __slots__ = ["network", "coverage_files", "testing_result_files", "file_fixes"]
     network: typing.List[str]
     coverage_files: typing.List[UploadCollectionResultFile]
+    testing_result_files: typing.List[UploadCollectionResultFile]
     file_fixes: typing.List[UploadCollectionResultFileFixer]
 
 

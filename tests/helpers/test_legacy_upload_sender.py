@@ -10,7 +10,7 @@ from codecov_cli.services.upload.legacy_upload_sender import LegacyUploadSender
 from codecov_cli.types import UploadCollectionResult
 from tests.data import reports_examples
 
-upload_collection = UploadCollectionResult(["1", "apple.py", "3"], [], [])
+upload_collection = UploadCollectionResult(["1", "apple.py", "3"], [], [], [])
 random_token = uuid.UUID("f359afb9-8a2a-42ab-a448-c3d267ff495b")
 random_sha = "845548c6b95223f12e8317a1820705f64beaf69e"
 named_upload_data = {
@@ -235,7 +235,7 @@ class TestPayloadGeneration(object):
                                     <<<<<< network
                                     """
 
-        upload_data = UploadCollectionResult(network_files, [], [])
+        upload_data = UploadCollectionResult(network_files, [], [], [])
 
         actual_network_section = LegacyUploadSender()._generate_network_section(
             upload_data
@@ -248,7 +248,7 @@ class TestPayloadGeneration(object):
     def test_generate_network_section_empty_result(self):
         assert (
             LegacyUploadSender()._generate_network_section(
-                UploadCollectionResult([], [], [])
+                UploadCollectionResult([], [], [], [])
             )
             == b""
         )
@@ -280,7 +280,6 @@ class TestPayloadGeneration(object):
         )
 
     def test_generate_coverage_files_section(self, mocker):
-
         mocker.patch(
             "codecov_cli.services.upload.LegacyUploadSender._format_coverage_file",
             side_effect=lambda file_bytes: file_bytes,
@@ -294,7 +293,7 @@ class TestPayloadGeneration(object):
         ]
 
         actual_section = LegacyUploadSender()._generate_coverage_files_section(
-            UploadCollectionResult([], coverage_files, [])
+            UploadCollectionResult([], coverage_files, [], [])
         )
 
         expected_section = b"".join(coverage_files)

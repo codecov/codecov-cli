@@ -7,7 +7,7 @@ from codecov_cli.services.upload.upload_collector import UploadCollector
 def test_fix_kt_files():
     kt_file = Path("tests/data/files_to_fix_examples/sample.kt")
 
-    col = UploadCollector(None, None, None)
+    col = UploadCollector(None, None, None, None)
 
     fixes = col._produce_file_fixes_for_network([str(kt_file)])
 
@@ -27,7 +27,7 @@ def test_fix_kt_files():
 def test_fix_go_files():
     go_file = Path("tests/data/files_to_fix_examples/sample.go")
 
-    col = UploadCollector(None, None, None)
+    col = UploadCollector(None, None, None, None)
 
     fixes = col._produce_file_fixes_for_network([str(go_file)])
 
@@ -53,7 +53,7 @@ def test_fix_bad_encoding_files(mock_open):
     mock_open.side_effect = UnicodeDecodeError("", bytes(), 0, 0, "")
     go_file = Path("tests/data/files_to_fix_examples/bad_encoding.go")
 
-    col = UploadCollector(None, None, None)
+    col = UploadCollector(None, None, None, None)
 
     fixes = col._produce_file_fixes_for_network([str(go_file)])
     assert len(fixes) == 1
@@ -66,7 +66,7 @@ def test_fix_bad_encoding_files(mock_open):
 def test_fix_php_files():
     php_file = Path("tests/data/files_to_fix_examples/sample.php")
 
-    col = UploadCollector(None, None, None)
+    col = UploadCollector(None, None, None, None)
 
     fixes = col._produce_file_fixes_for_network([str(php_file)])
 
@@ -81,7 +81,7 @@ def test_fix_php_files():
 def test_fix_for_cpp_swift_vala(tmp_path):
     cpp_file = Path("tests/data/files_to_fix_examples/sample.cpp")
 
-    col = UploadCollector(None, None, None)
+    col = UploadCollector(None, None, None, None)
 
     fixes = col._produce_file_fixes_for_network([str(cpp_file)])
 
@@ -103,7 +103,7 @@ def test_fix_for_cpp_swift_vala(tmp_path):
 def test_fix_when_disabled_fixes(tmp_path):
     cpp_file = Path("tests/data/files_to_fix_examples/sample.cpp")
 
-    col = UploadCollector(None, None, None, True)
+    col = UploadCollector(None, None, None, None, True)
 
     fixes = col._produce_file_fixes_for_network([str(cpp_file)])
 

@@ -12,7 +12,7 @@ from codecov_cli.services.upload.upload_sender import UploadSender
 from codecov_cli.types import UploadCollectionResult, UploadCollectionResultFileFixer
 from tests.data import reports_examples
 
-upload_collection = UploadCollectionResult(["1", "apple.py", "3"], [], [])
+upload_collection = UploadCollectionResult(["1", "apple.py", "3"], [], [], [])
 random_token = uuid.UUID("f359afb9-8a2a-42ab-a448-c3d267ff495b")
 random_sha = "845548c6b95223f12e8317a1820705f64beaf69e"
 named_upload_data = {
@@ -126,7 +126,7 @@ def get_fake_upload_collection_result(mocked_coverage_file):
             eof=None,
         ),
     ]
-    return UploadCollectionResult(network_files, coverage_files, path_fixers)
+    return UploadCollectionResult(network_files, coverage_files, None, path_fixers)
 
 
 class TestUploadSender(object):
@@ -301,7 +301,7 @@ class TestPayloadGeneration(object):
 
     def test_generate_empty_payload_overall(self):
         actual_report = UploadSender()._generate_payload(
-            UploadCollectionResult([], [], []), None
+            UploadCollectionResult([], [], [], []), None
         )
         expected_report = {
             "path_fixes": {

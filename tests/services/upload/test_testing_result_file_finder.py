@@ -2,21 +2,22 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from codecov_cli.services.upload.coverage_file_finder import CoverageFileFinder
+from codecov_cli.services.upload.testing_result_file_finder import (
+    TestingResultFileFinder,
+)
 from codecov_cli.types import UploadCollectionResultFile
 
 
-class TestCoverageFileFinder(object):
+class TestTestingResultFileFinder(object):
     def test_find_files_mocked_search_files(self, mocker):
         mocker.patch(
             "codecov_cli.helpers.file_finder.search_files",
             return_value=[],
         )
-        assert CoverageFileFinder().find_files() == []
+        assert TestingResultFileFinder().find_files() == []
 
         coverage_files_paths = [
-            Path("a/b.txt"),
-            Path("c.txt"),
+            Path("a/junit.xml"),
         ]
 
         mocker.patch(
@@ -25,14 +26,13 @@ class TestCoverageFileFinder(object):
         )
 
         expected = [
-            UploadCollectionResultFile(Path("c.txt")),
-            UploadCollectionResultFile(Path("a/b.txt")),
+            UploadCollectionResultFile(Path("a/junit.xml")),
         ]
 
         expected_paths = sorted([file.get_filename() for file in expected])
 
         actual_paths = sorted(
-            [file.get_filename() for file in CoverageFileFinder().find_files()]
+            [file.get_filename() for file in TestingResultFileFinder().find_files()]
         )
 
         assert expected_paths == actual_paths
@@ -42,24 +42,7 @@ class TestCoverageFileFinder(object):
         (tmp_path / "sub" / "subsub").mkdir()
         (tmp_path / "node_modules").mkdir()
 
-        should_find = [
-            "abc-coverage.cov",
-            "coverage-abc.abc",
-            "sub/coverage-abc.abc",
-            "sub/subsub/coverage-abc.abc",
-            "coverage.abc",
-            "jacocoxyz.xml",
-            "sub/jacocoxyz.xml",
-            "codecov.abc",
-            "sub/subsub/codecov.abc",
-            "xyz.codecov.abc",
-            "sub/xyz.codecov.abc",
-            "sub/subsub/xyz.codecov.abc",
-            "cover.out",
-            "abc.gcov",
-            "sub/abc.gcov",
-            "sub/subsub/abc.gcov",
-        ]
+        should_find = ["junit.xml", "sub/subsub/junit.xml"]
 
         should_ignore = [
             "abc.codecov.exe",
@@ -76,6 +59,7 @@ class TestCoverageFileFinder(object):
             "sub/test_abcd_coverage.txt",
             "test-result-ff-codecoverage.json",
             "node_modules/abc-coverage.cov",
+            "node_modules/junit.xml",
         ]
 
         for filename in should_find:
@@ -87,26 +71,25 @@ class TestCoverageFileFinder(object):
         expected = {
             UploadCollectionResultFile((tmp_path / file)) for file in should_find
         }
-        actual = set(CoverageFileFinder(tmp_path).find_files())
+        actual = set(TestingResultFileFinder(tmp_path).find_files())
         assert actual == expected
 
-        extra = tmp_path / "sub" / "nosetests.xml"
+        extra = tmp_path / "sub" / "junit.xml"
         extra.touch()
-        actual = set(CoverageFileFinder(tmp_path).find_files())
+        actual = set(TestingResultFileFinder(tmp_path).find_files())
         assert actual - expected == {UploadCollectionResultFile(extra)}
 
 
-class TestCoverageFileFinderUserInput(unittest.TestCase):
+class TestTestingResultFileFinderUserInput(unittest.TestCase):
     def setUp(self):
         self.temp_dir = tempfile.TemporaryDirectory()  # Create a temporary directory
         self.project_root = Path(self.temp_dir.name)
         self.folders_to_ignore = []
         self.explicitly_listed_files = [
-            self.project_root / "test_file.abc",
-            self.project_root / "subdirectory" / "another_file.abc",
+            self.project_root / "subdirectory" / "junit.xml",
         ]
         self.disable_search = False
-        self.coverage_file_finder = CoverageFileFinder(
+        self.testing_result_file_finder = TestingResultFileFinder(
             self.project_root,
             self.folders_to_ignore,
             self.explicitly_listed_files,
@@ -119,8 +102,7 @@ class TestCoverageFileFinderUserInput(unittest.TestCase):
     def test_find_files_with_existing_files(self):
         # Create some sample coverage files
         coverage_files = [
-            self.project_root / "coverage.xml",
-            self.project_root / "subdirectory" / "test_coverage.xml",
+            self.project_root / "subdirectory" / "junit.xml",
             self.project_root / "other_file.txt",
         ]
         (self.project_root / "subdirectory").mkdir()
@@ -128,45 +110,47 @@ class TestCoverageFileFinderUserInput(unittest.TestCase):
             file.touch()
 
         result = sorted(
-            [file.get_filename() for file in self.coverage_file_finder.find_files()]
+            [
+                file.get_filename()
+                for file in self.testing_result_file_finder.find_files()
+            ]
         )
         expected = [
-            UploadCollectionResultFile(Path(f"{self.project_root}/coverage.xml")),
             UploadCollectionResultFile(
-                Path(f"{self.project_root}/subdirectory/test_coverage.xml")
+                Path(f"{self.project_root}/subdirectory/junit.xml")
             ),
         ]
         expected_paths = sorted([file.get_filename() for file in expected])
         self.assertEqual(result, expected_paths)
 
     def test_find_files_with_no_files(self):
-        result = self.coverage_file_finder.find_files()
+        result = self.testing_result_file_finder.find_files()
         self.assertEqual(result, [])
 
     def test_find_files_with_disabled_search(self):
         # Create some sample coverage files
         print("project root", self.project_root)
         coverage_files = [
-            self.project_root / "test_file.abc",
-            self.project_root / "subdirectory" / "another_file.abc",
-            self.project_root / "subdirectory" / "test_coverage.xml",
-            self.project_root / "other_file.txt",
+            self.project_root / "subdirectory" / "junit.xml",
+            self.project_root / "junit.xml",
         ]
         (self.project_root / "subdirectory").mkdir()
         for file in coverage_files:
             file.touch()
 
         # Disable search
-        self.coverage_file_finder.disable_search = True
+        self.testing_result_file_finder.disable_search = True
 
         result = sorted(
-            [file.get_filename() for file in self.coverage_file_finder.find_files()]
+            [
+                file.get_filename()
+                for file in self.testing_result_file_finder.find_files()
+            ]
         )
 
         expected = [
-            UploadCollectionResultFile(Path(f"{self.project_root}/test_file.abc")),
             UploadCollectionResultFile(
-                Path(f"{self.project_root}/subdirectory/another_file.abc")
+                Path(f"{self.project_root}/subdirectory/junit.xml")
             ),
         ]
         expected_paths = sorted([file.get_filename() for file in expected])
@@ -176,28 +160,31 @@ class TestCoverageFileFinderUserInput(unittest.TestCase):
     def test_find_files_with_user_specified_files(self):
         # Create some sample coverage files
         coverage_files = [
-            self.project_root / "coverage.xml",
-            self.project_root / "subdirectory" / "test_coverage.xml",
-            self.project_root / "test_file.abc",
-            self.project_root / "subdirectory" / "another_file.abc",
+            self.project_root / "subdirectory" / "junit.xml",
+            self.project_root / "extra.xml",
+            self.project_root / "junit.xml",
         ]
         (self.project_root / "subdirectory").mkdir()
         for file in coverage_files:
             file.touch()
 
+        self.testing_result_file_finder.explicitly_listed_files.append(
+            self.project_root / "extra.xml"
+        )
+
         result = sorted(
-            [file.get_filename() for file in self.coverage_file_finder.find_files()]
+            [
+                file.get_filename()
+                for file in self.testing_result_file_finder.find_files()
+            ]
         )
 
         expected = [
-            UploadCollectionResultFile(Path(f"{self.project_root}/coverage.xml")),
             UploadCollectionResultFile(
-                Path(f"{self.project_root}/subdirectory/test_coverage.xml")
+                Path(f"{self.project_root}/subdirectory/junit.xml")
             ),
-            UploadCollectionResultFile(Path(f"{self.project_root}/test_file.abc")),
-            UploadCollectionResultFile(
-                Path(f"{self.project_root}/subdirectory/another_file.abc")
-            ),
+            UploadCollectionResultFile(Path(f"{self.project_root}/junit.xml")),
+            UploadCollectionResultFile(Path(f"{self.project_root}/extra.xml")),
         ]
         expected_paths = sorted([file.get_filename() for file in expected])
         self.assertEqual(result, expected_paths)
@@ -205,26 +192,29 @@ class TestCoverageFileFinderUserInput(unittest.TestCase):
     def test_find_files_with_user_specified_files_not_found(self):
         # Create some sample coverage files
         coverage_files = [
-            self.project_root / "coverage.xml",
-            self.project_root / "subdirectory" / "test_coverage.xml",
+            self.project_root / "junit.xml",
+            self.project_root / "subdirectory" / "junit.xml",
         ]
         (self.project_root / "subdirectory").mkdir()
         for file in coverage_files:
             file.touch()
 
         # Add a non-existent file to explicitly_listed_files
-        self.coverage_file_finder.explicitly_listed_files.append(
+        self.testing_result_file_finder.explicitly_listed_files.append(
             self.project_root / "non_existent.xml"
         )
 
         result = sorted(
-            [file.get_filename() for file in self.coverage_file_finder.find_files()]
+            [
+                file.get_filename()
+                for file in self.testing_result_file_finder.find_files()
+            ]
         )
 
         expected = [
-            UploadCollectionResultFile(Path(f"{self.project_root}/coverage.xml")),
+            UploadCollectionResultFile(Path(f"{self.project_root}/junit.xml")),
             UploadCollectionResultFile(
-                Path(f"{self.project_root}/subdirectory/test_coverage.xml")
+                Path(f"{self.project_root}/subdirectory/junit.xml")
             ),
         ]
         expected_paths = sorted([file.get_filename() for file in expected])

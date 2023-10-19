@@ -8,6 +8,7 @@ import click
 import requests
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
+from codecov_cli.helpers import request
 from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.helpers.validators import validate_commit_sha
 from codecov_cli.runners import get_runner
@@ -164,7 +165,7 @@ def label_analysis(
     start_wait = time.monotonic()
     time.sleep(1)
     while not has_result:
-        resp_data = requests.get(
+        resp_data = request.get(
             f"{upload_url}/labels/labels-analysis/{eid}",
             headers={"Authorization": token_header},
         )
@@ -270,7 +271,7 @@ def _potentially_calculate_absent_labels(
 def _patch_labels(payload, url, token_header):
     logger.info("Sending collected labels to Codecov...")
     try:
-        response = requests.patch(
+        response = request.patch(
             url, json=payload, headers={"Authorization": token_header}
         )
         if response.status_code < 300:
@@ -289,8 +290,8 @@ def _send_labelanalysis_request(payload, url, token_header):
         ),
     )
     try:
-        response = requests.post(
-            url, json=payload, headers={"Authorization": token_header}
+        response = request.post(
+            url, data=payload, headers={"Authorization": token_header}
         )
         if response.status_code >= 500:
             logger.warning(

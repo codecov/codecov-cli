@@ -10,6 +10,7 @@ import click
 import httpx
 import requests
 
+from codecov_cli.helpers import request
 from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.services.staticanalysis.analyzers import get_best_analyzer
 from codecov_cli.services.staticanalysis.exceptions import AnalysisError
@@ -59,9 +60,9 @@ async def run_analysis_entrypoint(
             extra=dict(extra_log_attributes=dict(json_payload=json_output)),
         )
         upload_url = enterprise_url or CODECOV_API_URL
-        response = requests.post(
+        response = request.post(
             f"{upload_url}/staticanalysis/analyses",
-            json=json_output,
+            data=json_output,
             headers={"Authorization": f"Repotoken {token}"},
         )
         response_json = response.json()
@@ -256,7 +257,7 @@ def send_finish_signal(response_json, upload_url: str, token: str):
         "Sending finish signal to let API know to schedule static analysis task",
         extra=dict(extra_log_attributes=dict(external_id=external_id)),
     )
-    response = requests.post(
+    response = request.post(
         f"{upload_url}/staticanalysis/analyses/{external_id}/finish",
         headers={"Authorization": f"Repotoken {token}"},
     )

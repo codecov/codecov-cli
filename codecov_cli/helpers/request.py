@@ -5,11 +5,42 @@ from time import sleep
 import click
 import requests
 
+from codecov_cli import __version__
 from codecov_cli.types import RequestError, RequestResult
 
 logger = logging.getLogger("codecovcli")
 
 MAX_RETRIES = 3
+
+USER_AGENT = f"codecov-cli/{__version__}"
+
+
+def _set_user_agent(headers: dict = None) -> dict:
+    headers = headers or {}
+    headers.setdefault("User-Agent", USER_AGENT)
+    return headers
+
+
+def patch(url: str, headers: dict = None, json: dict = None) -> requests.Response:
+    headers = _set_user_agent(headers)
+    return requests.patch(url, json=json, headers=headers)
+
+
+def get(url: str, headers: dict = None, params: dict = None) -> requests.Response:
+    headers = _set_user_agent(headers)
+    return requests.get(url, params=params, headers=headers)
+
+
+def put(url: str, data: dict = None, headers: dict = None) -> requests.Response:
+    headers = _set_user_agent(headers)
+    return requests.put(url, data=data, headers=headers)
+
+
+def post(
+    url: str, data: dict = None, headers: dict = None, params: dict = None
+) -> requests.Response:
+    headers = _set_user_agent(headers)
+    return requests.post(url, json=data, headers=headers, params=params)
 
 
 def backoff_time(curr_retry):
@@ -41,8 +72,7 @@ def retry_request(func):
 def send_post_request(
     url: str, data: dict = None, headers: dict = None, params: dict = None
 ):
-    resp = requests.post(url=url, json=data, headers=headers, params=params)
-    return request_result(resp)
+    return request_result(post(url=url, data=data, headers=headers, params=params))
 
 
 def get_token_header_or_fail(token: uuid.UUID) -> dict:
@@ -61,8 +91,7 @@ def send_put_request(
     data: dict = None,
     headers: dict = None,
 ):
-    resp = requests.put(url=url, data=data, headers=headers)
-    return request_result(resp)
+    return request_result(put(url=url, data=data, headers=headers))
 
 
 def request_result(resp):

@@ -1,7 +1,19 @@
+import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-from codecov_cli.services.upload.upload_collector import UploadCollector
+from codecov_cli.helpers.versioning_systems import NoVersioningSystem
+from codecov_cli.services.upload.coverage_file_finder import select_coverage_file_finder
+from codecov_cli.services.upload.network_finder import select_network_finder
+from codecov_cli.services.upload.testing_result_file_finder import (
+    select_testing_result_file_finder,
+)
+from codecov_cli.services.upload.upload_collector import (
+    UploadCollector,
+    UploadCollectionResult,
+)
+
+from codecov_cli.types import UploadCollectionResultFile
 
 
 def test_fix_kt_files():
@@ -109,3 +121,43 @@ def test_fix_when_disabled_fixes(tmp_path):
 
     assert len(fixes) == 0
     assert fixes == []
+
+
+def test_generate_upload_data():
+    temp_dir = tempfile.TemporaryDirectory()  # Create a temporary directory
+    project_root = Path(temp_dir.name)
+
+    (project_root / "coverage.xml").touch()
+    (project_root / "junit.xml").touch()
+
+    coverage_file_selector = select_coverage_file_finder(
+        project_root,
+        None,
+        None,
+        False,
+    )
+
+    testing_result_file_selector = select_testing_result_file_finder(
+        project_root,
+        None,
+        None,
+        False,
+    )
+
+    network_finder = select_network_finder(NoVersioningSystem())
+    collector = UploadCollector(
+        [],
+        network_finder,
+        coverage_file_selector,
+        testing_result_file_selector,
+        True,
+    )
+
+    data = collector.generate_upload_data()
+
+    assert data == UploadCollectionResult(
+        None,
+        [UploadCollectionResultFile((project_root / "coverage.xml"))],
+        [UploadCollectionResultFile((project_root / "junit.xml"))],
+        [],
+    )

@@ -229,3 +229,38 @@ class TestCoverageFileFinderUserInput(unittest.TestCase):
         ]
         expected_paths = sorted([file.get_filename() for file in expected])
         self.assertEqual(result, expected_paths)
+
+    def test_find_files_with_user_specified_files_excluded(self):
+        # Create some sample coverage files
+        coverage_files = [
+            self.project_root / "coverage.xml",
+            self.project_root / "subdirectory" / "test_coverage.xml",
+            self.project_root / "test.bash",
+        ]
+        (self.project_root / "subdirectory").mkdir()
+        for file in coverage_files:
+            file.touch()
+
+        # Add a non-existent file to explicitly_listed_files
+        self.coverage_file_finder.explicitly_listed_files.append(
+            self.project_root / "test.bash"
+        )
+
+        with self.assertLogs("codecovcli", level="WARNING") as cm:
+            result = sorted(
+                [file.get_filename() for file in self.coverage_file_finder.find_files()]
+            )
+        print(cm.output)
+        assert (
+            "WARNING:codecovcli:Some files being explicitly added are found in the list of excluded files for upload."
+            in cm.output
+        )
+
+        expected = [
+            UploadCollectionResultFile(Path(f"{self.project_root}/coverage.xml")),
+            UploadCollectionResultFile(
+                Path(f"{self.project_root}/subdirectory/test_coverage.xml")
+            ),
+        ]
+        expected_paths = sorted([file.get_filename() for file in expected])
+        self.assertEqual(result, expected_paths)

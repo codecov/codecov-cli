@@ -30,6 +30,8 @@ idna==3.4
     #   rfc3986
 ijson==3.2.3
     # via codecov-cli (setup.py)
+lxml==4.9.3
+    # via codecov-cli (setup.py)
 pyyaml==6.0.1
     # via codecov-cli (setup.py)
 requests==2.31.0

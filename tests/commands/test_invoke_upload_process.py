@@ -70,7 +70,7 @@ def test_upload_process_options(mocker):
             "  -C, --sha, --commit-sha TEXT    Commit SHA (with 40 chars)  [required]",
             "  -Z, --fail-on-error             Exit with non-zero code in case of error",
             "  --git-service [github|gitlab|bitbucket|github_enterprise|gitlab_enterprise|bitbucket_server]",
-            "  -t, --token UUID                Codecov upload token",
+            "  -t, --token TEXT                Codecov upload token",
             "  -r, --slug TEXT                 owner/repo slug used instead of the private",
             "                                  repo token in Self-hosted",
             "  --report-code TEXT              The code of the report. If unsure, leave",

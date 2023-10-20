@@ -1,6 +1,5 @@
 import logging
 import typing
-import uuid
 
 import click
 
@@ -42,7 +41,7 @@ def create_commit(
     pull_request_number: typing.Optional[int],
     branch: typing.Optional[str],
     slug: typing.Optional[str],
-    token: typing.Optional[uuid.UUID],
+    token: typing.Optional[str],
     git_service: typing.Optional[str],
     fail_on_error: bool,
 ):

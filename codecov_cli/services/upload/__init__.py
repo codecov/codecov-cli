@@ -1,6 +1,5 @@
 import logging
 import typing
-import uuid
 from pathlib import Path
 
 import click
@@ -39,7 +38,7 @@ def do_upload_logic(
     coverage_files_search_exclude_folders: typing.List[Path],
     coverage_files_search_explicitly_listed_files: typing.List[Path],
     plugin_names: typing.List[str],
-    token: uuid.UUID,
+    token: str,
     branch: typing.Optional[str],
     slug: typing.Optional[str],
     pull_request_number: typing.Optional[str],

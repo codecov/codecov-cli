@@ -1,10 +1,6 @@
 import json
 import logging
 import time
-import typing
-import uuid
-
-import requests
 
 from codecov_cli.helpers import request
 from codecov_cli.helpers.config import CODECOV_API_URL
@@ -25,7 +21,7 @@ def create_report_logic(
     code: str,
     slug: str,
     service: str,
-    token: uuid.UUID,
+    token: str,
     enterprise_url: str,
     fail_on_error: bool = False,
 ):
@@ -52,7 +48,7 @@ def create_report_results_logic(
     code: str,
     slug: str,
     service: str,
-    token: uuid.UUID,
+    token: str,
     enterprise_url: str,
     fail_on_error: bool = False,
 ):

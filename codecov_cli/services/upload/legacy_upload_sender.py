@@ -1,9 +1,6 @@
 import logging
 import typing
-import uuid
 from dataclasses import dataclass
-
-import requests
 
 from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.helpers.config import LEGACY_CODECOV_API_URL
@@ -39,7 +36,7 @@ class LegacyUploadSender(object):
         self,
         upload_data: UploadCollectionResult,
         commit_sha: str,
-        token: uuid.UUID,
+        token: str,
         env_vars: typing.Dict[str, str],
         report_code: str = None,
         name: typing.Optional[str] = None,

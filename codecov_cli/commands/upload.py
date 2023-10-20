@@ -2,7 +2,6 @@ import logging
 import os
 import pathlib
 import typing
-import uuid
 
 import click
 
@@ -185,7 +184,7 @@ def do_upload(
     coverage_files_search_explicitly_listed_files: typing.List[pathlib.Path],
     disable_search: bool,
     disable_file_fixes: bool,
-    token: typing.Optional[uuid.UUID],
+    token: typing.Optional[str],
     plugin_names: typing.List[str],
     branch: typing.Optional[str],
     slug: typing.Optional[str],

@@ -83,7 +83,18 @@ def mocked_coverage_file(mocker):
     return fake_result_file
 
 
-def get_fake_upload_collection_result(mocked_coverage_file):
+@pytest.fixture
+def mocked_testing_result_file(mocker):
+    fake_result_file = mocker.MagicMock()
+
+    fake_result_file.get_filename.return_value = b"test/junit.xml"
+
+    fake_result_file.get_content.return_value = reports_examples.testing_result_file
+
+    return fake_result_file
+
+
+def get_fake_upload_collection_result(mocked_coverage_file, mocked_testing_result_file):
     network_files = [
         "./codecov.yaml",
         "Makefile",
@@ -92,6 +103,7 @@ def get_fake_upload_collection_result(mocked_coverage_file):
         "dev.sh",
     ]
     coverage_files = [mocked_coverage_file, mocked_coverage_file]
+    testing_result_files = [mocked_testing_result_file]
     path_fixers = [
         UploadCollectionResultFileFixer(
             path=Path("SwiftExample/AppDelegate.swift"),
@@ -126,7 +138,9 @@ def get_fake_upload_collection_result(mocked_coverage_file):
             eof=None,
         ),
     ]
-    return UploadCollectionResult(network_files, coverage_files, None, path_fixers)
+    return UploadCollectionResult(
+        network_files, coverage_files, testing_result_files, path_fixers
+    )
 
 
 class TestUploadSender(object):
@@ -232,9 +246,14 @@ class TestUploadSender(object):
 
 
 class TestPayloadGeneration(object):
-    def test_generate_payload_overall(self, mocked_coverage_file):
+    def test_generate_payload_overall(
+        self, mocked_coverage_file, mocked_testing_result_file
+    ):
         actual_report = UploadSender()._generate_payload(
-            get_fake_upload_collection_result(mocked_coverage_file), None
+            get_fake_upload_collection_result(
+                mocked_coverage_file, mocked_testing_result_file
+            ),
+            None,
         )
         expected_report = {
             "path_fixes": {
@@ -295,6 +314,11 @@ class TestPayloadGeneration(object):
                     "labels": "",
                 },
             ],
+            "testing_result_files": [
+                [
+                    "eJwrqCxJLS6xNjSzNLcwMjUwsdCzMDW1NLS0NtAzMDSzNgBDI+tokKpivYLEouLUomI9EC8+KbE4FcICS5ZmlqRahRSVploBtVpZ6Shg0ZJVmpdZAmGCxSECSLpirQFLnjE3"
+                ]
+            ],
             "metadata": {},
         }
         assert actual_report == json.dumps(expected_report).encode()
@@ -310,6 +334,7 @@ class TestPayloadGeneration(object):
             },
             "network_files": [],
             "coverage_files": [],
+            "testing_result_files": [],
             "metadata": {},
         }
         assert actual_report == json.dumps(expected_report).encode()

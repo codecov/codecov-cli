@@ -14,6 +14,7 @@ from codecov_cli.helpers.request import (
     send_post_request,
     send_put_request,
 )
+from codecov_cli.parsers.junit import JUnitXMLParser, ParsingError
 from codecov_cli.types import (
     RequestResult,
     UploadCollectionResult,
@@ -52,13 +53,13 @@ class UploadSender(object):
             "version": codecov_cli_version,
         }
 
+        reports_payload = self._generate_payload(upload_data, env_vars)
         # Data to upload to Codecov
         headers = get_token_header_or_fail(token)
         encoded_slug = encode_slug(slug)
         upload_url = enterprise_url or CODECOV_API_URL
         url = f"{upload_url}/upload/{git_service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads"
         # Data that goes to storage
-        reports_payload = self._generate_payload(upload_data, env_vars)
 
         logger.debug("Sending upload request to Codecov")
         resp_from_codecov = send_post_request(
@@ -93,6 +94,7 @@ class UploadSender(object):
             },
             "network_files": network_files if network_files is not None else [],
             "coverage_files": self._get_coverage_files(upload_data),
+            "testing_result_files": self._get_testing_result_files(upload_data),
             "metadata": {},
         }
 
@@ -145,3 +147,26 @@ class UploadSender(object):
             base64.b64encode(zlib.compress((file.get_content())))
         ).decode()
         return format, formatted_content
+
+    def _get_testing_result_files(self, upload_data: UploadCollectionResult):
+        return [
+            self._parse_testing_result_file(file)
+            for file in upload_data.testing_result_files
+        ]
+
+    def _parse_testing_result_file(self, file: UploadCollectionResultFile):
+        parser = JUnitXMLParser()
+        try:
+            testsuites = parser.parse(file.get_content())
+        except ParsingError:
+            logger.error(
+                f"Error parsing JUnit file: {file.get_filename().decode()}",
+                extra=dict(filepath=str(file.get_filename())),
+            )
+            return []
+        return [
+            base64.b64encode(
+                zlib.compress(bytes(testsuite.to_str(), encoding="utf-8"))
+            ).decode()
+            for testsuite in testsuites
+        ]

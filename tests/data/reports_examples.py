@@ -141,3 +141,6 @@ unit.coverage.xml
 </coverage>
 <<<<<< EOF
 """
+
+
+testing_result_file = b"""<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="2" time="0.016" timestamp="2023-10-20T14:04:08.855919" hostname="test_host"><testcase classname="tests.parsers.test_base" name="test_testsuite" time="0.000" /><testcase classname="tests.parsers.test_junit" name="test_parse_junit" time="0.000" /></testsuite></testsuites>"""

@@ -62,13 +62,6 @@ def test_get_token_header_or_fail():
         == "Codecov token not found. Please provide Codecov token with -t flag."
     )
 
-    # Test with an invalid token type
-    token = "invalid_token"
-    with pytest.raises(Exception) as e:
-        get_token_header_or_fail(token)
-
-    assert str(e.value) == f"Token must be UUID. Received {type(token)}"
-
 
 def test_request_retry(mocker, valid_response):
     expected_response = request_result(valid_response)

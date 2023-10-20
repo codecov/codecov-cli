@@ -31,7 +31,6 @@ _global_options = [
         "-t",
         "--token",
         help="Codecov upload token",
-        type=click.UUID,
         envvar="CODECOV_TOKEN",
     ),
     click.option(

@@ -2,7 +2,6 @@ import base64
 import json
 import logging
 import typing
-import uuid
 import zlib
 from typing import Any, Dict
 
@@ -28,7 +27,7 @@ class UploadSender(object):
         self,
         upload_data: UploadCollectionResult,
         commit_sha: str,
-        token: uuid.UUID,
+        token: str,
         env_vars: typing.Dict[str, str],
         report_code: str,
         name: typing.Optional[str] = None,

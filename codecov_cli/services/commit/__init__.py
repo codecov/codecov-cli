@@ -1,6 +1,5 @@
 import logging
 import typing
-import uuid
 
 from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.helpers.encoder import encode_slug
@@ -19,7 +18,7 @@ def create_commit_logic(
     pr: typing.Optional[str],
     branch: typing.Optional[str],
     slug: typing.Optional[str],
-    token: uuid.UUID,
+    token: str,
     service: typing.Optional[str],
     enterprise_url: typing.Optional[str] = None,
     fail_on_error: bool = False,

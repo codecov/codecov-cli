@@ -1,6 +1,5 @@
 import logging
 import typing
-import uuid
 
 import click
 
@@ -36,7 +35,6 @@ logger = logging.getLogger("codecovcli")
     "-t",
     "--token",
     help="Codecov upload token",
-    type=click.UUID,
     envvar="CODECOV_TOKEN",
 )
 @click.option(
@@ -51,7 +49,7 @@ def pr_base_picking(
     base_sha: str,
     pr: typing.Optional[int],
     slug: typing.Optional[str],
-    token: typing.Optional[uuid.UUID],
+    token: typing.Optional[str],
     service: typing.Optional[str],
 ):
     enterprise_url = ctx.obj.get("enterprise_url")

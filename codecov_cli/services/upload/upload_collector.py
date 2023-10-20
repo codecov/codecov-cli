@@ -153,6 +153,7 @@ class UploadCollector(object):
         coverage_files = self.coverage_file_finder.find_files()
         testing_result_files = self.testing_result_file_finder.find_files()
         logger.info(f"Found {len(coverage_files)} coverage files to upload")
+        logger.info(f"Found {len(testing_result_files)} testing result files to upload")
         if not coverage_files:
             raise click.ClickException(
                 click.style(
@@ -160,7 +161,14 @@ class UploadCollector(object):
                     fg="red",
                 )
             )
+
+        if coverage_files:
+            logger.info("Coverage files found:")
         for file in coverage_files:
+            logger.info(f"> {file}")
+        if testing_result_files:
+            logger.info("Testing result files found:")
+        for file in testing_result_files:
             logger.info(f"> {file}")
         return UploadCollectionResult(
             network=network,

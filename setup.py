@@ -21,6 +21,7 @@ setup(
         "click==8.*",
         "httpx==0.23.*",
         "ijson==3.*",
+        "lxml==4.9.*",
         "pyyaml==6.*",
         "responses==0.21.*",
         "smart-open==6.*",

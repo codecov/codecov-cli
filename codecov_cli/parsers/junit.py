@@ -4,12 +4,12 @@ from typing import List
 
 from lxml import etree
 
-from codecov_cli.parsers.base import ParsingError, Test, Testrun
+from codecov_cli.parsers.base import ParsingError, Test, Testrun, Parser
 
 logger = logging.getLogger("codecovcli")
 
 
-class JUnitXMLParser:
+class JUnitXMLParser(Parser):
     def __init__(self):
         self._parser = etree.XMLParser(recover=True, resolve_entities=False)
 

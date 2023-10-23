@@ -53,3 +53,8 @@ class Testrun(object):
             )
             + ";"
         )
+
+
+class Parser:
+    def parse(self, file_content) -> List[Testrun]:
+        raise NotImplementedError()

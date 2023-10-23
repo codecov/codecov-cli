@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 
-from codecov_cli.parsers.base import Testcase, Testsuite
 from codecov_cli.parsers.junit import JUnitXMLParser
 
 

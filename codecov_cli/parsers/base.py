@@ -6,7 +6,7 @@ class ParsingError(Exception):
     ...
 
 
-class Testcase(object):
+class Test(object):
     def __init__(self, name: str, status: bool, duration: timedelta):
         self.name = name
         self.status = status
@@ -16,13 +16,13 @@ class Testcase(object):
         return f"{self.name}:{self.status}:{self.duration.total_seconds()}::"
 
 
-class Testsuite(object):
+class Testrun(object):
     def __init__(
         self,
         name: str,
         timestamp: datetime,
         time: timedelta,
-        testcases: List[Testcase],
+        testcases: List[Test],
         failures: int,
         errors: int,
         skipped: int,

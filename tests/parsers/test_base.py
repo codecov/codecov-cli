@@ -1,15 +1,15 @@
 from datetime import datetime, timedelta
 
-from codecov_cli.parsers.base import Testcase, Testsuite
+from codecov_cli.parsers.base import Test, Testrun
 
 
 def test_testsuite():
     now = datetime.now()
-    ts = Testsuite(
+    ts = Testrun(
         "test_name",
         now,
         timedelta(seconds=1),
-        [Testcase("testcase_name", True, timedelta(seconds=1))],
+        [Test("testcase_name", True, timedelta(seconds=1))],
         errors=0,
         failures=0,
         skipped=0,

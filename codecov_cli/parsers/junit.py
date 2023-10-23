@@ -4,7 +4,7 @@ from typing import List
 
 from lxml import etree
 
-from codecov_cli.parsers.base import ParsingError, Test, Testrun, Parser
+from codecov_cli.parsers.base import Parser, ParsingError, Test, Testrun
 
 logger = logging.getLogger("codecovcli")
 

@@ -145,7 +145,7 @@ class UploadCollector(object):
             prep.run_preparation(self)
         logger.debug("Collecting relevant files")
         network = self.network_finder.find_files()
-        coverage_files = self.coverage_file_finder.find_coverage_files()
+        coverage_files = self.coverage_file_finder.find_files()
         logger.info(f"Found {len(coverage_files)} coverage files to upload")
         if not coverage_files:
             raise click.ClickException(

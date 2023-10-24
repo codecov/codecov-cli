@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from json import JSONEncoder
-from typing import Any, List
+from typing import Any, List, Union
 
 
 class ParsingError(Exception):
@@ -10,7 +10,7 @@ class ParsingError(Exception):
 
 class ParserJSONEncoder(JSONEncoder):
     def default(self, o: Any) -> Any:
-        if isinstance(o, TestRunGroup | TestRun):
+        if isinstance(o, TestRunGroup) or isinstance(o, TestRun):
             return o.__dict__
         elif isinstance(o, timedelta):
             return o.total_seconds()

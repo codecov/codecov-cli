@@ -1,22 +1,26 @@
+import json
 from datetime import datetime, timedelta
 
-from codecov_cli.parsers.base import Test, Testrun
+from codecov_cli.parsers.base import ParserJSONEncoder, TestRun, TestRunGroup
 
 
-def test_testsuite():
+def test_parserjsonencoder():
     now = datetime.now()
-    ts = Testrun(
+    ts = TestRunGroup(
         "test_name",
         now,
         timedelta(seconds=1),
-        [Test("testcase_name", True, timedelta(seconds=1))],
+        [TestRun("testcase_name", True, timedelta(seconds=1))],
         errors=0,
         failures=0,
         skipped=0,
         total=1,
     )
 
+    print(json.dumps(ts, cls=ParserJSONEncoder))
+
     assert (
-        ts.to_str()
-        == f"test_name;{now.timestamp()};1.0;0;0;0;1;[testcase_name:True:1.0::];"
+        json.dumps(ts, cls=ParserJSONEncoder)
+        == '{"name": "test_name", "timestamp": "%s", "time": 1.0, "testruns": [{"name": "testcase_name", "status": true, "duration": 1.0}], "failures": 0, "errors": 0, "skipped": 0, "total": 1}'
+        % now.isoformat()
     )

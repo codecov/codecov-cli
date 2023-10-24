@@ -1,60 +1,44 @@
+from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import List
+from json import JSONEncoder
+from typing import Any, List
 
 
 class ParsingError(Exception):
     ...
 
 
-class Test(object):
-    def __init__(self, name: str, status: bool, duration: timedelta):
-        self.name = name
-        self.status = status
-        self.duration = duration
+class ParserJSONEncoder(JSONEncoder):
+    def default(self, o: Any) -> Any:
+        if isinstance(o, TestRunGroup | TestRun):
+            return o.__dict__
+        elif isinstance(o, timedelta):
+            return o.total_seconds()
+        elif isinstance(o, datetime):
+            return o.isoformat()
+        else:
+            raise ParsingError("Error encoding object to JSON")
 
-    def __repr__(self):
-        return f"{self.name}:{self.status}:{self.duration.total_seconds()}::"
+
+@dataclass
+class TestRun(object):
+    name: str
+    status: bool
+    duration: timedelta
 
 
-class Testrun(object):
-    def __init__(
-        self,
-        name: str,
-        timestamp: datetime,
-        time: timedelta,
-        testcases: List[Test],
-        failures: int,
-        errors: int,
-        skipped: int,
-        total: int,
-    ):
-        self.testcases = testcases or []
-        self.name = name
-        self.time = time
-        self.timestamp = timestamp
-        self.failures = failures
-        self.errors = errors
-        self.skipped = skipped
-        self.total = total
-
-    def to_str(self):
-        return (
-            ";".join(
-                [
-                    self.name,
-                    str(self.timestamp.timestamp()),
-                    str(self.time.total_seconds()),
-                    str(self.failures),
-                    str(self.errors),
-                    str(self.skipped),
-                    str(self.total),
-                    str(self.testcases),
-                ]
-            )
-            + ";"
-        )
+@dataclass
+class TestRunGroup(object):
+    name: str
+    timestamp: datetime
+    time: timedelta
+    testruns: List[TestRun]
+    failures: int
+    errors: int
+    skipped: int
+    total: int
 
 
 class Parser:
-    def parse(self, file_content) -> List[Testrun]:
+    def parse(self, file_content) -> TestRunGroup:
         raise NotImplementedError()

@@ -17,9 +17,9 @@ def test_parse_junit():
     assert result.name == "pytest"
     assert result.timestamp == datetime.fromisoformat("2023-10-20T12:56:19.831266")
     assert result.time == timedelta(seconds=0.016)
-    assert result.testcases[0].name == "tests.parsers.test_base.test_testsuite"
-    assert result.testcases[0].status == True
-    assert result.testcases[0].duration == timedelta(seconds=0.0)
+    assert result.testruns[0].name == "tests.parsers.test_base.test_testsuite"
+    assert result.testruns[0].status == True
+    assert result.testruns[0].duration == timedelta(seconds=0.0)
     assert result.errors == 0
     assert result.failures == 0
     assert result.skipped == 0

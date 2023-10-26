@@ -65,22 +65,18 @@ def do_upload_logic(
         disable_search,
     )
     network_finder = select_network_finder(versioning_system)
+
     if use_legacy_uploader:
-        collector = LegacyUploadCollector(
-            preparation_plugins,
-            network_finder,
-            coverage_file_selector,
-            disable_file_fixes,
-            env_vars,
-        )
+        Collector = LegacyUploadCollector
     else:
-        collector = CoverageUploadCollector(
-            preparation_plugins,
-            network_finder,
-            coverage_file_selector,
-            disable_file_fixes,
-            env_vars,
-        )
+        Collector = CoverageUploadCollector
+    collector = Collector(
+        preparation_plugins,
+        network_finder,
+        coverage_file_selector,
+        disable_file_fixes,
+        env_vars,
+    )
 
     try:
         upload_data = collector.generate_upload_data()

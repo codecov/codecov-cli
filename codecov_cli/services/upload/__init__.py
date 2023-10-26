@@ -40,9 +40,9 @@ def do_upload_logic(
     flags: typing.List[str],
     name: typing.Optional[str],
     network_root_folder: Path,
-    coverage_files_search_root_folder: Path,
-    coverage_files_search_exclude_folders: typing.List[Path],
-    coverage_files_search_explicitly_listed_files: typing.List[Path],
+    files_search_root_folder: Path,
+    files_search_exclude_folders: typing.List[Path],
+    files_search_explicitly_listed_files: typing.List[Path],
     plugin_names: typing.List[str],
     token: uuid.UUID,
     branch: typing.Optional[str],
@@ -59,9 +59,9 @@ def do_upload_logic(
 ):
     preparation_plugins = select_preparation_plugins(cli_config, plugin_names)
     coverage_file_selector = select_coverage_file_finder(
-        coverage_files_search_root_folder,
-        coverage_files_search_exclude_folders,
-        coverage_files_search_explicitly_listed_files,
+        files_search_root_folder,
+        files_search_exclude_folders,
+        files_search_explicitly_listed_files,
         disable_search,
     )
     network_finder = select_network_finder(versioning_system)

@@ -9,7 +9,7 @@ from codecov_cli.types import UploadCollectionResultFile
 class TestCoverageFileFinder(object):
     def test_find_files_mocked_search_files(self, mocker):
         mocker.patch(
-            "codecov_cli.helpers.file_finder.search_files",
+            "codecov_cli.services.upload.finders.result_file_finder.search_files",
             return_value=[],
         )
         assert CoverageFileFinder().find_files() == []
@@ -20,7 +20,7 @@ class TestCoverageFileFinder(object):
         ]
 
         mocker.patch(
-            "codecov_cli.helpers.file_finder.search_files",
+            "codecov_cli.services.upload.finders.result_file_finder.search_files",
             return_value=coverage_files_paths,
         )
 

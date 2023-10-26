@@ -143,7 +143,7 @@ default_folders_to_ignore = [
 ]
 
 
-class BaseFileFinder(object):
+class ResultFileFinder(object):
     file_patterns = None
 
     def __init__(

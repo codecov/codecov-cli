@@ -14,7 +14,7 @@ from codecov_cli.services.upload.finders.coverage_file_finder import (
     select_coverage_file_finder,
 )
 from codecov_cli.services.upload.legacy_upload_sender import LegacyUploadSender
-from codecov_cli.services.upload.network_finder import select_network_finder
+from codecov_cli.services.upload.finders.network_finder import select_network_finder
 from codecov_cli.services.upload.collectors.legacy_upload_collector import (
     LegacyUploadCollector,
 )

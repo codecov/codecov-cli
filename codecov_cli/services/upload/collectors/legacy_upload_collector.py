@@ -1,23 +1,13 @@
-import base64
-import json
 import logging
-import pathlib
-import re
 import typing
-import zlib
 from collections import namedtuple
 from fnmatch import fnmatch
 from typing import Any, Dict
 
-import click
 
-from codecov_cli.services.upload.network_finder import NetworkFinder
-from codecov_cli.services.upload.finders.coverage_file_finder import CoverageFileFinder
 from codecov_cli.types import (
     UploadCollectionResult,
     UploadCollectionResultFile,
-    UploadCollectionResultFileFixer,
-    PreparationPluginInterface,
 )
 from codecov_cli.services.upload.collectors.coverage_upload_collector import (
     CoverageUploadCollector,

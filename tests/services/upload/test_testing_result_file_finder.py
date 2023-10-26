@@ -11,7 +11,7 @@ from codecov_cli.types import UploadCollectionResultFile
 class TestTestingResultFileFinder(object):
     def test_find_files_mocked_search_files(self, mocker):
         mocker.patch(
-            "codecov_cli.helpers.file_finder.search_files",
+            "codecov_cli.services.upload.finders.result_file_finder.search_files",
             return_value=[],
         )
         assert TestingResultFileFinder().find_files() == []
@@ -21,7 +21,7 @@ class TestTestingResultFileFinder(object):
         ]
 
         mocker.patch(
-            "codecov_cli.helpers.file_finder.search_files",
+            "codecov_cli.services.upload.finders.result_file_finder.search_files",
             return_value=coverage_files_paths,
         )
 

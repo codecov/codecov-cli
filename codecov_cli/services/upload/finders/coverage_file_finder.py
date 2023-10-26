@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 
-from codecov_cli.helpers.file_finder import BaseFileFinder
+from codecov_cli.services.upload.finders.result_file_finder import ResultFileFinder
 
 logger = logging.getLogger("codecovcli")
 
@@ -33,7 +33,7 @@ coverage_files_patterns = [
 ]
 
 
-class CoverageFileFinder(BaseFileFinder):
+class CoverageFileFinder(ResultFileFinder):
     file_patterns = coverage_files_patterns
 
 

@@ -11,7 +11,7 @@ from typing import Any, Dict
 
 import click
 
-from codecov_cli.services.upload.network_finder import NetworkFinder
+from codecov_cli.services.upload.finders.network_finder import NetworkFinder
 from codecov_cli.services.upload.finders.coverage_file_finder import CoverageFileFinder
 from codecov_cli.types import (
     UploadCollectionResult,

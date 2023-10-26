@@ -1,13 +1,13 @@
 import logging
 
-from codecov_cli.helpers.file_finder import BaseFileFinder
+from codecov_cli.services.upload.finders.result_file_finder import ResultFileFinder
 
 logger = logging.getLogger("codecovcli")
 
 testing_result_patterns = ["**junit.xml"]
 
 
-class TestingResultFileFinder(BaseFileFinder):
+class TestingResultFileFinder(ResultFileFinder):
     file_patterns = testing_result_patterns
 
 

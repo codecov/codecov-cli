@@ -13,7 +13,12 @@ from codecov_cli.plugins import select_preparation_plugins
 from codecov_cli.services.upload.coverage_file_finder import select_coverage_file_finder
 from codecov_cli.services.upload.legacy_upload_sender import LegacyUploadSender
 from codecov_cli.services.upload.network_finder import select_network_finder
-from codecov_cli.services.upload.upload_collector import UploadCollector
+from codecov_cli.services.upload.collectors.legacy_upload_collector import (
+    LegacyUploadCollector,
+)
+from codecov_cli.services.upload.collectors.coverage_upload_collector import (
+    CoverageUploadCollector,
+)
 from codecov_cli.services.upload.upload_sender import UploadSender
 from codecov_cli.services.upload_completion import upload_completion_logic
 from codecov_cli.types import RequestResult
@@ -60,9 +65,23 @@ def do_upload_logic(
         disable_search,
     )
     network_finder = select_network_finder(versioning_system)
-    collector = UploadCollector(
-        preparation_plugins, network_finder, coverage_file_selector, disable_file_fixes
-    )
+    if use_legacy_uploader:
+        collector = LegacyUploadCollector(
+            preparation_plugins,
+            network_finder,
+            coverage_file_selector,
+            disable_file_fixes,
+            env_vars,
+        )
+    else:
+        collector = CoverageUploadCollector(
+            preparation_plugins,
+            network_finder,
+            coverage_file_selector,
+            disable_file_fixes,
+            env_vars,
+        )
+
     try:
         upload_data = collector.generate_upload_data()
     except click.ClickException as exp:

@@ -9,6 +9,9 @@ from responses import matchers
 from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.services.upload.upload_sender import UploadSender
+from codecov_cli.services.upload.collectors.coverage_upload_collector import (
+    CoverageUploadCollector,
+)
 from codecov_cli.types import UploadCollectionResult, UploadCollectionResultFileFixer
 from tests.data import reports_examples
 
@@ -233,7 +236,9 @@ class TestUploadSender(object):
 
 class TestPayloadGeneration(object):
     def test_generate_payload_overall(self, mocked_coverage_file):
-        actual_report = UploadSender()._generate_payload(
+        actual_report = CoverageUploadCollector(
+            None, None, None, None, None
+        )._generate_payload(
             get_fake_upload_collection_result(mocked_coverage_file), None
         )
         expected_report = {
@@ -300,9 +305,9 @@ class TestPayloadGeneration(object):
         assert actual_report == json.dumps(expected_report).encode()
 
     def test_generate_empty_payload_overall(self):
-        actual_report = UploadSender()._generate_payload(
-            UploadCollectionResult([], [], []), None
-        )
+        actual_report = CoverageUploadCollector(
+            None, None, None, None, None
+        )._generate_payload(UploadCollectionResult([], [], []), None)
         expected_report = {
             "report_fixes": {
                 "format": "legacy",
@@ -315,9 +320,9 @@ class TestPayloadGeneration(object):
         assert actual_report == json.dumps(expected_report).encode()
 
     def test_formatting_file_coverage_info(self, mocker, mocked_coverage_file):
-        format, formatted_content = UploadSender()._get_format_info(
-            mocked_coverage_file
-        )
+        format, formatted_content = CoverageUploadCollector(
+            None, None, None, None, None
+        )._get_format_info(mocked_coverage_file)
         assert format == "base64+compressed"
         assert (
             formatted_content
@@ -326,12 +331,12 @@ class TestPayloadGeneration(object):
 
     def test_coverage_file_format(self, mocker, mocked_coverage_file):
         mocker.patch(
-            "codecov_cli.services.upload.upload_sender.UploadSender._get_format_info",
+            "codecov_cli.services.upload.collectors.coverage_upload_collector.CoverageUploadCollector._get_format_info",
             return_value=("base64+compressed", "encoded_file_data"),
         )
-        json_formatted_coverage_file = UploadSender()._format_coverage_file(
-            mocked_coverage_file
-        )
+        json_formatted_coverage_file = CoverageUploadCollector(
+            None, None, None, None, None
+        )._format_coverage_file(mocked_coverage_file)
         print(json_formatted_coverage_file["data"])
         assert json_formatted_coverage_file == {
             "filename": mocked_coverage_file.get_filename().decode(),

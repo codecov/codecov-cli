@@ -4,13 +4,18 @@ from click.testing import CliRunner
 
 from codecov_cli.services.upload import (
     LegacyUploadSender,
-    UploadCollector,
     UploadSender,
     do_upload_logic,
 )
 from codecov_cli.services.upload.legacy_upload_sender import (
     UploadSendingResult,
     UploadSendingResultWarning,
+)
+from codecov_cli.services.upload.collectors.legacy_upload_collector import (
+    LegacyUploadCollector,
+)
+from codecov_cli.services.upload.collectors.coverage_upload_collector import (
+    CoverageUploadCollector,
 )
 from codecov_cli.types import RequestResult
 from tests.test_helpers import parse_outstreams_into_log_lines
@@ -27,7 +32,7 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
         "codecov_cli.services.upload.select_network_finder"
     )
     mock_generate_upload_data = mocker.patch.object(
-        UploadCollector, "generate_upload_data"
+        LegacyUploadCollector, "generate_upload_data"
     )
     mock_send_upload_data = mocker.patch.object(
         LegacyUploadSender,
@@ -113,7 +118,7 @@ def test_do_upload_logic_happy_path(mocker):
         "codecov_cli.services.upload.select_network_finder"
     )
     mock_generate_upload_data = mocker.patch.object(
-        UploadCollector, "generate_upload_data"
+        CoverageUploadCollector, "generate_upload_data"
     )
     mock_send_upload_data = mocker.patch.object(
         UploadSender,
@@ -198,7 +203,7 @@ def test_do_upload_logic_dry_run(mocker):
         "codecov_cli.services.upload.select_network_finder"
     )
     mock_generate_upload_data = mocker.patch.object(
-        UploadCollector, "generate_upload_data"
+        CoverageUploadCollector, "generate_upload_data"
     )
     mock_send_upload_data = mocker.patch.object(
         LegacyUploadSender,
@@ -259,7 +264,7 @@ def test_do_upload_logic_verbose(mocker, use_verbose_option):
     mocker.patch("codecov_cli.services.upload.select_preparation_plugins")
     mocker.patch("codecov_cli.services.upload.select_coverage_file_finder")
     mocker.patch("codecov_cli.services.upload.select_network_finder")
-    mocker.patch.object(UploadCollector, "generate_upload_data")
+    mocker.patch.object(LegacyUploadCollector, "generate_upload_data")
     mocker.patch.object(
         LegacyUploadSender,
         "send_upload_data",
@@ -332,7 +337,7 @@ def test_do_upload_no_cov_reports_found(mocker):
         raise click.ClickException("error")
 
     mock_generate_upload_data = mocker.patch(
-        "codecov_cli.services.upload.UploadCollector.generate_upload_data",
+        "codecov_cli.services.upload.collectors.coverage_upload_collector.CoverageUploadCollector.generate_upload_data",
         side_effect=side_effect,
     )
     mock_upload_completion_call = mocker.patch(
@@ -415,7 +420,7 @@ def test_do_upload_rase_no_cov_reports_found_error(mocker):
         )
 
     mock_generate_upload_data = mocker.patch(
-        "codecov_cli.services.upload.UploadCollector.generate_upload_data",
+        "codecov_cli.services.upload.collectors.coverage_upload_collector.CoverageUploadCollector.generate_upload_data",
         side_effect=side_effect,
     )
     cli_config = {}

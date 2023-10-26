@@ -2,7 +2,10 @@ from click.testing import CliRunner
 
 from codecov_cli.fallbacks import FallbackFieldEnum
 from codecov_cli.main import cli
-from codecov_cli.services.upload import UploadCollector, UploadSender
+from codecov_cli.services.upload import UploadSender
+from codecov_cli.services.upload.collectors.coverage_upload_collector import (
+    CoverageUploadCollector,
+)
 from codecov_cli.types import RequestError, RequestResult
 from tests.factory import FakeProvider, FakeVersioningSystem
 from tests.test_helpers import parse_outstreams_into_log_lines
@@ -32,7 +35,9 @@ def test_upload_raise_Z_option(mocker):
     upload_sender = mocker.patch.object(
         UploadSender, "send_upload_data", return_value=result
     )
-    upload_collector = mocker.patch.object(UploadCollector, "generate_upload_data")
+    upload_collector = mocker.patch.object(
+        CoverageUploadCollector, "generate_upload_data"
+    )
     fake_ci_provider = FakeProvider({FallbackFieldEnum.commit_sha: None})
     mocker.patch("codecov_cli.main.get_ci_adapter", return_value=fake_ci_provider)
 

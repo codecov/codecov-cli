@@ -26,7 +26,7 @@ logger = logging.getLogger("codecovcli")
 class UploadSender(object):
     def send_upload_data(
         self,
-        upload_data: UploadCollectionResult,
+        upload_data: bytes,
         commit_sha: str,
         token: uuid.UUID,
         env_vars: typing.Dict[str, str],
@@ -57,8 +57,6 @@ class UploadSender(object):
         encoded_slug = encode_slug(slug)
         upload_url = enterprise_url or CODECOV_API_URL
         url = f"{upload_url}/upload/{git_service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads"
-        # Data that goes to storage
-        reports_payload = self._generate_payload(upload_data, env_vars)
 
         logger.debug("Sending upload request to Codecov")
         resp_from_codecov = send_post_request(
@@ -79,69 +77,5 @@ class UploadSender(object):
         )
         put_url = resp_json_obj["raw_upload_location"]
         logger.debug("Sending upload to storage")
-        resp_from_storage = send_put_request(put_url, data=reports_payload)
+        resp_from_storage = send_put_request(put_url, data=upload_data)
         return resp_from_storage
-
-    def _generate_payload(
-        self, upload_data: UploadCollectionResult, env_vars: typing.Dict[str, str]
-    ) -> bytes:
-        network_files = upload_data.network
-        payload = {
-            "report_fixes": {
-                "format": "legacy",
-                "value": self._get_file_fixers(upload_data),
-            },
-            "network_files": network_files if network_files is not None else [],
-            "coverage_files": self._get_coverage_files(upload_data),
-            "metadata": {},
-        }
-
-        json_data = json.dumps(payload)
-        return json_data.encode()
-
-    def _get_file_fixers(
-        self, upload_data: UploadCollectionResult
-    ) -> Dict[str, Dict[str, Any]]:
-        """
-        Returns file/path fixes in the following format:
-
-        {
-            {path}: {
-                "eof": int(eof_line),
-                "lines": {set_of_lines},
-            },
-        }
-        """
-        file_fixers = {}
-        for file_fixer in upload_data.file_fixes:
-            fixed_lines_with_reason = set(
-                [fixer[0] for fixer in file_fixer.fixed_lines_with_reason]
-            )
-            total_fixed_lines = list(
-                file_fixer.fixed_lines_without_reason.union(fixed_lines_with_reason)
-            )
-            file_fixers[str(file_fixer.path)] = {
-                "eof": file_fixer.eof,
-                "lines": total_fixed_lines,
-            }
-
-        return file_fixers
-
-    def _get_coverage_files(self, upload_data: UploadCollectionResult):
-        return [self._format_coverage_file(file) for file in upload_data.coverage_files]
-
-    def _format_coverage_file(self, file: UploadCollectionResultFile):
-        format, formatted_content = self._get_format_info(file)
-        return {
-            "filename": file.get_filename().decode(),
-            "format": format,
-            "data": formatted_content,
-            "labels": "",
-        }
-
-    def _get_format_info(self, file: UploadCollectionResultFile):
-        format = "base64+compressed"
-        formatted_content = (
-            base64.b64encode(zlib.compress((file.get_content())))
-        ).decode()
-        return format, formatted_content

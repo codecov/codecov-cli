@@ -1,19 +1,23 @@
+import base64
+import json
 import logging
 import pathlib
 import re
 import typing
-import uuid
+import zlib
 from collections import namedtuple
 from fnmatch import fnmatch
+from typing import Any, Dict
 
 import click
 
-from codecov_cli.services.upload.coverage_file_finder import CoverageFileFinder
 from codecov_cli.services.upload.network_finder import NetworkFinder
+from codecov_cli.services.upload.coverage_file_finder import CoverageFileFinder
 from codecov_cli.types import (
-    PreparationPluginInterface,
     UploadCollectionResult,
+    UploadCollectionResultFile,
     UploadCollectionResultFileFixer,
+    PreparationPluginInterface,
 )
 
 logger = logging.getLogger("codecovcli")
@@ -23,18 +27,20 @@ fix_patterns_to_apply = namedtuple(
 )
 
 
-class UploadCollector(object):
+class CoverageUploadCollector(object):
     def __init__(
         self,
         preparation_plugins: typing.List[PreparationPluginInterface],
         network_finder: NetworkFinder,
         coverage_file_finder: CoverageFileFinder,
         disable_file_fixes: bool = False,
+        env_vars: typing.Dict[str, str] = None,
     ):
         self.preparation_plugins = preparation_plugins
         self.network_finder = network_finder
         self.coverage_file_finder = coverage_file_finder
         self.disable_file_fixes = disable_file_fixes
+        self.env_vars = env_vars
 
     def _produce_file_fixes_for_network(
         self, network: typing.List[str]
@@ -139,7 +145,7 @@ class UploadCollector(object):
             path, fixed_lines_without_reason, fixed_lines_with_reason, eof
         )
 
-    def generate_upload_data(self) -> UploadCollectionResult:
+    def generate_upload_data(self) -> bytes:
         for prep in self.preparation_plugins:
             logger.debug(f"Running preparation plugin: {type(prep)}")
             prep.run_preparation(self)
@@ -156,8 +162,74 @@ class UploadCollector(object):
             )
         for file in coverage_files:
             logger.info(f"> {file}")
-        return UploadCollectionResult(
+        collection_result = UploadCollectionResult(
             network=network,
             coverage_files=coverage_files,
             file_fixes=self._produce_file_fixes_for_network(network),
         )
+
+        return self._generate_payload(collection_result, self.env_vars)
+
+    def _generate_payload(
+        self, upload_data: UploadCollectionResult, env_vars: typing.Dict[str, str]
+    ) -> bytes:
+        network_files = upload_data.network
+        payload = {
+            "report_fixes": {
+                "format": "legacy",
+                "value": self._get_file_fixers(upload_data),
+            },
+            "network_files": network_files if network_files is not None else [],
+            "coverage_files": self._get_coverage_files(upload_data),
+            "metadata": {},
+        }
+
+        json_data = json.dumps(payload)
+        return json_data.encode()
+
+    def _get_file_fixers(
+        self, upload_data: UploadCollectionResult
+    ) -> Dict[str, Dict[str, Any]]:
+        """
+        Returns file/path fixes in the following format:
+
+        {
+            {path}: {
+                "eof": int(eof_line),
+                "lines": {set_of_lines},
+            },
+        }
+        """
+        file_fixers = {}
+        for file_fixer in upload_data.file_fixes:
+            fixed_lines_with_reason = set(
+                [fixer[0] for fixer in file_fixer.fixed_lines_with_reason]
+            )
+            total_fixed_lines = list(
+                file_fixer.fixed_lines_without_reason.union(fixed_lines_with_reason)
+            )
+            file_fixers[str(file_fixer.path)] = {
+                "eof": file_fixer.eof,
+                "lines": total_fixed_lines,
+            }
+
+        return file_fixers
+
+    def _get_coverage_files(self, upload_data: UploadCollectionResult):
+        return [self._format_coverage_file(file) for file in upload_data.coverage_files]
+
+    def _format_coverage_file(self, file: UploadCollectionResultFile):
+        format, formatted_content = self._get_format_info(file)
+        return {
+            "filename": file.get_filename().decode(),
+            "format": format,
+            "data": formatted_content,
+            "labels": "",
+        }
+
+    def _get_format_info(self, file: UploadCollectionResultFile):
+        format = "base64+compressed"
+        formatted_content = (
+            base64.b64encode(zlib.compress((file.get_content())))
+        ).decode()
+        return format, formatted_content

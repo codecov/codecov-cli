@@ -2,6 +2,7 @@ import pathlib
 import typing
 
 from codecov_cli.helpers.versioning_systems import VersioningSystemInterface
+from codecov_cli.types import UploadCollectionResultFile
 
 
 class NetworkFinder(object):
@@ -13,8 +14,11 @@ class NetworkFinder(object):
         network_root: typing.Optional[pathlib.Path] = None,
         network_filter=None,
         network_adjuster=None,
-    ) -> typing.List[str]:
-        return self.versioning_system.list_relevant_files(network_root)
+    ) -> typing.List[UploadCollectionResultFile]:
+        return [
+            UploadCollectionResultFile(pathlib.Path(file))
+            for file in self.versioning_system.list_relevant_files(network_root)
+        ]
 
 
 def select_network_finder(versioning_system: VersioningSystemInterface):

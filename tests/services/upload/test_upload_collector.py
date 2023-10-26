@@ -5,13 +5,16 @@ from codecov_cli.services.upload.collectors.coverage_upload_collector import (
     CoverageUploadCollector,
 )
 
+from codecov_cli.types import UploadCollectionResultFile
+
 
 def test_fix_kt_files():
     kt_file = Path("tests/data/files_to_fix_examples/sample.kt")
+    result_file = UploadCollectionResultFile(kt_file)
 
     col = CoverageUploadCollector(None, None, None)
 
-    fixes = col._produce_file_fixes_for_network([str(kt_file)])
+    fixes = col._produce_file_fixes_for_network([result_file])
 
     assert len(fixes) == 1
     fixes_for_kt_file = fixes[0]
@@ -28,10 +31,11 @@ def test_fix_kt_files():
 
 def test_fix_go_files():
     go_file = Path("tests/data/files_to_fix_examples/sample.go")
+    result_file = UploadCollectionResultFile(go_file)
 
     col = CoverageUploadCollector(None, None, None)
 
-    fixes = col._produce_file_fixes_for_network([str(go_file)])
+    fixes = col._produce_file_fixes_for_network([result_file])
 
     assert len(fixes) == 1
     fixes_for_go_file = fixes[0]
@@ -50,14 +54,15 @@ def test_fix_go_files():
     )
 
 
-@patch("codecov_cli.services.upload.collectors.coverage_upload_collector.open")
+@patch("codecov_cli.types.open")
 def test_fix_bad_encoding_files(mock_open):
     mock_open.side_effect = UnicodeDecodeError("", bytes(), 0, 0, "")
     go_file = Path("tests/data/files_to_fix_examples/bad_encoding.go")
+    result_file = UploadCollectionResultFile(go_file)
 
     col = CoverageUploadCollector(None, None, None)
 
-    fixes = col._produce_file_fixes_for_network([str(go_file)])
+    fixes = col._produce_file_fixes_for_network([result_file])
     assert len(fixes) == 1
     fixes_for_go_file = fixes[0]
     assert fixes_for_go_file.eof is None
@@ -67,10 +72,11 @@ def test_fix_bad_encoding_files(mock_open):
 
 def test_fix_php_files():
     php_file = Path("tests/data/files_to_fix_examples/sample.php")
+    result_file = UploadCollectionResultFile(php_file)
 
     col = CoverageUploadCollector(None, None, None)
 
-    fixes = col._produce_file_fixes_for_network([str(php_file)])
+    fixes = col._produce_file_fixes_for_network([result_file])
 
     assert len(fixes) == 1
     fixes_for_php_file = fixes[0]
@@ -82,10 +88,11 @@ def test_fix_php_files():
 
 def test_fix_for_cpp_swift_vala(tmp_path):
     cpp_file = Path("tests/data/files_to_fix_examples/sample.cpp")
+    result_file = UploadCollectionResultFile(cpp_file)
 
     col = CoverageUploadCollector(None, None, None)
 
-    fixes = col._produce_file_fixes_for_network([str(cpp_file)])
+    fixes = col._produce_file_fixes_for_network([result_file])
 
     assert len(fixes) == 1
     fixes_for_cpp_file = fixes[0]

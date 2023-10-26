@@ -41,7 +41,7 @@ class CoverageUploadCollector(object):
         self.env_vars = env_vars
 
     def _produce_file_fixes_for_network(
-        self, network: typing.List[str]
+        self, network: typing.List[UploadCollectionResultFile]
     ) -> typing.List[UploadCollectionResultFileFixer]:
         if not network or self.disable_file_fixes:
             return []
@@ -100,39 +100,41 @@ class CoverageUploadCollector(object):
         result = []
         for filename in network:
             for glob, fix_patterns in file_regex_patterns.items():
-                if fnmatch(filename, glob):
+                if fnmatch(filename.get_filename().decode(), glob):
                     result.append(self._get_file_fixes(filename, fix_patterns))
                     break
 
         return result
 
     def _get_file_fixes(
-        self, filename: str, fix_patterns_to_apply: fix_patterns_to_apply
+        self,
+        file: UploadCollectionResultFile,
+        fix_patterns_to_apply: fix_patterns_to_apply,
     ) -> UploadCollectionResultFileFixer:
-        path = pathlib.Path(filename)
+        path = pathlib.Path(file.get_filename().decode())
         fixed_lines_without_reason = set()
         fixed_lines_with_reason = set()
         eof = None
 
         try:
-            with open(filename, "r") as f:
-                for lineno, line_content in enumerate(f):
-                    if any(
-                        pattern.match(line_content)
-                        for pattern in fix_patterns_to_apply.with_reason
-                    ):
-                        fixed_lines_with_reason.add((lineno + 1, line_content))
-                    elif any(
-                        pattern.match(line_content)
-                        for pattern in fix_patterns_to_apply.without_reason
-                    ):
-                        fixed_lines_without_reason.add(lineno + 1)
+            file_content = file.get_string().splitlines(keepends=True)
+            for lineno, line_content in enumerate(file_content):
+                if any(
+                    pattern.match(line_content)
+                    for pattern in fix_patterns_to_apply.with_reason
+                ):
+                    fixed_lines_with_reason.add((lineno + 1, line_content))
+                elif any(
+                    pattern.match(line_content)
+                    for pattern in fix_patterns_to_apply.without_reason
+                ):
+                    fixed_lines_without_reason.add(lineno + 1)
 
-                if fix_patterns_to_apply.eof:
-                    eof = lineno + 1
+            if fix_patterns_to_apply.eof:
+                eof = lineno + 1
         except UnicodeDecodeError as err:
             logger.warning(
-                f"There was an issue decoding: {filename}, file fixes were not applied to this file.",
+                f"There was an issue decoding: {file.get_filename().decode()}, file fixes were not applied to this file.",
                 extra=dict(
                     encoding=err.encoding,
                     reason=err.reason,

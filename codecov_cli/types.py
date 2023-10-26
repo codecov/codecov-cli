@@ -14,6 +14,10 @@ class UploadCollectionResultFile(object):
         with open(self.path, "rb") as f:
             return f.read()
 
+    def get_string(self) -> bytes:
+        with open(self.path, "r") as f:
+            return f.read()
+
     def __repr__(self) -> str:
         return str(self.path)
 

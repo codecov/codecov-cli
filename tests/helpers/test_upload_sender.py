@@ -237,7 +237,7 @@ class TestUploadSender(object):
 class TestPayloadGeneration(object):
     def test_generate_payload_overall(self, mocked_coverage_file):
         actual_report = CoverageUploadCollector(
-            None, None, None, None, None
+            None, None, None, None
         )._generate_payload(
             get_fake_upload_collection_result(mocked_coverage_file), None
         )
@@ -306,7 +306,7 @@ class TestPayloadGeneration(object):
 
     def test_generate_empty_payload_overall(self):
         actual_report = CoverageUploadCollector(
-            None, None, None, None, None
+            None, None, None, None
         )._generate_payload(UploadCollectionResult([], [], []), None)
         expected_report = {
             "report_fixes": {
@@ -321,7 +321,7 @@ class TestPayloadGeneration(object):
 
     def test_formatting_file_coverage_info(self, mocker, mocked_coverage_file):
         format, formatted_content = CoverageUploadCollector(
-            None, None, None, None, None
+            None, None, None, None
         )._get_format_info(mocked_coverage_file)
         assert format == "base64+compressed"
         assert (
@@ -335,7 +335,7 @@ class TestPayloadGeneration(object):
             return_value=("base64+compressed", "encoded_file_data"),
         )
         json_formatted_coverage_file = CoverageUploadCollector(
-            None, None, None, None, None
+            None, None, None, None
         )._format_coverage_file(mocked_coverage_file)
         print(json_formatted_coverage_file["data"])
         assert json_formatted_coverage_file == {

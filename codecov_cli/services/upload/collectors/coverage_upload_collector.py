@@ -30,13 +30,11 @@ fix_patterns_to_apply = namedtuple(
 class CoverageUploadCollector(object):
     def __init__(
         self,
-        preparation_plugins: typing.List[PreparationPluginInterface],
         network_finder: NetworkFinder,
         coverage_file_finder: CoverageFileFinder,
         disable_file_fixes: bool = False,
         env_vars: typing.Dict[str, str] = None,
     ):
-        self.preparation_plugins = preparation_plugins
         self.network_finder = network_finder
         self.coverage_file_finder = coverage_file_finder
         self.disable_file_fixes = disable_file_fixes
@@ -146,9 +144,6 @@ class CoverageUploadCollector(object):
         )
 
     def generate_upload_data(self) -> bytes:
-        for prep in self.preparation_plugins:
-            logger.debug(f"Running preparation plugin: {type(prep)}")
-            prep.run_preparation(self)
         logger.debug("Collecting relevant files")
         network = self.network_finder.find_files()
         coverage_files = self.coverage_file_finder.find_files()

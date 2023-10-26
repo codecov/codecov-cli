@@ -190,7 +190,7 @@ class TestPayloadGeneration(object):
         env_vars = {"var1": "value1", "var2": "value2", "var3": None, "abc": "valbc"}
 
         actual_lines = (
-            LegacyUploadCollector(None, None, None, None, None)
+            LegacyUploadCollector(None, None, None, None)
             ._generate_env_vars_section(env_vars)
             .split(b"\n")
         )
@@ -214,9 +214,9 @@ class TestPayloadGeneration(object):
     def test_generate_env_vars_section_empty_result(self):
         env_vars = {"var1": None}
         assert (
-            LegacyUploadCollector(
-                None, None, None, None, None
-            )._generate_env_vars_section(env_vars)
+            LegacyUploadCollector(None, None, None, None)._generate_env_vars_section(
+                env_vars
+            )
             == b""
         )
 
@@ -248,7 +248,7 @@ class TestPayloadGeneration(object):
         upload_data = UploadCollectionResult(network_files, [], [])
 
         actual_network_section = LegacyUploadCollector(
-            None, None, None, None, None
+            None, None, None, None
         )._generate_network_section(upload_data)
 
         assert [line.strip() for line in expected_network_section.split(b"\n")] == [
@@ -257,9 +257,9 @@ class TestPayloadGeneration(object):
 
     def test_generate_network_section_empty_result(self):
         assert (
-            LegacyUploadCollector(
-                None, None, None, None, None
-            )._generate_network_section(UploadCollectionResult([], [], []))
+            LegacyUploadCollector(None, None, None, None)._generate_network_section(
+                UploadCollectionResult([], [], [])
+            )
             == b""
         )
 
@@ -281,7 +281,7 @@ class TestPayloadGeneration(object):
             : -len(b"\n<<<<<< EOF\n")
         ]
         actual_coverage_file_section = LegacyUploadCollector(
-            None, None, None, None, None
+            None, None, None, None
         )._format_coverage_file(fake_result_file)
 
         assert (
@@ -303,7 +303,7 @@ class TestPayloadGeneration(object):
         ]
 
         actual_section = LegacyUploadCollector(
-            None, None, None, None, None
+            None, None, None, None
         )._generate_coverage_files_section(
             UploadCollectionResult([], coverage_files, [])
         )
@@ -326,8 +326,8 @@ class TestPayloadGeneration(object):
             return_value=reports_examples.coverage_file_section_simple,
         )
 
-        actual_report = LegacyUploadCollector(
-            None, None, None, None, None
-        )._generate_payload(None, None)
+        actual_report = LegacyUploadCollector(None, None, None, None)._generate_payload(
+            None, None
+        )
 
         assert actual_report == reports_examples.env_network_coverage_sections

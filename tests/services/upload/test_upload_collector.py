@@ -105,7 +105,7 @@ def test_fix_for_cpp_swift_vala(tmp_path):
 def test_fix_when_disabled_fixes(tmp_path):
     cpp_file = Path("tests/data/files_to_fix_examples/sample.cpp")
 
-    col = CoverageUploadCollector(None, None, None, True)
+    col = CoverageUploadCollector(None, None, True, None)
 
     fixes = col._produce_file_fixes_for_network([str(cpp_file)])
 

@@ -57,29 +57,19 @@ def do_upload_logic(
     handle_no_reports_found: bool = False,
     disable_file_fixes: bool = False,
 ):
-    preparation_plugins = select_preparation_plugins(cli_config, plugin_names)
-    coverage_file_selector = select_coverage_file_finder(
-        files_search_root_folder,
-        files_search_exclude_folders,
-        files_search_explicitly_listed_files,
-        disable_search,
-    )
-    network_finder = select_network_finder(versioning_system)
-
-    if use_legacy_uploader:
-        Collector = LegacyUploadCollector
-    else:
-        Collector = CoverageUploadCollector
-    collector = Collector(
-        preparation_plugins,
-        network_finder,
-        coverage_file_selector,
-        disable_file_fixes,
-        env_vars,
-    )
-
     try:
-        upload_data = collector.generate_upload_data()
+        upload_data = prepare_coverage_data(
+            cli_config,
+            plugin_names,
+            files_search_root_folder,
+            files_search_exclude_folders,
+            files_search_explicitly_listed_files,
+            disable_search,
+            versioning_system,
+            use_legacy_uploader,
+            disable_file_fixes,
+            env_vars,
+        )
     except click.ClickException as exp:
         if handle_no_reports_found:
             logger.info(
@@ -101,11 +91,13 @@ def do_upload_logic(
             )
         else:
             raise exp
+
     if use_legacy_uploader:
         sender = LegacyUploadSender()
     else:
         sender = UploadSender()
     logger.debug(f"Selected uploader to use: {type(sender)}")
+
     ci_service = (
         ci_adapter.get_fallback_value(FallbackFieldEnum.service)
         if ci_adapter is not None
@@ -141,3 +133,44 @@ def do_upload_logic(
         )
     log_warnings_and_errors_if_any(sending_result, "Upload", fail_on_error)
     return sending_result
+
+
+def prepare_coverage_data(
+    cli_config,
+    plugin_names,
+    search_root_folder,
+    search_exclude_folders,
+    search_explicit,
+    disable_search,
+    versioning_system,
+    use_legacy,
+    disable_file_fixes,
+    env_vars,
+):
+    coverage_file_selector = select_coverage_file_finder(
+        search_root_folder,
+        search_exclude_folders,
+        search_explicit,
+        disable_search,
+    )
+    network_finder = select_network_finder(versioning_system)
+
+    if use_legacy:
+        Collector = LegacyUploadCollector
+    else:
+        Collector = CoverageUploadCollector
+
+    collector = Collector(
+        network_finder,
+        coverage_file_selector,
+        disable_file_fixes,
+        env_vars,
+    )
+
+    preparation_plugins = select_preparation_plugins(cli_config, plugin_names)
+
+    for prep in preparation_plugins:
+        logger.debug(f"Running preparation plugin: {type(prep)}")
+        prep.run_preparation(collector)
+
+    return collector.generate_upload_data()

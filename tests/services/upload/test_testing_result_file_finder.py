@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from codecov_cli.services.upload.testing_result_file_finder import (
+from codecov_cli.services.upload.finders.testing_result_file_finder import (
     TestingResultFileFinder,
 )
 from codecov_cli.types import UploadCollectionResultFile

@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from codecov_cli.services.upload.coverage_file_finder import CoverageFileFinder
+from codecov_cli.services.upload.finders.coverage_file_finder import CoverageFileFinder
 from codecov_cli.types import UploadCollectionResultFile
 
 

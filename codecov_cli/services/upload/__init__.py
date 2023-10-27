@@ -18,6 +18,12 @@ from codecov_cli.services.upload.finders.network_finder import select_network_fi
 from codecov_cli.services.upload.collectors.legacy_upload_collector import (
     LegacyUploadCollector,
 )
+from codecov_cli.services.upload.finders.testing_result_file_finder import (
+    select_testing_result_file_finder,
+)
+from codecov_cli.services.upload.collectors.testing_result_upload_collector import (
+    TestingResultUploadCollector,
+)
 from codecov_cli.services.upload.collectors.coverage_upload_collector import (
     CoverageUploadCollector,
 )
@@ -135,6 +141,24 @@ def do_upload_logic(
         )
     log_warnings_and_errors_if_any(sending_result, "Upload", fail_on_error)
     return sending_result
+
+
+def prepare_testing_result_data(
+    search_root_folder,
+    search_exclude_folders,
+    search_explicit,
+    disable_search,
+):
+    testing_result_file_finder = select_testing_result_file_finder(
+        search_root_folder,
+        search_exclude_folders,
+        search_explicit,
+        disable_search,
+    )
+
+    collector = TestingResultUploadCollector(testing_result_file_finder)
+
+    return collector.generate_payload_data()
 
 
 def prepare_coverage_data(

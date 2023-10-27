@@ -19,6 +19,12 @@ def _turn_env_vars_into_dict(ctx, params, value):
 
 _global_upload_options = [
     click.option(
+        "--type",
+        help="The type of file to search for an upload. Uploads coverage files by default",
+        type=click.Choice(["coverage", "testing"]),
+        default="coverage",
+    ),
+    click.option(
         "--report-code",
         help="The code of the report. If unsure, leave default",
         default="default",
@@ -172,6 +178,7 @@ def global_upload_options(func):
 def do_upload(
     ctx: click.Context,
     commit_sha: str,
+    upload_type: str,
     report_code: str,
     build_code: typing.Optional[str],
     build_url: typing.Optional[str],
@@ -205,6 +212,7 @@ def do_upload(
         "Starting upload processing",
         extra=dict(
             extra_log_attributes=dict(
+                upload_type=upload_type,
                 commit_sha=commit_sha,
                 report_code=report_code,
                 build_code=build_code,
@@ -235,6 +243,7 @@ def do_upload(
         versioning_system,
         ci_adapter,
         commit_sha=commit_sha,
+        upload_type=upload_type,
         report_code=report_code,
         build_code=build_code,
         build_url=build_url,

@@ -39,6 +39,7 @@ def do_upload_logic(
     versioning_system: VersioningSystemInterface,
     ci_adapter: CIAdapterBase,
     *,
+    upload_type: str,
     commit_sha: str,
     report_code: str,
     build_code: typing.Optional[str],
@@ -66,22 +67,31 @@ def do_upload_logic(
     disable_file_fixes: bool = False,
 ):
     try:
-        upload_data = prepare_coverage_data(
-            cli_config,
-            plugin_names,
-            files_search_root_folder,
-            files_search_exclude_folders,
-            files_search_explicitly_listed_files,
-            disable_search,
-            versioning_system,
-            use_legacy_uploader,
-            disable_file_fixes,
-            env_vars,
-        )
+        if upload_type == "coverage":
+            upload_data = prepare_coverage_data(
+                cli_config,
+                plugin_names,
+                files_search_root_folder,
+                files_search_exclude_folders,
+                files_search_explicitly_listed_files,
+                disable_search,
+                versioning_system,
+                use_legacy_uploader,
+                disable_file_fixes,
+                env_vars,
+            )
+        else:
+            upload_data = prepare_testing_result_data(
+                files_search_root_folder,
+                files_search_exclude_folders,
+                files_search_explicitly_listed_files,
+                disable_search,
+            )
     except click.ClickException as exp:
         if handle_no_reports_found:
             logger.info(
-                "No coverage reports found. Triggering notificaions without uploading."
+                "No reports found. Triggering notificaions without uploading.",
+                extra={"upload_type": upload_type},
             )
             upload_completion_logic(
                 commit_sha=commit_sha,
@@ -95,7 +105,7 @@ def do_upload_logic(
                 error=None,
                 warnings=None,
                 status_code=200,
-                text="No coverage reports found. Triggering notificaions without uploading.",
+                text=f"No {upload_type} reports found. Triggering notificaions without uploading.",
             )
         else:
             raise exp

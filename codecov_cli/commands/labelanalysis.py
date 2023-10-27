@@ -341,7 +341,7 @@ def _dry_run_json_output(
         runner_options=runner_options,
         ats_tests_to_run=sorted(labels_to_run),
         ats_tests_to_skip=sorted(labels_to_skip),
-        ats_error=fallback_reason,
+        ats_fallback_reason=fallback_reason,
     )
     # ⚠️ DON'T use logger
     # logger goes to stderr, we want it in stdout

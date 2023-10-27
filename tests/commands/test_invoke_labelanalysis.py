@@ -125,7 +125,7 @@ class TestLabelAnalysisNotInvoke(object):
             "runner_options": ["--option=1", "--option=2"],
             "ats_tests_to_skip": ["label_3", "label_4"],
             "ats_tests_to_run": ["label_1", "label_2"],
-            "ats_error": None,
+            "ats_fallback_reason": None,
         }
 
     def test__dry_run_json_output_fallback_reason(self):
@@ -147,7 +147,7 @@ class TestLabelAnalysisNotInvoke(object):
             "runner_options": ["--option=1", "--option=2"],
             "ats_tests_to_skip": [],
             "ats_tests_to_run": ["label_1", "label_2", "label_3", "label_4"],
-            "ats_error": "test_list_processing_errors",
+            "ats_fallback_reason": "test_list_processing_errors",
         }
 
     def test__dry_run_space_separated_list_output(self):
@@ -353,12 +353,14 @@ class TestLabelAnalysisCommand(object):
                 fake_runner.process_labelanalysis_result.assert_not_called()
         # Dry run format defaults to json
         print(result.stdout)
-        ats_error = "test_list_processing_errors" if processing_errors else None
+        ats_fallback_reason = (
+            "test_list_processing_errors" if processing_errors else None
+        )
         assert json.loads(result.stdout) == {
             "runner_options": ["--labels"],
             "ats_tests_to_run": ["test_absent", "test_global", "test_in_diff"],
             "ats_tests_to_skip": ["test_present"],
-            "ats_error": ats_error,
+            "ats_fallback_reason": ats_fallback_reason,
         }
 
     def test_invoke_label_analysis_dry_run_pytest_format(
@@ -511,7 +513,7 @@ class TestLabelAnalysisCommand(object):
             "runner_options": ["--labels"],
             "ats_tests_to_run": sorted(collected_labels),
             "ats_tests_to_skip": [],
-            "ats_error": "codecov_unavailable",
+            "ats_fallback_reason": "codecov_unavailable",
         }
         assert result.exit_code == 0
 
@@ -629,7 +631,7 @@ class TestLabelAnalysisCommand(object):
             "runner_options": ["--labels"],
             "ats_tests_to_run": sorted(collected_labels),
             "ats_tests_to_skip": [],
-            "ats_error": "test_list_processing_failed",
+            "ats_fallback_reason": "test_list_processing_failed",
         }
         assert result.exit_code == 0
 
@@ -739,7 +741,7 @@ class TestLabelAnalysisCommand(object):
             "runner_options": ["--labels"],
             "ats_tests_to_run": sorted(collected_labels),
             "ats_tests_to_skip": [],
-            "ats_error": "max_wait_time_exceeded",
+            "ats_fallback_reason": "max_wait_time_exceeded",
         }
         assert result.exit_code == 0
 

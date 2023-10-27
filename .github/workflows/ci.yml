@@ -36,6 +36,7 @@ jobs:
           fetch-depth: 2
       - uses: actions/setup-python@v3
         with:
+          # Because of https://github.com/tree-sitter/py-tree-sitter/issues/162
           python-version: '3.11.x'
       - name: Install CLI
         run: |
@@ -90,6 +91,7 @@ jobs:
           fetch-depth: 2
       - uses: actions/setup-python@v3
         with:
+          # Because of https://github.com/tree-sitter/py-tree-sitter/issues/162
           python-version: '3.11.x'
       - name: Install CLI
         run: |
@@ -112,6 +114,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-python@v3
         with:
+          # Because of https://github.com/tree-sitter/py-tree-sitter/issues/162
           python-version: '3.11.x'
       - name: Install CLI
         run: |

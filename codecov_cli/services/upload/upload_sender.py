@@ -86,7 +86,7 @@ class UploadSender(object):
     ) -> bytes:
         network_files = upload_data.network
         payload = {
-            "path_fixes": {
+            "report_fixes": {
                 "format": "legacy",
                 "value": self._get_file_fixers(upload_data),
             },

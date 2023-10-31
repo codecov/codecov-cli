@@ -157,6 +157,7 @@ def label_analysis(
                 runner,
                 dry_run=dry_run,
                 dry_run_format=dry_run_format,
+                fallback_reason="codecov_unavailable",
             )
             return
 
@@ -189,6 +190,13 @@ def label_analysis(
                     LabelAnalysisRequestResult(request_result),
                     runner,
                     dry_run_format,
+                    # It's possible that the task had processing errors and fallback to all tests
+                    # Even though it's marked as FINISHED (not ERROR) it's not a true success
+                    fallback_reason=(
+                        "test_list_processing_errors"
+                        if resp_json.get("errors", None)
+                        else None
+                    ),
                 )
             return
         if resp_json["state"] == "error":
@@ -207,6 +215,7 @@ def label_analysis(
                 runner=runner,
                 dry_run=dry_run,
                 dry_run_format=dry_run_format,
+                fallback_reason="test_list_processing_failed",
             )
             return
         if max_wait_time and (time.monotonic() - start_wait) > max_wait_time:
@@ -218,6 +227,7 @@ def label_analysis(
                 runner=runner,
                 dry_run=dry_run,
                 dry_run_format=dry_run_format,
+                fallback_reason="max_wait_time_exceeded",
             )
             return
         logger.info("Waiting more time for result...")
@@ -322,12 +332,16 @@ def _send_labelanalysis_request(payload, url, token_header):
 
 
 def _dry_run_json_output(
-    labels_to_run: set, labels_to_skip: set, runner_options: List[str]
+    labels_to_run: set,
+    labels_to_skip: set,
+    runner_options: List[str],
+    fallback_reason: str = None,
 ) -> None:
     output_as_dict = dict(
         runner_options=runner_options,
         ats_tests_to_run=sorted(labels_to_run),
         ats_tests_to_skip=sorted(labels_to_skip),
+        ats_fallback_reason=fallback_reason,
     )
     # ⚠️ DON'T use logger
     # logger goes to stderr, we want it in stdout
@@ -335,8 +349,14 @@ def _dry_run_json_output(
 
 
 def _dry_run_list_output(
-    labels_to_run: set, labels_to_skip: set, runner_options: List[str]
+    labels_to_run: set,
+    labels_to_skip: set,
+    runner_options: List[str],
+    fallback_reason: str = None,
 ) -> None:
+    if fallback_reason:
+        logger.warning(f"label-analysis didn't run correctly. Error: {fallback_reason}")
+
     to_run_line = " ".join(
         sorted(map(lambda l: f"'{l}'", runner_options))
         + sorted(map(lambda l: f"'{l}'", labels_to_run))
@@ -355,6 +375,10 @@ def _dry_run_output(
     result: LabelAnalysisRequestResult,
     runner: LabelAnalysisRunnerInterface,
     dry_run_format: str,
+    *,
+    # If we have a fallback reason it means that calculating the list of tests to run
+    # failed at some point. So it was not a completely successful task.
+    fallback_reason: str = None,
 ):
     labels_to_run = set(
         result.absent_labels + result.global_level_labels + result.present_diff_labels
@@ -368,13 +392,16 @@ def _dry_run_output(
     # Because dry_run_format is a click.Choice we can
     # be sure the value will be in the dict of choices
     fn_to_use = format_lookup[dry_run_format]
-    fn_to_use(labels_to_run, labels_to_skip, runner.dry_run_runner_options)
+    fn_to_use(
+        labels_to_run, labels_to_skip, runner.dry_run_runner_options, fallback_reason
+    )
 
 
 def _fallback_to_collected_labels(
     collected_labels: List[str],
     runner: LabelAnalysisRunnerInterface,
     *,
+    fallback_reason: str = None,
     dry_run: bool = False,
     dry_run_format: Optional[pathlib.Path] = None,
 ) -> dict:
@@ -393,7 +420,10 @@ def _fallback_to_collected_labels(
             return runner.process_labelanalysis_result(fake_response)
         else:
             return _dry_run_output(
-                LabelAnalysisRequestResult(fake_response), runner, dry_run_format
+                LabelAnalysisRequestResult(fake_response),
+                runner,
+                dry_run_format,
+                fallback_reason=fallback_reason,
             )
     logger.error("Cannot fallback to collected labels because no labels were collected")
     raise click.ClickException("Failed to get list of labels to run")

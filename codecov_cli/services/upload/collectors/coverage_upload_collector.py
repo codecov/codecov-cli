@@ -176,7 +176,9 @@ class CoverageUploadCollector(object):
                 "format": "legacy",
                 "value": self._get_file_fixers(upload_data),
             },
-            "network_files": network_files if network_files is not None else [],
+            "network_files": [file.get_filename().decode() for file in network_files]
+            if network_files is not None
+            else [],
             "coverage_files": self._get_coverage_files(upload_data),
             "metadata": {},
         }

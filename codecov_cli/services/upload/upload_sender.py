@@ -26,6 +26,7 @@ logger = logging.getLogger("codecovcli")
 class UploadSender(object):
     def send_upload_data(
         self,
+        upload_file_type: str,
         upload_data: bytes,
         commit_sha: str,
         token: uuid.UUID,
@@ -44,6 +45,7 @@ class UploadSender(object):
         enterprise_url: typing.Optional[str] = None,
     ) -> RequestResult:
         data = {
+            "upload_file_type": upload_file_type,
             "ci_url": build_url,
             "flags": flags,
             "env": env_vars,

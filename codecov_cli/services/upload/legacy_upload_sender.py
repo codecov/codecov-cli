@@ -37,6 +37,7 @@ class UploadSendingResult(object):
 class LegacyUploadSender(object):
     def send_upload_data(
         self,
+        upload_file_type: str,
         upload_data: bytes,
         commit_sha: str,
         token: uuid.UUID,

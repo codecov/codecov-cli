@@ -39,7 +39,7 @@ def do_upload_logic(
     versioning_system: VersioningSystemInterface,
     ci_adapter: CIAdapterBase,
     *,
-    upload_type: str,
+    upload_file_type: str,
     commit_sha: str,
     report_code: str,
     build_code: typing.Optional[str],
@@ -67,7 +67,7 @@ def do_upload_logic(
     disable_file_fixes: bool = False,
 ):
     try:
-        if upload_type == "coverage":
+        if upload_file_type == "coverage":
             upload_data = prepare_coverage_data(
                 cli_config,
                 plugin_names,
@@ -91,7 +91,7 @@ def do_upload_logic(
         if handle_no_reports_found:
             logger.info(
                 "No reports found. Triggering notificaions without uploading.",
-                extra={"upload_type": upload_type},
+                extra={"upload_type": upload_file_type},
             )
             upload_completion_logic(
                 commit_sha=commit_sha,
@@ -105,7 +105,7 @@ def do_upload_logic(
                 error=None,
                 warnings=None,
                 status_code=200,
-                text=f"No {upload_type} reports found. Triggering notificaions without uploading.",
+                text=f"No {upload_file_type} reports found. Triggering notificaions without uploading.",
             )
         else:
             raise exp
@@ -124,6 +124,7 @@ def do_upload_logic(
 
     if not dry_run:
         sending_result = sender.send_upload_data(
+            upload_file_type,
             upload_data,
             commit_sha,
             token,

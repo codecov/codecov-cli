@@ -57,7 +57,7 @@ def test_get_token_header_or_fail():
     # Test with a valid UUID token
     token = uuid.uuid4()
     result = get_token_header_or_fail(token)
-    assert result == {"Authorization": f"token {token.hex}"}
+    assert result == {"Authorization": f"token {str(token)}"}
 
     # Test with a None token
     token = None

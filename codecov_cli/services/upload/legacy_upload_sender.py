@@ -67,7 +67,7 @@ class LegacyUploadSender(object):
         }
 
         if token:
-            headers = {"X-Upload-Token": token.hex}
+            headers = {"X-Upload-Token": token}
         else:
             logger.warning("Token is empty.")
             headers = {"X-Upload-Token": ""}

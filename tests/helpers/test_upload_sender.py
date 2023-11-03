@@ -132,7 +132,7 @@ class TestUploadSender(object):
     def test_upload_sender_post_called_with_right_parameters(
         self, mocked_responses, mocked_legacy_upload_endpoint, mocked_storage_server
     ):
-        headers = {"Authorization": f"token {random_token.hex}"}
+        headers = {"Authorization": f"token {random_token}"}
 
         mocked_legacy_upload_endpoint.match = [
             matchers.json_params_matcher(request_data),

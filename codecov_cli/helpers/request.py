@@ -79,7 +79,7 @@ def get_token_header_or_fail(token: str) -> dict:
         raise click.ClickException(
             "Codecov token not found. Please provide Codecov token with -t flag."
         )
-    return {"Authorization": f"token {token.hex}"}
+    return {"Authorization": f"token {token}"}
 
 
 @retry_request

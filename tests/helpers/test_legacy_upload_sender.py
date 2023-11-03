@@ -67,7 +67,7 @@ class TestUploadSender(object):
     def test_upload_sender_post_called_with_right_parameters(
         self, mocked_responses, mocked_legacy_upload_endpoint, mocked_storage_server
     ):
-        headers = {"X-Upload-Token": random_token.hex}
+        headers = {"X-Upload-Token": random_token}
         params = {
             "package": f"codecov-cli/{codecov_cli_version}",
             "commit": random_sha,

@@ -2,6 +2,8 @@ import json
 import logging
 import time
 
+import requests
+
 from codecov_cli.helpers import request
 from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.helpers.encoder import encode_slug

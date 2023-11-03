@@ -5,14 +5,14 @@ import click
 import pytest
 from pytest import ExitCode
 
-from codecov_cli.runners.python_standard_runner import PythonStandardRunner
-from codecov_cli.runners.python_standard_runner import logger as runner_logger
-from codecov_cli.runners.python_standard_runner import stdout as pyrunner_stdout
+from codecov_cli.runners.pytest_standard_runner import PytestStandardRunner
+from codecov_cli.runners.pytest_standard_runner import logger as runner_logger
+from codecov_cli.runners.pytest_standard_runner import stdout as pyrunner_stdout
 from codecov_cli.runners.types import LabelAnalysisRequestResult
 
 
 class TestPythonStandardRunner(object):
-    runner = PythonStandardRunner()
+    runner = PytestStandardRunner()
 
     def test_init_with_params(self):
         assert self.runner.params.collect_tests_options == []
@@ -21,10 +21,10 @@ class TestPythonStandardRunner(object):
         config_params = dict(
             collect_tests_options=["--option=value", "-option"],
         )
-        runner_with_params = PythonStandardRunner(config_params)
+        runner_with_params = PytestStandardRunner(config_params)
         assert runner_with_params.params == config_params
 
-    @patch("codecov_cli.runners.python_standard_runner.subprocess")
+    @patch("codecov_cli.runners.pytest_standard_runner.subprocess")
     def test_execute_pytest(self, mock_subprocess):
         output = "Output in stdout"
         return_value = MagicMock(stdout=output.encode("utf-8"))
@@ -39,7 +39,29 @@ class TestPythonStandardRunner(object):
         )
         assert result == output
 
-    @patch("codecov_cli.runners.python_standard_runner.subprocess")
+    @pytest.mark.parametrize(
+        "command_configured", [["pyenv", "pytest"], "pyenv pytest"]
+    )
+    @patch("codecov_cli.runners.pytest_standard_runner.subprocess")
+    def test_execute_pytest_user_provided_command(
+        self, mock_subprocess, command_configured
+    ):
+        output = "Output in stdout"
+        return_value = MagicMock(stdout=output.encode("utf-8"))
+        mock_subprocess.run.return_value = return_value
+
+        runner = PytestStandardRunner(dict(pytest_command=command_configured))
+
+        result = runner._execute_pytest(["--option", "--ignore=batata"])
+        mock_subprocess.run.assert_called_with(
+            ["pyenv", "pytest", "--option", "--ignore=batata"],
+            capture_output=True,
+            check=True,
+            stdout=None,
+        )
+        assert result == output
+
+    @patch("codecov_cli.runners.pytest_standard_runner.subprocess")
     def test_execute_pytest_fail_collection(self, mock_subprocess):
         def side_effect(command, *args, **kwargs):
             raise CalledProcessError(
@@ -58,7 +80,7 @@ class TestPythonStandardRunner(object):
             == "Pytest exited with non-zero code 2.\nThis is likely not a problem with label-analysis. Check pytest's output and options.\nPYTEST OUTPUT:\nProcess running up to here...\nSome error occured"
         )
 
-    @patch("codecov_cli.runners.python_standard_runner.subprocess")
+    @patch("codecov_cli.runners.pytest_standard_runner.subprocess")
     def test_execute_pytest_fail_execution(self, mock_subprocess):
         def side_effect(command, *args, **kwargs):
             # In this scenario the regular output AND the stderr message will have been printed
@@ -123,7 +145,7 @@ class TestPythonStandardRunner(object):
             "tests/services/upload/test_upload_service.py::test_do_upload_logic_verbose"
         ]
         mock_execute = mocker.patch.object(
-            PythonStandardRunner,
+            PytestStandardRunner,
             "_execute_pytest",
             return_value="\n".join(collected_test_list),
         )
@@ -138,13 +160,13 @@ class TestPythonStandardRunner(object):
             "tests/services/upload/test_upload_collector.py::test_fix_php_files"
         ]
         mock_execute = mocker.patch.object(
-            PythonStandardRunner,
+            PytestStandardRunner,
             "_execute_pytest",
             return_value="\n".join(collected_test_list),
         )
 
         config_params = dict(collect_tests_options=["--option=value", "-option"])
-        runner_with_params = PythonStandardRunner(config_params)
+        runner_with_params = PytestStandardRunner(config_params)
 
         collected_tests_from_runner = runner_with_params.collect_tests()
         mock_execute.assert_called_with(
@@ -159,7 +181,7 @@ class TestPythonStandardRunner(object):
             "present_diff_labels": ["test_in_diff"],
             "global_level_labels": ["test_global"],
         }
-        mock_execute = mocker.patch.object(PythonStandardRunner, "_execute_pytest")
+        mock_execute = mocker.patch.object(PytestStandardRunner, "_execute_pytest")
 
         self.runner.process_labelanalysis_result(
             LabelAnalysisRequestResult(label_analysis_result)
@@ -185,10 +207,10 @@ class TestPythonStandardRunner(object):
             "present_diff_labels": ["test_in_diff"],
             "global_level_labels": ["test_global"],
         }
-        mock_execute = mocker.patch.object(PythonStandardRunner, "_execute_pytest")
+        mock_execute = mocker.patch.object(PytestStandardRunner, "_execute_pytest")
 
         config_params = dict(coverage_root="coverage_root/")
-        runner_with_params = PythonStandardRunner(config_params)
+        runner_with_params = PytestStandardRunner(config_params)
         runner_with_params.process_labelanalysis_result(
             LabelAnalysisRequestResult(label_analysis_result)
         )
@@ -213,13 +235,13 @@ class TestPythonStandardRunner(object):
             "present_diff_labels": ["test_in_diff"],
             "global_level_labels": ["test_global"],
         }
-        mock_execute = mocker.patch.object(PythonStandardRunner, "_execute_pytest")
+        mock_execute = mocker.patch.object(PytestStandardRunner, "_execute_pytest")
         mock_warning = mocker.patch.object(runner_logger, "warning")
 
         runner_config = {
             "execute_tests_options": ["-s", "--cov-report=xml", "--cov=something"]
         }
-        runner = PythonStandardRunner(runner_config)
+        runner = PytestStandardRunner(runner_config)
         runner.process_labelanalysis_result(
             LabelAnalysisRequestResult(label_analysis_result)
         )
@@ -251,7 +273,7 @@ class TestPythonStandardRunner(object):
             "present_diff_labels": [],
             "global_level_labels": [],
         }
-        mock_execute = mocker.patch.object(PythonStandardRunner, "_execute_pytest")
+        mock_execute = mocker.patch.object(PytestStandardRunner, "_execute_pytest")
 
         self.runner.process_labelanalysis_result(
             LabelAnalysisRequestResult(label_analysis_result)

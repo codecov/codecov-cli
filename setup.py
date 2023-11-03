@@ -1,5 +1,5 @@
-from platform import system
 from os import path
+from platform import system
 
 from setuptools import Extension, find_packages, setup
 
@@ -8,12 +8,9 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
-with open(path.join(here, "VERSION"), encoding="utf-8") as f:
-    version = f.readline().strip()
-
 setup(
     name="codecov-cli",
-    version=version,
+    version="0.4.1",
     packages=find_packages(exclude=["contrib", "docs", "tests*"]),
     description="Codecov Command Line Interface",
     long_description=long_description,
@@ -34,6 +31,7 @@ setup(
             "codecovcli = codecov_cli.main:run",
         ],
     },
+    python_requires=">=3.8",
     ext_modules=[
         Extension(
             "staticcodecov_languages",

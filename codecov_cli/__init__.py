@@ -1,4 +1,3 @@
-with open("VERSION", encoding="utf-8") as f:
-    version_number = f.readline().strip()
+import importlib.metadata
 
-__version__ = version_number
+__version__ = importlib.metadata.version("codecov-cli")

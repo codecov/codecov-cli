@@ -289,6 +289,11 @@ There are a few guidelines when developing in this system. Some notable folders:
 2. `services` - It's where the heavy logic resides. It's mostly organized by which command needs them. Commands should generally be thin wrappers around these services.
 3. `helpers` - This is meant for logic that is useful across different commands. For example, logging helpers, or the logic that searches folders.
 
+## Dependencies
+
+If external dependencies need to be added, it's important to check whether those dependencies have wheels available on PyPI with the `any` or `universal2` platform tags. If those dependencies don't have those wheels available, then they will need to built during the CI, so they will have to be added to the list of
+dependencies in the `--no-binary` flag when building the requirements for the macos release in `build_assets.yml`.
+
 # Releases
 
 The standard way to making a new release is the following:

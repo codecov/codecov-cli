@@ -8,6 +8,7 @@ import click
 import requests
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
+from codecov_cli.helpers import request
 from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.helpers.validators import validate_commit_sha
 from codecov_cli.runners import get_runner
@@ -44,7 +45,7 @@ logger = logging.getLogger("codecovcli")
     required=True,
 )
 @click.option(
-    "--runner-name", "--runner", "runner_name", help="Runner to use", default="python"
+    "--runner-name", "--runner", "runner_name", help="Runner to use", default="pytest"
 )
 @click.option(
     "--max-wait-time",
@@ -66,15 +67,10 @@ logger = logging.getLogger("codecovcli")
     is_flag=True,
 )
 @click.option(
-    "--dry-run-output-path",
-    "dry_run_output_path",
-    help=(
-        "Prints the dry-run list (ATS_TESTS_TO_RUN) into dry_run_output_path (in addition to stdout)\n"
-        + "AND prints ATS_TESTS_TO_SKIP into dry_run_output_path_skipped\n"
-        + "AND prints dry-run JSON output into dry_run_output_path.json"
-    ),
-    type=pathlib.Path,
-    default=None,
+    "--dry-run-format",
+    "dry_run_format",
+    type=click.Choice(["json", "space-separated-list"]),
+    default="json",
 )
 @click.pass_context
 def label_analysis(
@@ -85,7 +81,7 @@ def label_analysis(
     runner_name: str,
     max_wait_time: str,
     dry_run: bool,
-    dry_run_output_path: Optional[pathlib.Path],
+    dry_run_format: str,
 ):
     enterprise_url = ctx.obj.get("enterprise_url")
     logger.debug(
@@ -160,7 +156,8 @@ def label_analysis(
                 requested_labels,
                 runner,
                 dry_run=dry_run,
-                dry_run_output_path=dry_run_output_path,
+                dry_run_format=dry_run_format,
+                fallback_reason="codecov_unavailable",
             )
             return
 
@@ -169,7 +166,7 @@ def label_analysis(
     start_wait = time.monotonic()
     time.sleep(1)
     while not has_result:
-        resp_data = requests.get(
+        resp_data = request.get(
             f"{upload_url}/labels/labels-analysis/{eid}",
             headers={"Authorization": token_header},
         )
@@ -192,19 +189,33 @@ def label_analysis(
                 _dry_run_output(
                     LabelAnalysisRequestResult(request_result),
                     runner,
-                    dry_run_output_path,
+                    dry_run_format,
+                    # It's possible that the task had processing errors and fallback to all tests
+                    # Even though it's marked as FINISHED (not ERROR) it's not a true success
+                    fallback_reason=(
+                        "test_list_processing_errors"
+                        if resp_json.get("errors", None)
+                        else None
+                    ),
                 )
             return
         if resp_json["state"] == "error":
             logger.error(
                 "Request had problems calculating",
-                extra=dict(extra_log_attributes=dict(resp_json=resp_json)),
+                extra=dict(
+                    extra_log_attributes=dict(
+                        base_commit=resp_json["base_commit"],
+                        head_commit=resp_json["head_commit"],
+                        external_id=resp_json["external_id"],
+                    )
+                ),
             )
             _fallback_to_collected_labels(
                 collected_labels=requested_labels,
                 runner=runner,
                 dry_run=dry_run,
-                dry_run_output_path=dry_run_output_path,
+                dry_run_format=dry_run_format,
+                fallback_reason="test_list_processing_failed",
             )
             return
         if max_wait_time and (time.monotonic() - start_wait) > max_wait_time:
@@ -215,7 +226,8 @@ def label_analysis(
                 collected_labels=requested_labels,
                 runner=runner,
                 dry_run=dry_run,
-                dry_run_output_path=dry_run_output_path,
+                dry_run_format=dry_run_format,
+                fallback_reason="max_wait_time_exceeded",
             )
             return
         logger.info("Waiting more time for result...")
@@ -269,7 +281,7 @@ def _potentially_calculate_absent_labels(
 def _patch_labels(payload, url, token_header):
     logger.info("Sending collected labels to Codecov...")
     try:
-        response = requests.patch(
+        response = request.patch(
             url, json=payload, headers={"Authorization": token_header}
         )
         if response.status_code < 300:
@@ -288,8 +300,8 @@ def _send_labelanalysis_request(payload, url, token_header):
         ),
     )
     try:
-        response = requests.post(
-            url, json=payload, headers={"Authorization": token_header}
+        response = request.post(
+            url, data=payload, headers={"Authorization": token_header}
         )
         if response.status_code >= 500:
             logger.warning(
@@ -319,54 +331,69 @@ def _send_labelanalysis_request(payload, url, token_header):
     return eid
 
 
+def _dry_run_json_output(
+    labels_to_run: set,
+    labels_to_skip: set,
+    runner_options: List[str],
+    fallback_reason: str = None,
+) -> None:
+    output_as_dict = dict(
+        runner_options=runner_options,
+        ats_tests_to_run=sorted(labels_to_run),
+        ats_tests_to_skip=sorted(labels_to_skip),
+        ats_fallback_reason=fallback_reason,
+    )
+    # ⚠️ DON'T use logger
+    # logger goes to stderr, we want it in stdout
+    click.echo(json.dumps(output_as_dict))
+
+
+def _dry_run_list_output(
+    labels_to_run: set,
+    labels_to_skip: set,
+    runner_options: List[str],
+    fallback_reason: str = None,
+) -> None:
+    if fallback_reason:
+        logger.warning(f"label-analysis didn't run correctly. Error: {fallback_reason}")
+
+    to_run_line = " ".join(
+        sorted(map(lambda l: f"'{l}'", runner_options))
+        + sorted(map(lambda l: f"'{l}'", labels_to_run))
+    )
+    to_skip_line = " ".join(
+        sorted(map(lambda l: f"'{l}'", runner_options))
+        + sorted(map(lambda l: f"'{l}'", labels_to_skip))
+    )
+    # ⚠️ DON'T use logger
+    # logger goes to stderr, we want it in stdout
+    click.echo(f"TESTS_TO_RUN={to_run_line}")
+    click.echo(f"TESTS_TO_SKIP={to_skip_line}")
+
+
 def _dry_run_output(
     result: LabelAnalysisRequestResult,
     runner: LabelAnalysisRunnerInterface,
-    dry_run_output_path: Optional[pathlib.Path],
+    dry_run_format: str,
+    *,
+    # If we have a fallback reason it means that calculating the list of tests to run
+    # failed at some point. So it was not a completely successful task.
+    fallback_reason: str = None,
 ):
     labels_to_run = set(
         result.absent_labels + result.global_level_labels + result.present_diff_labels
     )
-    labels_skipped = set(result.present_report_labels) - labels_to_run
-    # If the test label can contain spaces and dashes the test runner might
-    # interpret it as an option and not a label
-    # So we wrap it in doublequotes just to be extra sure
-    labels_run_wrapped_double_quotes = sorted(
-        map(lambda l: '"' + l + '"', labels_to_run)
-    )
-    labels_skip_wrapped_double_quotes = sorted(
-        map(lambda l: '"' + l + '"', labels_skipped)
-    )
+    labels_to_skip = set(result.present_report_labels) - labels_to_run
 
-    output_as_dict = dict(
-        runner_options=runner.dry_run_runner_options,
-        ats_tests_to_run=labels_run_wrapped_double_quotes,
-        ats_tests_to_skip=labels_skip_wrapped_double_quotes,
-    )
-    if dry_run_output_path is not None:
-        with open(dry_run_output_path, "w") as fd:
-            fd.write(
-                " ".join(
-                    runner.dry_run_runner_options + labels_run_wrapped_double_quotes
-                )
-                + "\n"
-            )
-        with open(str(dry_run_output_path) + "_skipped", "w") as fd:
-            fd.write(
-                " ".join(
-                    runner.dry_run_runner_options + labels_skip_wrapped_double_quotes
-                )
-                + "\n"
-            )
-        with open(str(dry_run_output_path) + ".json", "w") as fd:
-            fd.write(json.dumps(output_as_dict) + "\n")
-
-    click.echo(json.dumps(output_as_dict))
-    click.echo(
-        f"ATS_TESTS_TO_RUN={' '.join(runner.dry_run_runner_options + labels_run_wrapped_double_quotes)}"
-    )
-    click.echo(
-        f"ATS_TESTS_TO_SKIP={' '.join(runner.dry_run_runner_options + labels_skip_wrapped_double_quotes)}"
+    format_lookup = {
+        "json": _dry_run_json_output,
+        "space-separated-list": _dry_run_list_output,
+    }
+    # Because dry_run_format is a click.Choice we can
+    # be sure the value will be in the dict of choices
+    fn_to_use = format_lookup[dry_run_format]
+    fn_to_use(
+        labels_to_run, labels_to_skip, runner.dry_run_runner_options, fallback_reason
     )
 
 
@@ -374,8 +401,9 @@ def _fallback_to_collected_labels(
     collected_labels: List[str],
     runner: LabelAnalysisRunnerInterface,
     *,
+    fallback_reason: str = None,
     dry_run: bool = False,
-    dry_run_output_path: Optional[pathlib.Path] = None,
+    dry_run_format: Optional[pathlib.Path] = None,
 ) -> dict:
     logger.info("Trying to fallback on collected labels")
     if collected_labels:
@@ -392,7 +420,10 @@ def _fallback_to_collected_labels(
             return runner.process_labelanalysis_result(fake_response)
         else:
             return _dry_run_output(
-                LabelAnalysisRequestResult(fake_response), runner, dry_run_output_path
+                LabelAnalysisRequestResult(fake_response),
+                runner,
+                dry_run_format,
+                fallback_reason=fallback_reason,
             )
     logger.error("Cannot fallback to collected labels because no labels were collected")
     raise click.ClickException("Failed to get list of labels to run")

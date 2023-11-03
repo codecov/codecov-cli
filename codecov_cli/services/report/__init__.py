@@ -2,6 +2,7 @@ import json
 import logging
 import time
 
+from codecov_cli.helpers import request
 from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.helpers.request import (
@@ -90,7 +91,7 @@ def send_reports_result_get_request(
     url = f"{upload_url}/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/results"
     number_tries = 0
     while number_tries < MAX_NUMBER_TRIES:
-        resp = requests.get(url=url, headers=headers)
+        resp = request.get(url=url, headers=headers)
         response_obj = request_result(resp)
         response_content = json.loads(response_obj.text)
 

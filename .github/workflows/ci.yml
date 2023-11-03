@@ -1,15 +1,19 @@
 # This workflow will install Python dependencies, run tests and lint with a variety of Python versions
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: Build-Test-Upload
+name: CLI CI
 
-on: [push] # Run on any push event
+on:
+  pull_request:
+  push:
+    branches:
+      - main
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - name: Install dependencies
@@ -26,7 +30,14 @@ jobs:
   codecov-startup:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 2
       - uses: actions/setup-python@v3
+        with:
+          # Because of https://github.com/tree-sitter/py-tree-sitter/issues/162
+          python-version: '3.11.x'
       - name: Install CLI
         run: |
           pip install codecov-cli
@@ -49,7 +60,7 @@ jobs:
           - python-version: "3.9"
           - python-version: "3.8"
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
         fetch-depth: 2
@@ -66,7 +77,7 @@ jobs:
     - name: Test with pytest
       run: |
         pytest --cov
-    - name: Dogfooding codecov-cli. Use codecov-cli to upload to codecov (new upload endpoint)
+    - name: Dogfooding codecov-cli
       run: |
         codecovcli do-upload --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
 
@@ -74,7 +85,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: codecov-startup
     steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 2
       - uses: actions/setup-python@v3
+        with:
+          # Because of https://github.com/tree-sitter/py-tree-sitter/issues/162
+          python-version: '3.11.x'
       - name: Install CLI
         run: |
           pip install codecov-cli
@@ -90,11 +108,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: static-analysis
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 0
       - uses: actions/setup-python@v3
+        with:
+          # Because of https://github.com/tree-sitter/py-tree-sitter/issues/162
+          python-version: '3.11.x'
       - name: Install CLI
         run: |
           pip install -r requirements.txt -r tests/requirements.txt

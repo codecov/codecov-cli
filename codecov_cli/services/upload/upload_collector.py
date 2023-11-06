@@ -112,6 +112,7 @@ class UploadCollector(object):
 
         try:
             with open(filename, "r") as f:
+                lineno = -1
                 for lineno, line_content in enumerate(f):
                     if any(
                         pattern.match(line_content)
@@ -123,7 +124,6 @@ class UploadCollector(object):
                         for pattern in fix_patterns_to_apply.without_reason
                     ):
                         fixed_lines_without_reason.add(lineno + 1)
-
                 if fix_patterns_to_apply.eof:
                     eof = lineno + 1
         except UnicodeDecodeError as err:

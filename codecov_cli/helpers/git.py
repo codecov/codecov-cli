@@ -97,6 +97,6 @@ def is_fork_pr(pr_num, slug, service):
     git_service = get_git_service(service)
     if git_service:
         pull_dict = git_service.get_pull_request(decoded_slug, pr_num)
-        if pull_dict and pull_dict["head"]["slug"] != decoded_slug:
+        if pull_dict and pull_dict["head"]["slug"] != pull_dict["base"]["slug"]:
             return True
     return False

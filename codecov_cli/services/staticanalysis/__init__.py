@@ -5,6 +5,7 @@ import typing
 from functools import partial
 from multiprocessing import get_context
 from pathlib import Path
+import sys
 
 import click
 import httpx
@@ -183,11 +184,15 @@ async def process_files(
     all_data = {}
     file_metadata = []
     errors = {}
+    if sys.platform.startswith("win32") or sys.platform.startswith("darwin"):
+        pool_thread_method = "spawn"
+    else:
+        pool_thread_method = "fork"
     with click.progressbar(
         length=len(files_to_analyze),
         label="Analyzing files",
     ) as bar:
-        with get_context("fork").Pool(processes=numberprocesses) as pool:
+        with get_context(pool_thread_method).Pool(processes=numberprocesses) as pool:
             file_results = pool.imap_unordered(mapped_func, files_to_analyze)
             for result in file_results:
                 bar.update(1, result)

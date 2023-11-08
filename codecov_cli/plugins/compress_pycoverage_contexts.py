@@ -5,7 +5,6 @@ from decimal import Decimal
 from typing import Any, List
 
 import ijson
-from smart_open import open
 
 from codecov_cli.plugins.types import PreparationPluginReturn
 

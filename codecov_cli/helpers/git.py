@@ -93,10 +93,13 @@ def parse_git_service(remote_repo_url: str):
 
 
 def is_fork_pr(pr_num, slug, service):
-    decoded_slug = decode_slug(slug)
+    """
+    takes in pull request number, slug in the owner/repo format, and the git service e.g. github, gitlab etc.
+    returns true if PR is made in a fork context, false if not.
+    """
     git_service = get_git_service(service)
     if git_service:
-        pull_dict = git_service.get_pull_request(decoded_slug, pr_num)
+        pull_dict = git_service.get_pull_request(slug, pr_num)
         if pull_dict and pull_dict["head"]["slug"] != pull_dict["base"]["slug"]:
             return True
     return False

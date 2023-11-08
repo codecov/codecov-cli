@@ -3,7 +3,7 @@ import typing
 import uuid
 
 from codecov_cli.helpers.config import CODECOV_API_URL
-from codecov_cli.helpers.encoder import encode_slug
+from codecov_cli.helpers.encoder import decode_slug, encode_slug
 from codecov_cli.helpers.git import is_fork_pr
 from codecov_cli.helpers.request import (
     get_token_header_or_fail,
@@ -50,9 +50,10 @@ def send_commit_data(
         "pullid": pr,
         "branch": branch,
     }
+    decoded_slug = decode_slug(slug)
     headers = (
         {}
-        if not token and is_fork_pr(pr, slug, service)
+        if not token and is_fork_pr(pr, decoded_slug, service)
         else get_token_header_or_fail(token)
     )
     upload_url = enterprise_url or CODECOV_API_URL

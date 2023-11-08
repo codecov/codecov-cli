@@ -103,7 +103,7 @@ def test_commit_sender_200(mocker):
     )
     token = uuid.uuid4()
     res = send_commit_data(
-        "commit_sha", "parent_sha", "pr", "branch", "slug", token, "service", None
+        "commit_sha", "parent_sha", "pr", "branch", "owner::::repo", token, "service", None
     )
     assert res.error is None
     assert res.warnings == []
@@ -117,7 +117,7 @@ def test_commit_sender_403(mocker):
     )
     token = uuid.uuid4()
     res = send_commit_data(
-        "commit_sha", "parent_sha", "pr", "branch", "slug", token, "service", None
+        "commit_sha", "parent_sha", "pr", "branch", "owner::::repo", token, "service", None
     )
     assert res.error == RequestError(
         code="HTTP Error 403",

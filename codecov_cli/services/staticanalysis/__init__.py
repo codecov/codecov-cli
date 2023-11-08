@@ -1,11 +1,11 @@
 import asyncio
 import json
 import logging
+import sys
 import typing
 from functools import partial
 from multiprocessing import get_context
 from pathlib import Path
-import sys
 
 import click
 import httpx

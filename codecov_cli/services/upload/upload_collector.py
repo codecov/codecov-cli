@@ -112,6 +112,9 @@ class UploadCollector(object):
 
         try:
             with open(filename, "r") as f:
+                # If lineno is unset that means that the
+                # file is empty thus the eof should be 0
+                # so lineno will be set to -1 here
                 lineno = -1
                 for lineno, line_content in enumerate(f):
                     if any(

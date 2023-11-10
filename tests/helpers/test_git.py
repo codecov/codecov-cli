@@ -160,15 +160,15 @@ def test_pr_is_not_fork_pr(mocker):
         "get",
         side_effect=mock_request,
     )
-    encoded_slug = "codecov::::codecov-cli"
-    assert not git.is_fork_pr(1, encoded_slug, "github")
+    pull_dict = git.get_pull("github", "codecov/codecov-cli", 1)
+    assert not git.is_fork_pr(pull_dict)
 
 
 def test_pr_is_fork_pr(mocker):
     def mock_request(*args, headers={}, **kwargs):
         assert headers["X-GitHub-Api-Version"] == "2022-11-28"
         res = {
-            "url": "https://api.github.com/repos/codecov/codecov-cli/pulls/325",
+            "url": "https://api.github.com/repos/codecov/codecov-cli/pulls/1",
             "head": {
                 "sha": "123",
                 "label": "codecov-cli:branch",
@@ -192,8 +192,8 @@ def test_pr_is_fork_pr(mocker):
         "get",
         side_effect=mock_request,
     )
-    encoded_slug = "codecov::::codecov-cli"
-    assert git.is_fork_pr(1, encoded_slug, "github")
+    pull_dict = git.get_pull("github", "codecov/codecov-cli", 1)
+    assert git.is_fork_pr(pull_dict)
 
 
 def test_pr_not_found(mocker):
@@ -209,5 +209,5 @@ def test_pr_not_found(mocker):
         "get",
         side_effect=mock_request,
     )
-    encoded_slug = "codecov::::codecov-cli"
-    assert not git.is_fork_pr(1, encoded_slug, "github")
+    pull_dict = git.get_pull("github", "codecov/codecov-cli", 1)
+    assert not git.is_fork_pr(pull_dict)

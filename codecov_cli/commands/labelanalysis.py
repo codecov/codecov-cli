@@ -58,11 +58,8 @@ logger = logging.getLogger("codecovcli")
     "--dry-run",
     "dry_run",
     help=(
-        "Print list of tests to run AND tests skipped (and options that need to be added to the test runner) to stdout. "
-        + "Also prints the same information in JSON format. "
-        + "JSON will have keys 'ats_tests_to_run', 'ats_tests_to_skip' and 'runner_options'. "
-        + "List of tests to run is prefixed with ATS_TESTS_TO_RUN= "
-        + "List of tests to skip is prefixed with ATS_TESTS_TO_SKIP="
+        "Print list of tests to run AND tests skipped AND options that need to be added to the test runner to stdout. "
+        + "Choose format with --dry-run-format option. Default is JSON. "
     ),
     is_flag=True,
 )
@@ -70,6 +67,7 @@ logger = logging.getLogger("codecovcli")
     "--dry-run-format",
     "dry_run_format",
     type=click.Choice(["json", "space-separated-list"]),
+    help="Format in which --dry-run data is printed. Default is JSON.",
     default="json",
 )
 @click.pass_context

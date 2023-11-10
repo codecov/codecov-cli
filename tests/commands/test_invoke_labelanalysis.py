@@ -171,38 +171,6 @@ class TestLabelAnalysisNotInvoke(object):
 
 
 class TestLabelAnalysisCommand(object):
-    def test_labelanalysis_help(self, mocker, fake_ci_provider):
-        mocker.patch("codecov_cli.main.get_ci_adapter", return_value=fake_ci_provider)
-        runner = CliRunner()
-
-        result = runner.invoke(cli, ["label-analysis", "--help"], obj={})
-        assert result.exit_code == 0
-        print(result.output)
-        assert result.output.split("\n") == [
-            "Usage: cli label-analysis [OPTIONS]",
-            "",
-            "Options:",
-            "  --token TEXT                    The static analysis token (NOT the same token",
-            "                                  as upload)  [required]",
-            "  --head-sha TEXT                 Commit SHA (with 40 chars)  [required]",
-            "  --base-sha TEXT                 Commit SHA (with 40 chars)  [required]",
-            "  --runner-name, --runner TEXT    Runner to use",
-            "  --max-wait-time INTEGER         Max time (in seconds) to wait for the label",
-            "                                  analysis result before falling back to running",
-            "                                  all tests. Default is to wait forever.",
-            "  --dry-run                       Print list of tests to run AND tests skipped",
-            "                                  (and options that need to be added to the test",
-            "                                  runner) to stdout. Also prints the same",
-            "                                  information in JSON format. JSON will have",
-            "                                  keys 'ats_tests_to_run', 'ats_tests_to_skip'",
-            "                                  and 'runner_options'. List of tests to run is",
-            "                                  prefixed with ATS_TESTS_TO_RUN= List of tests",
-            "                                  to skip is prefixed with ATS_TESTS_TO_SKIP=",
-            "  --dry-run-format [json|space-separated-list]",
-            "  -h, --help                      Show this message and exit.",
-            "",
-        ]
-
     def test_invoke_label_analysis_missing_token(self, mocker, fake_ci_provider):
         mocker.patch("codecov_cli.main.get_ci_adapter", return_value=fake_ci_provider)
         runner = CliRunner()

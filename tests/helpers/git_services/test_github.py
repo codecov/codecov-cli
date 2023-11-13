@@ -54,6 +54,7 @@ def test_get_pull_request(mocker):
         },
     }
 
+
 def test_get_pull_request_404(mocker):
     def mock_request(*args, headers={}, **kwargs):
         assert headers["X-GitHub-Api-Version"] == "2022-11-28"

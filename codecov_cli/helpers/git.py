@@ -97,11 +97,7 @@ def is_fork_pr(pull_dict):
     takes in dict: pull_dict
     returns true if PR is made in a fork context, false if not.
     """
-    return (
-        True
-        if pull_dict and pull_dict["head"]["slug"] != pull_dict["base"]["slug"]
-        else False
-    )
+    return pull_dict and pull_dict["head"]["slug"] != pull_dict["base"]["slug"]
 
 
 def get_pull(service, slug, pr_num):

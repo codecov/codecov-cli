@@ -3,6 +3,9 @@ import re
 from enum import Enum
 from urllib.parse import urlparse
 
+from codecov_cli.helpers.encoder import decode_slug
+from codecov_cli.helpers.git_services.github import Github
+
 slug_regex = re.compile(r"[^/\s]+\/[^/\s]+$")
 
 logger = logging.getLogger("codecovcli")
@@ -15,6 +18,11 @@ class GitService(Enum):
     GITHUB_ENTERPRISE = "github_enterprise"
     GITLAB_ENTERPRISE = "gitlab_enterprise"
     BITBUCKET_SERVER = "bitbucket_server"
+
+
+def get_git_service(git):
+    if git == "github":
+        return Github()
 
 
 def parse_slug(remote_repo_url: str):
@@ -82,3 +90,22 @@ def parse_git_service(remote_repo_url: str):
             extra=dict(remote_repo_url=remote_repo_url),
         )
         return None
+
+
+def is_fork_pr(pull_dict):
+    """
+    takes in dict: pull_dict
+    returns true if PR is made in a fork context, false if not.
+    """
+    return pull_dict and pull_dict["head"]["slug"] != pull_dict["base"]["slug"]
+
+
+def get_pull(service, slug, pr_num):
+    """
+    takes in str git service e.g. github, gitlab etc., slug in the owner/repo format, and the pull request number
+    returns the pull request info gotten from the git service provider if successful, None if not
+    """
+    git_service = get_git_service(service)
+    if git_service:
+        pull_dict = git_service.get_pull_request(slug, pr_num)
+        return pull_dict

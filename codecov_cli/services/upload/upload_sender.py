@@ -8,6 +8,7 @@ from typing import Any, Dict
 from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.helpers.encoder import encode_slug
+from codecov_cli.helpers.git import get_pull, is_fork_pr
 from codecov_cli.helpers.request import (
     get_token_header_or_fail,
     send_post_request,
@@ -52,7 +53,14 @@ class UploadSender(object):
         }
 
         # Data to upload to Codecov
-        headers = get_token_header_or_fail(token)
+        pull_dict = (
+            get_pull(git_service, slug, pull_request_number) if not token else None
+        )
+        headers = (
+            {}
+            if not token and is_fork_pr(pull_dict)
+            else get_token_header_or_fail(token)
+        )
         encoded_slug = encode_slug(slug)
         upload_url = enterprise_url or CODECOV_API_URL
         url = f"{upload_url}/upload/{git_service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads"

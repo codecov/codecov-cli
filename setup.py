@@ -23,7 +23,6 @@ setup(
         "ijson==3.*",
         "pyyaml==6.*",
         "responses==0.21.*",
-        "smart-open==6.*",
         "tree-sitter==0.20.*",
     ],
     entry_points={

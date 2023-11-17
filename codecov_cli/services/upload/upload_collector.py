@@ -116,6 +116,8 @@ class UploadCollector(object):
                 # file is empty thus the eof should be 0
                 # so lineno will be set to -1 here
                 lineno = -1
+                # overwrite lineno in this for loop
+                # if f is empty, lineno stays at -1
                 for lineno, line_content in enumerate(f):
                     if any(
                         pattern.match(line_content)

@@ -1,10 +1,9 @@
 import asyncio
 import json
 import logging
-import sys
 import typing
 from functools import partial
-from multiprocessing import get_context
+from multiprocessing import Pool
 from pathlib import Path
 
 import click
@@ -184,15 +183,13 @@ async def process_files(
     all_data = {}
     file_metadata = []
     errors = {}
-    if sys.platform.startswith("win32") or sys.platform.startswith("darwin"):
-        pool_thread_method = "spawn"
-    else:
-        pool_thread_method = "fork"
     with click.progressbar(
         length=len(files_to_analyze),
         label="Analyzing files",
     ) as bar:
-        with get_context(pool_thread_method).Pool(processes=numberprocesses) as pool:
+        # https://docs.python.org/3/library/multiprocessing.html#contexts-and-start-methods
+        # from the link above, we want to use the default start methods
+        with Pool(processes=numberprocesses) as pool:
             file_results = pool.imap_unordered(mapped_func, files_to_analyze)
             for result in file_results:
                 bar.update(1, result)

@@ -3,7 +3,7 @@ import json
 import logging
 import typing
 from functools import partial
-from multiprocessing import get_context
+from multiprocessing import Pool
 from pathlib import Path
 
 import click
@@ -187,7 +187,9 @@ async def process_files(
         length=len(files_to_analyze),
         label="Analyzing files",
     ) as bar:
-        with get_context("fork").Pool(processes=numberprocesses) as pool:
+        # https://docs.python.org/3/library/multiprocessing.html#contexts-and-start-methods
+        # from the link above, we want to use the default start methods
+        with Pool(processes=numberprocesses) as pool:
             file_results = pool.imap_unordered(mapped_func, files_to_analyze)
             for result in file_results:
                 bar.update(1, result)

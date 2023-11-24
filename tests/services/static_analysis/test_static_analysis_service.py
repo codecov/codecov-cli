@@ -32,9 +32,7 @@ class TestStaticAnalysisService:
                 ],
             )
         )
-        mock_get_context = mocker.patch(
-            "codecov_cli.services.staticanalysis.get_context"
-        )
+        mock_pool = mocker.patch("codecov_cli.services.staticanalysis.Pool")
 
         def side_effect(config, filename: FileAnalysisRequest):
             if filename.result_filename == "correct_file.py":
@@ -59,12 +57,12 @@ class TestStaticAnalysisService:
                 results.append(mapped_func(file))
             return results
 
-        mock_get_context.return_value.Pool.return_value.__enter__.return_value.imap_unordered.side_effect = (
+        mock_pool.return_value.__enter__.return_value.imap_unordered.side_effect = (
             imap_side_effect
         )
 
         results = await process_files(files_found, 1, {})
-        mock_get_context.return_value.Pool.return_value.__enter__.return_value.imap_unordered.assert_called()
+        mock_pool.return_value.__enter__.return_value.imap_unordered.assert_called()
         assert mock_analyze_function.call_count == 2
         assert results == dict(
             all_data={"correct_file.py": {"hash": "abc123"}},

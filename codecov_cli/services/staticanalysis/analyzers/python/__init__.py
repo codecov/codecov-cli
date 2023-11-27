@@ -1,8 +1,8 @@
 import hashlib
 
-import staticcodecov_languages
 from tree_sitter import Language, Parser
 
+import staticcodecov_languages
 from codecov_cli.services.staticanalysis.analyzers.general import BaseAnalyzer
 from codecov_cli.services.staticanalysis.analyzers.python.node_wrappers import (
     NodeVisitor,

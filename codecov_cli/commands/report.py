@@ -2,6 +2,7 @@ import logging
 
 import click
 
+from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
 from codecov_cli.helpers.options import global_options
 from codecov_cli.services.report import create_report_logic
 

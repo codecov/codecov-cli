@@ -1,5 +1,4 @@
 import logging
-import uuid
 
 import click
 
@@ -24,7 +23,7 @@ def get_report_results(
     code: str,
     slug: str,
     git_service: str,
-    token: uuid.UUID,
+    token: str,
     fail_on_error: bool,
 ):
     enterprise_url = ctx.obj.get("enterprise_url")

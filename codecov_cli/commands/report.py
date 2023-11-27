@@ -1,10 +1,8 @@
 import logging
-import uuid
 
 import click
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
-from codecov_cli.helpers.git import GitService
 from codecov_cli.helpers.options import global_options
 from codecov_cli.services.report import create_report_logic
 
@@ -32,7 +30,7 @@ def create_report(
     code: str,
     slug: str,
     git_service: str,
-    token: uuid.UUID,
+    token: str,
     fail_on_error: bool,
     pull_request_number: int,
 ):

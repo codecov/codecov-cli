@@ -225,7 +225,7 @@ Codecov-cli supports user input. These inputs, along with their descriptions and
 | :---:     |     :---:   |    :---:   | 
 | -C, --sha, --commit-sha TEXT    |Commit SHA (with 40 chars) | Required
 | -r, --slug TEXT                 |owner/repo slug used instead of the private repo token in Self-hosted | Required
-| -t, --token UUID                |Codecov upload token | Required
+| -t, --token TEXT                |Codecov upload token | Required
 | --git-service | Git provider. Options: github, gitlab, bitbucket, github_enterprise, gitlab_enterprise, bitbucket_server | Optional
 | -h,--help                      |Show this message and exit.
 

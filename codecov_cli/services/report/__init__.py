@@ -1,7 +1,6 @@
 import json
 import logging
 import time
-import uuid
 
 import requests
 
@@ -25,7 +24,7 @@ def create_report_logic(
     code: str,
     slug: str,
     service: str,
-    token: uuid.UUID,
+    token: str,
     enterprise_url: str,
     pull_request_number: int,
     fail_on_error: bool = False,
@@ -65,7 +64,7 @@ def create_report_results_logic(
     code: str,
     slug: str,
     service: str,
-    token: uuid.UUID,
+    token: str,
     enterprise_url: str,
     fail_on_error: bool = False,
 ):

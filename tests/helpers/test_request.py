@@ -57,7 +57,7 @@ def test_get_token_header_or_fail():
     # Test with a valid UUID token
     token = uuid.uuid4()
     result = get_token_header_or_fail(token)
-    assert result == {"Authorization": f"token {token.hex}"}
+    assert result == {"Authorization": f"token {str(token)}"}
 
     # Test with a None token
     token = None
@@ -68,13 +68,6 @@ def test_get_token_header_or_fail():
         str(e.value)
         == "Codecov token not found. Please provide Codecov token with -t flag."
     )
-
-    # Test with an invalid token type
-    token = "invalid_token"
-    with pytest.raises(Exception) as e:
-        get_token_header_or_fail(token)
-
-    assert str(e.value) == f"Token must be UUID. Received {type(token)}"
 
 
 def test_request_retry(mocker, valid_response):

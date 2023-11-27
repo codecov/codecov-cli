@@ -1,4 +1,3 @@
-import uuid
 from urllib import parse
 
 import pytest
@@ -11,7 +10,7 @@ from codecov_cli.types import UploadCollectionResult
 from tests.data import reports_examples
 
 upload_collection = UploadCollectionResult(["1", "apple.py", "3"], [], [])
-random_token = uuid.UUID("f359afb9-8a2a-42ab-a448-c3d267ff495b")
+random_token = "f359afb9-8a2a-42ab-a448-c3d267ff495b"
 random_sha = "845548c6b95223f12e8317a1820705f64beaf69e"
 named_upload_data = {
     "name": "name",
@@ -68,7 +67,7 @@ class TestUploadSender(object):
     def test_upload_sender_post_called_with_right_parameters(
         self, mocked_responses, mocked_legacy_upload_endpoint, mocked_storage_server
     ):
-        headers = {"X-Upload-Token": random_token.hex}
+        headers = {"X-Upload-Token": random_token}
         params = {
             "package": f"codecov-cli/{codecov_cli_version}",
             "commit": random_sha,

@@ -1,6 +1,5 @@
 import logging
 import typing
-import uuid
 
 import click
 
@@ -19,7 +18,7 @@ def empty_upload(
     ctx,
     commit_sha: str,
     slug: typing.Optional[str],
-    token: typing.Optional[uuid.UUID],
+    token: typing.Optional[str],
     git_service: typing.Optional[str],
     fail_on_error: typing.Optional[bool],
 ):

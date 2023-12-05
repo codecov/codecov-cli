@@ -195,5 +195,5 @@ def test_commit_sender_with_forked_repo(mocker):
             "pullid": "1",
             "branch": "user_forked_repo/codecov-cli:branch",
         },
-        headers={},
+        headers={"X-Tokenless": "user_forked_repo/codecov-cli"},
     )

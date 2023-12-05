@@ -51,9 +51,10 @@ def send_create_report_request(
     pull_dict = (
         get_pull(service, decoded_slug, pull_request_number) if not token else None
     )
-    headers = (
-        {} if not token and is_fork_pr(pull_dict) else get_token_header_or_fail(token)
-    )
+    if is_fork_pr(pull_dict):
+        headers = {"X-Tokenless": pull_dict["head"]["slug"]}
+    else:
+        headers = get_token_header_or_fail(token)
     upload_url = enterprise_url or CODECOV_API_URL
     url = f"{upload_url}/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports"
     return send_post_request(url=url, headers=headers, data=data)

@@ -1,9 +1,11 @@
 import logging
 import re
 from enum import Enum
+from typing import Optional
 from urllib.parse import urlparse
 
 from codecov_cli.helpers.encoder import decode_slug
+from codecov_cli.helpers.git_services import PullDict
 from codecov_cli.helpers.git_services.github import Github
 
 slug_regex = re.compile(r"[^/\s]+\/[^/\s]+$")
@@ -92,7 +94,7 @@ def parse_git_service(remote_repo_url: str):
         return None
 
 
-def is_fork_pr(pull_dict):
+def is_fork_pr(pull_dict: PullDict) -> bool:
     """
     takes in dict: pull_dict
     returns true if PR is made in a fork context, false if not.
@@ -100,7 +102,7 @@ def is_fork_pr(pull_dict):
     return pull_dict and pull_dict["head"]["slug"] != pull_dict["base"]["slug"]
 
 
-def get_pull(service, slug, pr_num):
+def get_pull(service, slug, pr_num) -> Optional[PullDict]:
     """
     takes in str git service e.g. github, gitlab etc., slug in the owner/repo format, and the pull request number
     returns the pull request info gotten from the git service provider if successful, None if not

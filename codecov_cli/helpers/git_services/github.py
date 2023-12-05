@@ -2,12 +2,14 @@ import json
 
 import requests
 
+from codecov_cli.helpers.git_services import PullDict
+
 
 class Github:
     api_url = "https://api.github.com"
     api_version = "2022-11-28"
 
-    def get_pull_request(self, slug, pr_number):
+    def get_pull_request(self, slug, pr_number) -> PullDict:
         pull_url = f"/repos/{slug}/pulls/{pr_number}"
         url = self.api_url + pull_url
         headers = {"X-GitHub-Api-Version": self.api_version}

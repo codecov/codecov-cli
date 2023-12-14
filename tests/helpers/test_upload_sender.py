@@ -159,6 +159,47 @@ class TestUploadSender(object):
             post_req_made.headers.items() >= headers.items()
         )  # test dict is a subset of the other
 
+    def test_upload_sender_post_called_with_right_parameters_tokenless(
+        self,
+        mocked_responses,
+        mocked_legacy_upload_endpoint,
+        mocked_storage_server,
+        mocker,
+    ):
+        headers = {"X-Tokenless": "user-forked/repo", "X-Tokenless-PR": "pr"}
+        mock_get_pull = mocker.patch(
+            "codecov_cli.services.upload.upload_sender.get_pull",
+            return_value={
+                "head": {"slug": "user-forked/repo"},
+                "base": {"slug": "org/repo"},
+            },
+        )
+        mocked_legacy_upload_endpoint.match = [
+            matchers.json_params_matcher(request_data),
+            matchers.header_matcher(headers),
+        ]
+
+        sending_result = UploadSender().send_upload_data(
+            upload_collection, random_sha, None, **named_upload_data
+        )
+        assert sending_result.error is None
+        assert sending_result.warnings == []
+
+        assert len(mocked_responses.calls) == 2
+
+        post_req_made = mocked_responses.calls[0].request
+        encoded_slug = encode_slug(named_upload_data["slug"])
+        response = json.loads(mocked_responses.calls[0].response.text)
+        assert response.get("url") == "https://app.codecov.io/commit-url"
+        assert (
+            post_req_made.url
+            == f"https://api.codecov.io/upload/github/{encoded_slug}/commits/{random_sha}/reports/{named_upload_data['report_code']}/uploads"
+        )
+        assert (
+            post_req_made.headers.items() >= headers.items()
+        )  # test dict is a subset of the other
+        mock_get_pull.assert_called()
+
     def test_upload_sender_put_called_with_right_parameters(
         self, mocked_responses, mocked_legacy_upload_endpoint, mocked_storage_server
     ):

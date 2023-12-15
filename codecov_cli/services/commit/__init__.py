@@ -3,7 +3,7 @@ import typing
 
 from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.helpers.encoder import decode_slug, encode_slug
-from codecov_cli.helpers.git import get_git_service, get_pull, is_fork_pr
+from codecov_cli.helpers.git import get_pull, is_fork_pr
 from codecov_cli.helpers.request import (
     get_token_header_or_fail,
     log_warnings_and_errors_if_any,

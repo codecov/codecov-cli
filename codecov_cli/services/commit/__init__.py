@@ -3,7 +3,7 @@ import typing
 
 from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.helpers.encoder import decode_slug, encode_slug
-from codecov_cli.helpers.git import get_git_service, get_pull, is_fork_pr
+from codecov_cli.helpers.git import get_pull, is_fork_pr
 from codecov_cli.helpers.request import (
     get_token_header_or_fail,
     log_warnings_and_errors_if_any,
@@ -46,7 +46,7 @@ def send_commit_data(
     decoded_slug = decode_slug(slug)
     pull_dict = get_pull(service, decoded_slug, pr) if not token else None
     if is_fork_pr(pull_dict):
-        headers = {"X-Tokenless": pull_dict["head"]["slug"]}
+        headers = {"X-Tokenless": pull_dict["head"]["slug"], "X-Tokenless-PR": pr}
         branch = pull_dict["head"]["slug"] + ":" + branch
         logger.info("The PR is happening in a forked repo. Using tokenless upload.")
     else:

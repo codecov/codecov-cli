@@ -17,12 +17,9 @@ logger = logging.getLogger("codecovcli")
 
 class PytestStandardRunnerConfigParams(dict):
     @property
-    def pytest_command(self) -> List[str]:
-        command_from_config = self.get("pytest_command")
-        if isinstance(command_from_config, str):
-            logger.warning("pytest_command should be a list")
-            command_from_config = command_from_config.split(" ")
-        return command_from_config or ["python", "-m", "pytest"]
+    def python_path(self) -> str:
+        python_path = self.get("python_path")
+        return python_path or "python"
 
     @property
     def collect_tests_options(self) -> List[str]:
@@ -49,6 +46,7 @@ class PytestStandardRunnerConfigParams(dict):
 class PytestStandardRunner(LabelAnalysisRunnerInterface):
 
     dry_run_runner_options = ["--cov-context=test"]
+    params: PytestStandardRunnerConfigParams
 
     def __init__(self, config_params: Optional[dict] = None) -> None:
         super().__init__()
@@ -70,7 +68,7 @@ class PytestStandardRunner(LabelAnalysisRunnerInterface):
         Raises Exception if pytest fails
         Returns the complete pytest output
         """
-        command = self.params.pytest_command + pytest_args
+        command = [self.params.python_path, "-m", "pytest"] + pytest_args
         try:
             result = subprocess.run(
                 command,
@@ -101,7 +99,7 @@ class PytestStandardRunner(LabelAnalysisRunnerInterface):
             "Collecting tests",
             extra=dict(
                 extra_log_attributes=dict(
-                    pytest_command=self.params.pytest_command,
+                    pytest_command=[self.params.python_path, "-m", "pytest"],
                     pytest_options=options_to_use,
                 ),
             ),

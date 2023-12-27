@@ -39,22 +39,18 @@ class TestPythonStandardRunner(object):
         )
         assert result == output
 
-    @pytest.mark.parametrize(
-        "command_configured", [["pyenv", "pytest"], "pyenv pytest"]
-    )
+    @pytest.mark.parametrize("python_path", ["/usr/bin/python", "venv/bin/python"])
     @patch("codecov_cli.runners.pytest_standard_runner.subprocess")
-    def test_execute_pytest_user_provided_command(
-        self, mock_subprocess, command_configured
-    ):
+    def test_execute_pytest_user_provided_command(self, mock_subprocess, python_path):
         output = "Output in stdout"
         return_value = MagicMock(stdout=output.encode("utf-8"))
         mock_subprocess.run.return_value = return_value
 
-        runner = PytestStandardRunner(dict(pytest_command=command_configured))
+        runner = PytestStandardRunner(dict(python_path=python_path))
 
         result = runner._execute_pytest(["--option", "--ignore=batata"])
         mock_subprocess.run.assert_called_with(
-            ["pyenv", "pytest", "--option", "--ignore=batata"],
+            [python_path, "-m", "pytest", "--option", "--ignore=batata"],
             capture_output=True,
             check=True,
             stdout=None,

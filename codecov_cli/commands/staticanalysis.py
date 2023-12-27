@@ -12,18 +12,41 @@ from codecov_cli.services.staticanalysis import run_analysis_entrypoint
 logger = logging.getLogger("codecovcli")
 
 
+_static_analysis_options = [
+    click.option(
+        "--foldertosearch",
+        default=".",
+        help="Folder to search",
+        type=click.Path(path_type=pathlib.Path),
+    ),
+    click.option(
+        "--numberprocesses",
+        type=click.INT,
+        default=None,
+        help="number of processes to use",
+    ),
+    click.option("--pattern", default="*", help="file pattern to search for"),
+    click.option("--force/--no-force", default=False),
+    click.option(
+        "--folders-to-exclude",
+        help="Folders not to search",
+        type=click.Path(path_type=pathlib.Path),
+        multiple=True,
+        default=[],
+    ),
+]
+
+
+def static_analysis_options(func):
+    for option in reversed(_static_analysis_options):
+        func = option(func)
+    return func
+
+
 @click.command()
-@click.option(
-    "--foldertosearch",
-    default=".",
-    help="Folder to search",
-    type=click.Path(path_type=pathlib.Path),
-)
-@click.option(
-    "--numberprocesses", type=click.INT, default=None, help="number of processes to use"
-)
-@click.option("--pattern", default="*", help="file pattern to search for")
-@click.option("--force/--no-force", default=False)
+@static_analysis_options
+# This is not part of the options list to avoid conflicts with label-analysis
+# that uses --head-sha / --base-sha.
 @click.option(
     "--commit-sha",
     "commit",
@@ -34,13 +57,6 @@ logger = logging.getLogger("codecovcli")
     required=True,
 )
 @click.option(
-    "--folders-to-exclude",
-    help="Folders not to search",
-    type=click.Path(path_type=pathlib.Path),
-    multiple=True,
-    default=[],
-)
-@click.option(
     "--token",
     required=True,
     envvar="CODECOV_STATIC_TOKEN",
@@ -48,13 +64,13 @@ logger = logging.getLogger("codecovcli")
 )
 @click.pass_context
 def static_analysis(
-    ctx,
-    foldertosearch,
-    numberprocesses,
-    pattern,
-    commit,
-    token,
-    force,
+    ctx: click.Context,
+    foldertosearch: pathlib.Path,
+    numberprocesses: typing.Optional[int],
+    pattern: str,
+    commit: str,
+    token: str,
+    force: bool,
     folders_to_exclude: typing.List[pathlib.Path],
 ):
     enterprise_url = ctx.obj.get("enterprise_url")

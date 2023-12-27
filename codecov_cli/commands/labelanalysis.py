@@ -19,22 +19,53 @@ from codecov_cli.runners.types import (
 
 logger = logging.getLogger("codecovcli")
 
+_label_analysis_options = [
+    click.option(
+        "--runner-name",
+        "--runner",
+        "runner_name",
+        help="Runner to use",
+        default="pytest",
+    ),
+    click.option(
+        "--max-wait-time",
+        "max_wait_time",
+        help="Max time (in seconds) to wait for the label analysis result before falling back to running all tests. Default is to wait forever.",
+        default=None,
+        type=int,
+    ),
+    click.option(
+        "--dry-run",
+        "dry_run",
+        help=(
+            "Print list of tests to run AND tests skipped AND options that need to be added to the test runner to stdout. "
+            + "Choose format with --dry-run-format option. Default is JSON. "
+        ),
+        is_flag=True,
+    ),
+    click.option(
+        "--dry-run-format",
+        "dry_run_format",
+        type=click.Choice(["json", "space-separated-list"]),
+        help="Format in which --dry-run data is printed. Default is JSON.",
+        default="json",
+    ),
+]
+
+
+def label_analysis_options(func):
+    for option in reversed(_label_analysis_options):
+        func = option(func)
+    return func
+
 
 @click.command()
+@label_analysis_options
 @click.option(
     "--token",
     required=True,
     envvar="CODECOV_STATIC_TOKEN",
     help="The static analysis token (NOT the same token as upload)",
-)
-@click.option(
-    "--head-sha",
-    "head_commit_sha",
-    help="Commit SHA (with 40 chars)",
-    cls=CodecovOption,
-    fallback_field=FallbackFieldEnum.commit_sha,
-    callback=validate_commit_sha,
-    required=True,
 )
 @click.option(
     "--base-sha",
@@ -45,30 +76,13 @@ logger = logging.getLogger("codecovcli")
     required=True,
 )
 @click.option(
-    "--runner-name", "--runner", "runner_name", help="Runner to use", default="pytest"
-)
-@click.option(
-    "--max-wait-time",
-    "max_wait_time",
-    help="Max time (in seconds) to wait for the label analysis result before falling back to running all tests. Default is to wait forever.",
-    default=None,
-    type=int,
-)
-@click.option(
-    "--dry-run",
-    "dry_run",
-    help=(
-        "Print list of tests to run AND tests skipped AND options that need to be added to the test runner to stdout. "
-        + "Choose format with --dry-run-format option. Default is JSON. "
-    ),
-    is_flag=True,
-)
-@click.option(
-    "--dry-run-format",
-    "dry_run_format",
-    type=click.Choice(["json", "space-separated-list"]),
-    help="Format in which --dry-run data is printed. Default is JSON.",
-    default="json",
+    "--head-sha",
+    "head_commit_sha",
+    help="Commit SHA (with 40 chars)",
+    cls=CodecovOption,
+    fallback_field=FallbackFieldEnum.commit_sha,
+    callback=validate_commit_sha,
+    required=True,
 )
 @click.pass_context
 def label_analysis(

@@ -2,7 +2,7 @@ import json
 import logging
 import pathlib
 import time
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import click
 import requests
@@ -70,6 +70,11 @@ logger = logging.getLogger("codecovcli")
     help="Format in which --dry-run data is printed. Default is JSON.",
     default="json",
 )
+@click.option(
+    "--runner-param",
+    "runner_params",
+    multiple=True,
+)
 @click.pass_context
 def label_analysis(
     ctx: click.Context,
@@ -80,6 +85,7 @@ def label_analysis(
     max_wait_time: str,
     dry_run: bool,
     dry_run_format: str,
+    runner_params: List[str],
 ):
     enterprise_url = ctx.obj.get("enterprise_url")
     logger.debug(
@@ -113,7 +119,8 @@ def label_analysis(
     codecov_yaml = ctx.obj["codecov_yaml"] or {}
     cli_config = codecov_yaml.get("cli", {})
     # Raises error if no runner is found
-    runner = get_runner(cli_config, runner_name)
+    parsed_runner_params = _parse_runner_params(runner_params)
+    runner = get_runner(cli_config, runner_name, parsed_runner_params)
     logger.debug(
         f"Selected runner: {runner}",
         extra=dict(extra_log_attributes=dict(config=runner.params)),
@@ -230,6 +237,38 @@ def label_analysis(
             return
         logger.info("Waiting more time for result...")
         time.sleep(5)
+
+
+def _parse_runner_params(runner_params: List[str]) -> Dict[str, str]:
+    """Parses the structured list of dynamic runner params into a dictionary.
+    Structure is `key=value`. If value is a list make it comma-separated.
+    If the list item doesn't have '=' we consider it the key and set to None.
+
+    EXAMPLE:
+    runner_params = ['key=value', 'null_item', 'list=item1,item2,item3']
+    _parse_runner_params(runner_params) == {
+        'key': 'value',
+        'null_item': None,
+        'list': ['item1', 'item2', 'item3']
+    }
+    """
+    final_params = {}
+    for param in runner_params:
+        # Emit warning if param is not well formatted
+        # Using == 0 rather than != 1 because there might be
+        # a good reason for the param to include '=' in the value.
+        if param.count("=") == 0:
+            logger.warning(
+                f"Runner param {param} is not well formated. Setting value to None. Use '--runner-param key=value' to set value"
+            )
+            final_params[param] = None
+        else:
+            key, value = param.split("=", 1)
+            # For list values we need to split the list too
+            if "," in value:
+                value = value.split(",")
+            final_params[key] = value
+    return final_params
 
 
 def _potentially_calculate_absent_labels(

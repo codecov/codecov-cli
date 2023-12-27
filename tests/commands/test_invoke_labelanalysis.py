@@ -13,6 +13,7 @@ from codecov_cli.commands.labelanalysis import (
     _dry_run_json_output,
     _dry_run_list_output,
     _fallback_to_collected_labels,
+    _parse_runner_params,
     _potentially_calculate_absent_labels,
     _send_labelanalysis_request,
 )
@@ -168,6 +169,20 @@ class TestLabelAnalysisNotInvoke(object):
             stdout
             == "TESTS_TO_RUN='--option=1' '--option=2' 'label_1' 'label_2'\nTESTS_TO_SKIP='--option=1' '--option=2' 'label_3' 'label_4'\n"
         )
+
+    def test_parse_dynamic_runner_options(self):
+        params = [
+            "wrong_param",
+            "key=value",
+            "list_key=val1,val2,val3",
+            "point=somethingwith=sign",
+        ]
+        assert _parse_runner_params(params) == {
+            "wrong_param": None,
+            "key": "value",
+            "list_key": ["val1", "val2", "val3"],
+            "point": "somethingwith=sign",
+        }
 
 
 class TestLabelAnalysisCommand(object):

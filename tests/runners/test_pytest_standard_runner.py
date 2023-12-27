@@ -5,7 +5,10 @@ import click
 import pytest
 from pytest import ExitCode
 
-from codecov_cli.runners.pytest_standard_runner import PytestStandardRunner
+from codecov_cli.runners.pytest_standard_runner import (
+    PytestStandardRunner,
+    PytestStandardRunnerConfigParams,
+)
 from codecov_cli.runners.pytest_standard_runner import logger as runner_logger
 from codecov_cli.runners.pytest_standard_runner import stdout as pyrunner_stdout
 from codecov_cli.runners.types import LabelAnalysisRequestResult
@@ -39,9 +42,33 @@ class TestPythonStandardRunner(object):
         )
         assert result == output
 
+    @patch("codecov_cli.runners.pytest_standard_runner.logger.warning")
+    def test_warning_bad_config(self, mock_warning):
+        available_config = PytestStandardRunnerConfigParams.get_available_params()
+        assert "python_path" in available_config
+        assert "collect_tests_options" in available_config
+        assert "some_missing_option" not in available_config
+        params = dict(
+            python_path="path_to_python",
+            collect_tests_options=["option1", "option2"],
+            some_missing_option="option",
+        )
+        runner = PytestStandardRunner(params)
+        # Adding invalid config options emits a warning
+        assert mock_warning.called_with(
+            "Config parameter 'some_missing_option' is unknonw."
+        )
+        # Warnings don't change the config
+        assert runner.params == {**params, "some_missing_option": "option"}
+        # And we can still access the config as usual
+        assert runner.params.python_path == "path_to_python"
+        assert runner.params.collect_tests_options == ["option1", "option2"]
+
     @pytest.mark.parametrize("python_path", ["/usr/bin/python", "venv/bin/python"])
     @patch("codecov_cli.runners.pytest_standard_runner.subprocess")
-    def test_execute_pytest_user_provided_command(self, mock_subprocess, python_path):
+    def test_execute_pytest_user_provided_python_path(
+        self, mock_subprocess, python_path
+    ):
         output = "Output in stdout"
         return_value = MagicMock(stdout=output.encode("utf-8"))
         mock_subprocess.run.return_value = return_value

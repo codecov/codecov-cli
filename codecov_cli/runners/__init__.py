@@ -15,7 +15,9 @@ class UnableToFindRunner(Exception):
     pass
 
 
-def _load_runner_from_yaml(plugin_dict: typing.Dict) -> LabelAnalysisRunnerInterface:
+def _load_runner_from_yaml(
+    plugin_dict: typing.Dict, dynamic_params: typing.Dict
+) -> LabelAnalysisRunnerInterface:
     try:
         module_obj = import_module(plugin_dict["module"])
         class_obj = getattr(module_obj, plugin_dict["class"])
@@ -32,16 +34,21 @@ def _load_runner_from_yaml(plugin_dict: typing.Dict) -> LabelAnalysisRunnerInter
         )
         raise
     try:
-        return class_obj(**plugin_dict["params"])
+        final_params = {**plugin_dict["params"], **dynamic_params}
+        return class_obj(**final_params)
     except TypeError:
         click.secho(
-            f"Unable to instantiate {class_obj} with parameters {plugin_dict['params']}",
+            f"Unable to instantiate {class_obj} with parameters {final_params}",
             err=True,
         )
         raise
 
 
-def get_runner(cli_config, runner_name) -> LabelAnalysisRunnerInterface:
+def get_runner(
+    cli_config, runner_name: str, dynamic_params: typing.Dict = None
+) -> LabelAnalysisRunnerInterface:
+    if dynamic_params is None:
+        dynamic_params = {}
     if runner_name == "pytest":
         config_params = cli_config.get("runners", {}).get("pytest", {})
         # This is for backwards compatibility with versions <= 0.3.4
@@ -52,10 +59,12 @@ def get_runner(cli_config, runner_name) -> LabelAnalysisRunnerInterface:
                 logger.warning(
                     "Using 'python' to configure the PytestStandardRunner is deprecated. Please change to 'pytest'"
                 )
-        return PytestStandardRunner(config_params)
+        final_params = {**config_params, **dynamic_params}
+        return PytestStandardRunner(final_params)
     elif runner_name == "dan":
         config_params = cli_config.get("runners", {}).get("dan", {})
-        return DoAnythingNowRunner(config_params)
+        final_params = {**config_params, **dynamic_params}
+        return DoAnythingNowRunner(final_params)
     logger.debug(
         f"Trying to load runner {runner_name}",
         extra=dict(
@@ -65,5 +74,7 @@ def get_runner(cli_config, runner_name) -> LabelAnalysisRunnerInterface:
         ),
     )
     if cli_config and runner_name in cli_config.get("runners", {}):
-        return _load_runner_from_yaml(cli_config["runners"][runner_name])
+        return _load_runner_from_yaml(
+            cli_config["runners"][runner_name], dynamic_params=dynamic_params
+        )
     raise UnableToFindRunner(f"Can't find runner {runner_name}")

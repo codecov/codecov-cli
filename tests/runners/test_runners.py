@@ -14,7 +14,7 @@ class TestRunners(object):
         assert isinstance(get_runner({}, "dan"), DoAnythingNowRunner)
         # TODO: Extend with other standard runners once we create them (e.g. JS)
 
-    def test_pytest_standard_runner_with_options_backwards_compatible(self):
+    def test_pytest_standard_runner_with_options(self):
         config_params = dict(
             collect_tests_options=["--option=value", "-option"],
         )
@@ -24,6 +24,23 @@ class TestRunners(object):
             runner_instance.params.collect_tests_options
             == config_params["collect_tests_options"]
         )
+        assert runner_instance.params.coverage_root == "./"
+
+    def test_pytest_standard_runner_with_options_and_dynamic_options(self):
+        config_params = dict(
+            collect_tests_options=["--option=value", "-option"],
+        )
+        runner_instance = get_runner(
+            {"runners": {"pytest": config_params}},
+            "pytest",
+            {"python_path": "path/to/python"},
+        )
+        assert isinstance(runner_instance, PytestStandardRunner)
+        assert (
+            runner_instance.params.collect_tests_options
+            == config_params["collect_tests_options"]
+        )
+        assert runner_instance.params.python_path == "path/to/python"
         assert runner_instance.params.coverage_root == "./"
 
     def test_pytest_standard_runner_with_options_backwards_compatible(self):
@@ -56,7 +73,9 @@ class TestRunners(object):
         config = {"runners": {"my_runner": {"path": "path_to_my_runner"}}}
         mock_load_runner.return_value = "MyRunner()"
         assert get_runner(config, "my_runner") == "MyRunner()"
-        mock_load_runner.assert_called_with({"path": "path_to_my_runner"})
+        mock_load_runner.assert_called_with(
+            {"path": "path_to_my_runner"}, dynamic_params={}
+        )
 
     def test_load_runner_from_yaml(self, mocker):
         fake_module = mocker.MagicMock(FakeRunner=FakeRunner)
@@ -66,7 +85,8 @@ class TestRunners(object):
                 "module": "mymodule.runner",
                 "class": "FakeRunner",
                 "params": {"collect_tests_response": ["list", "of", "labels"]},
-            }
+            },
+            {},
         )
         assert isinstance(res, FakeRunner)
         assert res.collect_tests() == ["list", "of", "labels"]
@@ -83,7 +103,8 @@ class TestRunners(object):
                     "module": "mymodule.runner",
                     "class": "FakeRunner",
                     "params": {"collect_tests_response": ["list", "of", "labels"]},
-                }
+                },
+                {},
             )
 
     def test_load_runner_from_yaml_class_not_found(self, mocker):
@@ -97,7 +118,8 @@ class TestRunners(object):
                     "module": "mymodule.runner",
                     "class": "WrongClassName",
                     "params": {"collect_tests_response": ["list", "of", "labels"]},
-                }
+                },
+                {},
             )
 
     def test_load_runner_from_yaml_fail_instantiate_class(self, mocker):
@@ -109,5 +131,6 @@ class TestRunners(object):
                     "module": "mymodule.runner",
                     "class": "FakeRunner",
                     "params": {"wrong_params": ["list", "of", "labels"]},
-                }
+                },
+                {},
             )

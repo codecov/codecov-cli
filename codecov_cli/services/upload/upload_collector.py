@@ -8,7 +8,7 @@ from fnmatch import fnmatch
 
 import click
 
-from codecov_cli.services.upload.coverage_file_finder import CoverageFileFinder
+from codecov_cli.services.upload.file_finder import FileFinder
 from codecov_cli.services.upload.network_finder import NetworkFinder
 from codecov_cli.types import (
     PreparationPluginInterface,
@@ -28,7 +28,7 @@ class UploadCollector(object):
         self,
         preparation_plugins: typing.List[PreparationPluginInterface],
         network_finder: NetworkFinder,
-        coverage_file_finder: CoverageFileFinder,
+        coverage_file_finder: FileFinder,
         disable_file_fixes: bool = False,
     ):
         self.preparation_plugins = preparation_plugins
@@ -150,7 +150,7 @@ class UploadCollector(object):
             prep.run_preparation(self)
         logger.debug("Collecting relevant files")
         network = self.network_finder.find_files()
-        coverage_files = self.coverage_file_finder.find_coverage_files()
+        coverage_files = self.coverage_file_finder.find_files()
         logger.info(f"Found {len(coverage_files)} coverage files to upload")
         if not coverage_files:
             raise click.ClickException(

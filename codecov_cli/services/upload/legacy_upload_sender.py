@@ -116,9 +116,7 @@ class LegacyUploadSender(object):
         return network_files_section.encode() + b"<<<<<< network\n"
 
     def _generate_coverage_files_section(self, upload_data: UploadCollectionResult):
-        return b"".join(
-            self._format_coverage_file(file) for file in upload_data.coverage_files
-        )
+        return b"".join(self._format_coverage_file(file) for file in upload_data.files)
 
     def _format_coverage_file(self, file: UploadCollectionResultFile) -> bytes:
         header = b"# path=" + file.get_filename() + b"\n"

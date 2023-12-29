@@ -47,6 +47,7 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
             cli_config,
             versioning_system,
             ci_adapter,
+            upload_file_type="coverage",
             commit_sha="commit_sha",
             report_code="report_code",
             build_code="build_code",
@@ -56,9 +57,9 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
             flags=None,
             name="name",
             network_root_folder=None,
-            coverage_files_search_root_folder=None,
-            coverage_files_search_exclude_folders=None,
-            coverage_files_search_explicitly_listed_files=None,
+            files_search_root_folder=None,
+            files_search_exclude_folders=None,
+            files_search_explicitly_listed_files=None,
             plugin_names=["first_plugin", "another", "forth"],
             token="token",
             branch="branch",
@@ -81,8 +82,9 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
     )
     mock_select_file_finder.assert_called_with(None, None, None, False)
     mock_select_network_finder.assert_called_with(versioning_system)
-    mock_generate_upload_data.assert_called_with()
+    mock_generate_upload_data.assert_called_with("coverage")
     mock_send_upload_data.assert_called_with(
+        "coverage",
         mock_generate_upload_data.return_value,
         "commit_sha",
         "token",
@@ -133,6 +135,7 @@ def test_do_upload_logic_happy_path(mocker):
             cli_config,
             versioning_system,
             ci_adapter,
+            upload_file_type="coverage",
             commit_sha="commit_sha",
             report_code="report_code",
             build_code="build_code",
@@ -142,9 +145,9 @@ def test_do_upload_logic_happy_path(mocker):
             flags=None,
             name="name",
             network_root_folder=None,
-            coverage_files_search_root_folder=None,
-            coverage_files_search_exclude_folders=None,
-            coverage_files_search_explicitly_listed_files=None,
+            files_search_root_folder=None,
+            files_search_exclude_folders=None,
+            files_search_explicitly_listed_files=None,
             plugin_names=["first_plugin", "another", "forth"],
             token="token",
             branch="branch",
@@ -166,8 +169,9 @@ def test_do_upload_logic_happy_path(mocker):
     )
     mock_select_file_finder.assert_called_with(None, None, None, False)
     mock_select_network_finder.assert_called_with(versioning_system)
-    mock_generate_upload_data.assert_called_with()
+    mock_generate_upload_data.assert_called_with("coverage")
     mock_send_upload_data.assert_called_with(
+        "coverage",
         mock_generate_upload_data.return_value,
         "commit_sha",
         "token",
@@ -214,6 +218,7 @@ def test_do_upload_logic_dry_run(mocker):
             cli_config,
             versioning_system,
             ci_adapter,
+            upload_file_type="coverage",
             commit_sha="commit_sha",
             report_code="report_code",
             build_code="build_code",
@@ -223,9 +228,9 @@ def test_do_upload_logic_dry_run(mocker):
             flags=None,
             name="name",
             network_root_folder=None,
-            coverage_files_search_root_folder=None,
-            coverage_files_search_exclude_folders=None,
-            coverage_files_search_explicitly_listed_files=None,
+            files_search_root_folder=None,
+            files_search_exclude_folders=None,
+            files_search_explicitly_listed_files=None,
             plugin_names=["first_plugin", "another", "forth"],
             token="token",
             branch="branch",
@@ -274,6 +279,7 @@ def test_do_upload_logic_verbose(mocker, use_verbose_option):
             cli_config,
             versioning_system,
             ci_adapter,
+            upload_file_type="coverage",
             commit_sha="commit_sha",
             report_code="report_code",
             build_code="build_code",
@@ -283,9 +289,9 @@ def test_do_upload_logic_verbose(mocker, use_verbose_option):
             flags=None,
             name="name",
             network_root_folder=None,
-            coverage_files_search_root_folder=None,
-            coverage_files_search_exclude_folders=None,
-            coverage_files_search_explicitly_listed_files=None,
+            files_search_root_folder=None,
+            files_search_exclude_folders=None,
+            files_search_explicitly_listed_files=None,
             plugin_names=["first_plugin", "another", "forth"],
             token="token",
             branch="branch",
@@ -348,6 +354,7 @@ def test_do_upload_no_cov_reports_found(mocker):
             cli_config,
             versioning_system,
             ci_adapter,
+            upload_file_type="coverage",
             commit_sha="commit_sha",
             report_code="report_code",
             build_code="build_code",
@@ -357,9 +364,9 @@ def test_do_upload_no_cov_reports_found(mocker):
             flags=None,
             name="name",
             network_root_folder=None,
-            coverage_files_search_root_folder=None,
-            coverage_files_search_exclude_folders=None,
-            coverage_files_search_explicitly_listed_files=None,
+            files_search_root_folder=None,
+            files_search_exclude_folders=None,
+            files_search_explicitly_listed_files=None,
             plugin_names=["first_plugin", "another", "forth"],
             token="token",
             branch="branch",
@@ -387,7 +394,7 @@ def test_do_upload_no_cov_reports_found(mocker):
     )
     mock_select_file_finder.assert_called_with(None, None, None, False)
     mock_select_network_finder.assert_called_with(versioning_system)
-    mock_generate_upload_data.assert_called_with()
+    mock_generate_upload_data.assert_called_with("coverage")
     mock_upload_completion_call.assert_called_with(
         commit_sha="commit_sha",
         slug="slug",
@@ -428,6 +435,7 @@ def test_do_upload_rase_no_cov_reports_found_error(mocker):
             cli_config,
             versioning_system,
             ci_adapter,
+            upload_file_type="coverage",
             commit_sha="commit_sha",
             report_code="report_code",
             build_code="build_code",
@@ -437,9 +445,9 @@ def test_do_upload_rase_no_cov_reports_found_error(mocker):
             flags=None,
             name="name",
             network_root_folder=None,
-            coverage_files_search_root_folder=None,
-            coverage_files_search_exclude_folders=None,
-            coverage_files_search_explicitly_listed_files=None,
+            files_search_root_folder=None,
+            files_search_exclude_folders=None,
+            files_search_explicitly_listed_files=None,
             plugin_names=["first_plugin", "another", "forth"],
             token="token",
             branch="branch",
@@ -458,4 +466,4 @@ def test_do_upload_rase_no_cov_reports_found_error(mocker):
     )
     mock_select_file_finder.assert_called_with(None, None, None, False)
     mock_select_network_finder.assert_called_with(versioning_system)
-    mock_generate_upload_data.assert_called_with()
+    mock_generate_upload_data.assert_called_with("coverage")

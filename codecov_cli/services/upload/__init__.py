@@ -34,14 +34,15 @@ def do_upload_logic(
     flags: typing.List[str],
     name: typing.Optional[str],
     network_root_folder: Path,
-    coverage_files_search_root_folder: Path,
-    coverage_files_search_exclude_folders: typing.List[Path],
-    coverage_files_search_explicitly_listed_files: typing.List[Path],
+    files_search_root_folder: Path,
+    files_search_exclude_folders: typing.List[Path],
+    files_search_explicitly_listed_files: typing.List[Path],
     plugin_names: typing.List[str],
     token: str,
     branch: typing.Optional[str],
     slug: typing.Optional[str],
     pull_request_number: typing.Optional[str],
+    upload_file_type: str = "coverage",
     use_legacy_uploader: bool = False,
     fail_on_error: bool = False,
     dry_run: bool = False,
@@ -52,18 +53,18 @@ def do_upload_logic(
     disable_file_fixes: bool = False,
 ):
     preparation_plugins = select_preparation_plugins(cli_config, plugin_names)
-    coverage_file_selector = select_file_finder(
-        coverage_files_search_root_folder,
-        coverage_files_search_exclude_folders,
-        coverage_files_search_explicitly_listed_files,
+    file_selector = select_file_finder(
+        files_search_root_folder,
+        files_search_exclude_folders,
+        files_search_explicitly_listed_files,
         disable_search,
     )
     network_finder = select_network_finder(versioning_system)
     collector = UploadCollector(
-        preparation_plugins, network_finder, coverage_file_selector, disable_file_fixes
+        preparation_plugins, network_finder, file_selector, disable_file_fixes
     )
     try:
-        upload_data = collector.generate_upload_data()
+        upload_data = collector.generate_upload_data(upload_file_type)
     except click.ClickException as exp:
         if handle_no_reports_found:
             logger.info(
@@ -98,6 +99,7 @@ def do_upload_logic(
 
     if not dry_run:
         sending_result = sender.send_upload_data(
+            upload_file_type,
             upload_data,
             commit_sha,
             token,

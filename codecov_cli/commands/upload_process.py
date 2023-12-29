@@ -32,9 +32,9 @@ def upload_process(
     flags: typing.List[str],
     name: typing.Optional[str],
     network_root_folder: pathlib.Path,
-    coverage_files_search_root_folder: pathlib.Path,
-    coverage_files_search_exclude_folders: typing.List[pathlib.Path],
-    coverage_files_search_explicitly_listed_files: typing.List[pathlib.Path],
+    files_search_root_folder: pathlib.Path,
+    files_search_exclude_folders: typing.List[pathlib.Path],
+    files_search_explicitly_listed_files: typing.List[pathlib.Path],
     disable_search: bool,
     disable_file_fixes: bool,
     token: typing.Optional[str],
@@ -48,6 +48,7 @@ def upload_process(
     git_service: typing.Optional[str],
     parent_sha: typing.Optional[str],
     handle_no_reports_found: bool,
+    report_type: str,
 ):
     logger.debug(
         "Starting upload process",
@@ -62,9 +63,9 @@ def upload_process(
                 flags=flags,
                 name=name,
                 network_root_folder=network_root_folder,
-                coverage_files_search_root_folder=coverage_files_search_root_folder,
-                coverage_files_search_exclude_folders=coverage_files_search_exclude_folders,
-                coverage_files_search_explicitly_listed_files=coverage_files_search_explicitly_listed_files,
+                files_search_root_folder=files_search_root_folder,
+                files_search_exclude_folders=files_search_exclude_folders,
+                files_search_explicitly_listed_files=files_search_explicitly_listed_files,
                 plugin_names=plugin_names,
                 token=token,
                 branch=branch,
@@ -90,15 +91,16 @@ def upload_process(
         git_service=git_service,
         fail_on_error=True,
     )
-    ctx.invoke(
-        create_report,
-        token=token,
-        code=report_code,
-        fail_on_error=True,
-        commit_sha=commit_sha,
-        slug=slug,
-        git_service=git_service,
-    )
+    if report_type == "coverage":
+        ctx.invoke(
+            create_report,
+            token=token,
+            code=report_code,
+            fail_on_error=True,
+            commit_sha=commit_sha,
+            slug=slug,
+            git_service=git_service,
+        )
     ctx.invoke(
         do_upload,
         commit_sha=commit_sha,
@@ -110,9 +112,9 @@ def upload_process(
         flags=flags,
         name=name,
         network_root_folder=network_root_folder,
-        coverage_files_search_root_folder=coverage_files_search_root_folder,
-        coverage_files_search_exclude_folders=coverage_files_search_exclude_folders,
-        coverage_files_search_explicitly_listed_files=coverage_files_search_explicitly_listed_files,
+        files_search_root_folder=files_search_root_folder,
+        files_search_exclude_folders=files_search_exclude_folders,
+        files_search_explicitly_listed_files=files_search_explicitly_listed_files,
         disable_search=disable_search,
         token=token,
         plugin_names=plugin_names,
@@ -125,4 +127,5 @@ def upload_process(
         git_service=git_service,
         handle_no_reports_found=handle_no_reports_found,
         disable_file_fixes=disable_file_fixes,
+        report_type=report_type,
     )

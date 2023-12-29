@@ -33,7 +33,8 @@ _global_upload_options = [
         "-s",
         "--dir",
         "--coverage-files-search-root-folder",
-        "coverage_files_search_root_folder",
+        "--files-search-root-folder",
+        "files_search_root_folder",
         help="Folder where to search for coverage files",
         type=click.Path(path_type=pathlib.Path),
         default=pathlib.Path.cwd,
@@ -42,7 +43,8 @@ _global_upload_options = [
     click.option(
         "--exclude",
         "--coverage-files-search-exclude-folder",
-        "coverage_files_search_exclude_folders",
+        "--files-search-exclude-folder",
+        "files_search_exclude_folders",
         help="Folders to exclude from search",
         type=click.Path(path_type=pathlib.Path),
         multiple=True,
@@ -52,7 +54,8 @@ _global_upload_options = [
         "-f",
         "--file",
         "--coverage-files-search-direct-file",
-        "coverage_files_search_explicitly_listed_files",
+        "--files-search-direct-file",
+        "files_search_explicitly_listed_files",
         help="Explicit files to upload. These will be added to the coverage files found for upload. If you wish to only upload the specified files, please consider using --disable-search to disable uploading other files.",
         type=click.Path(path_type=pathlib.Path),
         multiple=True,
@@ -155,6 +158,12 @@ _global_upload_options = [
         is_flag=True,
         help="Raise no excpetions when no coverage reports found.",
     ),
+    click.option(
+        "--report-type",
+        help="The type of the file to upload, coverage by default. Possible values are: testing, coverage.",
+        default="coverage",
+        type=click.Choice(["coverage", "test_results"]),
+    ),
 ]
 
 
@@ -179,9 +188,9 @@ def do_upload(
     flags: typing.List[str],
     name: typing.Optional[str],
     network_root_folder: pathlib.Path,
-    coverage_files_search_root_folder: pathlib.Path,
-    coverage_files_search_exclude_folders: typing.List[pathlib.Path],
-    coverage_files_search_explicitly_listed_files: typing.List[pathlib.Path],
+    files_search_root_folder: pathlib.Path,
+    files_search_exclude_folders: typing.List[pathlib.Path],
+    files_search_explicitly_listed_files: typing.List[pathlib.Path],
     disable_search: bool,
     disable_file_fixes: bool,
     token: typing.Optional[str],
@@ -194,6 +203,7 @@ def do_upload(
     dry_run: bool,
     git_service: typing.Optional[str],
     handle_no_reports_found: bool,
+    report_type: str,
 ):
     versioning_system = ctx.obj["versioning_system"]
     codecov_yaml = ctx.obj["codecov_yaml"] or {}
@@ -204,6 +214,7 @@ def do_upload(
         "Starting upload processing",
         extra=dict(
             extra_log_attributes=dict(
+                upload_file_type=report_type,
                 commit_sha=commit_sha,
                 report_code=report_code,
                 build_code=build_code,
@@ -213,9 +224,9 @@ def do_upload(
                 flags=flags,
                 name=name,
                 network_root_folder=network_root_folder,
-                coverage_files_search_root_folder=coverage_files_search_root_folder,
-                coverage_files_search_exclude_folders=coverage_files_search_exclude_folders,
-                coverage_files_search_explicitly_listed_files=coverage_files_search_explicitly_listed_files,
+                files_search_root_folder=files_search_root_folder,
+                files_search_exclude_folders=files_search_exclude_folders,
+                files_search_explicitly_listed_files=files_search_explicitly_listed_files,
                 plugin_names=plugin_names,
                 token=token,
                 branch=branch,
@@ -233,6 +244,7 @@ def do_upload(
         cli_config,
         versioning_system,
         ci_adapter,
+        upload_file_type=report_type,
         commit_sha=commit_sha,
         report_code=report_code,
         build_code=build_code,
@@ -242,13 +254,9 @@ def do_upload(
         flags=flags,
         name=name,
         network_root_folder=network_root_folder,
-        coverage_files_search_root_folder=coverage_files_search_root_folder,
-        coverage_files_search_exclude_folders=list(
-            coverage_files_search_exclude_folders
-        ),
-        coverage_files_search_explicitly_listed_files=list(
-            coverage_files_search_explicitly_listed_files
-        ),
+        files_search_root_folder=files_search_root_folder,
+        files_search_exclude_folders=list(files_search_exclude_folders),
+        files_search_explicitly_listed_files=list(files_search_explicitly_listed_files),
         plugin_names=plugin_names,
         token=token,
         branch=branch,

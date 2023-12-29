@@ -1,5 +1,5 @@
-import base64
 import json
+import base64
 import logging
 import typing
 import zlib
@@ -31,6 +31,7 @@ class UploadSender(object):
         token: str,
         env_vars: typing.Dict[str, str],
         report_code: str,
+        upload_file_type: str = "coverage",
         name: typing.Optional[str] = None,
         branch: typing.Optional[str] = None,
         slug: typing.Optional[str] = None,
@@ -66,9 +67,17 @@ class UploadSender(object):
             headers = get_token_header_or_fail(token)
         encoded_slug = encode_slug(slug)
         upload_url = enterprise_url or CODECOV_API_URL
-        url = f"{upload_url}/upload/{git_service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads"
+        if upload_file_type == "coverage":
+            url = f"{upload_url}/upload/{git_service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads"
+        elif upload_file_type == "test_results":
+            data["slug"] = encoded_slug
+            data["commit"] = commit_sha
+            data["service"] = git_service
+            url = f"{upload_url}/upload/test_results/v1"
         # Data that goes to storage
-        reports_payload = self._generate_payload(upload_data, env_vars)
+        reports_payload = self._generate_payload(
+            upload_data, env_vars, upload_file_type
+        )
 
         logger.debug("Sending upload request to Codecov")
         resp_from_codecov = send_post_request(
@@ -93,18 +102,26 @@ class UploadSender(object):
         return resp_from_storage
 
     def _generate_payload(
-        self, upload_data: UploadCollectionResult, env_vars: typing.Dict[str, str]
+        self,
+        upload_data: UploadCollectionResult,
+        env_vars: typing.Dict[str, str],
+        upload_file_type="coverage",
     ) -> bytes:
         network_files = upload_data.network
-        payload = {
-            "report_fixes": {
-                "format": "legacy",
-                "value": self._get_file_fixers(upload_data),
-            },
-            "network_files": network_files if network_files is not None else [],
-            "coverage_files": self._get_coverage_files(upload_data),
-            "metadata": {},
-        }
+        if upload_file_type == "coverage":
+            payload = {
+                "report_fixes": {
+                    "format": "legacy",
+                    "value": self._get_file_fixers(upload_data),
+                },
+                "network_files": network_files if network_files is not None else [],
+                "coverage_files": self._get_files(upload_data),
+                "metadata": {},
+            }
+        elif upload_file_type == "test_results":
+            payload = {
+                "test_results_files": self._get_files(upload_data),
+            }
 
         json_data = json.dumps(payload)
         return json_data.encode()
@@ -137,10 +154,10 @@ class UploadSender(object):
 
         return file_fixers
 
-    def _get_coverage_files(self, upload_data: UploadCollectionResult):
-        return [self._format_coverage_file(file) for file in upload_data.files]
+    def _get_files(self, upload_data: UploadCollectionResult):
+        return [self._format_file(file) for file in upload_data.files]
 
-    def _format_coverage_file(self, file: UploadCollectionResultFile):
+    def _format_file(self, file: UploadCollectionResultFile):
         format, formatted_content = self._get_format_info(file)
         return {
             "filename": file.get_filename().decode(),

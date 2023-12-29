@@ -51,7 +51,6 @@ class LegacyUploadSender(object):
         git_service: typing.Optional[str] = None,
         enterprise_url: typing.Optional[str] = None,
     ) -> UploadSendingResult:
-
         params = {
             "package": f"codecov-cli/{codecov_cli_version}",
             "commit": commit_sha,

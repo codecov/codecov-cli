@@ -2,17 +2,17 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from codecov_cli.services.upload.coverage_file_finder import CoverageFileFinder
+from codecov_cli.services.upload.file_finder import FileFinder
 from codecov_cli.types import UploadCollectionResultFile
 
 
 class TestCoverageFileFinder(object):
     def test_find_coverage_files_mocked_search_files(self, mocker):
         mocker.patch(
-            "codecov_cli.services.upload.coverage_file_finder.search_files",
+            "codecov_cli.services.upload.file_finder.search_files",
             return_value=[],
         )
-        assert CoverageFileFinder().find_coverage_files() == []
+        assert FileFinder().find_files() == []
 
         coverage_files_paths = [
             Path("a/b.txt"),
@@ -20,7 +20,7 @@ class TestCoverageFileFinder(object):
         ]
 
         mocker.patch(
-            "codecov_cli.services.upload.coverage_file_finder.search_files",
+            "codecov_cli.services.upload.file_finder.search_files",
             return_value=coverage_files_paths,
         )
 
@@ -32,7 +32,7 @@ class TestCoverageFileFinder(object):
         expected_paths = sorted([file.get_filename() for file in expected])
 
         actual_paths = sorted(
-            [file.get_filename() for file in CoverageFileFinder().find_coverage_files()]
+            [file.get_filename() for file in FileFinder().find_files()]
         )
 
         assert expected_paths == actual_paths
@@ -87,12 +87,12 @@ class TestCoverageFileFinder(object):
         expected = {
             UploadCollectionResultFile((tmp_path / file)) for file in should_find
         }
-        actual = set(CoverageFileFinder(tmp_path).find_coverage_files())
+        actual = set(FileFinder(tmp_path).find_files())
         assert actual == expected
 
         extra = tmp_path / "sub" / "nosetests.xml"
         extra.touch()
-        actual = set(CoverageFileFinder(tmp_path).find_coverage_files())
+        actual = set(FileFinder(tmp_path).find_files())
         assert actual - expected == {UploadCollectionResultFile(extra)}
 
 
@@ -106,7 +106,7 @@ class TestCoverageFileFinderUserInput(unittest.TestCase):
             self.project_root / "subdirectory" / "another_file.abc",
         ]
         self.disable_search = False
-        self.coverage_file_finder = CoverageFileFinder(
+        self.coverage_file_finder = FileFinder(
             self.project_root,
             self.folders_to_ignore,
             self.explicitly_listed_files,
@@ -128,10 +128,7 @@ class TestCoverageFileFinderUserInput(unittest.TestCase):
             file.touch()
 
         result = sorted(
-            [
-                file.get_filename()
-                for file in self.coverage_file_finder.find_coverage_files()
-            ]
+            [file.get_filename() for file in self.coverage_file_finder.find_files()]
         )
         expected = [
             UploadCollectionResultFile(Path(f"{self.project_root}/coverage.xml")),
@@ -143,7 +140,7 @@ class TestCoverageFileFinderUserInput(unittest.TestCase):
         self.assertEqual(result, expected_paths)
 
     def test_find_coverage_files_with_no_files(self):
-        result = self.coverage_file_finder.find_coverage_files()
+        result = self.coverage_file_finder.find_files()
         self.assertEqual(result, [])
 
     def test_find_coverage_files_with_disabled_search(self):
@@ -163,10 +160,7 @@ class TestCoverageFileFinderUserInput(unittest.TestCase):
         self.coverage_file_finder.disable_search = True
 
         result = sorted(
-            [
-                file.get_filename()
-                for file in self.coverage_file_finder.find_coverage_files()
-            ]
+            [file.get_filename() for file in self.coverage_file_finder.find_files()]
         )
 
         expected = [
@@ -192,10 +186,7 @@ class TestCoverageFileFinderUserInput(unittest.TestCase):
             file.touch()
 
         result = sorted(
-            [
-                file.get_filename()
-                for file in self.coverage_file_finder.find_coverage_files()
-            ]
+            [file.get_filename() for file in self.coverage_file_finder.find_files()]
         )
 
         expected = [
@@ -227,10 +218,7 @@ class TestCoverageFileFinderUserInput(unittest.TestCase):
         )
 
         result = sorted(
-            [
-                file.get_filename()
-                for file in self.coverage_file_finder.find_coverage_files()
-            ]
+            [file.get_filename() for file in self.coverage_file_finder.find_files()]
         )
 
         expected = [

@@ -20,8 +20,8 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
     mock_select_preparation_plugins = mocker.patch(
         "codecov_cli.services.upload.select_preparation_plugins"
     )
-    mock_select_coverage_file_finder = mocker.patch(
-        "codecov_cli.services.upload.select_coverage_file_finder"
+    mock_select_file_finder = mocker.patch(
+        "codecov_cli.services.upload.select_file_finder"
     )
     mock_select_network_finder = mocker.patch(
         "codecov_cli.services.upload.select_network_finder"
@@ -79,7 +79,7 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
     mock_select_preparation_plugins.assert_called_with(
         cli_config, ["first_plugin", "another", "forth"]
     )
-    mock_select_coverage_file_finder.assert_called_with(None, None, None, False)
+    mock_select_file_finder.assert_called_with(None, None, None, False)
     mock_select_network_finder.assert_called_with(versioning_system)
     mock_generate_upload_data.assert_called_with()
     mock_send_upload_data.assert_called_with(
@@ -106,8 +106,8 @@ def test_do_upload_logic_happy_path(mocker):
     mock_select_preparation_plugins = mocker.patch(
         "codecov_cli.services.upload.select_preparation_plugins"
     )
-    mock_select_coverage_file_finder = mocker.patch(
-        "codecov_cli.services.upload.select_coverage_file_finder"
+    mock_select_file_finder = mocker.patch(
+        "codecov_cli.services.upload.select_file_finder"
     )
     mock_select_network_finder = mocker.patch(
         "codecov_cli.services.upload.select_network_finder"
@@ -164,7 +164,7 @@ def test_do_upload_logic_happy_path(mocker):
     mock_select_preparation_plugins.assert_called_with(
         cli_config, ["first_plugin", "another", "forth"]
     )
-    mock_select_coverage_file_finder.assert_called_with(None, None, None, False)
+    mock_select_file_finder.assert_called_with(None, None, None, False)
     mock_select_network_finder.assert_called_with(versioning_system)
     mock_generate_upload_data.assert_called_with()
     mock_send_upload_data.assert_called_with(
@@ -191,8 +191,8 @@ def test_do_upload_logic_dry_run(mocker):
     mock_select_preparation_plugins = mocker.patch(
         "codecov_cli.services.upload.select_preparation_plugins"
     )
-    mock_select_coverage_file_finder = mocker.patch(
-        "codecov_cli.services.upload.select_coverage_file_finder"
+    mock_select_file_finder = mocker.patch(
+        "codecov_cli.services.upload.select_file_finder"
     )
     mock_select_network_finder = mocker.patch(
         "codecov_cli.services.upload.select_network_finder"
@@ -236,7 +236,7 @@ def test_do_upload_logic_dry_run(mocker):
             enterprise_url=None,
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
-    mock_select_coverage_file_finder.assert_called_with(None, None, None, False)
+    mock_select_file_finder.assert_called_with(None, None, None, False)
     mock_select_network_finder.assert_called_with(versioning_system)
     assert mock_generate_upload_data.call_count == 1
     assert mock_send_upload_data.call_count == 0
@@ -257,7 +257,7 @@ def test_do_upload_logic_dry_run(mocker):
 
 def test_do_upload_logic_verbose(mocker, use_verbose_option):
     mocker.patch("codecov_cli.services.upload.select_preparation_plugins")
-    mocker.patch("codecov_cli.services.upload.select_coverage_file_finder")
+    mocker.patch("codecov_cli.services.upload.select_file_finder")
     mocker.patch("codecov_cli.services.upload.select_network_finder")
     mocker.patch.object(UploadCollector, "generate_upload_data")
     mocker.patch.object(
@@ -321,8 +321,8 @@ def test_do_upload_no_cov_reports_found(mocker):
     mock_select_preparation_plugins = mocker.patch(
         "codecov_cli.services.upload.select_preparation_plugins"
     )
-    mock_select_coverage_file_finder = mocker.patch(
-        "codecov_cli.services.upload.select_coverage_file_finder",
+    mock_select_file_finder = mocker.patch(
+        "codecov_cli.services.upload.select_file_finder",
     )
     mock_select_network_finder = mocker.patch(
         "codecov_cli.services.upload.select_network_finder"
@@ -385,7 +385,7 @@ def test_do_upload_no_cov_reports_found(mocker):
     mock_select_preparation_plugins.assert_called_with(
         cli_config, ["first_plugin", "another", "forth"]
     )
-    mock_select_coverage_file_finder.assert_called_with(None, None, None, False)
+    mock_select_file_finder.assert_called_with(None, None, None, False)
     mock_select_network_finder.assert_called_with(versioning_system)
     mock_generate_upload_data.assert_called_with()
     mock_upload_completion_call.assert_called_with(
@@ -402,8 +402,8 @@ def test_do_upload_rase_no_cov_reports_found_error(mocker):
     mock_select_preparation_plugins = mocker.patch(
         "codecov_cli.services.upload.select_preparation_plugins"
     )
-    mock_select_coverage_file_finder = mocker.patch(
-        "codecov_cli.services.upload.select_coverage_file_finder",
+    mock_select_file_finder = mocker.patch(
+        "codecov_cli.services.upload.select_file_finder",
     )
     mock_select_network_finder = mocker.patch(
         "codecov_cli.services.upload.select_network_finder"
@@ -456,6 +456,6 @@ def test_do_upload_rase_no_cov_reports_found_error(mocker):
     mock_select_preparation_plugins.assert_called_with(
         cli_config, ["first_plugin", "another", "forth"]
     )
-    mock_select_coverage_file_finder.assert_called_with(None, None, None, False)
+    mock_select_file_finder.assert_called_with(None, None, None, False)
     mock_select_network_finder.assert_called_with(versioning_system)
     mock_generate_upload_data.assert_called_with()

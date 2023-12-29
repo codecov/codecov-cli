@@ -35,6 +35,11 @@ coverage_files_patterns = [
     "test_cov.xml",
 ]
 
+test_results_files_patterns = [
+    "*junit*",
+]
+
+test_results_files_excluded_patterns = []
 
 coverage_files_excluded_patterns = [
     "*.am",
@@ -170,49 +175,53 @@ default_folders_to_ignore = [
 ]
 
 
-class CoverageFileFinder(object):
+class FileFinder(object):
     def __init__(
         self,
         project_root: Path = None,
         folders_to_ignore: typing.List[str] = None,
         explicitly_listed_files: typing.List[Path] = None,
         disable_search: bool = False,
+        report_type: str = "coverage",
     ):
         self.project_root = project_root or Path(os.getcwd())
         self.folders_to_ignore = folders_to_ignore or []
         self.explicitly_listed_files = explicitly_listed_files or None
         self.disable_search = disable_search
+        self.report_type = report_type
 
-    def find_coverage_files(self) -> typing.List[UploadCollectionResultFile]:
-        regex_patterns_to_exclude = globs_to_regex(coverage_files_excluded_patterns)
-        coverage_files_paths = []
-        user_coverage_files_paths = []
+    def find_files(self) -> typing.List[UploadCollectionResultFile]:
+        if self.report_type == "coverage":
+            files_excluded_patterns = coverage_files_excluded_patterns
+            files_patterns = coverage_files_patterns
+        elif self.report_type == "test_results":
+            files_excluded_patterns = test_results_files_excluded_patterns
+            files_patterns = test_results_files_patterns
+        regex_patterns_to_exclude = globs_to_regex(files_excluded_patterns)
+        files_paths = []
+        user_files_paths = []
         if self.explicitly_listed_files:
-            user_coverage_files_paths = self.get_user_specified_coverage_files(
-                regex_patterns_to_exclude
-            )
+            user_files_paths = self.get_user_specified_files(regex_patterns_to_exclude)
         if not self.disable_search:
-            regex_patterns_to_include = globs_to_regex(coverage_files_patterns)
-            coverage_files_paths = search_files(
+            regex_patterns_to_include = globs_to_regex(files_patterns)
+            files_paths = search_files(
                 self.project_root,
                 default_folders_to_ignore + self.folders_to_ignore,
                 filename_include_regex=regex_patterns_to_include,
                 filename_exclude_regex=regex_patterns_to_exclude,
             )
         result_files = [
-            UploadCollectionResultFile(path)
-            for path in coverage_files_paths
-            if coverage_files_paths
+            UploadCollectionResultFile(path) for path in files_paths if files_paths
         ]
         user_result_files = [
             UploadCollectionResultFile(path)
-            for path in user_coverage_files_paths
-            if user_coverage_files_paths
+            for path in user_files_paths
+            if user_files_paths
         ]
 
         return list(set(result_files + user_result_files))
 
-    def get_user_specified_coverage_files(self, regex_patterns_to_exclude):
+    def get_user_specified_files(self, regex_patterns_to_exclude):
         user_filenames_to_include = []
         files_excluded_but_user_includes = []
         for file in self.explicitly_listed_files:
@@ -230,7 +239,7 @@ class CoverageFileFinder(object):
         multipart_include_regex = globs_to_regex(
             [str(path.resolve()) for path in self.explicitly_listed_files]
         )
-        user_coverage_files_paths = list(
+        user_files_paths = list(
             search_files(
                 self.project_root,
                 default_folders_to_ignore + self.folders_to_ignore,
@@ -241,7 +250,7 @@ class CoverageFileFinder(object):
         )
         not_found_files = []
         for filepath in self.explicitly_listed_files:
-            if filepath.resolve() not in user_coverage_files_paths:
+            if filepath.resolve() not in user_files_paths:
                 not_found_files.append(filepath)
 
         if not_found_files:
@@ -250,13 +259,13 @@ class CoverageFileFinder(object):
                 extra=dict(extra_log_attributes=dict(not_found_files=not_found_files)),
             )
 
-        return user_coverage_files_paths
+        return user_files_paths
 
 
-def select_coverage_file_finder(
+def select_file_finder(
     root_folder_to_search, folders_to_ignore, explicitly_listed_files, disable_search
 ):
-    return CoverageFileFinder(
+    return FileFinder(
         root_folder_to_search,
         folders_to_ignore,
         explicitly_listed_files,

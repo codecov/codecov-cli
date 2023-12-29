@@ -138,7 +138,7 @@ class UploadSender(object):
         return file_fixers
 
     def _get_coverage_files(self, upload_data: UploadCollectionResult):
-        return [self._format_coverage_file(file) for file in upload_data.coverage_files]
+        return [self._format_coverage_file(file) for file in upload_data.files]
 
     def _format_coverage_file(self, file: UploadCollectionResultFile):
         format, formatted_content = self._get_format_info(file)

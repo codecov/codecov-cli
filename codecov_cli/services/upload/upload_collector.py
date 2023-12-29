@@ -163,6 +163,6 @@ class UploadCollector(object):
             logger.info(f"> {file}")
         return UploadCollectionResult(
             network=network,
-            coverage_files=coverage_files,
+            files=coverage_files,
             file_fixes=self._produce_file_fixes_for_network(network),
         )

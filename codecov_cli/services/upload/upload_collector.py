@@ -28,12 +28,12 @@ class UploadCollector(object):
         self,
         preparation_plugins: typing.List[PreparationPluginInterface],
         network_finder: NetworkFinder,
-        coverage_file_finder: FileFinder,
+        file_finder: FileFinder,
         disable_file_fixes: bool = False,
     ):
         self.preparation_plugins = preparation_plugins
         self.network_finder = network_finder
-        self.coverage_file_finder = coverage_file_finder
+        self.file_finder = file_finder
         self.disable_file_fixes = disable_file_fixes
 
     def _produce_file_fixes_for_network(
@@ -144,25 +144,27 @@ class UploadCollector(object):
             path, fixed_lines_without_reason, fixed_lines_with_reason, eof
         )
 
-    def generate_upload_data(self) -> UploadCollectionResult:
+    def generate_upload_data(self, report_type="coverage") -> UploadCollectionResult:
         for prep in self.preparation_plugins:
             logger.debug(f"Running preparation plugin: {type(prep)}")
             prep.run_preparation(self)
         logger.debug("Collecting relevant files")
         network = self.network_finder.find_files()
-        coverage_files = self.coverage_file_finder.find_files()
-        logger.info(f"Found {len(coverage_files)} coverage files to upload")
-        if not coverage_files:
+        files = self.file_finder.find_files()
+        logger.info(f"Found {len(files)} {report_type} files to upload")
+        if not files:
             raise click.ClickException(
                 click.style(
-                    "No coverage reports found. Please make sure you're generating reports successfully.",
+                    f"No {report_type} reports found. Please make sure you're generating reports successfully.",
                     fg="red",
                 )
             )
-        for file in coverage_files:
+        for file in files:
             logger.info(f"> {file}")
         return UploadCollectionResult(
             network=network,
-            files=coverage_files,
-            file_fixes=self._produce_file_fixes_for_network(network),
+            files=files,
+            file_fixes=self._produce_file_fixes_for_network(network)
+            if report_type == "coverage"
+            else [],
         )

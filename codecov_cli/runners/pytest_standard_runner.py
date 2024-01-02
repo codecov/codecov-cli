@@ -140,35 +140,26 @@ class PytestStandardRunner(LabelAnalysisRunnerInterface):
             f"--cov={self.params.coverage_root}",
             "--cov-context=test",
         ] + self.params.execute_tests_options
-        all_labels = set(
-            result.absent_labels
-            + result.present_diff_labels
-            + result.global_level_labels
-        )
-        skipped_tests = set(result.present_report_labels) - all_labels
-        if skipped_tests:
+        tests_to_run = result.get_tests_to_run_in_collection_order()
+        tests_to_skip = result.get_tests_to_skip_in_collection_order()
+        if tests_to_skip:
             logger.info(
                 "Some tests are being skipped. (run in verbose mode to get list of tests skipped)",
                 extra=dict(
-                    extra_log_attributes=dict(skipped_tests_count=len(skipped_tests))
+                    extra_log_attributes=dict(skipped_tests_count=len(tests_to_skip))
                 ),
             )
             logger.debug(
                 "List of skipped tests",
-                extra=dict(
-                    extra_log_attributes=dict(skipped_tests=sorted(skipped_tests))
-                ),
+                extra=dict(extra_log_attributes=dict(skipped_tests=tests_to_skip)),
             )
 
-        if len(all_labels) == 0:
-            all_labels = [random.choice(result.present_report_labels)]
+        if len(tests_to_run) == 0:
+            tests_to_run = [random.choice(result.present_report_labels)]
             logger.info(
                 "All tests are being skipped. Selected random label to run",
-                extra=dict(extra_log_attributes=dict(selected_label=all_labels[0])),
+                extra=dict(extra_log_attributes=dict(selected_label=tests_to_run[0])),
             )
-        tests_to_run = [
-            label.split("[")[0] if "[" in label else label for label in all_labels
-        ]
         command_array = default_options + tests_to_run
         logger.info(
             "Running tests. (run in verbose mode to get list of tests executed)"

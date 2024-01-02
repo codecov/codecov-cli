@@ -1,16 +1,14 @@
 from subprocess import CalledProcessError
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock, patch
 
 import click
 import pytest
-from pytest import ExitCode
 
 from codecov_cli.runners.pytest_standard_runner import (
     PytestStandardRunner,
     PytestStandardRunnerConfigParams,
 )
 from codecov_cli.runners.pytest_standard_runner import logger as runner_logger
-from codecov_cli.runners.pytest_standard_runner import stdout as pyrunner_stdout
 from codecov_cli.runners.types import LabelAnalysisRequestResult
 
 
@@ -203,6 +201,11 @@ class TestPythonStandardRunner(object):
             "absent_labels": ["test_absent"],
             "present_diff_labels": ["test_in_diff"],
             "global_level_labels": ["test_global"],
+            "collected_labels_in_order": [
+                "test_absent",
+                "test_global",
+                "test_in_diff",
+            ],
         }
         mock_execute = mocker.patch.object(PytestStandardRunner, "_execute_pytest")
 
@@ -229,6 +232,11 @@ class TestPythonStandardRunner(object):
             "absent_labels": ["test_absent"],
             "present_diff_labels": ["test_in_diff"],
             "global_level_labels": ["test_global"],
+            "collected_labels_in_order": [
+                "test_absent",
+                "test_global",
+                "test_in_diff",
+            ],
         }
         mock_execute = mocker.patch.object(PytestStandardRunner, "_execute_pytest")
 
@@ -257,6 +265,11 @@ class TestPythonStandardRunner(object):
             "absent_labels": ["test_absent"],
             "present_diff_labels": ["test_in_diff"],
             "global_level_labels": ["test_global"],
+            "collected_labels_in_order": [
+                "test_absent",
+                "test_global",
+                "test_in_diff",
+            ],
         }
         mock_execute = mocker.patch.object(PytestStandardRunner, "_execute_pytest")
         mock_warning = mocker.patch.object(runner_logger, "warning")

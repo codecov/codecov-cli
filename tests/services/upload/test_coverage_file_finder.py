@@ -95,6 +95,63 @@ class TestCoverageFileFinder(object):
         actual = set(FileFinder(tmp_path).find_files())
         assert actual - expected == {UploadCollectionResultFile(extra)}
 
+    def test_find_coverage_files_test_results(self, tmp_path):
+        (tmp_path / "sub").mkdir()
+        (tmp_path / "sub" / "subsub").mkdir()
+        (tmp_path / "node_modules").mkdir()
+
+        should_find = ["junit.xml", "abc.junit.xml", "sub/junit.xml"]
+
+        should_ignore = [
+            "abc.codecov.exe",
+            "sub/abc.codecov.exe",
+            "codecov.exe",
+            "__pycache__",
+            "sub/subsub/__pycache__",
+            ".gitignore",
+            "a.sql",
+            "a.csv",
+            ".abc-coveragerc",
+            ".coverage-xyz",
+            "sub/scoverage.measurements.xyz",
+            "sub/test_abcd_coverage.txt",
+            "test-result-ff-codecoverage.json",
+            "node_modules/abc-coverage.cov",
+            "abc-coverage.cov",
+            "coverage-abc.abc",
+            "sub/coverage-abc.abc",
+            "sub/subsub/coverage-abc.abc",
+            "coverage.abc",
+            "jacocoxyz.xml",
+            "sub/jacocoxyz.xml",
+            "codecov.abc",
+            "sub/subsub/codecov.abc",
+            "xyz.codecov.abc",
+            "sub/xyz.codecov.abc",
+            "sub/subsub/xyz.codecov.abc",
+            "cover.out",
+            "abc.gcov",
+            "sub/abc.gcov",
+            "sub/subsub/abc.gcov",
+        ]
+
+        for filename in should_find:
+            (tmp_path / filename).touch()
+
+        for filename in should_ignore:
+            (tmp_path / filename).touch()
+
+        expected = {
+            UploadCollectionResultFile((tmp_path / file)) for file in should_find
+        }
+        actual = set(FileFinder(tmp_path, report_type="test_results").find_files())
+        assert actual == expected
+
+        extra = tmp_path / "sub" / "nosetests.junit.xml"
+        extra.touch()
+        actual = set(FileFinder(tmp_path, report_type="test_results").find_files())
+        assert actual - expected == {UploadCollectionResultFile(extra)}
+
 
 class TestCoverageFileFinderUserInput(unittest.TestCase):
     def setUp(self):

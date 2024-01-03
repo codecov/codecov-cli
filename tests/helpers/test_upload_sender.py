@@ -29,6 +29,21 @@ named_upload_data = {
     "ci_service": "ci_service",
     "git_service": "github",
 }
+test_results_named_upload_data = {
+    "upload_file_type": "test_results",
+    "report_code": "report_code",
+    "env_vars": {},
+    "name": "name",
+    "branch": "branch",
+    "slug": "org/repo",
+    "pull_request_number": "pr",
+    "build_code": "build_code",
+    "build_url": "build_url",
+    "job_code": "job_code",
+    "flags": "flags",
+    "ci_service": "ci_service",
+    "git_service": "github",
+}
 request_data = {
     "ci_url": "build_url",
     "env": {},
@@ -55,6 +70,20 @@ def mocked_legacy_upload_endpoint(mocked_responses):
         json={
             "raw_upload_location": "https://puturl.com",
             "url": "https://app.codecov.io/commit-url",
+        },
+    )
+    mocked_responses.add(resp)
+    yield resp
+
+
+@pytest.fixture
+def mocked_test_results_endpoint(mocked_responses):
+    resp = responses.Response(
+        responses.POST,
+        f"https://api.codecov.io/upload/test_results/v1",
+        status=200,
+        json={
+            "raw_upload_location": "https://puturl.com",
         },
     )
     mocked_responses.add(resp)
@@ -159,6 +188,39 @@ class TestUploadSender(object):
         assert (
             post_req_made.headers.items() >= headers.items()
         )  # test dict is a subset of the other
+
+    def test_upload_sender_post_called_with_right_parameters_test_results(
+        self, mocked_responses, mocked_test_results_endpoint, mocked_storage_server
+    ):
+        headers = {"Authorization": f"token {random_token}"}
+
+        mocked_legacy_upload_endpoint.match = [
+            matchers.json_params_matcher(request_data),
+            matchers.header_matcher(headers),
+        ]
+
+        sending_result = UploadSender().send_upload_data(
+            upload_collection,
+            random_sha,
+            random_token,
+            **test_results_named_upload_data,
+        )
+        assert sending_result.error is None
+        assert sending_result.warnings == []
+
+        assert len(mocked_responses.calls) == 2
+
+        post_req_made = mocked_responses.calls[0].request
+        response = json.loads(mocked_responses.calls[0].response.text)
+        assert response.get("raw_upload_location") == "https://puturl.com"
+        assert post_req_made.url == "https://api.codecov.io/upload/test_results/v1"
+        assert (
+            post_req_made.headers.items() >= headers.items()
+        )  # test dict is a subset of the other
+
+        put_req_made = mocked_responses.calls[1].request
+        assert put_req_made.url == "https://puturl.com/"
+        assert "test_results_files" in put_req_made.body.decode("utf-8")
 
     def test_upload_sender_post_called_with_right_parameters_tokenless(
         self,

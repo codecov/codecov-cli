@@ -39,8 +39,6 @@ test_results_files_patterns = [
     "*junit*",
 ]
 
-test_results_files_excluded_patterns = []
-
 coverage_files_excluded_patterns = [
     "*.am",
     "*.bash",
@@ -138,6 +136,10 @@ coverage_files_excluded_patterns = [
     ".ds_store",
     "*.zip",
 ]
+
+test_results_files_excluded_patterns = (
+    coverage_files_patterns + coverage_files_excluded_patterns
+)
 
 
 default_folders_to_ignore = [

@@ -39,6 +39,7 @@ class LegacyUploadSender(object):
         token: str,
         env_vars: typing.Dict[str, str],
         report_code: str = None,
+        upload_file_type: str = None,
         name: typing.Optional[str] = None,
         branch: typing.Optional[str] = None,
         slug: typing.Optional[str] = None,

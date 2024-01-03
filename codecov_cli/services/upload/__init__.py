@@ -99,12 +99,12 @@ def do_upload_logic(
 
     if not dry_run:
         sending_result = sender.send_upload_data(
-            upload_file_type,
             upload_data,
             commit_sha,
             token,
             env_vars,
             report_code,
+            upload_file_type,
             name,
             branch,
             slug,

@@ -84,12 +84,12 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
     mock_select_network_finder.assert_called_with(versioning_system)
     mock_generate_upload_data.assert_called_with("coverage")
     mock_send_upload_data.assert_called_with(
-        "coverage",
         mock_generate_upload_data.return_value,
         "commit_sha",
         "token",
         None,
         "report_code",
+        "coverage",
         "name",
         "branch",
         "slug",
@@ -171,12 +171,12 @@ def test_do_upload_logic_happy_path(mocker):
     mock_select_network_finder.assert_called_with(versioning_system)
     mock_generate_upload_data.assert_called_with("coverage")
     mock_send_upload_data.assert_called_with(
-        "coverage",
         mock_generate_upload_data.return_value,
         "commit_sha",
         "token",
         None,
         "report_code",
+        "coverage",
         "name",
         "branch",
         "slug",

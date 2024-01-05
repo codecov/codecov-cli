@@ -20,6 +20,8 @@ CodecovCLI is a new way for users to interact with Codecov directly from the use
   - [create-report-results](#create-report-results)
   - [get-report-results](#get-report-results)
   - [pr-base-picking](#pr-base-picking)
+  - [send-notifications](#send-notifications)
+  - [empty-upload](#empty-upload)
 - [How to Use Local Upload](#how-to-use-local-upload)
 - [Work in Progress Features](#work-in-progress-features)
   - [Plugin System](#plugin-system)
@@ -27,6 +29,7 @@ CodecovCLI is a new way for users to interact with Codecov directly from the use
 - [Contributions](#contributions)
   - [Requirements](#requirements)
   - [Guidelines](#guidelines)
+  - [Dependencies](#dependencies)
 - [Releases](#releases)
 
 # Installing
@@ -228,6 +231,23 @@ Codecov-cli supports user input. These inputs, along with their descriptions and
 | -t, --token TEXT                |Codecov upload token | Required
 | --git-service | Git provider. Options: github, gitlab, bitbucket, github_enterprise, gitlab_enterprise, bitbucket_server | Optional
 | -h,--help                      |Show this message and exit.
+
+## empty-upload
+
+Used if the changes made don't need testing, but PRs require a passing codecov status to be merged.
+This command will scan the files in the commit and send passing status checks configured if all the changed files
+are ignored by codecov (including README and configuration files)
+
+`Usage: codecovcli empty-upload [OPTIONS]`
+
+Options:
+  -C, --sha, --commit-sha TEXT    Commit SHA (with 40 chars)  [required]
+  -Z, --fail-on-error             Exit with non-zero code in case of error
+  --git-service [github|gitlab|bitbucket|github_enterprise|gitlab_enterprise|bitbucket_server]
+  -t, --token TEXT                Codecov upload token
+  -r, --slug TEXT                 owner/repo slug used instead of the private
+                                  repo token in Self-hosted
+  -h, --help                      Show this message and exit.
 
 # How to Use Local Upload
 

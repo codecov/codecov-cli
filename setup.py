@@ -22,7 +22,6 @@ setup(
         "httpx==0.23.*",
         "ijson==3.*",
         "pyyaml==6.*",
-        "responses==0.21.*",
         "tree-sitter==0.20.*",
     ],
     entry_points={

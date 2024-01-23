@@ -67,13 +67,15 @@ class UploadSender(object):
             headers = get_token_header_or_fail(token)
         encoded_slug = encode_slug(slug)
         upload_url = enterprise_url or CODECOV_API_URL
-        if upload_file_type == "coverage":
-            url = f"{upload_url}/upload/{git_service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads"
-        elif upload_file_type == "test_results":
-            data["slug"] = encoded_slug
-            data["commit"] = commit_sha
-            data["service"] = git_service
-            url = f"{upload_url}/upload/test_results/v1"
+        url, data = self.get_url_and_possibly_update_data(
+            data,
+            upload_file_type,
+            upload_url,
+            git_service,
+            encoded_slug,
+            commit_sha,
+            report_code,
+        )
         # Data that goes to storage
         reports_payload = self._generate_payload(
             upload_data, env_vars, upload_file_type
@@ -172,3 +174,23 @@ class UploadSender(object):
             base64.b64encode(zlib.compress((file.get_content())))
         ).decode()
         return format, formatted_content
+
+    def get_url_and_possibly_update_data(
+        self,
+        data,
+        report_type,
+        upload_url,
+        git_service,
+        encoded_slug,
+        commit_sha,
+        report_code,
+    ):
+        if report_type == "coverage":
+            url = f"{upload_url}/upload/{git_service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads"
+        elif report_type == "test_results":
+            data["slug"] = encoded_slug
+            data["commit"] = commit_sha
+            data["service"] = git_service
+            url = f"{upload_url}/upload/test_results/v1"
+
+        return url, data

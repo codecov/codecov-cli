@@ -1,6 +1,6 @@
 [submodule "languages/treesitterpython"]
 	path = languages/treesitterpython
-	url = git@github.com:tree-sitter/tree-sitter-python.git
+	url = https://github.com/tree-sitter/tree-sitter-python.git
 [submodule "languages/treesitterjavascript"]
 	path = languages/treesitterjavascript
-	url = git@github.com:tree-sitter/tree-sitter-javascript.git
+	url = https://github.com/tree-sitter/tree-sitter-javascript.git

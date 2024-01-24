@@ -52,12 +52,16 @@ def do_upload_logic(
     handle_no_reports_found: bool = False,
     disable_file_fixes: bool = False,
 ):
-    preparation_plugins = select_preparation_plugins(cli_config, plugin_names)
+    if upload_file_type == "coverage":
+        preparation_plugins = select_preparation_plugins(cli_config, plugin_names)
+    elif upload_file_type == "test_results":
+        preparation_plugins = []
     file_selector = select_file_finder(
         files_search_root_folder,
         files_search_exclude_folders,
         files_search_explicitly_listed_files,
         disable_search,
+        upload_file_type,
     )
     network_finder = select_network_finder(versioning_system)
     collector = UploadCollector(

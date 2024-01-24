@@ -118,7 +118,7 @@ class GitVersioningSystem(VersioningSystemInterface):
             filename[1:-1]
             if filename.startswith('"') and filename.endswith('"')
             else filename
-            for filename in res.stdout.decode("unicode_escape").strip().split()
+            for filename in res.stdout.decode("unicode_escape").strip().split("\n")
         ]
 
 

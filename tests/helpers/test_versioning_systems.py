@@ -95,7 +95,7 @@ class TestGitVersioningSystem(object):
             return_value=mocked_subprocess,
         )
         # git ls-files diplays a single \n as \\\\n
-        mocked_subprocess.stdout = b'a.txt\nb.txt\n"a\\\\nb.txt"\nc.txt\nd.txt'
+        mocked_subprocess.stdout = b'a.txt\nb.txt\n"a\\\\nb.txt"\nc.txt\nd.txt\n.circleci/config.yml\nLICENSE\napp/advanced calculations/advanced_calculator.js\n'
 
         vs = GitVersioningSystem()
 
@@ -105,6 +105,9 @@ class TestGitVersioningSystem(object):
             "a\\nb.txt",
             "c.txt",
             "d.txt",
+            ".circleci/config.yml",
+            "LICENSE",
+            "app/advanced calculations/advanced_calculator.js",
         ]
 
     def test_list_relevant_files_fails_if_no_root_is_found(self, mocker):

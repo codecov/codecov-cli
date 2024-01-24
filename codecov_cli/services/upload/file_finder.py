@@ -265,11 +265,16 @@ class FileFinder(object):
 
 
 def select_file_finder(
-    root_folder_to_search, folders_to_ignore, explicitly_listed_files, disable_search
+    root_folder_to_search,
+    folders_to_ignore,
+    explicitly_listed_files,
+    disable_search,
+    report_type="coverage",
 ):
     return FileFinder(
         root_folder_to_search,
         folders_to_ignore,
         explicitly_listed_files,
         disable_search,
+        report_type,
     )

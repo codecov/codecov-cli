@@ -1,10 +1,10 @@
 from pathlib import Path
 from unittest.mock import patch
 
-from codecov_cli.services.upload.upload_collector import UploadCollector
+from codecov_cli.helpers.versioning_systems import GitVersioningSystem
 from codecov_cli.services.upload.file_finder import FileFinder
 from codecov_cli.services.upload.network_finder import NetworkFinder
-from codecov_cli.helpers.versioning_systems import GitVersioningSystem
+from codecov_cli.services.upload.upload_collector import UploadCollector
 from codecov_cli.types import UploadCollectionResultFile
 
 

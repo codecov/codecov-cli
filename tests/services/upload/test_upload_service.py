@@ -80,7 +80,7 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
     mock_select_preparation_plugins.assert_called_with(
         cli_config, ["first_plugin", "another", "forth"]
     )
-    mock_select_file_finder.assert_called_with(None, None, None, False)
+    mock_select_file_finder.assert_called_with(None, None, None, False, "coverage")
     mock_select_network_finder.assert_called_with(versioning_system)
     mock_generate_upload_data.assert_called_with("coverage")
     mock_send_upload_data.assert_called_with(
@@ -167,7 +167,7 @@ def test_do_upload_logic_happy_path(mocker):
     mock_select_preparation_plugins.assert_called_with(
         cli_config, ["first_plugin", "another", "forth"]
     )
-    mock_select_file_finder.assert_called_with(None, None, None, False)
+    mock_select_file_finder.assert_called_with(None, None, None, False, "coverage")
     mock_select_network_finder.assert_called_with(versioning_system)
     mock_generate_upload_data.assert_called_with("coverage")
     mock_send_upload_data.assert_called_with(
@@ -241,7 +241,7 @@ def test_do_upload_logic_dry_run(mocker):
             enterprise_url=None,
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
-    mock_select_file_finder.assert_called_with(None, None, None, False)
+    mock_select_file_finder.assert_called_with(None, None, None, False, "coverage")
     mock_select_network_finder.assert_called_with(versioning_system)
     assert mock_generate_upload_data.call_count == 1
     assert mock_send_upload_data.call_count == 0
@@ -392,7 +392,7 @@ def test_do_upload_no_cov_reports_found(mocker):
     mock_select_preparation_plugins.assert_called_with(
         cli_config, ["first_plugin", "another", "forth"]
     )
-    mock_select_file_finder.assert_called_with(None, None, None, False)
+    mock_select_file_finder.assert_called_with(None, None, None, False, "coverage")
     mock_select_network_finder.assert_called_with(versioning_system)
     mock_generate_upload_data.assert_called_with("coverage")
     mock_upload_completion_call.assert_called_with(
@@ -464,7 +464,7 @@ def test_do_upload_rase_no_cov_reports_found_error(mocker):
     mock_select_preparation_plugins.assert_called_with(
         cli_config, ["first_plugin", "another", "forth"]
     )
-    mock_select_file_finder.assert_called_with(None, None, None, False)
+    mock_select_file_finder.assert_called_with(None, None, None, False, "coverage")
     mock_select_network_finder.assert_called_with(versioning_system)
     mock_generate_upload_data.assert_called_with("coverage")
 
@@ -529,10 +529,8 @@ def test_do_upload_logic_happy_path_test_results(mocker):
     ]
 
     assert res == UploadSender.send_upload_data.return_value
-    mock_select_preparation_plugins.assert_called_with(
-        cli_config, ["first_plugin", "another", "forth"]
-    )
-    mock_select_file_finder.assert_called_with(None, None, None, False)
+    mock_select_preparation_plugins.assert_not_called
+    mock_select_file_finder.assert_called_with(None, None, None, False, "test_results")
     mock_select_network_finder.assert_called_with(versioning_system)
     mock_generate_upload_data.assert_called_with("test_results")
     mock_send_upload_data.assert_called_with(

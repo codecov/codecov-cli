@@ -9,7 +9,7 @@ from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
 from codecov_cli.helpers.request import log_warnings_and_errors_if_any
 from codecov_cli.helpers.versioning_systems import VersioningSystemInterface
 from codecov_cli.plugins import select_preparation_plugins
-from codecov_cli.services.upload.coverage_file_finder import select_coverage_file_finder
+from codecov_cli.services.upload.file_finder import select_file_finder
 from codecov_cli.services.upload.legacy_upload_sender import LegacyUploadSender
 from codecov_cli.services.upload.network_finder import select_network_finder
 from codecov_cli.services.upload.upload_collector import UploadCollector
@@ -34,14 +34,15 @@ def do_upload_logic(
     flags: typing.List[str],
     name: typing.Optional[str],
     network_root_folder: Path,
-    coverage_files_search_root_folder: Path,
-    coverage_files_search_exclude_folders: typing.List[Path],
-    coverage_files_search_explicitly_listed_files: typing.List[Path],
+    files_search_root_folder: Path,
+    files_search_exclude_folders: typing.List[Path],
+    files_search_explicitly_listed_files: typing.List[Path],
     plugin_names: typing.List[str],
     token: str,
     branch: typing.Optional[str],
     slug: typing.Optional[str],
     pull_request_number: typing.Optional[str],
+    upload_file_type: str = "coverage",
     use_legacy_uploader: bool = False,
     fail_on_error: bool = False,
     dry_run: bool = False,
@@ -51,19 +52,23 @@ def do_upload_logic(
     handle_no_reports_found: bool = False,
     disable_file_fixes: bool = False,
 ):
-    preparation_plugins = select_preparation_plugins(cli_config, plugin_names)
-    coverage_file_selector = select_coverage_file_finder(
-        coverage_files_search_root_folder,
-        coverage_files_search_exclude_folders,
-        coverage_files_search_explicitly_listed_files,
+    if upload_file_type == "coverage":
+        preparation_plugins = select_preparation_plugins(cli_config, plugin_names)
+    elif upload_file_type == "test_results":
+        preparation_plugins = []
+    file_selector = select_file_finder(
+        files_search_root_folder,
+        files_search_exclude_folders,
+        files_search_explicitly_listed_files,
         disable_search,
+        upload_file_type,
     )
     network_finder = select_network_finder(versioning_system)
     collector = UploadCollector(
-        preparation_plugins, network_finder, coverage_file_selector, disable_file_fixes
+        preparation_plugins, network_finder, file_selector, disable_file_fixes
     )
     try:
-        upload_data = collector.generate_upload_data()
+        upload_data = collector.generate_upload_data(upload_file_type)
     except click.ClickException as exp:
         if handle_no_reports_found:
             logger.info(
@@ -103,6 +108,7 @@ def do_upload_logic(
             token,
             env_vars,
             report_code,
+            upload_file_type,
             name,
             branch,
             slug,

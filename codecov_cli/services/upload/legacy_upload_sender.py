@@ -39,6 +39,7 @@ class LegacyUploadSender(object):
         token: str,
         env_vars: typing.Dict[str, str],
         report_code: str = None,
+        upload_file_type: str = None,
         name: typing.Optional[str] = None,
         branch: typing.Optional[str] = None,
         slug: typing.Optional[str] = None,
@@ -51,7 +52,6 @@ class LegacyUploadSender(object):
         git_service: typing.Optional[str] = None,
         enterprise_url: typing.Optional[str] = None,
     ) -> UploadSendingResult:
-
         params = {
             "package": f"codecov-cli/{codecov_cli_version}",
             "commit": commit_sha,
@@ -116,9 +116,7 @@ class LegacyUploadSender(object):
         return network_files_section.encode() + b"<<<<<< network\n"
 
     def _generate_coverage_files_section(self, upload_data: UploadCollectionResult):
-        return b"".join(
-            self._format_coverage_file(file) for file in upload_data.coverage_files
-        )
+        return b"".join(self._format_coverage_file(file) for file in upload_data.files)
 
     def _format_coverage_file(self, file: UploadCollectionResultFile) -> bytes:
         header = b"# path=" + file.get_filename() + b"\n"

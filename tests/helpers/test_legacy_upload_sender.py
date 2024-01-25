@@ -166,7 +166,11 @@ class TestUploadSender(object):
         mocked_legacy_upload_endpoint.status = 400
 
         sender = LegacyUploadSender().send_upload_data(
-            upload_collection, random_sha, random_token, {}, **named_upload_data
+            upload_collection,
+            random_sha,
+            random_token,
+            {},
+            **named_upload_data,
         )
 
         assert sender.error is not None
@@ -279,7 +283,6 @@ class TestPayloadGeneration(object):
         )
 
     def test_generate_coverage_files_section(self, mocker):
-
         mocker.patch(
             "codecov_cli.services.upload.LegacyUploadSender._format_coverage_file",
             side_effect=lambda file_bytes: file_bytes,

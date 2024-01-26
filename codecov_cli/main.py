@@ -33,11 +33,6 @@ logger = logging.getLogger("codecovcli")
     ),
 )
 @click.option(
-    "--codecov-yml-path",
-    type=click.Path(path_type=pathlib.Path),
-    default=pathlib.Path("codecov.yml"),
-)
-@click.option(
     "--enterprise-url", "--url", "-u", help="Change the upload host (Enterprise use)"
 )
 @click.option("-v", "--verbose", "verbose", help="Use verbose logging", is_flag=True)

@@ -12,7 +12,7 @@ logger = logging.getLogger("codecovcli")
 
 
 @click.command()
-@click.option("--force/--no-force", default=False)
+@click.option("--force", is_flag=True, default=False)
 @global_options
 @click.pass_context
 def empty_upload(

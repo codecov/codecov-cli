@@ -1,4 +1,5 @@
 import logging
+from sys import exit
 from time import sleep
 
 import click

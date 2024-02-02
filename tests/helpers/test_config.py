@@ -49,3 +49,18 @@ def test_find_codecov_yaml(mocker):
     ]
 
     assert sorted(_find_codecov_yamls()) == sorted(expected_yamls)
+
+
+def test_load_config_finds_yaml(mocker):
+    fake_project_root = pathlib.Path.cwd() / "samples" / "fake_project"
+
+    mock_vcs = Mock()
+    mock_vcs.get_network_root.return_value = fake_project_root
+    mocker.patch(
+        "codecov_cli.helpers.config.get_versioning_system", return_value=mock_vcs
+    )
+
+    result = load_cli_config(None)
+    assert result == {
+        "runners": {"python": {"collect_tests_options": ["--ignore", "batata"]}}
+    }

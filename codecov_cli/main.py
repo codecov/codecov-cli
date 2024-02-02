@@ -34,8 +34,8 @@ logger = logging.getLogger("codecovcli")
 )
 @click.option(
     "--codecov-yml-path",
-    type=click.Path(path_type=pathlib.Path),
-    default=pathlib.Path("codecov.yml"),
+    type=click.Path(path_type=typing.Optional[pathlib.Path]),
+    default=None,
 )
 @click.option(
     "--enterprise-url", "--url", "-u", help="Change the upload host (Enterprise use)"

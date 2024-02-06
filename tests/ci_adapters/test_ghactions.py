@@ -56,7 +56,7 @@ class TestGithubActions(object):
             return_value=fake_subprocess,
         )
 
-        fake_subprocess.stdout = b"aa74b3ff0411086ee37e7a78f1b62984d7759077\n20e1219371dff308fd910b206f47fdf250621abf"
+        fake_subprocess.stdout = b"aa74b3ff0411086ee37e7a78f1b62984d7759077 20e1219371dff308fd910b206f47fdf250621abf"
         assert (
             GithubActionsCIAdapter().get_fallback_value(FallbackFieldEnum.commit_sha)
             == "20e1219371dff308fd910b206f47fdf250621abf"

@@ -1,8 +1,11 @@
+import logging
 import os
 import re
 import subprocess
 
 from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
+
+logger = logging.getLogger("codecovcli")
 
 
 class GithubActionsCIAdapter(CIAdapterBase):
@@ -17,14 +20,27 @@ class GithubActionsCIAdapter(CIAdapterBase):
         if not pr:
             return commit
 
-        # actions/checkout should be run with fetch-depth > 1 or set to 0 for this to work
-        completed_subprocess = subprocess.run(
-            ["git", "rev-parse", "HEAD^@"], capture_output=True
-        )
+        merge_commit_regex = r"^[a-z0-9]{40} [a-z0-9]{40}$"
+        merge_commit_message = subprocess.run(
+            ["git", "show", "--no-patch", "--format=%P"],
+            capture_output=True,
+        ).stdout
 
-        parents_hash = completed_subprocess.stdout.decode().strip().splitlines()
-        if len(parents_hash) == 2:
-            return parents_hash[1]
+        try:
+            merge_commit_message = merge_commit_message.decode('utf-8')
+
+            if re.match(merge_commit_regex, merge_commit_message) is not None:
+                merge_commit = merge_commit_message.split(" ")[1]
+                logger.info(f"    Fixing merge commit SHA ${commit} -> ${merge_commit}")
+                commit = merge_commit
+            elif merge_commit_message == "":
+                logger.info(
+                    "->  Issue detecting commit SHA. Please run actions/checkout with fetch-depth > 1 or set to 0"
+                )
+        except TypeError:  # For the re.match
+            logger.info(
+                f"    Commit with SHA ${commit} of PR ${pr} is not a merge commit"
+            )
 
         return commit
 

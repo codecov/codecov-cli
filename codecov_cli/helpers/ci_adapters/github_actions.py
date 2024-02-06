@@ -27,7 +27,7 @@ class GithubActionsCIAdapter(CIAdapterBase):
         ).stdout
 
         try:
-            merge_commit_message = merge_commit_message.decode('utf-8')
+            merge_commit_message = merge_commit_message.decode("utf-8").strip()
 
             if re.match(merge_commit_regex, merge_commit_message) is not None:
                 merge_commit = merge_commit_message.split(" ")[1]

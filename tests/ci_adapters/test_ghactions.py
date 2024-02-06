@@ -82,6 +82,32 @@ class TestGithubActions(object):
             == "1234"
         )
 
+    def test_commit_sha_in_merge_commit_is_empty(self, mocker):
+        mocker.patch.dict(
+            os.environ, {GithubActionsEnvEnum.GITHUB_SHA: "1234"}, clear=True
+        )
+        mocker.patch.object(
+            GithubActionsCIAdapter, "_get_pull_request_number"
+        ).return_value = "random_pr_number"
+
+        fake_subprocess = mocker.MagicMock()
+        mocker.patch(
+            "codecov_cli.helpers.ci_adapters.github_actions.subprocess.run",
+            return_value=fake_subprocess,
+        )
+
+        fake_subprocess.stdout = b""
+        assert (
+            GithubActionsCIAdapter().get_fallback_value(FallbackFieldEnum.commit_sha)
+            == "1234"
+        )
+
+        fake_subprocess.stdout = None
+        assert (
+            GithubActionsCIAdapter().get_fallback_value(FallbackFieldEnum.commit_sha)
+            == "1234"
+        )
+
     @pytest.mark.parametrize(
         "env_dict,slug,build_code,expected",
         [

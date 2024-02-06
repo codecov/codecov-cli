@@ -39,7 +39,7 @@ class GithubActionsCIAdapter(CIAdapterBase):
                 )
         except TypeError:  # For the re.match
             logger.info(
-                f"    Commit with SHA ${commit} of PR ${pr} is not a merge commit"
+                f"    Commit with SHA {commit} of PR {pr} is not a merge commit"
             )
 
         return commit

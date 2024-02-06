@@ -37,7 +37,7 @@ class GithubActionsCIAdapter(CIAdapterBase):
                 logger.info(
                     "->  Issue detecting commit SHA. Please run actions/checkout with fetch-depth > 1 or set to 0"
                 )
-        except TypeError:  # For the re.match
+        except AttributeError, TypeError:  # For the re.match and .decode
             logger.info(
                 f"    Commit with SHA {commit} of PR {pr} is not a merge commit"
             )

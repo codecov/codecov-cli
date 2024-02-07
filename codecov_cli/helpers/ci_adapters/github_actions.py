@@ -86,5 +86,8 @@ class GithubActionsCIAdapter(CIAdapterBase):
     def _get_service(self):
         return "github-actions"
 
+    def _get_git_service(self):
+        return "github"
+
     def get_service_name(self):
         return "GithubActions"

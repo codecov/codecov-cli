@@ -115,6 +115,11 @@ def test_get_plugin_xcode():
     assert isinstance(res, XcodePlugin)
 
 
+def test_get_plugin_noop():
+    res = _get_plugin({}, "noop")
+    assert isinstance(res, NoopPlugin)
+
+
 def test_get_plugin_pycoverage():
     res = _get_plugin({}, "pycoverage")
     assert isinstance(res, Pycoverage)

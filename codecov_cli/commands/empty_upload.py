@@ -12,11 +12,13 @@ logger = logging.getLogger("codecovcli")
 
 
 @click.command()
+@click.option("--force", is_flag=True, default=False)
 @global_options
 @click.pass_context
 def empty_upload(
     ctx,
     commit_sha: str,
+    force: bool,
     slug: typing.Optional[str],
     token: typing.Optional[str],
     git_service: typing.Optional[str],
@@ -37,5 +39,5 @@ def empty_upload(
         ),
     )
     return empty_upload_logic(
-        commit_sha, slug, token, git_service, enterprise_url, fail_on_error
+        commit_sha, slug, token, git_service, enterprise_url, fail_on_error, force
     )

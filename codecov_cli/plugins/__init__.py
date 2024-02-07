@@ -60,6 +60,8 @@ def _load_plugin_from_yaml(plugin_dict: typing.Dict):
 
 
 def _get_plugin(cli_config, plugin_name):
+    if plugin_name == "noop":
+        return NoopPlugin()
     if plugin_name == "gcov":
         return GcovPlugin()
     if plugin_name == "pycoverage":

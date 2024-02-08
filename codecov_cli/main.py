@@ -34,7 +34,7 @@ logger = logging.getLogger("codecovcli")
 )
 @click.option(
     "--codecov-yml-path",
-    type=click.Path(path_type=typing.Optional[pathlib.Path]),
+    type=click.Path(path_type=pathlib.Path),
     default=None,
 )
 @click.option(

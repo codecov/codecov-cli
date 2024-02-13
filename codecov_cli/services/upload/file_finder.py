@@ -36,7 +36,7 @@ coverage_files_patterns = [
 ]
 
 test_results_files_patterns = [
-    "*junit*",
+    "*junit.xml",
 ]
 
 coverage_files_excluded_patterns = [

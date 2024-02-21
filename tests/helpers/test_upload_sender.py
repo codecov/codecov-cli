@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -303,6 +304,23 @@ class TestUploadSender(object):
         assert "400" in sender.error.code
 
         assert sender.warnings is not None
+
+    def test_upload_sender_result_fail_post_502(
+        self, mocker, mocked_responses, mocked_legacy_upload_endpoint, capsys
+    ):
+        mocker.patch("codecov_cli.helpers.request.sleep")
+        mocked_legacy_upload_endpoint.status = 502
+
+        with pytest.raises(Exception, match="Request failed after too many retries"):
+            _ = UploadSender().send_upload_data(
+                upload_collection, random_sha, random_token, **named_upload_data
+            )
+
+        matcher = re.compile(
+            r"(warning.*((Response status code was 502)|(Request failed\. Retrying)).*(\n)?){6}"
+        )
+
+        assert matcher.match(capsys.readouterr().err) is not None
 
     def test_upload_sender_result_fail_put_400(
         self, mocked_responses, mocked_legacy_upload_endpoint, mocked_storage_server

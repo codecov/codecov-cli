@@ -47,15 +47,27 @@ def backoff_time(curr_retry):
     return 2 ** (curr_retry - 1)
 
 
+class RetryException(Exception):
+    ...
+
+
 def retry_request(func):
     def wrapper(*args, **kwargs):
         retry = 0
         while retry < MAX_RETRIES:
             try:
-                return func(*args, **kwargs)
+                response = func(*args, **kwargs)
+                if response.status_code == 502:
+                    logger.warning(
+                        "Response status code was 502.",
+                        extra=dict(extra_log_attributes=dict(retry=retry)),
+                    )
+                    raise RetryException
+                return response
             except (
                 requests.exceptions.ConnectionError,
                 requests.exceptions.Timeout,
+                RetryException,
             ) as exp:
                 logger.warning(
                     "Request failed. Retrying",

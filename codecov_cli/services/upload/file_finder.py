@@ -232,12 +232,14 @@ class FileFinder(object):
                 files_excluded_but_user_includes.append(str(file))
         if files_excluded_but_user_includes:
             logger.warning(
-                "Some files being explicitly added are found in the list of excluded files for upload.",
+                "Some files being explicitly added are found in the list of excluded files for upload. We are still going to search for the explicitly added files.",
                 extra=dict(
                     extra_log_attributes=dict(files=files_excluded_but_user_includes)
                 ),
             )
-        regex_patterns_to_include = globs_to_regex(user_filenames_to_include)
+        regex_patterns_to_include = globs_to_regex(
+            [file.name for file in self.explicitly_listed_files]
+        )
         multipart_include_regex = globs_to_regex(
             [str(path.resolve()) for path in self.explicitly_listed_files]
         )
@@ -246,7 +248,6 @@ class FileFinder(object):
                 self.search_root,
                 self.folders_to_ignore,
                 filename_include_regex=regex_patterns_to_include,
-                filename_exclude_regex=regex_patterns_to_exclude,
                 multipart_include_regex=multipart_include_regex,
             )
         )

@@ -27,9 +27,11 @@ class GithubActionsCIAdapter(CIAdapterBase):
         )
         if not is_safe_directory:
             safe_directory = os.path.join("__w", self._get_slug())
-            logger.info(f"  Setting safe.directory with git config --global --add safe.directory {safe_directory}")
+            logger.info(
+                f"  Setting safe.directory with git config --global --add safe.directory {safe_directory}"
+            )
             subprocess.run(
-               ["git", "config", "--global", "-add", "safe.directory", safe_directory]
+                ["git", "config", "--global", "-add", "safe.directory", safe_directory]
             )
 
     def _get_commit_sha(self):

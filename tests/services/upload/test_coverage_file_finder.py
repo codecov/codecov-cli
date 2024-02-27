@@ -179,8 +179,10 @@ class TestCoverageFileFinderUserInput(unittest.TestCase):
             self.project_root / "coverage.xml",
             self.project_root / "subdirectory" / "test_coverage.xml",
             self.project_root / "other_file.txt",
+            self.project_root / ".tox" / "another_file.abc",
         ]
         (self.project_root / "subdirectory").mkdir()
+        (self.project_root / ".tox").mkdir()
         for file in coverage_files:
             file.touch()
 
@@ -208,8 +210,10 @@ class TestCoverageFileFinderUserInput(unittest.TestCase):
             self.project_root / "subdirectory" / "another_file.abc",
             self.project_root / "subdirectory" / "test_coverage.xml",
             self.project_root / "other_file.txt",
+            self.project_root / ".tox" / "another_file.abc",
         ]
         (self.project_root / "subdirectory").mkdir()
+        (self.project_root / ".tox").mkdir()
         for file in coverage_files:
             file.touch()
 
@@ -237,8 +241,10 @@ class TestCoverageFileFinderUserInput(unittest.TestCase):
             self.project_root / "subdirectory" / "test_coverage.xml",
             self.project_root / "test_file.abc",
             self.project_root / "subdirectory" / "another_file.abc",
+            self.project_root / ".tox" / "another_file.abc",
         ]
         (self.project_root / "subdirectory").mkdir()
+        (self.project_root / ".tox").mkdir()
         for file in coverage_files:
             file.touch()
 
@@ -264,8 +270,10 @@ class TestCoverageFileFinderUserInput(unittest.TestCase):
         coverage_files = [
             self.project_root / "coverage.xml",
             self.project_root / "subdirectory" / "test_coverage.xml",
+            self.project_root / ".tox" / "another_file.abc",
         ]
         (self.project_root / "subdirectory").mkdir()
+        (self.project_root / ".tox").mkdir()
         for file in coverage_files:
             file.touch()
 
@@ -282,6 +290,39 @@ class TestCoverageFileFinderUserInput(unittest.TestCase):
             UploadCollectionResultFile(Path(f"{self.project_root}/coverage.xml")),
             UploadCollectionResultFile(
                 Path(f"{self.project_root}/subdirectory/test_coverage.xml")
+            ),
+        ]
+        expected_paths = sorted([file.get_filename() for file in expected])
+        self.assertEqual(result, expected_paths)
+
+    def test_find_coverage_files_with_user_specified_files_in_default_ignored_folder(self):
+        # Create some sample coverage files
+        coverage_files = [
+            self.project_root / "coverage.xml",
+            self.project_root / "subdirectory" / "test_coverage.xml",
+            self.project_root / "test_file.abc",
+            self.project_root / "subdirectory" / "another_file.abc",
+            self.project_root / ".tox" / "another_file.abc",
+        ]
+        (self.project_root / "subdirectory").mkdir()
+        (self.project_root / ".tox").mkdir()
+        for file in coverage_files:
+            file.touch()
+
+        self.coverage_file_finder.explicitly_listed_files = [
+            self.project_root / ".tox" / "another_file.abc",
+        ]
+        result = sorted(
+            [file.get_filename() for file in self.coverage_file_finder.find_files()]
+        )
+
+        expected = [
+            UploadCollectionResultFile(Path(f"{self.project_root}/coverage.xml")),
+            UploadCollectionResultFile(
+                Path(f"{self.project_root}/subdirectory/test_coverage.xml")
+            ),
+            UploadCollectionResultFile(
+                Path(f"{self.project_root}/.tox/another_file.abc")
             ),
         ]
         expected_paths = sorted([file.get_filename() for file in expected])

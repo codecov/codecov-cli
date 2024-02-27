@@ -180,13 +180,13 @@ default_folders_to_ignore = [
 class FileFinder(object):
     def __init__(
         self,
-        project_root: Path = None,
+        search_root: Path = None,
         folders_to_ignore: typing.List[str] = None,
         explicitly_listed_files: typing.List[Path] = None,
         disable_search: bool = False,
         report_type: str = "coverage",
     ):
-        self.project_root = project_root or Path(os.getcwd())
+        self.search_root = search_root or Path(os.getcwd())
         self.folders_to_ignore = folders_to_ignore or []
         self.explicitly_listed_files = explicitly_listed_files or None
         self.disable_search = disable_search
@@ -207,7 +207,7 @@ class FileFinder(object):
         if not self.disable_search:
             regex_patterns_to_include = globs_to_regex(files_patterns)
             files_paths = search_files(
-                self.project_root,
+                self.search_root,
                 default_folders_to_ignore + self.folders_to_ignore,
                 filename_include_regex=regex_patterns_to_include,
                 filename_exclude_regex=regex_patterns_to_exclude,
@@ -243,16 +243,17 @@ class FileFinder(object):
         )
         user_files_paths = list(
             search_files(
-                self.project_root,
-                default_folders_to_ignore + self.folders_to_ignore,
+                self.search_root,
+                self.folders_to_ignore,
                 filename_include_regex=regex_patterns_to_include,
                 filename_exclude_regex=regex_patterns_to_exclude,
                 multipart_include_regex=multipart_include_regex,
             )
         )
         not_found_files = []
+        user_files_paths_resolved = [path.resolve() for path in user_files_paths]
         for filepath in self.explicitly_listed_files:
-            if filepath.resolve() not in user_files_paths:
+            if filepath.resolve() not in user_files_paths_resolved:
                 not_found_files.append(filepath)
 
         if not_found_files:

@@ -63,7 +63,7 @@ _global_upload_options = [
     ),
     click.option(
         "--disable-search",
-        help="Disable search for coverage files. This is helpful when specifying what files you want to uload with the --file option.",
+        help="Disable search for coverage files. This is helpful when specifying what files you want to upload with the --file option.",
         is_flag=True,
         default=False,
     ),

@@ -91,7 +91,7 @@ def test_upload_process_options(mocker):
             "                                  disable uploading other files.",
             "  --disable-search                Disable search for coverage files. This is",
             "                                  helpful when specifying what files you want to",
-            "                                  uload with the --file option.",
+            "                                  upload with the --file option.",
             "  --disable-file-fixes            Disable file fixes to ignore common lines from",
             "                                  coverage (e.g. blank lines or empty brackets)",
             "  -b, --build, --build-code TEXT  Specify the build number manually",

@@ -295,7 +295,9 @@ class TestCoverageFileFinderUserInput(unittest.TestCase):
         expected_paths = sorted([file.get_filename() for file in expected])
         self.assertEqual(result, expected_paths)
 
-    def test_find_coverage_files_with_user_specified_files_in_default_ignored_folder(self):
+    def test_find_coverage_files_with_user_specified_files_in_default_ignored_folder(
+        self,
+    ):
         # Create some sample coverage files
         coverage_files = [
             self.project_root / "coverage.xml",

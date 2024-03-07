@@ -38,7 +38,13 @@ def get_versioning_system() -> VersioningSystemInterface:
 class GitVersioningSystem(VersioningSystemInterface):
     @classmethod
     def is_available(cls):
-        return which("git") is not None
+        if which("git") is not None:
+            p = subprocess.run(
+                ["git", "rev-parse", "--show-toplevel"], capture_output=True
+            )
+            if p.stdout:
+                return True
+        return False
 
     def get_fallback_value(self, fallback_field: FallbackFieldEnum):
         if fallback_field == FallbackFieldEnum.commit_sha:

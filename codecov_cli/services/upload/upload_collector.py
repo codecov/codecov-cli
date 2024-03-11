@@ -153,9 +153,13 @@ class UploadCollector(object):
         files = self.file_finder.find_files()
         logger.info(f"Found {len(files)} {report_type} files to upload")
         if not files:
+            if report_type == "test_results":
+                error_message = "No JUnit XML reports found. Please review our documentation (https://docs.codecov.com/docs/test-result-ingestion-beta) to generate and upload the file."
+            else:
+                error_message = "No coverage reports found. Please make sure you're generating reports successfully."
             raise click.ClickException(
                 click.style(
-                    f"No {report_type} reports found. Please make sure you're generating reports successfully.",
+                    error_message,
                     fg="red",
                 )
             )
@@ -164,7 +168,9 @@ class UploadCollector(object):
         return UploadCollectionResult(
             network=network,
             files=files,
-            file_fixes=self._produce_file_fixes_for_network(network)
-            if report_type == "coverage"
-            else [],
+            file_fixes=(
+                self._produce_file_fixes_for_network(network)
+                if report_type == "coverage"
+                else []
+            ),
         )

@@ -237,9 +237,7 @@ class FileFinder(object):
                     extra_log_attributes=dict(files=files_excluded_but_user_includes)
                 ),
             )
-        regex_patterns_to_include = globs_to_regex(
-            [file.name for file in self.explicitly_listed_files]
-        )
+        regex_patterns_to_include = globs_to_regex(user_filenames_to_include)
         multipart_include_regex = globs_to_regex(
             [str(path.resolve()) for path in self.explicitly_listed_files]
         )

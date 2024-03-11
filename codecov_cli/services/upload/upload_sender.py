@@ -51,6 +51,7 @@ class UploadSender(object):
             "name": name,
             "job_code": job_code,
             "version": codecov_cli_version,
+            "ci_service": ci_service,
         }
 
         # Data to upload to Codecov

@@ -52,6 +52,7 @@ request_data = {
     "job_code": "job_code",
     "name": "name",
     "version": codecov_cli_version,
+    "ci_service": "ci_service",
 }
 
 

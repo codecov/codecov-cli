@@ -327,6 +327,46 @@ class TestCoverageFileFinderUserInput:
         expected_paths = sorted([file.get_filename() for file in expected])
         assert result == expected_paths
 
+    def test_find_coverage_files_with_user_specified_files_in_default_ignored_folder(
+        self, coverage_file_finder_fixture
+    ):
+
+        (
+            project_root,
+            coverage_file_finder,
+        ) = coverage_file_finder_fixture
+
+        # Create some sample coverage files
+        coverage_files = [
+            project_root / "coverage.xml",
+            project_root / "subdirectory" / "test_coverage.xml",
+            project_root / "test_file.abc",
+            project_root / "subdirectory" / "another_file.abc",
+            project_root / ".tox" / "another_file.abc",
+        ]
+        (project_root / "subdirectory").mkdir()
+        (project_root / ".tox").mkdir()
+        for file in coverage_files:
+            file.touch()
+
+        coverage_file_finder.explicitly_listed_files = [
+            project_root / ".tox" / "another_file.abc",
+        ]
+        result = sorted(
+            [file.get_filename() for file in coverage_file_finder.find_files()]
+        )
+
+        expected = [
+            UploadCollectionResultFile(Path(f"{project_root}/coverage.xml")),
+            UploadCollectionResultFile(
+                Path(f"{project_root}/subdirectory/test_coverage.xml")
+            ),
+            UploadCollectionResultFile(Path(f"{project_root}/.tox/another_file.abc")),
+        ]
+        expected_paths = sorted([file.get_filename() for file in expected])
+
+        assert result == expected_paths
+
     def test_find_coverage_files_with_user_specified_files_in_excluded(
         self, capsys, coverage_file_finder_fixture
     ):

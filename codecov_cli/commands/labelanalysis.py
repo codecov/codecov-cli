@@ -192,7 +192,7 @@ def label_analysis(
                 runner.process_labelanalysis_result(request_result)
             else:
                 _dry_run_output(
-                    LabelAnalysisRequestResult(request_result),
+                    request_result,
                     runner,
                     dry_run_format,
                     # It's possible that the task had processing errors and fallback to all tests
@@ -287,16 +287,14 @@ def _potentially_calculate_absent_labels(
         global_level_labels_set = set(request_result.get("global_level_labels", []))
         final_result = LabelAnalysisRequestResult(
             {
-                "present_report_labels": sorted(
+                "present_report_labels": list(
                     present_report_labels_set & requested_labels_set
                 ),
-                "present_diff_labels": sorted(
+                "present_diff_labels": list(
                     present_diff_labels_set & requested_labels_set
                 ),
-                "absent_labels": sorted(
-                    requested_labels_set - present_report_labels_set
-                ),
-                "global_level_labels": sorted(
+                "absent_labels": list(requested_labels_set - present_report_labels_set),
+                "global_level_labels": list(
                     global_level_labels_set & requested_labels_set
                 ),
             }
@@ -312,6 +310,10 @@ def _potentially_calculate_absent_labels(
             )
         ),
     )
+    # Requested labels is important because it preserves the collection order
+    # of the testing tool. Running tests out of order might surface errors with
+    # the tests.
+    final_result["collected_labels_in_order"] = requested_labels
     return final_result
 
 
@@ -369,15 +371,15 @@ def _send_labelanalysis_request(payload, url, token_header):
 
 
 def _dry_run_json_output(
-    labels_to_run: set,
-    labels_to_skip: set,
+    labels_to_run: List[str],
+    labels_to_skip: List[str],
     runner_options: List[str],
     fallback_reason: str = None,
 ) -> None:
     output_as_dict = dict(
         runner_options=runner_options,
-        ats_tests_to_run=sorted(labels_to_run),
-        ats_tests_to_skip=sorted(labels_to_skip),
+        ats_tests_to_run=labels_to_run,
+        ats_tests_to_skip=labels_to_skip,
         ats_fallback_reason=fallback_reason,
     )
     # ⚠️ DON'T use logger
@@ -386,8 +388,8 @@ def _dry_run_json_output(
 
 
 def _dry_run_list_output(
-    labels_to_run: set,
-    labels_to_skip: set,
+    labels_to_run: List[str],
+    labels_to_skip: List[str],
     runner_options: List[str],
     fallback_reason: str = None,
 ) -> None:
@@ -395,12 +397,12 @@ def _dry_run_list_output(
         logger.warning(f"label-analysis didn't run correctly. Error: {fallback_reason}")
 
     to_run_line = " ".join(
-        sorted(map(lambda l: f"'{l}'", runner_options))
-        + sorted(map(lambda l: f"'{l}'", labels_to_run))
+        list(map(lambda l: f"'{l}'", runner_options))
+        + list(map(lambda l: f"'{l}'", labels_to_run))
     )
     to_skip_line = " ".join(
-        sorted(map(lambda l: f"'{l}'", runner_options))
-        + sorted(map(lambda l: f"'{l}'", labels_to_skip))
+        list(map(lambda l: f"'{l}'", runner_options))
+        + list(map(lambda l: f"'{l}'", labels_to_skip))
     )
     # ⚠️ DON'T use logger
     # logger goes to stderr, we want it in stdout
@@ -417,10 +419,8 @@ def _dry_run_output(
     # failed at some point. So it was not a completely successful task.
     fallback_reason: str = None,
 ):
-    labels_to_run = set(
-        result.absent_labels + result.global_level_labels + result.present_diff_labels
-    )
-    labels_to_skip = set(result.present_report_labels) - labels_to_run
+    labels_to_run = result.get_tests_to_run_in_collection_order()
+    labels_to_skip = result.get_tests_to_skip_in_collection_order()
 
     format_lookup = {
         "json": _dry_run_json_output,
@@ -451,6 +451,7 @@ def _fallback_to_collected_labels(
                 "absent_labels": collected_labels,
                 "present_diff_labels": [],
                 "global_level_labels": [],
+                "collected_labels_in_order": collected_labels,
             }
         )
         if not dry_run:

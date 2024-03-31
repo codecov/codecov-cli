@@ -67,7 +67,7 @@ def parse_git_service(remote_repo_url: str):
     parsed_url = urlparse(remote_repo_url)
     service = None
 
-    if remote_repo_url.startswith("https://"):
+    if remote_repo_url.startswith("https://") or remote_repo_url.startswith("ssh://"):
         netloc = parsed_url.netloc
         if "@" in netloc:
             netloc = netloc.split("@", 1)[1]

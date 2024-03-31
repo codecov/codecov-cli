@@ -53,6 +53,10 @@ from codecov_cli.helpers.git_services.github import Github
         ("ssh://host.abc.xz/owner/repo.git", "owner/repo"),
         ("user-name@host.xz:owner/repo.git/", "owner/repo"),
         ("host.xz:owner/repo.git/", "owner/repo"),
+        (
+            "ssh://git@github.com/reMarkable/cloud-vernemq-auth.git",
+            "reMarkable/cloud-vernemq-auth",
+        ),
     ],
 )
 def test_parse_slug_valid_address(address, slug):
@@ -107,6 +111,9 @@ def test_parse_slug_invalid_address(address):
             "bitbucket",
         ),
         ("git@bitbucket.org:name-codecov/abc.git.git", "bitbucket"),
+        ("git@github.com:reMarkable/cloud-vernemq-auth.git", "github"),
+        ("ssh://git@github.com/reMarkable/cloud-vernemq-auth.git", "github"),
+        ("ssh://git@github.com:reMarkable/cloud-vernemq-auth.git", "github"),
     ],
 )
 def test_parse_git_service_valid_address(address, git_service):
@@ -120,6 +127,7 @@ def test_parse_git_service_valid_address(address, git_service):
         ("ssh://host.abc.xz/owner/repo.git"),
         ("user-name@host.xz:owner/repo.git/"),
         ("host.xz:owner/repo.git/"),
+        ("/home/espen/source/github/escarls/codecov-cli/"),
     ],
 )
 def test_parse_git_service_invalid_service(url):

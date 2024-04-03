@@ -87,9 +87,6 @@ def process_test_results(
 
     message = build_message(payload)
 
-    os.environ["GITHUB_STEP_SUMMARY"] = message
-
-    print("Done!")
     print(message)
 
 

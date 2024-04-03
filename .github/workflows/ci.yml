@@ -164,4 +164,4 @@ jobs:
     - name: Dogfooding codecov-cli
       if: ${{ !cancelled() }}
       run: |
-        codecovcli process-test-results
+        codecovcli process-test-results >> $GITHUB_STEP_SUMMARY

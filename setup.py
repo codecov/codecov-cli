@@ -25,6 +25,7 @@ setup(
         "responses==0.21.*",
         "tree-sitter==0.20.*",
         "test-results-parser @ https://github.com/codecov/test-results-parser/archive/5515e960d5d38881036e9127f86320efca649f13.tar.gz#egg=test-results-parser",
+        "regex",
     ],
     entry_points={
         "console_scripts": [

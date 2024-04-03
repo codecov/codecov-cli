@@ -1,7 +1,7 @@
 import os
 import pathlib
 from dataclasses import dataclass
-from enum import Enu
+from enum import Enum
 from typing import List
 
 import click

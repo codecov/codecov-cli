@@ -162,6 +162,6 @@ jobs:
       run: |
         pytest --cov --junitxml=junit.xml
     - name: Dogfooding codecov-cli
-      if: ${{ !cancelled() && !github.event.pull_request.head.repo.fork && github.repository_owner == 'codecov' }}
+      if: ${{ !cancelled() }}
       run: |
         codecovcli process-test-results

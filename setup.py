@@ -24,7 +24,7 @@ setup(
         "pyyaml==6.*",
         "responses==0.21.*",
         "tree-sitter==0.20.*",
-        "test-results-parser @ https://github.com/codecov/test-results-parser/archive/5515e960d5d38881036e9127f86320efca649f13.tar.gz#egg=test-results-parser",
+        "test-results-parser @ https://github.com/codecov/test-results-parser/archive/0bc7838d3bdde0c014adb38f1b79fce22d5ba727.tar.gz#egg=test-results-parser",
         "regex",
     ],
     entry_points={

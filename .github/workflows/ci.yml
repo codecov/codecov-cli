@@ -135,6 +135,8 @@ jobs:
 
   test-process-test-results-cmd:
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     strategy:
       fail-fast: false
       matrix:
@@ -164,4 +166,4 @@ jobs:
     - name: Dogfooding codecov-cli
       if: ${{ !cancelled() }}
       run: |
-        codecovcli process-test-results >> $GITHUB_STEP_SUMMARY
+        codecovcli process-test-results --provider-token ${{ secrets.GITHUB_TOKEN }}

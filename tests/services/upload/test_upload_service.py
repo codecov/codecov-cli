@@ -521,9 +521,9 @@ def test_do_upload_logic_happy_path_test_results(mocker):
             env_vars=None,
             flags=None,
             name="name",
-            network_filter=None,
-            network_prefix=None,
-            network_root_folder=None,
+            network_filter="some_dir",
+            network_prefix="hello/",
+            network_root_folder="root/",
             files_search_root_folder=None,
             files_search_exclude_folders=None,
             files_search_explicitly_listed_files=None,
@@ -545,7 +545,7 @@ def test_do_upload_logic_happy_path_test_results(mocker):
     assert res == UploadSender.send_upload_data.return_value
     mock_select_preparation_plugins.assert_not_called
     mock_select_file_finder.assert_called_with(None, None, None, False, "test_results")
-    mock_select_network_finder.assert_called_with(versioning_system, network_filter=None, network_prefix=None, network_root_folder=None)
+    mock_select_network_finder.assert_called_with(versioning_system, network_filter="some_dir", network_prefix="hello/", network_root_folder="root/")
     mock_generate_upload_data.assert_called_with("test_results")
     mock_send_upload_data.assert_called_with(
         mock_generate_upload_data.return_value,

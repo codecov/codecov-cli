@@ -18,29 +18,6 @@ def _turn_env_vars_into_dict(ctx, params, value):
 
 _global_upload_options = [
     click.option(
-        "-B",
-        "--branch",
-        help="Branch to which this commit belongs to",
-        cls=CodecovOption,
-        fallback_field=FallbackFieldEnum.branch,
-    ),
-    click.option(
-        "-b",
-        "--build",
-        "--build-code",
-        "build_code",
-        cls=CodecovOption,
-        help="Specify the build number manually",
-        fallback_field=FallbackFieldEnum.build_code,
-    ),
-    click.option(
-        "--build-url",
-        "build_url",
-        cls=CodecovOption,
-        help="The URL of the build where this is running",
-        fallback_field=FallbackFieldEnum.build_url,
-    ),
-    click.option(
         "--report-code",
         help="The code of the report. If unsure, leave default",
         default="default",
@@ -97,6 +74,22 @@ _global_upload_options = [
         default=False,
     ),
     click.option(
+        "-b",
+        "--build",
+        "--build-code",
+        "build_code",
+        cls=CodecovOption,
+        help="Specify the build number manually",
+        fallback_field=FallbackFieldEnum.build_code,
+    ),
+    click.option(
+        "--build-url",
+        "build_url",
+        cls=CodecovOption,
+        help="The URL of the build where this is running",
+        fallback_field=FallbackFieldEnum.build_url,
+    ),
+    click.option(
         "--job-code",
         cls=CodecovOption,
         fallback_field=FallbackFieldEnum.job_code,
@@ -105,6 +98,13 @@ _global_upload_options = [
         "-n",
         "--name",
         help="Custom defined name of the upload. Visible in Codecov UI",
+    ),
+    click.option(
+        "-B",
+        "--branch",
+        help="Branch to which this commit belongs to",
+        cls=CodecovOption,
+        fallback_field=FallbackFieldEnum.branch,
     ),
     click.option(
         "-P",

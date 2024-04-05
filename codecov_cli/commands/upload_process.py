@@ -31,6 +31,8 @@ def upload_process(
     env_vars: typing.Dict[str, str],
     flags: typing.List[str],
     name: typing.Optional[str],
+    network_filter: typing.Optional[str],
+    network_prefix: typing.Optional[str],
     network_root_folder: pathlib.Path,
     files_search_root_folder: pathlib.Path,
     files_search_exclude_folders: typing.List[pathlib.Path],

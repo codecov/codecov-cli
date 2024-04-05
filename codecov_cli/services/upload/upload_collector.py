@@ -94,10 +94,10 @@ class UploadCollector(object):
         }
 
         result = []
-        for file in files:
+        for filename in files:
             for glob, fix_patterns in file_regex_patterns.items():
-                if fnmatch(file.path, glob):
-                    result.append(self._get_file_fixes(file.path, fix_patterns))
+                if fnmatch(filename, glob):
+                    result.append(self._get_file_fixes(filename, fix_patterns))
                     break
 
         return result
@@ -169,7 +169,7 @@ class UploadCollector(object):
             network=network,
             files=files,
             file_fixes=(
-                self._produce_file_fixes(files)
+                self._produce_file_fixes([file.path for file in files])
                 if report_type == "coverage"
                 else []
             ),

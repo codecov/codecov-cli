@@ -36,10 +36,10 @@ class UploadCollector(object):
         self.file_finder = file_finder
         self.disable_file_fixes = disable_file_fixes
 
-    def _produce_file_fixes_for_network(
-        self, network: typing.List[str]
+    def _produce_file_fixes(
+        self, files: typing.List[str]
     ) -> typing.List[UploadCollectionResultFileFixer]:
-        if not network or self.disable_file_fixes:
+        if not files or self.disable_file_fixes:
             return []
         # patterns that we don't need to specify a reason for
         empty_line_regex = re.compile(r"^\s*$")
@@ -94,10 +94,10 @@ class UploadCollector(object):
         }
 
         result = []
-        for filename in network:
+        for file in files:
             for glob, fix_patterns in file_regex_patterns.items():
-                if fnmatch(filename, glob):
-                    result.append(self._get_file_fixes(filename, fix_patterns))
+                if fnmatch(file.path, glob):
+                    result.append(self._get_file_fixes(file.path, fix_patterns))
                     break
 
         return result
@@ -169,7 +169,7 @@ class UploadCollector(object):
             network=network,
             files=files,
             file_fixes=(
-                self._produce_file_fixes_for_network(network)
+                self._produce_file_fixes(files)
                 if report_type == "coverage"
                 else []
             ),

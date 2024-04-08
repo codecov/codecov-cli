@@ -17,13 +17,14 @@ class NetworkFinder(object):
         self.network_prefix = network_prefix
         self.network_root_folder = network_root_folder
 
-    def find_files(self) -> typing.List[str]:
+    def find_files(self, ignore_filters=False) -> typing.List[str]:
         files = self.versioning_system.list_relevant_files(self.network_root_folder)
 
-        if self.network_filter:
-            files = [file for file in files if file.startswith(self.network_filter)]
-        if self.network_prefix:
-            files = [self.network_prefix + file for file in files]
+        if not ignore_filters:
+            if self.network_filter:
+                files = [file for file in files if file.startswith(self.network_filter)]
+            if self.network_prefix:
+                files = [self.network_prefix + file for file in files]
 
         return files
 

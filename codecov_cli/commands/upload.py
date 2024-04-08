@@ -166,7 +166,7 @@ _global_upload_options = [
     ),
     click.option(
         "--network-filter",
-        help="Specify a filter on the files listed in the network section of the Codecov report. Useful for upload-specific path fixing",
+        help="Specify a filter on the files listed in the network section of the Codecov report. This will only add files whose path begin with the specified filter. Useful for upload-specific path fixing",
     ),
     click.option(
         "--network-prefix",

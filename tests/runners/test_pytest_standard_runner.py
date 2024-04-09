@@ -55,7 +55,7 @@ class TestPythonStandardRunner(object):
         )
         runner = PytestStandardRunner(params)
         # Adding invalid config options emits a warning
-        assert mock_warning.called_with(
+        mock_warning.assert_called_with(
             "Config parameter 'some_missing_option' is unknonw."
         )
         # Warnings don't change the config

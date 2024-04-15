@@ -61,13 +61,16 @@ def parse_git_service(remote_repo_url: str):
     Possible cases we're considering:
     - https://github.com/codecov/codecov-cli.git returns github
     - git@github.com:codecov/codecov-cli.git returns github
+    - ssh://git@github.com/gitcodecov/codecov-cli returns github
+    - ssh://git@github.com:gitcodecov/codecov-cli returns github
     - https://user-name@bitbucket.org/namespace-codecov/first_repo.git returns bitbucket
     """
     services = [service.value for service in GitService]
     parsed_url = urlparse(remote_repo_url)
     service = None
 
-    if remote_repo_url.startswith("https://"):
+    scheme = parsed_url.scheme
+    if scheme in ("https", "ssh"):
         netloc = parsed_url.netloc
         if "@" in netloc:
             netloc = netloc.split("@", 1)[1]

@@ -60,6 +60,6 @@ def load_cli_config(codecov_yml_path: typing.Optional[pathlib.Path]):
         )
         return None
 
-    logger.debug(f"meow meow meownfig from {codecov_yml_path}")
+    logger.debug(f"Loading config from {codecov_yml_path}")
     with open(codecov_yml_path, "r") as file_stream:
         return yaml.safe_load(file_stream.read())

@@ -65,7 +65,6 @@ class LegacyUploadSender(object):
             "pr": pull_request_number,
             "job": job_code,
         }
-        logger.debug(f"THIS IS PARAMS {params}")
 
         if token:
             headers = {"X-Upload-Token": token}

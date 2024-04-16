@@ -77,25 +77,22 @@ class UploadSender(object):
             commit_sha,
             report_code,
         )
-        logger.debug(f"THIS IS DATA {data}")
         # Data that goes to storage
         reports_payload = self._generate_payload(
             upload_data, env_vars, upload_file_type
         )
 
-        logger.debug("Sending upload iMEOW request to Codecov")
         resp_from_codecov = send_post_request(
             url=url,
             data=data,
             headers=headers,
         )
-        logger.debug(f"THIS IS DATA AGAIN {data}")
         if resp_from_codecov.status_code >= 400:
             return resp_from_codecov
         resp_json_obj = json.loads(resp_from_codecov.text)
         if resp_json_obj.get("url"):
             logger.info(
-                f"oad is now processing. When finished, results will be available at: {resp_json_obj.get('url')}"
+                f"Your upload is now processing. When finished, results will be available at: {resp_json_obj.get('url')}"
             )
         logger.debug(
             "Upload request to Codecov complete.",

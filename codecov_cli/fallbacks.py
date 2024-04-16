@@ -11,7 +11,6 @@ class FallbackFieldEnum(Enum):
     commit_sha = auto()
     git_service = auto()
     job_code = auto()
-    name = auto()
     pull_request_number = auto()
     service = auto()
     slug = auto()

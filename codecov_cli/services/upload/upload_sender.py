@@ -89,6 +89,7 @@ class UploadSender(object):
             data=data,
             headers=headers,
         )
+        logger.debug(f"THIS IS DATA AGAIN {data}")
         if resp_from_codecov.status_code >= 400:
             return resp_from_codecov
         resp_json_obj = json.loads(resp_from_codecov.text)

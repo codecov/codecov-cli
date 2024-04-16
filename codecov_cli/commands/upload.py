@@ -98,6 +98,7 @@ _global_upload_options = [
         "-n",
         "--name",
         help="Custom defined name of the upload. Visible in Codecov UI",
+        cls=CodecovOption,
         fallback_field=FallbackFieldEnum.build_code,
     ),
     click.option(

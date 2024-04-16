@@ -82,6 +82,7 @@ class UploadSender(object):
             upload_data, env_vars, upload_file_type
         )
 
+        logger.debug("Sending upload request to Codecov")
         resp_from_codecov = send_post_request(
             url=url,
             data=data,

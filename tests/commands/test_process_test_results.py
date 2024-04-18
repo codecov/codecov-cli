@@ -1,9 +1,10 @@
+import logging
 import os
 
 from click.testing import CliRunner
+
 from codecov_cli.main import cli
 from codecov_cli.types import RequestResult
-import logging
 
 
 def test_process_test_results(

@@ -1,22 +1,22 @@
+import logging
 import os
 import pathlib
 from dataclasses import dataclass
-import logging
 
 import click
 from test_results_parser import (
     Outcome,
-    Testrun,
-    parse_junit_xml,
-    build_message,
     ParserError,
+    Testrun,
+    build_message,
+    parse_junit_xml,
 )
 
-from codecov_cli.services.upload.file_finder import select_file_finder
 from codecov_cli.helpers.request import (
-    send_post_request,
     log_warnings_and_errors_if_any,
+    send_post_request,
 )
+from codecov_cli.services.upload.file_finder import select_file_finder
 
 logger = logging.getLogger("codecovcli")
 

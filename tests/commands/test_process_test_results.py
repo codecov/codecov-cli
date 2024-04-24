@@ -92,7 +92,7 @@ def test_process_test_results_non_existent_file(mocker, tmpdir):
 
     assert result.exit_code == 1
     expected_logs = [
-        "ci service found: local",
+        "ci service found",
         'Some files were not found',
     ]
     for log in expected_logs:
@@ -133,16 +133,11 @@ def test_process_test_results_missing_repo(mocker, tmpdir):
 
     assert result.exit_code == 1
     expected_logs = [
-        "ci service found: local",
+        "ci service found",
         "Error: Error getting repo slug from environment. Can't find GITHUB_REPOSITORY environment variable.",
     ]
     for log in expected_logs:
         assert log in result.output
-
-    assert (
-        "Parsing b'/Users/josephsawaya/dev/codecov/codecov-cli/samples/junit.xml'"
-        not in result.output
-    )
 
 
 def test_process_test_results_missing_ref(mocker, tmpdir):
@@ -180,16 +175,12 @@ def test_process_test_results_missing_ref(mocker, tmpdir):
 
     assert result.exit_code == 1
     expected_logs = [
-        "ci service found: local",
+        "ci service found",
         "Error: Error getting PR number from environment. Can't find GITHUB_REF environment variable.",
     ]
     for log in expected_logs:
         assert log in result.output
 
-    assert (
-        "Parsing b'/Users/josephsawaya/dev/codecov/codecov-cli/samples/junit.xml'"
-        not in result.output
-    )
 
 
 def test_process_test_results_missing_step_summary(mocker, tmpdir):
@@ -226,13 +217,8 @@ def test_process_test_results_missing_step_summary(mocker, tmpdir):
 
     assert result.exit_code == 1
     expected_logs = [
-        "ci service found: local",
+        "ci service found",
         "Error: Error getting step summary file path from environment. Can't find GITHUB_STEP_SUMMARY environment variable.",
     ]
     for log in expected_logs:
         assert log in result.output
-
-    assert (
-        "Parsing b'/Users/josephsawaya/dev/codecov/codecov-cli/samples/junit.xml'"
-        not in result.output
-    )

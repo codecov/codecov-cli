@@ -2,6 +2,7 @@ import logging
 import os
 import pathlib
 from dataclasses import dataclass
+from typing import List
 
 import click
 from test_results_parser import (
@@ -74,7 +75,7 @@ def process_test_results_options(func):
 
 @dataclass
 class TestResultsNotificationPayload:
-    failures: list[Testrun]
+    failures: List[Testrun]
     failed: int = 0
     passed: int = 0
     skipped: int = 0

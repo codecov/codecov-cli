@@ -81,6 +81,18 @@ def retry_request(func):
 
 
 @retry_request
+def send_get_request(
+    url: str, headers: dict = None, params: dict = None
+):
+    return request_result(get(url=url, headers=headers, params=params))
+
+@retry_request
+def send_patch_request(
+    url: str, headers: dict = None, json: dict = None
+):
+    return request_result(patch(url=url, headers=headers, json=json))
+
+@retry_request
 def send_post_request(
     url: str, data: dict = None, headers: dict = None, params: dict = None
 ):

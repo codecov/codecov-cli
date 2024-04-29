@@ -2,8 +2,8 @@ import logging
 import os
 import pathlib
 from dataclasses import dataclass
-from typing import List
 from json import loads
+from typing import List
 
 import click
 from test_results_parser import (
@@ -16,9 +16,9 @@ from test_results_parser import (
 
 from codecov_cli.helpers.request import (
     log_warnings_and_errors_if_any,
-    send_post_request,
     send_get_request,
-    send_patch_request
+    send_patch_request,
+    send_post_request,
 )
 from codecov_cli.services.upload.file_finder import select_file_finder
 
@@ -67,12 +67,7 @@ _process_test_results_options = [
         type=str,
         default=None,
     ),
-    click.option(
-        "--matrix",
-        help="github actions matrix",
-        type=str,
-        default=None
-    )
+    click.option("--matrix", help="github actions matrix", type=str, default=None),
 ]
 
 
@@ -93,7 +88,12 @@ class TestResultsNotificationPayload:
 @click.command()
 @process_test_results_options
 def process_test_results(
-    dir=None, files=None, exclude_folders=None, disable_search=None, provider_token=None, matrix=None
+    dir=None,
+    files=None,
+    exclude_folders=None,
+    disable_search=None,
+    provider_token=None,
+    matrix=None,
 ):
 
     if provider_token is None:
@@ -143,7 +143,7 @@ def process_test_results(
     create_github_comment(provider_token, slug, pr_number, message, matrix)
 
 
-def create_github_comment(token, repo_slug, pr_number, message, matrix: str):
+def create_github_comment(token, repo_slug, pr_number, message, matrix):
     headers = {
         "Accept": "application/vnd.github+json",
         "Authorization": f"Bearer {token}",
@@ -154,12 +154,13 @@ def create_github_comment(token, repo_slug, pr_number, message, matrix: str):
     # list comments
     result = send_get_request(url=url, headers=headers)
     comments = loads(result.text)
-    matrix = matrix.strip()
-    for comment in comments:        
+    if matrix is not None:
+        matrix = matrix.strip()
+    for comment in comments:
         if f"<!-- Codecov comment for {matrix} -->" in comment:
             logger.info("Patching github comment")
-            
-            url = comment['url']
+
+            url = comment["url"]
             log_warnings_and_errors_if_any(
                 send_patch_request(url=url, json={"body": message}, headers=headers),
                 "Patching test results comment",

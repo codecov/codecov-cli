@@ -67,7 +67,12 @@ _process_test_results_options = [
         type=str,
         default=None,
     ),
-    click.option("--matrix", help="github actions matrix", type=str, default=None),
+    click.option(
+        "--matrix",
+        help="Used by the test results action to let the CLI know which combination of values are currently selected for the matrix in the Github Actions run. This is used so that different runs in the matrix don't overwrite each other's comments.",
+        type=str,
+        default=None,
+    ),
 ]
 
 

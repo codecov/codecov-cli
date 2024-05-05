@@ -46,6 +46,7 @@ class UploadCollector(object):
         comment_regex = re.compile(r"^\s*\/\/.*$")
         bracket_regex = re.compile(r"^\s*[\{\}]\s*(\/\/.*)?$")
         list_regex = re.compile(r"^\s*[\]\[]\s*(\/\/.*)?$")
+        paren_regex = re.compile(r"^\s*[\(\)]\s*(\/\/.*)?$")
         go_function_regex = re.compile(r"^\s*func\s*[\{]\s*(\/\/.*)?$")
         php_end_bracket_regex = re.compile(r"^\s*\);\s*(\/\/.*)?$")
 
@@ -54,7 +55,9 @@ class UploadCollector(object):
         lcov_excel_regex = re.compile(r"\/\/ LCOV_EXCL")
 
         kt_patterns_to_apply = fix_patterns_to_apply(
-            [bracket_regex], [comment_block_regex], True
+            [bracket_regex, paren_regex],
+            [comment_block_regex],
+            True
         )
         go_patterns_to_apply = fix_patterns_to_apply(
             [empty_line_regex, comment_regex, bracket_regex, go_function_regex],

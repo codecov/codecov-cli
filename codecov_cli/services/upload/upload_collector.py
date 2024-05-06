@@ -55,9 +55,7 @@ class UploadCollector(object):
         lcov_excel_regex = re.compile(r"\/\/ LCOV_EXCL")
 
         kt_patterns_to_apply = fix_patterns_to_apply(
-            [bracket_regex, paren_regex],
-            [comment_block_regex],
-            True
+            [bracket_regex, paren_regex], [comment_block_regex], True
         )
         go_patterns_to_apply = fix_patterns_to_apply(
             [empty_line_regex, comment_regex, bracket_regex, go_function_regex],
@@ -74,7 +72,6 @@ class UploadCollector(object):
             [],
             False,
         )
-
         cpp_swift_vala_patterns_to_apply = fix_patterns_to_apply(
             [empty_line_regex, bracket_regex],
             [lcov_excel_regex],

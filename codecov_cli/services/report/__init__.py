@@ -9,6 +9,7 @@ from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.helpers.encoder import decode_slug, encode_slug
 from codecov_cli.helpers.git import get_pull, is_fork_pr
 from codecov_cli.helpers.request import (
+    get_auth_header,
     get_token_header_or_fail,
     log_warnings_and_errors_if_any,
     request_result,
@@ -26,7 +27,6 @@ def create_report_logic(
     service: str,
     token: str,
     enterprise_url: str,
-    pull_request_number: int,
     fail_on_error: bool = False,
 ):
     encoded_slug = encode_slug(slug)
@@ -37,27 +37,16 @@ def create_report_logic(
         token,
         encoded_slug,
         enterprise_url,
-        pull_request_number,
     )
     log_warnings_and_errors_if_any(sending_result, "Report creating", fail_on_error)
     return sending_result
 
 
 def send_create_report_request(
-    commit_sha, code, service, token, encoded_slug, enterprise_url, pull_request_number
+    commit_sha, code, service, token, encoded_slug, enterprise_url
 ):
     data = {"code": code}
-    decoded_slug = decode_slug(encoded_slug)
-    pull_dict = (
-        get_pull(service, decoded_slug, pull_request_number) if not token else None
-    )
-    if is_fork_pr(pull_dict):
-        headers = {
-            "X-Tokenless": pull_dict["head"]["slug"],
-            "X-Tokenless-PR": pull_request_number,
-        }
-    else:
-        headers = get_token_header_or_fail(token)
+    headers = get_auth_header(token)
     upload_url = enterprise_url or CODECOV_API_URL
     url = f"{upload_url}/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports"
     return send_post_request(url=url, headers=headers, data=data)

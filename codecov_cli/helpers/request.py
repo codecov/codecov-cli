@@ -1,4 +1,5 @@
 import logging
+import os
 from sys import exit
 from time import sleep
 
@@ -93,6 +94,15 @@ def get_token_header_or_fail(token: str) -> dict:
             "Codecov token not found. Please provide Codecov token with -t flag."
         )
     return {"Authorization": f"token {token}"}
+
+
+def get_auth_header(token):
+    tokenless = os.environ.get("TOKENLESS", None)
+    if tokenless:
+        headers = {"X-Tokenless": tokenless}
+    else:
+        headers = get_token_header_or_fail(token)
+    return headers
 
 
 @retry_request

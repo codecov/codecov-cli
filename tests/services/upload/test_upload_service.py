@@ -83,7 +83,12 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
         cli_config, ["first_plugin", "another", "forth"]
     )
     mock_select_file_finder.assert_called_with(None, None, None, False, "coverage")
-    mock_select_network_finder.assert_called_with(versioning_system, network_filter=None, network_prefix=None, network_root_folder=None)
+    mock_select_network_finder.assert_called_with(
+        versioning_system,
+        network_filter=None,
+        network_prefix=None,
+        network_root_folder=None,
+    )
     mock_generate_upload_data.assert_called_with("coverage")
     mock_send_upload_data.assert_called_with(
         mock_generate_upload_data.return_value,
@@ -172,7 +177,12 @@ def test_do_upload_logic_happy_path(mocker):
         cli_config, ["first_plugin", "another", "forth"]
     )
     mock_select_file_finder.assert_called_with(None, None, None, False, "coverage")
-    mock_select_network_finder.assert_called_with(versioning_system, network_filter=None, network_prefix=None, network_root_folder=None)
+    mock_select_network_finder.assert_called_with(
+        versioning_system,
+        network_filter=None,
+        network_prefix=None,
+        network_root_folder=None,
+    )
     mock_generate_upload_data.assert_called_with("coverage")
     mock_send_upload_data.assert_called_with(
         mock_generate_upload_data.return_value,
@@ -248,7 +258,12 @@ def test_do_upload_logic_dry_run(mocker):
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     mock_select_file_finder.assert_called_with(None, None, None, False, "coverage")
-    mock_select_network_finder.assert_called_with(versioning_system, network_filter=None, network_prefix=None, network_root_folder=None)
+    mock_select_network_finder.assert_called_with(
+        versioning_system,
+        network_filter=None,
+        network_prefix=None,
+        network_root_folder=None,
+    )
     assert mock_generate_upload_data.call_count == 1
     assert mock_send_upload_data.call_count == 0
     mock_select_preparation_plugins.assert_called_with(
@@ -403,7 +418,12 @@ def test_do_upload_no_cov_reports_found(mocker):
         cli_config, ["first_plugin", "another", "forth"]
     )
     mock_select_file_finder.assert_called_with(None, None, None, False, "coverage")
-    mock_select_network_finder.assert_called_with(versioning_system, network_filter=None, network_prefix=None, network_root_folder=None)
+    mock_select_network_finder.assert_called_with(
+        versioning_system,
+        network_filter=None,
+        network_prefix=None,
+        network_root_folder=None,
+    )
     mock_generate_upload_data.assert_called_with("coverage")
     mock_upload_completion_call.assert_called_with(
         commit_sha="commit_sha",
@@ -477,7 +497,12 @@ def test_do_upload_rase_no_cov_reports_found_error(mocker):
         cli_config, ["first_plugin", "another", "forth"]
     )
     mock_select_file_finder.assert_called_with(None, None, None, False, "coverage")
-    mock_select_network_finder.assert_called_with(versioning_system, network_filter=None, network_prefix=None, network_root_folder=None)
+    mock_select_network_finder.assert_called_with(
+        versioning_system,
+        network_filter=None,
+        network_prefix=None,
+        network_root_folder=None,
+    )
     mock_generate_upload_data.assert_called_with("coverage")
 
 
@@ -545,7 +570,12 @@ def test_do_upload_logic_happy_path_test_results(mocker):
     assert res == UploadSender.send_upload_data.return_value
     mock_select_preparation_plugins.assert_not_called
     mock_select_file_finder.assert_called_with(None, None, None, False, "test_results")
-    mock_select_network_finder.assert_called_with(versioning_system, network_filter="some_dir", network_prefix="hello/", network_root_folder="root/")
+    mock_select_network_finder.assert_called_with(
+        versioning_system,
+        network_filter="some_dir",
+        network_prefix="hello/",
+        network_root_folder="root/",
+    )
     mock_generate_upload_data.assert_called_with("test_results")
     mock_send_upload_data.assert_called_with(
         mock_generate_upload_data.return_value,

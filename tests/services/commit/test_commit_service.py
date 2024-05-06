@@ -1,4 +1,5 @@
 import json
+import os
 import uuid
 
 import requests
@@ -177,6 +178,8 @@ def test_commit_sender_with_forked_repo(mocker):
         "get",
         side_effect=mock_request,
     )
+
+    os.environ["TOKENLESS"] = "user:branch"
     res = send_commit_data(
         "commit_sha",
         "parent_sha",
@@ -193,7 +196,7 @@ def test_commit_sender_with_forked_repo(mocker):
             "commitid": "commit_sha",
             "parent_commit_id": "parent_sha",
             "pullid": "1",
-            "branch": "user_forked_repo/codecov-cli:branch",
+            "branch": "branch",
         },
-        headers={"X-Tokenless": "user_forked_repo/codecov-cli", "X-Tokenless-PR": "1"},
+        headers={"X-Tokenless": "user:branch"},
     )

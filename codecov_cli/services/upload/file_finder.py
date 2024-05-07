@@ -253,7 +253,11 @@ class FileFinder(object):
         user_files_paths_resolved = [path.resolve() for path in user_files_paths]
         for filepath in self.explicitly_listed_files:
             if filepath.resolve() not in user_files_paths_resolved:
-                not_found_files.append(filepath)
+                ## The file given might be linked or in a parent dir, check to see if it exists
+                if filepath.exists():
+                    user_files_paths.append(filepath)
+                else:
+                    not_found_files.append(filepath)
 
         if not_found_files:
             logger.warning(

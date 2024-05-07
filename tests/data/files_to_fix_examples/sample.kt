@@ -13,6 +13,9 @@ secnod line
     should fix previous
 }
 
+data class Key(
+    val key: String? = null
+)
 
     /*
 

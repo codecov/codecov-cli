@@ -18,12 +18,12 @@ def test_fix_kt_files():
     assert len(fixes) == 1
     fixes_for_kt_file = fixes[0]
 
-    assert fixes_for_kt_file.eof == 30
-    assert fixes_for_kt_file.fixed_lines_without_reason == set([1, 3, 7, 9, 12, 14])
+    assert fixes_for_kt_file.eof == 33
+    assert fixes_for_kt_file.fixed_lines_without_reason == set([1, 3, 7, 9, 12, 14, 18])
     assert fixes_for_kt_file.fixed_lines_with_reason == set(
         [
-            (17, "    /*\n"),
-            (22, "*/\n"),
+            (20, "    /*\n"),
+            (25, "*/\n"),
         ]
     )
 

@@ -13,6 +13,15 @@ logger = logging.getLogger("codecovcli")
 @click.option(
     "--code", help="The code of the report. If unsure, leave default", default="default"
 )
+@click.option(
+    "-P",
+    "--pr",
+    "--pull-request-number",
+    "pull_request_number",
+    help="Deprecated option, this option has no effect on the execution of this command anymore. Specify the pull request number mannually. Used to override pre-existing CI environment variables",
+    cls=CodecovOption,
+    fallback_field=FallbackFieldEnum.pull_request_number,
+)
 @global_options
 @click.pass_context
 def create_report(
@@ -23,6 +32,7 @@ def create_report(
     git_service: str,
     token: str,
     fail_on_error: bool,
+    pull_request_number: int,
 ):
     enterprise_url = ctx.obj.get("enterprise_url")
     logger.debug(

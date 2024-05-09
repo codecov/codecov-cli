@@ -18,7 +18,7 @@ logger = logging.getLogger("codecovcli")
     "--pr",
     "--pull-request-number",
     "pull_request_number",
-    help="Deprecated option, this option has no effect on the execution of this command anymore. Specify the pull request number mannually. Used to override pre-existing CI environment variables",
+    help="[Deprecated], this option has no effect on the execution of this command anymore. Specify the pull request number mannually. Used to override pre-existing CI environment variables",
     cls=CodecovOption,
     fallback_field=FallbackFieldEnum.pull_request_number,
 )

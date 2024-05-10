@@ -130,7 +130,7 @@ def process_test_results(
     payload = generate_message_payload(upload_collection_results)
 
     message = build_message(payload)
-
+    message += "\n<!-- Codecov comment -->"
     # write to step summary file
     with open(summary_file_path, "w") as f:
         f.write(message)

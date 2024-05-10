@@ -134,7 +134,7 @@ def process_test_results(
 
     message = build_message(payload)
     server_url = os.getenv("GITHUB_SERVER_URL")
-    message += f"\n[View checks]({server_url}/{slug}/pull/{pr_number}/checks"
+    message += f"\n\n[View checks]({server_url}/{slug}/pull/{pr_number}/checks)"
     message += "\n<!-- Codecov comment -->"
     # write to step summary file
     with open(summary_file_path, "w") as f:

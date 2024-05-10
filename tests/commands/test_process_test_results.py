@@ -2,6 +2,7 @@ import os
 
 from click.testing import CliRunner
 
+from codecov_cli import __version__
 from codecov_cli.main import cli
 from codecov_cli.types import RequestResult
 
@@ -52,7 +53,7 @@ def test_process_test_results(
         headers={
             "Accept": "application/vnd.github+json",
             "Authorization": "Bearer whatever",
-            "User-Agent": "codecov-cli/0.5.2",
+            "User-Agent": f"codecov-cli/{__version__}",
             "X-GitHub-Api-Version": "2022-11-28",
         },
     )

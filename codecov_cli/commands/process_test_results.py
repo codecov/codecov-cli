@@ -127,16 +127,18 @@ def process_test_results(
             "No JUnit XML files were found. Make sure to specify them using the --file option."
         )
 
+    # GITHUB_REF is documented here: https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables
+    pr_number = ref.split("/")[2]
+
     payload = generate_message_payload(upload_collection_results)
 
     message = build_message(payload)
+    server_url = os.getenv("GITHUB_SERVER_URL")
+    message += f"\n[View checks]({server_url}/{slug}/pull/{pr_number}/checks"
     message += "\n<!-- Codecov comment -->"
     # write to step summary file
     with open(summary_file_path, "w") as f:
         f.write(message)
-
-    # GITHUB_REF is documented here: https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables
-    pr_number = ref.split("/")[2]
 
     create_github_comment(
         provider_token,

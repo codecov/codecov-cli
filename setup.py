@@ -49,9 +49,9 @@ setup(
                 "languages/treesitterjavascript/src/tree_sitter",
                 "languages/treesitterpython/src/tree_sitter",
             ],
-            extra_compile_args=(
-                ["-Wno-unused-variable"] if system() != "Windows" else None
-            ),
+            extra_compile_args=["-Wno-unused-variable"]
+            if system() != "Windows"
+            else ["-std=c99"],
         )
     ],
 )

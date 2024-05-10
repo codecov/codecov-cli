@@ -67,12 +67,6 @@ _process_test_results_options = [
         type=str,
         default=None,
     ),
-    click.option(
-        "--matrix",
-        help="Used by the test results action to let the CLI know which combination of values are currently selected for the matrix in the Github Actions run. This is used so that different runs in the matrix don't overwrite each other's comments.",
-        type=str,
-        default=None,
-    ),
 ]
 
 
@@ -98,7 +92,6 @@ def process_test_results(
     exclude_folders=None,
     disable_search=None,
     provider_token=None,
-    matrix=None,
 ):
 
     if provider_token is None:
@@ -145,10 +138,20 @@ def process_test_results(
     # GITHUB_REF is documented here: https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables
     pr_number = ref.split("/")[2]
 
-    create_github_comment(provider_token, slug, pr_number, message, matrix)
+    create_github_comment(
+        provider_token,
+        slug,
+        pr_number,
+        message,
+    )
 
 
-def create_github_comment(token, repo_slug, pr_number, message, matrix):
+def create_github_comment(
+    token,
+    repo_slug,
+    pr_number,
+    message,
+):
     headers = {
         "Accept": "application/vnd.github+json",
         "Authorization": f"Bearer {token}",
@@ -159,10 +162,8 @@ def create_github_comment(token, repo_slug, pr_number, message, matrix):
     # list comments
     result = send_get_request(url=url, headers=headers)
     comments = loads(result.text)
-    if matrix is not None:
-        matrix = matrix.strip()
     for comment in comments:
-        if f"<!-- Codecov comment for {matrix} -->" in comment:
+        if "<!-- Codecov comment -->" in comment:
             logger.info("Patching github comment")
 
             url = comment["url"]

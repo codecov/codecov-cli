@@ -166,6 +166,6 @@ jobs:
     - name: Dogfooding codecov-cli
       if: ${{ !cancelled() }}
       run: |
-        codecovcli process-test-results --provider-token ${{ secrets.GITHUB_TOKEN }} --matrix '${{ toJSON(matrix) }}'
+        codecovcli process-test-results --provider-token ${{ secrets.GITHUB_TOKEN }}
         sleep 5
-        codecovcli process-test-results --provider-token ${{ secrets.GITHUB_TOKEN }} --matrix '${{ toJSON(matrix) }}'
+        codecovcli process-test-results --provider-token ${{ secrets.GITHUB_TOKEN }}

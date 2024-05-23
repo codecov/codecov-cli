@@ -60,10 +60,7 @@ class UploadSender(object):
         )
 
         if is_fork_pr(pull_dict):
-            headers = {
-                "X-Tokenless": pull_dict["head"]["slug"],
-                "X-Tokenless-PR": pull_request_number,
-            }
+            headers = None
         else:
             headers = get_token_header_or_fail(token)
         encoded_slug = encode_slug(slug)

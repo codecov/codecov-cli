@@ -15,7 +15,7 @@ MAX_RETRIES = 3
 USER_AGENT = f"codecov-cli/{__version__}"
 
 
-def _set_user_agent(headers: dict = None) -> dict:
+def _set_user_agent(headers: dict | None = None) -> dict:
     headers = headers or {}
     headers.setdefault("User-Agent", USER_AGENT)
     return headers
@@ -37,7 +37,7 @@ def put(url: str, data: dict = None, headers: dict = None) -> requests.Response:
 
 
 def post(
-    url: str, data: dict = None, headers: dict = None, params: dict = None
+    url: str, data: dict | None = None, headers: dict | None = None, params: dict | None = None
 ) -> requests.Response:
     headers = _set_user_agent(headers)
     return requests.post(url, json=data, headers=headers, params=params)
@@ -82,7 +82,7 @@ def retry_request(func):
 
 @retry_request
 def send_post_request(
-    url: str, data: dict = None, headers: dict = None, params: dict = None
+    url: str, data: dict | None = None, headers: dict | None = None, params: dict | None = None
 ):
     return request_result(post(url=url, data=data, headers=headers, params=params))
 

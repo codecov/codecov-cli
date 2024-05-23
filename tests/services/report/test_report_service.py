@@ -57,7 +57,7 @@ def test_send_create_report_request_200_tokneless(mocker):
     assert res.warnings == []
     mocked_response.assert_called_with(
         url=f"enterprise_url/upload/github/owner::::repo/commits/commit_sha/reports",
-        headers={"X-Tokenless": "user-forked/repo", "X-Tokenless-PR": 1},
+        headers=None,
         data={"code": "code"},
     )
     mocked_get_pull.assert_called()

@@ -231,7 +231,7 @@ class TestUploadSender(object):
         mocked_storage_server,
         mocker,
     ):
-        headers = {"X-Tokenless": "user-forked/repo", "X-Tokenless-PR": "pr"}
+        headers = {}
         mock_get_pull = mocker.patch(
             "codecov_cli.services.upload.upload_sender.get_pull",
             return_value={

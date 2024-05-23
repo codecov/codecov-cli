@@ -97,12 +97,12 @@ def parse_git_service(remote_repo_url: str):
         return None
 
 
-def is_fork_pr(pull_dict: PullDict) -> bool:
+def is_fork_pr(pull_dict: PullDict | None) -> bool:
     """
     takes in dict: pull_dict
     returns true if PR is made in a fork context, false if not.
     """
-    return pull_dict and pull_dict["head"]["slug"] != pull_dict["base"]["slug"]
+    return pull_dict is not None and pull_dict["head"]["slug"] != pull_dict["base"]["slug"]
 
 
 def get_pull(service, slug, pr_num) -> Optional[PullDict]:

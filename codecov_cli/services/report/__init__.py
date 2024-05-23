@@ -52,10 +52,7 @@ def send_create_report_request(
         get_pull(service, decoded_slug, pull_request_number) if not token else None
     )
     if is_fork_pr(pull_dict):
-        headers = {
-            "X-Tokenless": pull_dict["head"]["slug"],
-            "X-Tokenless-PR": pull_request_number,
-        }
+        headers = None
     else:
         headers = get_token_header_or_fail(token)
     upload_url = enterprise_url or CODECOV_API_URL

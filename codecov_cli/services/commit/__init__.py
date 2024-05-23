@@ -46,8 +46,8 @@ def send_commit_data(
     decoded_slug = decode_slug(slug)
     pull_dict = get_pull(service, decoded_slug, pr) if not token else None
     if is_fork_pr(pull_dict):
-        headers = {"X-Tokenless": pull_dict["head"]["slug"], "X-Tokenless-PR": pr}
-        branch = pull_dict["head"]["slug"] + ":" + branch
+        headers = None # type: ignore
+        branch = pull_dict["head"]["slug"] + ":" + branch # type: ignore
         logger.info("The PR is happening in a forked repo. Using tokenless upload.")
     else:
         headers = get_token_header_or_fail(token)

@@ -45,6 +45,14 @@ def send_commit_data(
 ):
     decoded_slug = decode_slug(slug)
     pull_dict = get_pull(service, decoded_slug, pr) if not token else None
+    logger.debug(
+        "Pull dict for tokenless check.",
+        extra=dict(
+            extra_log_attributes=dict(
+                pull_dict=pull_dict,
+            ),
+        ),
+    )
     if is_fork_pr(pull_dict):
         headers = {"X-Tokenless": pull_dict["head"]["slug"], "X-Tokenless-PR": pr}
         branch = pull_dict["head"]["slug"] + ":" + branch
@@ -62,3 +70,4 @@ def send_commit_data(
     upload_url = enterprise_url or CODECOV_API_URL
     url = f"{upload_url}/upload/{service}/{slug}/commits"
     return send_post_request(url=url, data=data, headers=headers)
+

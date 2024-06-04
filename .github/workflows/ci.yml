@@ -74,11 +74,17 @@ jobs:
     - name: Test with pytest
       run: |
         pytest --cov --junitxml=junit.xml
-    - name: Dogfooding codecov-cli
-      # if: ${{ !github.event.pull_request.head.repo.fork && github.repository_owner == 'codecov' }}
+    - name: Create commit in codecov
       run: |
-        codecovcli -v upload-process --fail-on-error --plugin pycoverage --flag python${{matrix.python-version}}
-        codecovcli upload-process --report-type test_results --fail-on-error --plugin pycoverage --flag python${{matrix.python-version}}
+        codecovcli create-commit -v --git-service github
+    - name: Create commit report in codecov
+      run: |
+        codecovcli create-report -t ${{ secrets.CODECOV_TOKEN }} --git-service github
+    - name: Dogfooding codecov-cli
+      if: ${{ !github.event.pull_request.head.repo.fork && github.repository_owner == 'codecov' }}
+      run: |
+        codecovcli -v do-upload --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
+        codecovcli do-upload --report-type test_results --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
 
   static-analysis:
     runs-on: ubuntu-latest

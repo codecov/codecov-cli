@@ -1,9 +1,11 @@
 import json
+import logging
 
 import requests
 
 from codecov_cli.helpers.git_services import PullDict
 
+logger = logging.getLogger("codecovcli")
 
 class Github:
     api_url = "https://api.github.com"

@@ -57,9 +57,9 @@ def retry_request(func):
         while retry < MAX_RETRIES:
             try:
                 response = func(*args, **kwargs)
-                if response.status_code == 502:
+                if response.status_code >= 500:
                     logger.warning(
-                        "Response status code was 502.",
+                        f"Response status code was {response.status_code}.",
                         extra=dict(extra_log_attributes=dict(retry=retry)),
                     )
                     raise RetryException

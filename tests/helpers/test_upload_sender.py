@@ -306,11 +306,13 @@ class TestUploadSender(object):
 
         assert sender.warnings is not None
 
-    def test_upload_sender_result_fail_post_502(
-        self, mocker, mocked_responses, mocked_legacy_upload_endpoint, capsys
+
+    @pytest.mark.parametrize("error_code", [500, 502])
+    def test_upload_sender_result_fail_post_500s(
+        self, mocker, mocked_responses, mocked_legacy_upload_endpoint, capsys, error_code
     ):
         mocker.patch("codecov_cli.helpers.request.sleep")
-        mocked_legacy_upload_endpoint.status = 502
+        mocked_legacy_upload_endpoint.status = error_code
 
         with pytest.raises(Exception, match="Request failed after too many retries"):
             _ = UploadSender().send_upload_data(
@@ -318,7 +320,7 @@ class TestUploadSender(object):
             )
 
         matcher = re.compile(
-            r"(warning.*((Response status code was 502)|(Request failed\. Retrying)).*(\n)?){6}"
+            rf"(warning.*((Response status code was {error_code})|(Request failed\. Retrying)).*(\n)?){{6}}"
         )
 
         assert matcher.match(capsys.readouterr().err) is not None

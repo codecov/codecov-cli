@@ -75,7 +75,7 @@ jobs:
       run: |
         pytest --cov --junitxml=junit.xml
     - name: Dogfooding codecov-cli
-      if: ${{ !github.event.pull_request.head.repo.fork && github.repository_owner == 'codecov' }}
+      # if: ${{ !github.event.pull_request.head.repo.fork && github.repository_owner == 'codecov' }}
       run: |
         codecovcli -v upload-process --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
         codecovcli upload-process --report-type test_results --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}

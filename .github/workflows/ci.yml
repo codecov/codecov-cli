@@ -76,7 +76,7 @@ jobs:
         pytest --cov --junitxml=junit.xml
     - name: Create commit in codecov
       run: |
-        codecovcli create-commit -v --git-service github
+        codecovcli -v create-commit --git-service github
     - name: Create commit report in codecov
       run: |
         codecovcli create-report -t ${{ secrets.CODECOV_TOKEN }} --git-service github

@@ -8,6 +8,7 @@ from codecov_cli import __version__
 from codecov_cli.helpers.request import (
     get,
     get_token_header_or_fail,
+    get_token_header,
     log_warnings_and_errors_if_any,
 )
 from codecov_cli.helpers.request import logger as req_log
@@ -68,6 +69,17 @@ def test_get_token_header_or_fail():
         str(e.value)
         == "Codecov token not found. Please provide Codecov token with -t flag."
     )
+
+def test_get_token_header():
+    # Test with a valid UUID token
+    token = uuid.uuid4()
+    result = get_token_header(token)
+    assert result == {"Authorization": f"token {str(token)}"}
+
+    # Test with a None token
+    token = None
+    result = get_token_header(token)
+    assert result is None
 
 
 def test_request_retry(mocker, valid_response):

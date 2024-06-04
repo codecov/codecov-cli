@@ -232,13 +232,7 @@ class TestUploadSender(object):
         mocker,
     ):
         headers = {}
-        mock_get_pull = mocker.patch(
-            "codecov_cli.services.upload.upload_sender.get_pull",
-            return_value={
-                "head": {"slug": "user-forked/repo"},
-                "base": {"slug": "org/repo"},
-            },
-        )
+        
         mocked_legacy_upload_endpoint.match = [
             matchers.json_params_matcher(request_data),
             matchers.header_matcher(headers),
@@ -263,7 +257,6 @@ class TestUploadSender(object):
         assert (
             post_req_made.headers.items() >= headers.items()
         )  # test dict is a subset of the other
-        mock_get_pull.assert_called()
 
     def test_upload_sender_put_called_with_right_parameters(
         self, mocked_responses, mocked_legacy_upload_endpoint, mocked_storage_server

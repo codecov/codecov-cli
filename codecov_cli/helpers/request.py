@@ -94,6 +94,11 @@ def get_token_header_or_fail(token: str) -> dict:
         )
     return {"Authorization": f"token {token}"}
 
+def get_token_header(token: str) -> dict | None:
+    if token is None:
+        return None
+    return {"Authorization": f"token {token}"}
+
 
 @retry_request
 def send_put_request(

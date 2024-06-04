@@ -7,6 +7,7 @@ from codecov_cli.helpers.ci_adapters.bitrise_ci import BitriseCIAdapter
 from codecov_cli.helpers.ci_adapters.buildkite import BuildkiteAdapter
 from codecov_cli.helpers.ci_adapters.circleci import CircleCICIAdapter
 from codecov_cli.helpers.ci_adapters.cirrus_ci import CirrusCIAdapter
+from codecov_cli.helpers.ci_adapters.cloudbuild import GoogleCloudBuildAdapter
 from codecov_cli.helpers.ci_adapters.codebuild import AWSCodeBuildCIAdapter
 from codecov_cli.helpers.ci_adapters.droneci import DroneCIAdapter
 from codecov_cli.helpers.ci_adapters.github_actions import GithubActionsCIAdapter
@@ -54,6 +55,7 @@ def get_ci_providers_list():
         TeamcityAdapter(),
         TravisCIAdapter(),
         AWSCodeBuildCIAdapter(),
+        GoogleCloudBuildAdapter(),
         # local adapter should always be the last one
         LocalAdapter(),
     ]

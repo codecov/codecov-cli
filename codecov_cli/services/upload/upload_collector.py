@@ -36,16 +36,17 @@ class UploadCollector(object):
         self.file_finder = file_finder
         self.disable_file_fixes = disable_file_fixes
 
-    def _produce_file_fixes_for_network(
-        self, network: typing.List[str]
+    def _produce_file_fixes(
+        self, files: typing.List[str]
     ) -> typing.List[UploadCollectionResultFileFixer]:
-        if not network or self.disable_file_fixes:
+        if not files or self.disable_file_fixes:
             return []
         # patterns that we don't need to specify a reason for
         empty_line_regex = re.compile(r"^\s*$")
         comment_regex = re.compile(r"^\s*\/\/.*$")
         bracket_regex = re.compile(r"^\s*[\{\}]\s*(\/\/.*)?$")
         list_regex = re.compile(r"^\s*[\]\[]\s*(\/\/.*)?$")
+        parenthesis_regex = re.compile(r"^\s*[\(\)]\s*(\/\/.*)?$")
         go_function_regex = re.compile(r"^\s*func\s*[\{]\s*(\/\/.*)?$")
         php_end_bracket_regex = re.compile(r"^\s*\);\s*(\/\/.*)?$")
 
@@ -54,7 +55,7 @@ class UploadCollector(object):
         lcov_excel_regex = re.compile(r"\/\/ LCOV_EXCL")
 
         kt_patterns_to_apply = fix_patterns_to_apply(
-            [bracket_regex], [comment_block_regex], True
+            [bracket_regex, parenthesis_regex], [comment_block_regex], True
         )
         go_patterns_to_apply = fix_patterns_to_apply(
             [empty_line_regex, comment_regex, bracket_regex, go_function_regex],
@@ -71,7 +72,6 @@ class UploadCollector(object):
             [],
             False,
         )
-
         cpp_swift_vala_patterns_to_apply = fix_patterns_to_apply(
             [empty_line_regex, bracket_regex],
             [lcov_excel_regex],
@@ -94,7 +94,7 @@ class UploadCollector(object):
         }
 
         result = []
-        for filename in network:
+        for filename in files:
             for glob, fix_patterns in file_regex_patterns.items():
                 if fnmatch(filename, glob):
                     result.append(self._get_file_fixes(filename, fix_patterns))
@@ -139,6 +139,8 @@ class UploadCollector(object):
                     reason=err.reason,
                 ),
             )
+        except IsADirectoryError as err:
+            logger.info(f"Skipping {filename}, found a directory not a file")
 
         return UploadCollectionResultFileFixer(
             path, fixed_lines_without_reason, fixed_lines_with_reason, eof
@@ -150,21 +152,27 @@ class UploadCollector(object):
             prep.run_preparation(self)
         logger.debug("Collecting relevant files")
         network = self.network_finder.find_files()
-        files = self.file_finder.find_files()
-        logger.info(f"Found {len(files)} {report_type} files to upload")
-        if not files:
+        report_files = self.file_finder.find_files()
+        logger.info(f"Found {len(report_files)} {report_type} files to report")
+        if not report_files:
+            if report_type == "test_results":
+                error_message = "No JUnit XML reports found. Please review our documentation (https://docs.codecov.com/docs/test-result-ingestion-beta) to generate and upload the file."
+            else:
+                error_message = "No coverage reports found. Please make sure you're generating reports successfully."
             raise click.ClickException(
                 click.style(
-                    f"No {report_type} reports found. Please make sure you're generating reports successfully.",
+                    error_message,
                     fg="red",
                 )
             )
-        for file in files:
+        for file in report_files:
             logger.info(f"> {file}")
         return UploadCollectionResult(
             network=network,
-            files=files,
-            file_fixes=self._produce_file_fixes_for_network(network)
-            if report_type == "coverage"
-            else [],
+            files=report_files,
+            file_fixes=(
+                self._produce_file_fixes(self.network_finder.find_files(True))
+                if report_type == "coverage"
+                else []
+            ),
         )

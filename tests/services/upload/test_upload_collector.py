@@ -13,17 +13,17 @@ def test_fix_kt_files():
 
     col = UploadCollector(None, None, None)
 
-    fixes = col._produce_file_fixes_for_network([str(kt_file)])
+    fixes = col._produce_file_fixes([kt_file])
 
     assert len(fixes) == 1
     fixes_for_kt_file = fixes[0]
 
-    assert fixes_for_kt_file.eof == 30
-    assert fixes_for_kt_file.fixed_lines_without_reason == set([1, 3, 7, 9, 12, 14])
+    assert fixes_for_kt_file.eof == 33
+    assert fixes_for_kt_file.fixed_lines_without_reason == set([1, 3, 7, 9, 12, 14, 18])
     assert fixes_for_kt_file.fixed_lines_with_reason == set(
         [
-            (17, "    /*\n"),
-            (22, "*/\n"),
+            (20, "    /*\n"),
+            (25, "*/\n"),
         ]
     )
 
@@ -33,7 +33,7 @@ def test_fix_go_files():
 
     col = UploadCollector(None, None, None)
 
-    fixes = col._produce_file_fixes_for_network([str(go_file)])
+    fixes = col._produce_file_fixes([go_file])
 
     assert len(fixes) == 1
     fixes_for_go_file = fixes[0]
@@ -59,7 +59,7 @@ def test_fix_bad_encoding_files(mock_open):
 
     col = UploadCollector(None, None, None)
 
-    fixes = col._produce_file_fixes_for_network([str(go_file)])
+    fixes = col._produce_file_fixes([go_file])
     assert len(fixes) == 1
     fixes_for_go_file = fixes[0]
     assert fixes_for_go_file.eof is None
@@ -72,7 +72,7 @@ def test_fix_php_files():
 
     col = UploadCollector(None, None, None)
 
-    fixes = col._produce_file_fixes_for_network([str(php_file)])
+    fixes = col._produce_file_fixes([php_file])
 
     assert len(fixes) == 1
     fixes_for_php_file = fixes[0]
@@ -87,7 +87,7 @@ def test_fix_for_cpp_swift_vala(tmp_path):
 
     col = UploadCollector(None, None, None)
 
-    fixes = col._produce_file_fixes_for_network([str(cpp_file)])
+    fixes = col._produce_file_fixes([cpp_file])
 
     assert len(fixes) == 1
     fixes_for_cpp_file = fixes[0]
@@ -109,7 +109,7 @@ def test_fix_when_disabled_fixes(tmp_path):
 
     col = UploadCollector(None, None, None, True)
 
-    fixes = col._produce_file_fixes_for_network([str(cpp_file)])
+    fixes = col._produce_file_fixes([cpp_file])
 
     assert len(fixes) == 0
     assert fixes == []
@@ -164,7 +164,7 @@ def test_generate_upload_data(tmp_path):
 
     file_finder = FileFinder(tmp_path)
 
-    network_finder = NetworkFinder(GitVersioningSystem())
+    network_finder = NetworkFinder(GitVersioningSystem(), None, None, None)
 
     collector = UploadCollector([], network_finder, file_finder)
 

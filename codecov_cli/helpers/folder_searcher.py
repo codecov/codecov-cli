@@ -58,7 +58,7 @@ def search_files(
     this_is_excluded = functools.partial(
         _is_excluded, filename_exclude_regex, multipart_exclude_regex
     )
-    for (dirpath, dirnames, filenames) in os.walk(folder_to_search):
+    for dirpath, dirnames, filenames in os.walk(folder_to_search):
         dirs_to_remove = set(d for d in dirnames if d in folders_to_ignore)
 
         if multipart_exclude_regex is not None:

@@ -10,7 +10,7 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="codecov-cli",
-    version="0.4.7",
+    version="0.6.0",
     packages=find_packages(exclude=["contrib", "docs", "tests*"]),
     description="Codecov Command Line Interface",
     long_description=long_description,
@@ -24,6 +24,8 @@ setup(
         "pyyaml==6.*",
         "responses==0.21.*",
         "tree-sitter==0.20.*",
+        "test-results-parser==0.1.*",
+        "regex",
     ],
     entry_points={
         "console_scripts": [

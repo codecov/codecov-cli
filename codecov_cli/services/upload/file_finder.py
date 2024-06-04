@@ -180,13 +180,13 @@ default_folders_to_ignore = [
 class FileFinder(object):
     def __init__(
         self,
-        project_root: Path = None,
+        search_root: Path = None,
         folders_to_ignore: typing.List[str] = None,
         explicitly_listed_files: typing.List[Path] = None,
         disable_search: bool = False,
         report_type: str = "coverage",
     ):
-        self.project_root = project_root or Path(os.getcwd())
+        self.search_root = search_root or Path(os.getcwd())
         self.folders_to_ignore = folders_to_ignore or []
         self.explicitly_listed_files = explicitly_listed_files or None
         self.disable_search = disable_search
@@ -207,7 +207,7 @@ class FileFinder(object):
         if not self.disable_search:
             regex_patterns_to_include = globs_to_regex(files_patterns)
             files_paths = search_files(
-                self.project_root,
+                self.search_root,
                 default_folders_to_ignore + self.folders_to_ignore,
                 filename_include_regex=regex_patterns_to_include,
                 filename_exclude_regex=regex_patterns_to_exclude,
@@ -232,7 +232,7 @@ class FileFinder(object):
                 files_excluded_but_user_includes.append(str(file))
         if files_excluded_but_user_includes:
             logger.warning(
-                "Some files being explicitly added are found in the list of excluded files for upload.",
+                "Some files being explicitly added are found in the list of excluded files for upload. We are still going to search for the explicitly added files.",
                 extra=dict(
                     extra_log_attributes=dict(files=files_excluded_but_user_includes)
                 ),
@@ -243,17 +243,21 @@ class FileFinder(object):
         )
         user_files_paths = list(
             search_files(
-                self.project_root,
-                default_folders_to_ignore + self.folders_to_ignore,
+                self.search_root,
+                self.folders_to_ignore,
                 filename_include_regex=regex_patterns_to_include,
-                filename_exclude_regex=regex_patterns_to_exclude,
                 multipart_include_regex=multipart_include_regex,
             )
         )
         not_found_files = []
+        user_files_paths_resolved = [path.resolve() for path in user_files_paths]
         for filepath in self.explicitly_listed_files:
-            if filepath.resolve() not in user_files_paths:
-                not_found_files.append(filepath)
+            if filepath.resolve() not in user_files_paths_resolved:
+                ## The file given might be linked or in a parent dir, check to see if it exists
+                if filepath.exists():
+                    user_files_paths.append(filepath)
+                else:
+                    not_found_files.append(filepath)
 
         if not_found_files:
             logger.warning(

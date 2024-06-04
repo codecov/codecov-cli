@@ -47,12 +47,12 @@ def test_sample_analysis(input_filename, output_filename):
 
 @patch("builtins.open")
 @patch("codecov_cli.services.staticanalysis.get_best_analyzer", return_value=None)
-def test_analyse_file_no_analyser(mock_get_analyser, mock_open):
-    fake_contents = MagicMock()
+def test_analyse_file_no_analyzer(mock_get_analyzer, mock_open):
+    fake_contents = MagicMock(name="fake_file_contents")
     file_name = MagicMock(actual_filepath="filepath")
-    mock_open.return_value.read.return_value = fake_contents
+    mock_open.return_value.__enter__.return_value.read.return_value = fake_contents
     config = {}
     res = analyze_file(config, file_name)
     assert res == None
-    assert mock_open.called_with("filepath", "rb")
-    assert mock_get_analyser.called_with(file_name, fake_contents)
+    mock_open.assert_called_with("filepath", "rb")
+    mock_get_analyzer.assert_called_with(file_name, fake_contents)

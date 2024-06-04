@@ -53,6 +53,7 @@ from codecov_cli.helpers.git_services.github import Github
         ("ssh://host.abc.xz/owner/repo.git", "owner/repo"),
         ("user-name@host.xz:owner/repo.git/", "owner/repo"),
         ("host.xz:owner/repo.git/", "owner/repo"),
+        ("ssh://git@github.com/gitcodecov/codecov-cli", "gitcodecov/codecov-cli"),
     ],
 )
 def test_parse_slug_valid_address(address, slug):
@@ -107,6 +108,8 @@ def test_parse_slug_invalid_address(address):
             "bitbucket",
         ),
         ("git@bitbucket.org:name-codecov/abc.git.git", "bitbucket"),
+        ("ssh://git@github.com/gitcodecov/codecov-cli", "github"),
+        ("ssh://git@github.com:gitcodecov/codecov-cli", "github"),
     ],
 )
 def test_parse_git_service_valid_address(address, git_service):

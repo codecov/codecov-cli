@@ -50,15 +50,12 @@ jobs:
           codecovcli create-report -t ${{ secrets.CODECOV_TOKEN }} --git-service github
 
   build-test-upload:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - python-version: "3.11"
-          - python-version: "3.10"
-          - python-version: "3.9"
-          - python-version: "3.8"
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
     steps:
     - uses: actions/checkout@v4
       with:
@@ -80,8 +77,8 @@ jobs:
     - name: Dogfooding codecov-cli
       if: ${{ !github.event.pull_request.head.repo.fork && github.repository_owner == 'codecov' }}
       run: |
-        codecovcli do-upload --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
-        codecovcli do-upload --report-type test_results --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}} 
+        codecovcli -v upload-process --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
+        codecovcli upload-process --report-type test_results --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
 
   static-analysis:
     runs-on: ubuntu-latest
@@ -132,3 +129,38 @@ jobs:
       - name: Upload smart-labels
         run: |
           codecovcli --codecov-yml-path=codecov.yml do-upload --plugin pycoverage --plugin compress-pycoverage --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --flag smart-labels
+
+  test-process-test-results-cmd:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - python-version: "3.11"
+          - python-version: "3.10"
+          - python-version: "3.9"
+          - python-version: "3.8"
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+        fetch-depth: 2
+    - name: Set up Python ${{matrix.python-version}}
+      uses: actions/setup-python@v3
+      with:
+        python-version: "${{matrix.python-version}}"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        python setup.py develop
+        pip install -r tests/requirements.txt
+    - name: Test with pytest
+      run: |
+        pytest --cov --junitxml=junit.xml
+    - name: Dogfooding codecov-cli
+      if: ${{ !cancelled() }}
+      run: |
+        codecovcli process-test-results --provider-token ${{ secrets.GITHUB_TOKEN }}

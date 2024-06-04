@@ -111,6 +111,7 @@ def get_pull(service, slug, pr_num) -> Optional[PullDict]:
     returns the pull request info gotten from the git service provider if successful, None if not
     """
     git_service = get_git_service(service)
+    logger.debug("Found the git_service", extra=dict(extra_log_attributes=dict(git_service=git_service)))
     if git_service:
         pull_dict = git_service.get_pull_request(slug, pr_num)
         return pull_dict

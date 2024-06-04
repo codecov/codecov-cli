@@ -12,8 +12,11 @@ class Github:
     def get_pull_request(self, slug, pr_number) -> PullDict:
         pull_url = f"/repos/{slug}/pulls/{pr_number}"
         url = self.api_url + pull_url
+        logger.debug("Found the url", extra=dict(extra_log_attributes=dict(url=url)))
         headers = {"X-GitHub-Api-Version": self.api_version}
         response = requests.get(url, headers=headers)
+        logger.debug("Found the response", extra=dict(extra_log_attributes=dict(response=response)))
+        logger.debug("Found the response.status_code", extra=dict(extra_log_attributes=dict(response_status_code=response.status_code)))
         if response.status_code == 200:
             res = json.loads(response.text)
             return {

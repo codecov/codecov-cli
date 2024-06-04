@@ -79,7 +79,7 @@ jobs:
         codecovcli -v create-commit --git-service github
     - name: Create commit report in codecov
       run: |
-        codecovcli create-report -t ${{ secrets.CODECOV_TOKEN }} --git-service github
+        codecovcli -v create-report --git-service github
     - name: Dogfooding codecov-cli
       if: ${{ !github.event.pull_request.head.repo.fork && github.repository_owner == 'codecov' }}
       run: |

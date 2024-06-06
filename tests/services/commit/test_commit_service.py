@@ -150,7 +150,7 @@ def test_commit_sender_with_forked_repo(mocker):
         return_value=mocker.MagicMock(status_code=200, text="success"),
     )
 
-    mocker.patch("os.environ.get", "user_forked_repo/codecov-cli:branch")
+    mocker.patch("os.environ", dict(TOKENLESS="user_forked_repo/codecov-cli:branch"))
     res = send_commit_data(
         "commit_sha",
         "parent_sha",

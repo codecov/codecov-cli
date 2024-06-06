@@ -43,7 +43,7 @@ def create_commit_logic(
 def send_commit_data(
     commit_sha, parent_sha, pr, branch, slug, token, service, enterprise_url
 ):
-    tokenless = os.environ.get 
+    tokenless = os.environ.get("TOKENLESS")
     if tokenless:
         headers = None # type: ignore
         branch = tokenless # type: ignore

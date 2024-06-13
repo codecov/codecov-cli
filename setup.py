@@ -31,6 +31,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
+            "codecov = codecov_cli.main:run",
             "codecovcli = codecov_cli.main:run",
         ],
     },

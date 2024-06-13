@@ -35,10 +35,9 @@ jobs:
         with:
           submodules: true
           fetch-depth: 2
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v5
         with:
-          # Because of https://github.com/tree-sitter/py-tree-sitter/issues/162
-          python-version: '3.11.x'
+          python-version: "3.12"
       - name: Install CLI
         run: |
           pip install codecov-cli
@@ -55,6 +54,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - python-version: "3.12"
           - python-version: "3.11"
           - python-version: "3.10"
           - python-version: "3.9"
@@ -65,14 +65,14 @@ jobs:
         submodules: true
         fetch-depth: 2
     - name: Set up Python ${{matrix.python-version}}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
         python-version: "${{matrix.python-version}}"
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        python setup.py develop
+        python -m pip install -e .
         pip install -r tests/requirements.txt
     - name: Test with pytest
       run: |
@@ -92,10 +92,9 @@ jobs:
         with:
           submodules: true
           fetch-depth: 2
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v5
         with:
-          # Because of https://github.com/tree-sitter/py-tree-sitter/issues/162
-          python-version: '3.11.x'
+          python-version: "3.12"
       - name: Install CLI
         run: |
           pip install codecov-cli
@@ -116,10 +115,9 @@ jobs:
         with:
           submodules: true
           fetch-depth: 0
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v5
         with:
-          # Because of https://github.com/tree-sitter/py-tree-sitter/issues/162
-          python-version: '3.11.x'
+          python-version: "3.12"
       - name: Install CLI
         run: |
           pip install -r requirements.txt -r tests/requirements.txt
@@ -141,6 +139,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - python-version: "3.12"
           - python-version: "3.11"
           - python-version: "3.10"
           - python-version: "3.9"
@@ -151,14 +150,14 @@ jobs:
         submodules: true
         fetch-depth: 2
     - name: Set up Python ${{matrix.python-version}}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
         python-version: "${{matrix.python-version}}"
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        python setup.py develop
+        python -m pip install -e .
         pip install -r tests/requirements.txt
     - name: Test with pytest
       run: |

@@ -7,6 +7,7 @@ import requests
 
 from codecov_cli import __version__
 from codecov_cli.types import RequestError, RequestResult
+from typing import Optional
 
 logger = logging.getLogger("codecovcli")
 
@@ -15,7 +16,7 @@ MAX_RETRIES = 3
 USER_AGENT = f"codecov-cli/{__version__}"
 
 
-def _set_user_agent(headers: dict | None = None) -> dict:
+def _set_user_agent(headers: Optional[dict] = None) -> dict:
     headers = headers or {}
     headers.setdefault("User-Agent", USER_AGENT)
     return headers
@@ -37,7 +38,10 @@ def put(url: str, data: dict = None, headers: dict = None) -> requests.Response:
 
 
 def post(
-    url: str, data: dict | None = None, headers: dict | None = None, params: dict | None = None
+    url: str,
+    data: Optional[dict] = None,
+    headers: Optional[dict] = None,
+    params: Optional[dict] = None,
 ) -> requests.Response:
     headers = _set_user_agent(headers)
     return requests.post(url, json=data, headers=headers, params=params)
@@ -82,7 +86,10 @@ def retry_request(func):
 
 @retry_request
 def send_post_request(
-    url: str, data: dict | None = None, headers: dict | None = None, params: dict | None = None
+    url: str,
+    data: Optional[dict] = None,
+    headers: Optional[dict] = None,
+    params: Optional[dict] = None,
 ):
     return request_result(post(url=url, data=data, headers=headers, params=params))
 
@@ -94,7 +101,8 @@ def get_token_header_or_fail(token: str) -> dict:
         )
     return {"Authorization": f"token {token}"}
 
-def get_token_header(token: str) -> dict | None:
+
+def get_token_header(token: str) -> Optional[dict]:
     if token is None:
         return None
     return {"Authorization": f"token {token}"}

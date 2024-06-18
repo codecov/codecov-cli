@@ -1,13 +1,13 @@
 import logging
 from sys import exit
 from time import sleep
+from typing import Optional
 
 import click
 import requests
 
 from codecov_cli import __version__
 from codecov_cli.types import RequestError, RequestResult
-from typing import Optional
 
 logger = logging.getLogger("codecovcli")
 

@@ -7,8 +7,8 @@ from requests import Response
 from codecov_cli import __version__
 from codecov_cli.helpers.request import (
     get,
-    get_token_header_or_fail,
     get_token_header,
+    get_token_header_or_fail,
     log_warnings_and_errors_if_any,
 )
 from codecov_cli.helpers.request import logger as req_log

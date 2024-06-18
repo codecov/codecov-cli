@@ -1,5 +1,5 @@
-import os
 import logging
+import os
 import typing
 
 from codecov_cli.helpers.config import CODECOV_API_URL
@@ -44,11 +44,11 @@ def send_commit_data(
     commit_sha, parent_sha, pr, branch, slug, token, service, enterprise_url
 ):
     # this is how the CLI receives the username of the user to whom the fork belongs
-    # to and the branch name from the action 
+    # to and the branch name from the action
     tokenless = os.environ.get("TOKENLESS")
     if tokenless:
-        headers = None # type: ignore
-        branch = tokenless # type: ignore
+        headers = None  # type: ignore
+        branch = tokenless  # type: ignore
         logger.info("The PR is happening in a forked repo. Using tokenless upload.")
     else:
         headers = get_token_header_or_fail(token)

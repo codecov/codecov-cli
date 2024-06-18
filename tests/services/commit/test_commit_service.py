@@ -150,33 +150,7 @@ def test_commit_sender_with_forked_repo(mocker):
         return_value=mocker.MagicMock(status_code=200, text="success"),
     )
 
-    def mock_request(*args, headers={}, **kwargs):
-        assert headers["X-GitHub-Api-Version"] == "2022-11-28"
-        res = {
-            "url": "https://api.github.com/repos/codecov/codecov-cli/pulls/1",
-            "head": {
-                "sha": "123",
-                "label": "codecov-cli:branch",
-                "ref": "branch",
-                "repo": {"full_name": "user_forked_repo/codecov-cli"},
-            },
-            "base": {
-                "sha": "123",
-                "label": "codecov-cli:main",
-                "ref": "main",
-                "repo": {"full_name": "codecov/codecov-cli"},
-            },
-        }
-        response = Response()
-        response.status_code = 200
-        response._content = json.dumps(res).encode("utf-8")
-        return response
-
-    mocker.patch.object(
-        requests,
-        "get",
-        side_effect=mock_request,
-    )
+    mocker.patch("os.environ", dict(TOKENLESS="user_forked_repo/codecov-cli:branch"))
     res = send_commit_data(
         "commit_sha",
         "parent_sha",
@@ -195,5 +169,5 @@ def test_commit_sender_with_forked_repo(mocker):
             "pullid": "1",
             "branch": "user_forked_repo/codecov-cli:branch",
         },
-        headers={"X-Tokenless": "user_forked_repo/codecov-cli", "X-Tokenless-PR": "1"},
+        headers=None,
     )

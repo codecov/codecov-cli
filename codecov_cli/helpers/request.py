@@ -1,6 +1,7 @@
 import logging
 from sys import exit
 from time import sleep
+from typing import Optional
 
 import click
 import requests
@@ -15,7 +16,7 @@ MAX_RETRIES = 3
 USER_AGENT = f"codecov-cli/{__version__}"
 
 
-def _set_user_agent(headers: dict = None) -> dict:
+def _set_user_agent(headers: Optional[dict] = None) -> dict:
     headers = headers or {}
     headers.setdefault("User-Agent", USER_AGENT)
     return headers
@@ -37,7 +38,10 @@ def put(url: str, data: dict = None, headers: dict = None) -> requests.Response:
 
 
 def post(
-    url: str, data: dict = None, headers: dict = None, params: dict = None
+    url: str,
+    data: Optional[dict] = None,
+    headers: Optional[dict] = None,
+    params: Optional[dict] = None,
 ) -> requests.Response:
     headers = _set_user_agent(headers)
     return requests.post(url, json=data, headers=headers, params=params)
@@ -82,7 +86,10 @@ def retry_request(func):
 
 @retry_request
 def send_post_request(
-    url: str, data: dict = None, headers: dict = None, params: dict = None
+    url: str,
+    data: Optional[dict] = None,
+    headers: Optional[dict] = None,
+    params: Optional[dict] = None,
 ):
     return request_result(post(url=url, data=data, headers=headers, params=params))
 
@@ -92,6 +99,12 @@ def get_token_header_or_fail(token: str) -> dict:
         raise click.ClickException(
             "Codecov token not found. Please provide Codecov token with -t flag."
         )
+    return {"Authorization": f"token {token}"}
+
+
+def get_token_header(token: str) -> Optional[dict]:
+    if token is None:
+        return None
     return {"Authorization": f"token {token}"}
 
 

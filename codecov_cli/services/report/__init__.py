@@ -9,6 +9,7 @@ from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.helpers.encoder import decode_slug, encode_slug
 from codecov_cli.helpers.request import (
     get_token_header,
+    get_token_header_or_fail,
     log_warnings_and_errors_if_any,
     request_result,
     send_post_request,
@@ -80,13 +81,7 @@ def create_report_results_logic(
 def send_reports_result_request(
     commit_sha, report_code, encoded_slug, service, token, enterprise_url
 ):
-    tokenless = os.environ.get("TOKENLESS")
-    if tokenless:
-        headers = None  # type: ignore
-        branch = tokenless  # type: ignore
-        logger.info("The PR is happening in a forked repo. Using tokenless upload.")
-    else:
-        headers = get_token_header_or_fail(token)
+    headers = get_token_header_or_fail(token)
     upload_url = enterprise_url or CODECOV_API_URL
     url = f"{upload_url}/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/results"
     return send_post_request(url=url, headers=headers)

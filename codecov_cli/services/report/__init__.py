@@ -80,7 +80,13 @@ def create_report_results_logic(
 def send_reports_result_request(
     commit_sha, report_code, encoded_slug, service, token, enterprise_url
 ):
-    headers = get_token_header_or_fail(token)
+    tokenless = os.environ.get("TOKENLESS")
+    if tokenless:
+        headers = None  # type: ignore
+        branch = tokenless  # type: ignore
+        logger.info("The PR is happening in a forked repo. Using tokenless upload.")
+    else:
+        headers = get_token_header_or_fail(token)
     upload_url = enterprise_url or CODECOV_API_URL
     url = f"{upload_url}/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/results"
     return send_post_request(url=url, headers=headers)

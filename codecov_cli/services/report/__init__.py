@@ -8,7 +8,7 @@ from codecov_cli.helpers import request
 from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.helpers.encoder import decode_slug, encode_slug
 from codecov_cli.helpers.request import (
-    get_token_header_or_fail,
+    get_token_header,
     log_warnings_and_errors_if_any,
     request_result,
     send_post_request,
@@ -46,7 +46,7 @@ def send_create_report_request(
     commit_sha, code, service, token, encoded_slug, enterprise_url, pull_request_number
 ):
     data = {"code": code}
-    headers = get_token_header_or_fail(token)
+    headers = get_token_header(token)
     upload_url = enterprise_url or CODECOV_API_URL
     url = f"{upload_url}/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports"
     return send_post_request(url=url, headers=headers, data=data)

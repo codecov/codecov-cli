@@ -58,6 +58,8 @@ def cli(
     ctx.obj["codecov_yaml"] = load_cli_config(codecov_yml_path)
     if ctx.obj["codecov_yaml"] is None:
         logger.debug("No codecov_yaml found")
+    elif (token := ctx.obj["codecov_yaml"].get("codecov", {}).get("token")) is not None:
+        ctx.default_map = {ctx.invoked_subcommand: {"token": token}}
     ctx.obj["enterprise_url"] = enterprise_url
 
 

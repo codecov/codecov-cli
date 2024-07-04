@@ -50,7 +50,7 @@ jobs:
       - name: Create commit report in codecov
         run: |
           codecovcli create-report -t ${{ secrets.CODECOV_TOKEN }} --git-service github
-      - name: Create commit report in codecov
+      - name: Create commit report in codecov (staging)
         run: |
           codecovcli --enterprise-url=${{ secrets.CODECOV_STAGING_URL }} create-report -t ${{ secrets.CODECOV_ORG_TOKEN_STAGING }} --git-service github
 
@@ -83,19 +83,19 @@ jobs:
     - name: Test with pytest
       run: |
         pytest --cov --junitxml=junit.xml
-    - name: Dogfooding codecov-cli
+    - name: Dogfooding codecov-cli for coverage
       if: ${{ !github.event.pull_request.head.repo.fork && github.repository_owner == 'codecov' }}
       run: |
-        codecovcli do-upload --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
-    - name: Dogfood test results
+        codecovcli -v do-upload --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
+    - name: Dogfooding codecov-cli for test results
       if: ${{ !cancelled() && !github.event.pull_request.head.repo.fork && github.repository_owner == 'codecov' }}
       run: |
         codecovcli do-upload --report-type test_results --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --flag python${{matrix.python-version}} 
-    - name: Dogfooding codecov-cli (staging)
+    - name: Dogfooding codecov-cli for coverage (staging)
       if: ${{ !github.event.pull_request.head.repo.fork && github.repository_owner == 'codecov' }}
       run: |
         codecovcli --enterprise-url=${{ secrets.CODECOV_STAGING_URL }} do-upload --fail-on-error -t ${{ secrets.CODECOV_ORG_TOKEN_STAGING }} --plugin pycoverage --flag python${{matrix.python-version}}
-    - name: Dogfood test results (staging)
+    - name: Dogfooding codecov-cli for test results (staging)
       if: ${{ !cancelled() && !github.event.pull_request.head.repo.fork && github.repository_owner == 'codecov' }}
       run: |
         codecovcli --enterprise-url=${{ secrets.CODECOV_STAGING_URL }} do-upload --report-type test_results --fail-on-error -t ${{ secrets.CODECOV_ORG_TOKEN_STAGING }} --flag python${{matrix.python-version}}

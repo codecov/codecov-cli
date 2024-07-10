@@ -60,6 +60,7 @@ class UploadSender(object):
             upload_file_type,
             upload_url,
             git_service,
+            branch,
             encoded_slug,
             commit_sha,
             report_code,
@@ -169,6 +170,7 @@ class UploadSender(object):
         report_type,
         upload_url,
         git_service,
+        branch,
         encoded_slug,
         commit_sha,
         report_code,
@@ -177,6 +179,7 @@ class UploadSender(object):
             url = f"{upload_url}/upload/{git_service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads"
         elif report_type == "test_results":
             data["slug"] = encoded_slug
+            data["branch"] = branch
             data["commit"] = commit_sha
             data["service"] = git_service
             url = f"{upload_url}/upload/test_results/v1"

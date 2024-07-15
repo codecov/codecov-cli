@@ -18,7 +18,9 @@ def _turn_env_vars_into_dict(ctx, params, value):
 
 _global_upload_options = [
     click.option(
+        "--code",
         "--report-code",
+        "report_code",
         help="The code of the report. If unsure, leave default",
         default="default",
     ),

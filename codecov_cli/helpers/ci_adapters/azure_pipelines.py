@@ -10,7 +10,9 @@ class AzurePipelinesCIAdapter(CIAdapterBase):
         return bool(os.getenv("SYSTEM_TEAMFOUNDATIONCOLLECTIONURI"))
 
     def _get_commit_sha(self):
-        return os.getenv("BUILD_SOURCEVERSION")
+        return os.getenv("SYSTEM_PULLREQUEST_SOURCECOMMITID") or os.getenv(
+            "BUILD_SOURCEVERSION"
+        )
 
     def _get_build_url(self):
         if os.getenv("SYSTEM_TEAMPROJECT") and os.getenv("BUILD_BUILDID"):

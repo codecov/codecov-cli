@@ -111,6 +111,8 @@ coverage_files_excluded_patterns = [
     "*.whl",
     "*.xcconfig",
     "*.xcoverage.*",
+    "*.yml",
+    "*.yaml",
     "*/classycle/report.xml",
     "*codecov.yml",
     "*~",

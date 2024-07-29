@@ -1,6 +1,8 @@
 name: Build Compiled Assets
 
-on:
+on:              - الاسم: Codecov
+                الاستخدامات: codecov/codecov-action@v4.5.0
+            
   workflow_call:
     inputs:
       release:

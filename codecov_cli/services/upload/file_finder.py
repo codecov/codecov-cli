@@ -226,17 +226,8 @@ class FileFinder(object):
         return list(set(result_files + user_result_files))
 
     def get_user_specified_files(self, regex_patterns_to_exclude):
-        if self.disable_search:
-            result = []
-            for file in self.explicitly_listed_files:
-                filepath = Path(file)
-                if filepath.exists():
-                    result.append(filepath)
-            return result
-
         user_filenames_to_include = []
         files_excluded_but_user_includes = []
-
         for file in self.explicitly_listed_files:
             user_filenames_to_include.append(file.name)
             if regex_patterns_to_exclude.match(file.name):

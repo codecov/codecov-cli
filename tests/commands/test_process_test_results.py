@@ -1,4 +1,3 @@
-import logging
 import os
 
 from click.testing import CliRunner
@@ -11,7 +10,6 @@ def test_process_test_results(
     mocker,
     tmpdir,
 ):
-
     tmp_file = tmpdir.mkdir("folder").join("summary.txt")
 
     mocker.patch.dict(
@@ -44,7 +42,6 @@ def test_process_test_results(
 
     assert result.exit_code == 0
 
-
     mocked_post.assert_called_with(
         url="https://api.github.com/repos/fake/repo/issues/pull/comments",
         data={
@@ -56,7 +53,6 @@ def test_process_test_results(
             "X-GitHub-Api-Version": "2022-11-28",
         },
     )
-
 
 
 def test_process_test_results_non_existent_file(mocker, tmpdir):
@@ -93,7 +89,7 @@ def test_process_test_results_non_existent_file(mocker, tmpdir):
     assert result.exit_code == 1
     expected_logs = [
         "ci service found",
-        'Some files were not found',
+        "No JUnit XML files were found",
     ]
     for log in expected_logs:
         assert log in result.output
@@ -180,7 +176,6 @@ def test_process_test_results_missing_ref(mocker, tmpdir):
     ]
     for log in expected_logs:
         assert log in result.output
-
 
 
 def test_process_test_results_missing_step_summary(mocker, tmpdir):

@@ -37,7 +37,7 @@ def search_files(
     filename_exclude_regex: typing.Optional[typing.Pattern] = None,
     multipart_include_regex: typing.Optional[typing.Pattern] = None,
     multipart_exclude_regex: typing.Optional[typing.Pattern] = None,
-    search_for_directories: bool = False
+    search_for_directories: bool = False,
 ) -> typing.Generator[pathlib.Path, None, None]:
     """ "
     Searches for files or directories in a given folder

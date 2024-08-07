@@ -45,10 +45,8 @@ def send_commit_data(
 ):
     # this is how the CLI receives the username of the user to whom the fork belongs
     # to and the branch name from the action
-    tokenless = os.environ.get("TOKENLESS")
-    if tokenless:
+    if not token and branch and ":" in branch:
         headers = None  # type: ignore
-        branch = tokenless  # type: ignore
         logger.info("The PR is happening in a forked repo. Using tokenless upload.")
     else:
         headers = get_token_header_or_fail(token)

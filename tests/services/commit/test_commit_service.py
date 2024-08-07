@@ -1,9 +1,8 @@
-import json
 import uuid
 
-import requests
+import pytest
+from click import ClickException
 from click.testing import CliRunner
-from requests import Response
 
 from codecov_cli.services.commit import create_commit_logic, send_commit_data
 from codecov_cli.types import RequestError, RequestResult, RequestResultWarning
@@ -150,12 +149,11 @@ def test_commit_sender_with_forked_repo(mocker):
         return_value=mocker.MagicMock(status_code=200, text="success"),
     )
 
-    mocker.patch("os.environ", dict(TOKENLESS="user_forked_repo/codecov-cli:branch"))
     res = send_commit_data(
         "commit_sha",
         "parent_sha",
         "1",
-        "branch",
+        "user_forked_repo/codecov-cli:branch",
         "codecov::::codecov-cli",
         None,
         "github",
@@ -171,3 +169,23 @@ def test_commit_sender_with_forked_repo(mocker):
         },
         headers=None,
     )
+
+
+def test_commit_sender_with_forked_repo_bad_branch(mocker):
+    mocked_response = mocker.patch(
+        "codecov_cli.services.commit.send_post_request",
+        return_value=mocker.MagicMock(status_code=200, text="success"),
+    )
+
+    with pytest.raises(ClickException):
+        _res = send_commit_data(
+            "commit_sha",
+            "parent_sha",
+            "1",
+            "branch",
+            "codecov::::codecov-cli",
+            None,
+            "github",
+            None,
+        )
+    mocked_response.assert_not_called()

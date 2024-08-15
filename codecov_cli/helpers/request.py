@@ -180,7 +180,7 @@ def _sanitize_request_result(result: RequestResult):
                 warnings=result.warnings,
                 text=sanitized_text,
             )
-    except AttributeError:
+    except (AttributeError, json.JSONDecodeError):
         pass
 
     return result

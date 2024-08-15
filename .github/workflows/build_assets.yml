@@ -91,7 +91,7 @@ jobs:
           - distro: "python:3.11-alpine3.18"
             arch: x86_64
             distro_name: alpine
-          - distro: "python:3.11"
+          - distro: "python:3.11-bullseye"
             arch: arm64
             distro_name: linux
             

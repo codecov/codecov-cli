@@ -1,3 +1,4 @@
+import json
 import logging
 from sys import exit
 from time import sleep
@@ -143,7 +144,9 @@ def log_warnings_and_errors_if_any(
     )
     logger.debug(
         f"{process_desc} result",
-        extra=dict(extra_log_attributes=dict(result=sending_result)),
+        extra=dict(
+            extra_log_attributes=dict(result=_sanitize_request_result(sending_result))
+        ),
     )
     if sending_result.warnings:
         number_warnings = len(sending_result.warnings)
@@ -157,3 +160,27 @@ def log_warnings_and_errors_if_any(
         logger.error(f"{process_desc} failed: {sending_result.error.description}")
         if fail_on_error:
             exit(1)
+
+
+def _sanitize_request_result(result: RequestResult):
+    if not hasattr(result, "text"):
+        return result
+
+    try:
+        text_as_dict = json.loads(result.text)
+        token = text_as_dict.get("repository").get("yaml").get("codecov").get("token")
+        if token:
+            sanitized_token = str(token)[:1] + 18 * "*"
+            text_as_dict["repository"]["yaml"]["codecov"]["token"] = sanitized_token
+            sanitized_text = json.dumps(text_as_dict)
+
+            return RequestResult(
+                status_code=result.status_code,
+                error=result.error,
+                warnings=result.warnings,
+                text=sanitized_text,
+            )
+    except AttributeError:
+        pass
+
+    return result

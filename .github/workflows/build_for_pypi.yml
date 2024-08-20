@@ -10,32 +10,68 @@ on:
 
 jobs:
   build_for_pypi:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read  # This is required for actions/checkout
+    strategy:
+      matrix:
+        # macos-13 is an intel runner, macos-14 is apple silicon
+        os: [ubuntu-latest, windows-latest, macos-13, macos-14]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Set up QEMU
+        if: runner.os == 'Linux'
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: all
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.20.0
+        env:
+          # configure cibuildwheel to build native archs ('auto'), and some
+          # emulated ones
+          CIBW_ARCHS_LINUX: auto aarch64
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
+
+  build_sdist:
+    name: Build source distribution
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read  # This is required for actions/checkout
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build sdist
+        run: pipx run build --sdist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cibw-sdist
+          path: dist/*.tar.gz
+
+  upload_pypi:
+    needs: [build_for_pypi, build_sdist]
     runs-on: ubuntu-latest
     permissions:
       id-token: write # This is required for requesting the JWT
       contents: read  # This is required for actions/checkout
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
         with:
-          submodules: true
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
-      - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
-          python setup.py build
-          python setup.py develop
-      - name: Build distributions for different platforms
-        run: |
-          pip install wheel
-          python setup.py sdist bdist_wheel --plat-name=manylinux2014_x86_64
-          python setup.py bdist_wheel --plat-name=macosx-12.6-x86_64
-          python setup.py bdist_wheel --plat-name=win_amd64
-      - name: Publish package to PyPi
+          # unpacks all CIBW artifacts into dist/
+          pattern: cibw-*
+          path: dist
+          merge-multiple: true
+
+      - name: Publish package to PyPI
         if: inputs.publish == true
         uses: pypa/gh-action-pypi-publish@release/v1
-
-
-

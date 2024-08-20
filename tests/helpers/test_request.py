@@ -54,6 +54,38 @@ def test_log_error_raise(mocker):
     mock_log_error.assert_called_with(f"Process failed: Unauthorized")
 
 
+def test_log_result_without_token(mocker):
+    mock_log_debug = mocker.patch.object(req_log, "debug")
+    result = RequestResult(
+        error=None,
+        warnings=[],
+        status_code=201,
+        text="{\"message\":\"commit\",\"timestamp\":\"2024-03-25T15:41:07Z\",\"ci_passed\":true,\"state\":\"complete\",\"repository\":{\"name\":\"repo\",\"is_private\":false,\"active\":true,\"language\":\"python\",\"yaml\":null},\"author\":{\"avatar_url\":\"https://example.com\",\"service\":\"github\",\"username\":null,\"name\":\"dependabot[bot]\",\"ownerid\":2780265},\"commitid\":\"commit\",\"parent_commit_id\":\"parent\",\"pullid\":1,\"branch\":\"main\"}"
+    )
+    log_warnings_and_errors_if_any(result, "Commit creating", False)
+    mock_log_debug.assert_called_with('Commit creating result', extra={'extra_log_attributes': {'result': result}})
+
+
+def test_log_result_with_token(mocker):
+    mock_log_debug = mocker.patch.object(req_log, "debug")
+    result = RequestResult(
+        error=None,
+        warnings=[],
+        status_code=201,
+        text="{\"message\": \"commit\", \"timestamp\": \"2024-07-16T20:51:07Z\", \"ci_passed\": true, \"state\": \"complete\", \"repository\": {\"name\": \"repo\", \"is_private\": false, \"active\": true, \"language\": \"python\", \"yaml\": {\"codecov\": {\"token\": \"faketoken\"}}, \"author\": {\"avatar_url\": \"https://example.com\", \"service\": \"github\", \"username\": \"author\", \"name\": \"author\", \"ownerid\": 3461769}, \"commitid\": \"commit\", \"parent_commit_id\": \"parent_commit\", \"pullid\": null, \"branch\": \"main\"}}"
+    )
+
+    expected_text = "{\"message\": \"commit\", \"timestamp\": \"2024-07-16T20:51:07Z\", \"ci_passed\": true, \"state\": \"complete\", \"repository\": {\"name\": \"repo\", \"is_private\": false, \"active\": true, \"language\": \"python\", \"yaml\": {\"codecov\": {\"token\": \"f******************\"}}, \"author\": {\"avatar_url\": \"https://example.com\", \"service\": \"github\", \"username\": \"author\", \"name\": \"author\", \"ownerid\": 3461769}, \"commitid\": \"commit\", \"parent_commit_id\": \"parent_commit\", \"pullid\": null, \"branch\": \"main\"}}"
+    expected = RequestResult(
+        error=None,
+        warnings=[],
+        status_code=201,
+        text=expected_text,
+    )
+    log_warnings_and_errors_if_any(result, "Commit creating", False)
+    mock_log_debug.assert_called_with('Commit creating result', extra={'extra_log_attributes': {'result': expected}})
+
+
 def test_get_token_header_or_fail():
     # Test with a valid UUID token
     token = uuid.uuid4()

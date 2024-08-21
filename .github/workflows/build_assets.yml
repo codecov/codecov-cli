@@ -91,10 +91,10 @@ jobs:
           - distro: "python:3.11-alpine3.18"
             arch: x86_64
             distro_name: alpine
-          - distro: "python:3.11-bullseye"
+          - distro: "ubuntu/python:3.10-22.04_stable"
             arch: arm64
             distro_name: linux
-            
+
     steps:
     - uses: actions/checkout@v4
       with:
@@ -127,6 +127,3 @@ jobs:
         asset_name: codecovcli_${{ matrix.distro_name }}_${{ matrix.arch }}
         tag: ${{ github.ref }}
         overwrite: true
-    
-
-

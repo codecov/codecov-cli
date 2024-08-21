@@ -1,5 +1,6 @@
 #!/bin/sh
-apt install build-essential
+apt update
+apt install -y python3 python3-pip build-essential
 pip install -r requirements.txt
 pip install .
 python setup.py build

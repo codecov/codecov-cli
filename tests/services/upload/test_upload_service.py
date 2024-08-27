@@ -390,14 +390,14 @@ def test_do_upload_no_cov_reports_found(mocker):
     assert out_bytes == [
         (
             "info",
-            "No coverage reports found. Triggering notificaions without uploading.",
+            "No coverage reports found. Triggering notifications without uploading.",
         ),
     ]
     assert res == RequestResult(
         error=None,
         warnings=None,
         status_code=200,
-        text="No coverage reports found. Triggering notificaions without uploading.",
+        text="No coverage reports found. Triggering notifications without uploading.",
     )
     mock_select_preparation_plugins.assert_called_with(
         cli_config, ["first_plugin", "another", "forth"]

@@ -164,7 +164,7 @@ _global_upload_options = [
     ),
     click.option(
         "--report-type",
-        help="The type of the file to upload, coverage by default. Possible values are: testing, coverage.",
+        help="The type of the file to upload, coverage by default. Possible values are: test_results, coverage.",
         default="coverage",
         type=click.Choice(["coverage", "test_results"]),
     ),

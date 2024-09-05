@@ -7,6 +7,7 @@ from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.helpers.git import GitService
 from codecov_cli.helpers.options import global_options
 from codecov_cli.services.report import send_reports_result_get_request
+from codecov_cli.types import CommandContext
 
 logger = logging.getLogger("codecovcli")
 
@@ -18,7 +19,7 @@ logger = logging.getLogger("codecovcli")
 @global_options
 @click.pass_context
 def get_report_results(
-    ctx,
+    ctx: CommandContext,
     commit_sha: str,
     code: str,
     slug: str,

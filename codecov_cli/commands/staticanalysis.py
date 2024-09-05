@@ -8,6 +8,7 @@ import click
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
 from codecov_cli.helpers.validators import validate_commit_sha
 from codecov_cli.services.staticanalysis import run_analysis_entrypoint
+from codecov_cli.types import CommandContext
 
 logger = logging.getLogger("codecovcli")
 
@@ -48,7 +49,7 @@ logger = logging.getLogger("codecovcli")
 )
 @click.pass_context
 def static_analysis(
-    ctx,
+    ctx: CommandContext,
     foldertosearch,
     numberprocesses,
     pattern,

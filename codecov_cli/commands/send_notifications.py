@@ -7,6 +7,7 @@ from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
 from codecov_cli.helpers.git import GitService
 from codecov_cli.helpers.options import global_options
 from codecov_cli.services.upload_completion import upload_completion_logic
+from codecov_cli.types import CommandContext
 
 logger = logging.getLogger("codecovcli")
 
@@ -15,7 +16,7 @@ logger = logging.getLogger("codecovcli")
 @global_options
 @click.pass_context
 def send_notifications(
-    ctx,
+    ctx: CommandContext,
     commit_sha: str,
     slug: typing.Optional[str],
     token: typing.Optional[str],

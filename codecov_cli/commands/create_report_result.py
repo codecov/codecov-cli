@@ -4,6 +4,7 @@ import click
 
 from codecov_cli.helpers.options import global_options
 from codecov_cli.services.report import create_report_results_logic
+from codecov_cli.types import CommandContext
 
 logger = logging.getLogger("codecovcli")
 
@@ -15,7 +16,7 @@ logger = logging.getLogger("codecovcli")
 @global_options
 @click.pass_context
 def create_report_results(
-    ctx,
+    ctx: CommandContext,
     commit_sha: str,
     code: str,
     slug: str,

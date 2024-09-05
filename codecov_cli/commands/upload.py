@@ -8,6 +8,7 @@ import click
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
 from codecov_cli.helpers.options import global_options
 from codecov_cli.services.upload import do_upload_logic
+from codecov_cli.types import CommandContext
 
 logger = logging.getLogger("codecovcli")
 
@@ -190,7 +191,7 @@ def global_upload_options(func):
 @global_options
 @click.pass_context
 def do_upload(
-    ctx: click.Context,
+    ctx: CommandContext,
     commit_sha: str,
     report_code: str,
     branch: typing.Optional[str],

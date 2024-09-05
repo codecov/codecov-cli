@@ -8,6 +8,7 @@ from codecov_cli.commands.commit import create_commit
 from codecov_cli.commands.report import create_report
 from codecov_cli.commands.upload import do_upload, global_upload_options
 from codecov_cli.helpers.options import global_options
+from codecov_cli.types import CommandContext
 
 logger = logging.getLogger("codecovcli")
 
@@ -22,7 +23,7 @@ logger = logging.getLogger("codecovcli")
 )
 @click.pass_context
 def upload_process(
-    ctx,
+    ctx: CommandContext,
     commit_sha: str,
     report_code: str,
     build_code: typing.Optional[str],

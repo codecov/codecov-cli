@@ -1,6 +1,6 @@
 import logging
 import subprocess
-import typing
+import typing as t
 from pathlib import Path
 from shutil import which
 
@@ -14,21 +14,17 @@ class VersioningSystemInterface(object):
     def __repr__(self) -> str:
         return str(type(self))
 
-    def get_fallback_value(
-        self, fallback_field: FallbackFieldEnum
-    ) -> typing.Optional[str]:
+    def get_fallback_value(self, fallback_field: FallbackFieldEnum) -> t.Optional[str]:
         pass
 
-    def get_network_root(self) -> typing.Optional[Path]:
+    def get_network_root(self) -> t.Optional[Path]:
         pass
 
-    def list_relevant_files(
-        self, directory: typing.Optional[Path] = None
-    ) -> typing.List[str]:
+    def list_relevant_files(self, directory: t.Optional[Path] = None) -> t.List[str]:
         pass
 
 
-def get_versioning_system() -> VersioningSystemInterface:
+def get_versioning_system() -> t.Optional[VersioningSystemInterface]:
     for klass in [GitVersioningSystem, NoVersioningSystem]:
         if klass.is_available():
             logger.debug(f"versioning system found: {klass}")
@@ -123,9 +119,7 @@ class GitVersioningSystem(VersioningSystemInterface):
             return Path(p.stdout.decode().rstrip())
         return None
 
-    def list_relevant_files(
-        self, root_folder: typing.Optional[Path] = None
-    ) -> typing.List[str]:
+    def list_relevant_files(self, root_folder: t.Optional[Path] = None) -> t.List[str]:
         dir_to_use = root_folder or self.get_network_root()
         if dir_to_use is None:
             raise ValueError("Can't determine root folder")

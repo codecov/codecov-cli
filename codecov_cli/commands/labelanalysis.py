@@ -16,6 +16,7 @@ from codecov_cli.runners.types import (
     LabelAnalysisRequestResult,
     LabelAnalysisRunnerInterface,
 )
+from codecov_cli.types import CommandContext
 
 logger = logging.getLogger("codecovcli")
 
@@ -77,7 +78,7 @@ logger = logging.getLogger("codecovcli")
 )
 @click.pass_context
 def label_analysis(
-    ctx: click.Context,
+    ctx: CommandContext,
     token: str,
     head_commit_sha: str,
     base_commit_sha: str,

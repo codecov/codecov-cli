@@ -6,6 +6,7 @@ import click
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
 from codecov_cli.helpers.encoder import slug_without_subgroups_is_invalid
 from codecov_cli.services.commit.base_picking import base_picking_logic
+from codecov_cli.types import CommandContext
 
 logger = logging.getLogger("codecovcli")
 
@@ -45,7 +46,7 @@ logger = logging.getLogger("codecovcli")
 )
 @click.pass_context
 def pr_base_picking(
-    ctx,
+    ctx: CommandContext,
     base_sha: str,
     pr: typing.Optional[int],
     slug: typing.Optional[str],

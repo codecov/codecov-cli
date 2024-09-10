@@ -5,6 +5,7 @@ import click
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
 from codecov_cli.helpers.options import global_options
 from codecov_cli.services.report import create_report_logic
+from codecov_cli.types import CommandContext
 
 logger = logging.getLogger("codecovcli")
 
@@ -25,7 +26,7 @@ logger = logging.getLogger("codecovcli")
 @global_options
 @click.pass_context
 def create_report(
-    ctx,
+    ctx: CommandContext,
     commit_sha: str,
     code: str,
     slug: str,

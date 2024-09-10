@@ -1,7 +1,9 @@
 import logging
+from typing import Optional
 
 from codecov_cli.helpers.ci_adapters.appveyor_ci import AppveyorCIAdapter
 from codecov_cli.helpers.ci_adapters.azure_pipelines import AzurePipelinesCIAdapter
+from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
 from codecov_cli.helpers.ci_adapters.bitbucket_ci import BitbucketAdapter
 from codecov_cli.helpers.ci_adapters.bitrise_ci import BitriseCIAdapter
 from codecov_cli.helpers.ci_adapters.buildkite import BuildkiteAdapter
@@ -22,7 +24,7 @@ from codecov_cli.helpers.ci_adapters.woodpeckerci import WoodpeckerCIAdapter
 logger = logging.getLogger("codecovcli")
 
 
-def get_ci_adapter(provider_name: str = None):
+def get_ci_adapter(provider_name: str = None) -> Optional[CIAdapterBase]:
     if provider_name:
         for provider in get_ci_providers_list():
             if provider.get_service_name().lower() == provider_name.lower():

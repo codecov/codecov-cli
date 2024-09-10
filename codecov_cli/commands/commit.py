@@ -7,6 +7,7 @@ from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
 from codecov_cli.helpers.git import GitService
 from codecov_cli.helpers.options import global_options
 from codecov_cli.services.commit import create_commit_logic
+from codecov_cli.types import CommandContext
 
 logger = logging.getLogger("codecovcli")
 
@@ -35,7 +36,7 @@ logger = logging.getLogger("codecovcli")
 @global_options
 @click.pass_context
 def create_commit(
-    ctx,
+    ctx: CommandContext,
     commit_sha: str,
     parent_sha: typing.Optional[str],
     pull_request_number: typing.Optional[int],

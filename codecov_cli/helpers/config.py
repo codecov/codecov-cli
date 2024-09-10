@@ -1,6 +1,6 @@
 import logging
 import pathlib
-import typing
+import typing as t
 
 import yaml
 
@@ -45,7 +45,7 @@ def _find_codecov_yamls():
     return yamls
 
 
-def load_cli_config(codecov_yml_path: typing.Optional[pathlib.Path]):
+def load_cli_config(codecov_yml_path: t.Optional[pathlib.Path]) -> t.Optional[dict]:
     if not codecov_yml_path:
         yamls = _find_codecov_yamls()
         codecov_yml_path = yamls[0] if yamls else None

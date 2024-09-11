@@ -1,4 +1,5 @@
 import asyncio
+from copy import deepcopy
 import json
 import logging
 import typing
@@ -31,6 +32,7 @@ async def run_analysis_entrypoint(
     commit: str,
     token: str,
     should_force: bool,
+    should_dump: bool,
     folders_to_exclude: typing.List[Path],
     enterprise_url: typing.Optional[str],
 ):
@@ -42,6 +44,12 @@ async def run_analysis_entrypoint(
     # Also makes the function easier to test
     processing_errors = processing_results["processing_errors"]
     log_processing_errors(processing_errors)
+
+    if should_dump:
+        dump_path = folder / "static_analysis_output"
+        dump_data(processing_results["all_data"], dump_path)
+        logger.info(f"Dumped data at {dump_path}")
+        return
     # Upload results metadata to codecov to get list of files that we need to upload
     file_metadata = processing_results["file_metadata"]
     all_data = processing_results["all_data"]
@@ -293,3 +301,16 @@ def analyze_file(
         return FileAnalysisResult(
             filename=str(filename.result_filename), error=error_dict
         )
+
+
+def dump_data(all_data: dict, path: Path):
+    files = all_data.keys()
+    for file in files:
+        file_parts: list[str] = file.split("/")
+        file_path = deepcopy(path)
+        for part in file_parts[:-1]:
+            file_path = file_path / part
+        if not file_path.exists():
+            file_path.mkdir(parents=True, exist_ok=True)
+        file_path = file_path / file_parts[-1]
+        file_path.write_text(json.dumps(all_data[file]))

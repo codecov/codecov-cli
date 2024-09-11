@@ -47,15 +47,21 @@ logger = logging.getLogger("codecovcli")
     envvar="CODECOV_STATIC_TOKEN",
     help="The static analysis token (NOT the same token as upload)",
 )
+@click.option(
+    "--dump",
+    is_flag=True,
+    help="When used the CLI will dump all static analysis files generated in `./static_analysis/`",
+)
 @click.pass_context
 def static_analysis(
     ctx: CommandContext,
     foldertosearch,
     numberprocesses,
     pattern,
-    commit,
-    token,
-    force,
+    commit: str,
+    token: str | None,
+    force: bool,
+    dump: bool,
     folders_to_exclude: typing.List[pathlib.Path],
 ):
     enterprise_url = ctx.obj.get("enterprise_url")
@@ -69,6 +75,7 @@ def static_analysis(
                 commit_sha=commit,
                 token=token,
                 force=force,
+                dump=dump,
                 folders_to_exclude=folders_to_exclude,
                 enterprise_url=enterprise_url,
             )
@@ -83,6 +90,7 @@ def static_analysis(
             commit,
             token,
             force,
+            dump,
             list(folders_to_exclude),
             enterprise_url,
         )

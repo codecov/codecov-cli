@@ -4,6 +4,7 @@ import typing
 import click
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
+from codecov_cli.helpers.args import get_cli_args
 from codecov_cli.helpers.git import GitService
 from codecov_cli.helpers.options import global_options
 from codecov_cli.services.empty_upload import empty_upload_logic
@@ -26,19 +27,13 @@ def empty_upload(
     fail_on_error: typing.Optional[bool],
 ):
     enterprise_url = ctx.obj.get("enterprise_url")
+    args = get_cli_args(ctx)
     logger.debug(
         "Starting empty upload process",
         extra=dict(
-            extra_log_attributes=dict(
-                commit_sha=commit_sha,
-                slug=slug,
-                token=token,
-                service=git_service,
-                enterprise_url=enterprise_url,
-                fail_on_error=fail_on_error,
-            )
+            extra_log_attributes=args,
         ),
     )
     return empty_upload_logic(
-        commit_sha, slug, token, git_service, enterprise_url, fail_on_error, force
+        commit_sha, slug, token, git_service, enterprise_url, fail_on_error, force, args
     )

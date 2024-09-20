@@ -28,6 +28,7 @@ def create_report_logic(
     enterprise_url: str,
     pull_request_number: int,
     fail_on_error: bool = False,
+    args: dict = None,
 ):
     encoded_slug = encode_slug(slug)
     sending_result = send_create_report_request(
@@ -38,15 +39,26 @@ def create_report_logic(
         encoded_slug,
         enterprise_url,
         pull_request_number,
+        args,
     )
     log_warnings_and_errors_if_any(sending_result, "Report creating", fail_on_error)
     return sending_result
 
 
 def send_create_report_request(
-    commit_sha, code, service, token, encoded_slug, enterprise_url, pull_request_number
+    commit_sha,
+    code,
+    service,
+    token,
+    encoded_slug,
+    enterprise_url,
+    pull_request_number,
+    args,
 ):
-    data = {"code": code}
+    data = {
+        "cli_args": args,
+        "code": code,
+    }
     headers = get_token_header(token)
     upload_url = enterprise_url or CODECOV_API_URL
     url = f"{upload_url}/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports"
@@ -61,6 +73,7 @@ def create_report_results_logic(
     token: str,
     enterprise_url: str,
     fail_on_error: bool = False,
+    args: dict = None,
 ):
     encoded_slug = encode_slug(slug)
     sending_result = send_reports_result_request(
@@ -79,12 +92,21 @@ def create_report_results_logic(
 
 
 def send_reports_result_request(
-    commit_sha, report_code, encoded_slug, service, token, enterprise_url
+    commit_sha,
+    report_code,
+    encoded_slug,
+    service,
+    token,
+    enterprise_url,
+    args,
 ):
+    data = {
+        "cli_args": args,
+    }
     headers = get_token_header_or_fail(token)
     upload_url = enterprise_url or CODECOV_API_URL
     url = f"{upload_url}/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/results"
-    return send_post_request(url=url, headers=headers)
+    return send_post_request(url=url, data=data, headers=headers)
 
 
 def send_reports_result_get_request(

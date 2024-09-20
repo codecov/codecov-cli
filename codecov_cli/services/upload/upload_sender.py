@@ -42,15 +42,17 @@ class UploadSender(object):
         ci_service: typing.Optional[str] = None,
         git_service: typing.Optional[str] = None,
         enterprise_url: typing.Optional[str] = None,
+        args: dict = None,
     ) -> RequestResult:
         data = {
-            "ci_url": build_url,
-            "flags": flags,
-            "env": env_vars,
-            "name": name,
-            "job_code": job_code,
-            "version": codecov_cli_version,
             "ci_service": ci_service,
+            "ci_url": build_url,
+            "cli_args": args,
+            "env": env_vars,
+            "flags": flags,
+            "job_code": job_code,
+            "name": name,
+            "version": codecov_cli_version,
         }
         headers = get_token_header(token)
         encoded_slug = encode_slug(slug)

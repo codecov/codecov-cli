@@ -25,6 +25,7 @@ def do_upload_logic(
     versioning_system: VersioningSystemInterface,
     ci_adapter: CIAdapterBase,
     *,
+    args: dict = None,
     branch: typing.Optional[str],
     build_code: typing.Optional[str],
     build_url: typing.Optional[str],
@@ -127,6 +128,7 @@ def do_upload_logic(
             ci_service,
             git_service,
             enterprise_url,
+            args,
         )
     else:
         logger.info("dry-run option activated. NOT sending data to Codecov.")

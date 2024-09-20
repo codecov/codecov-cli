@@ -51,6 +51,7 @@ class LegacyUploadSender(object):
         ci_service: typing.Optional[str] = None,
         git_service: typing.Optional[str] = None,
         enterprise_url: typing.Optional[str] = None,
+        args: dict = None,
     ) -> UploadSendingResult:
         params = {
             "package": f"codecov-cli/{codecov_cli_version}",
@@ -72,9 +73,13 @@ class LegacyUploadSender(object):
             logger.warning("Token is empty.")
             headers = {"X-Upload-Token": ""}
 
+        data = {
+            "cli_args": args,
+        }
+
         upload_url = enterprise_url or LEGACY_CODECOV_API_URL
         resp = send_post_request(
-            f"{upload_url}/upload/v4", headers=headers, params=params
+            f"{upload_url}/upload/v4", data=data, headers=headers, params=params
         )
         if resp.status_code >= 400:
             return resp

@@ -6,6 +6,7 @@ import typing
 import click
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
+from codecov_cli.helpers.args import get_cli_args
 from codecov_cli.helpers.options import global_options
 from codecov_cli.services.upload import do_upload_logic
 from codecov_cli.types import CommandContext
@@ -225,36 +226,11 @@ def do_upload(
     cli_config = codecov_yaml.get("cli", {})
     ci_adapter = ctx.obj.get("ci_adapter")
     enterprise_url = ctx.obj.get("enterprise_url")
+    args = get_cli_args(ctx)
     logger.debug(
         "Starting upload processing",
         extra=dict(
-            extra_log_attributes=dict(
-                branch=branch,
-                build_code=build_code,
-                build_url=build_url,
-                commit_sha=commit_sha,
-                disable_file_fixes=disable_file_fixes,
-                disable_search=disable_search,
-                enterprise_url=enterprise_url,
-                env_vars=env_vars,
-                files_search_exclude_folders=files_search_exclude_folders,
-                files_search_explicitly_listed_files=files_search_explicitly_listed_files,
-                files_search_root_folder=files_search_root_folder,
-                flags=flags,
-                git_service=git_service,
-                handle_no_reports_found=handle_no_reports_found,
-                job_code=job_code,
-                name=name,
-                network_filter=network_filter,
-                network_prefix=network_prefix,
-                network_root_folder=network_root_folder,
-                plugin_names=plugin_names,
-                pull_request_number=pull_request_number,
-                report_code=report_code,
-                slug=slug,
-                token=token,
-                upload_file_type=report_type,
-            )
+            extra_log_attributes=args,
         ),
     )
     do_upload_logic(
@@ -289,4 +265,5 @@ def do_upload(
         token=token,
         upload_file_type=report_type,
         use_legacy_uploader=use_legacy_uploader,
+        args=args,
     )

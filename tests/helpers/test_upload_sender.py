@@ -16,6 +16,7 @@ upload_collection = UploadCollectionResult(["1", "apple.py", "3"], [], [])
 random_token = "f359afb9-8a2a-42ab-a448-c3d267ff495b"
 random_sha = "845548c6b95223f12e8317a1820705f64beaf69e"
 named_upload_data = {
+    "args": None,
     "upload_file_type": "coverage",
     "report_code": "report_code",
     "env_vars": {},
@@ -46,13 +47,14 @@ test_results_named_upload_data = {
     "git_service": "github",
 }
 request_data = {
+    "ci_service": "ci_service",
     "ci_url": "build_url",
+    "cli_args": None,
     "env": {},
     "flags": "flags",
     "job_code": "job_code",
     "name": "name",
     "version": codecov_cli_version,
-    "ci_service": "ci_service",
 }
 
 
@@ -232,7 +234,7 @@ class TestUploadSender(object):
         mocker,
     ):
         headers = {}
-        
+
         mocked_legacy_upload_endpoint.match = [
             matchers.json_params_matcher(request_data),
             matchers.header_matcher(headers),

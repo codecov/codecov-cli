@@ -28,17 +28,11 @@ def get_report_results(
     fail_on_error: bool,
 ):
     enterprise_url = ctx.obj.get("enterprise_url")
+    args = get_cli_args(ctx)
     logger.debug(
         "Getting report results",
         extra=dict(
-            extra_log_attributes=dict(
-                commit_sha=commit_sha,
-                code=code,
-                slug=slug,
-                service=git_service,
-                enterprise_url=enterprise_url,
-                token=token,
-            )
+            extra_log_attributes=args,
         ),
     )
     encoded_slug = encode_slug(slug)

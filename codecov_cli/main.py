@@ -51,6 +51,8 @@ def cli(
     enterprise_url: str,
     verbose: bool = False,
 ):
+    ctx.obj["cli_args"] = ctx.params
+    ctx.obj["cli_args"]["version"] = f"cli-{__version__}"
     configure_logger(logger, log_level=(logging.DEBUG if verbose else logging.INFO))
     ctx.help_option_names = ["-h", "--help"]
     ctx.obj["ci_adapter"] = get_ci_adapter(auto_load_params_from)

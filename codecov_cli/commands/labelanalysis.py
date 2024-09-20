@@ -9,6 +9,7 @@ import requests
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
 from codecov_cli.helpers import request
+from codecov_cli.helpers.args import get_cli_args
 from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.helpers.validators import validate_commit_sha
 from codecov_cli.runners import get_runner
@@ -89,18 +90,11 @@ def label_analysis(
     runner_params: List[str],
 ):
     enterprise_url = ctx.obj.get("enterprise_url")
+    args = get_cli_args(ctx)
     logger.debug(
         "Starting label analysis",
         extra=dict(
-            extra_log_attributes=dict(
-                head_commit_sha=head_commit_sha,
-                base_commit_sha=base_commit_sha,
-                token=token,
-                runner_name=runner_name,
-                enterprise_url=enterprise_url,
-                max_wait_time=max_wait_time,
-                dry_run=dry_run,
-            )
+            extra_log_attributes=args,
         ),
     )
     if head_commit_sha == base_commit_sha:

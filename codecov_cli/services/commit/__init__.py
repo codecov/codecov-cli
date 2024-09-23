@@ -23,6 +23,7 @@ def create_commit_logic(
     service: typing.Optional[str],
     enterprise_url: typing.Optional[str] = None,
     fail_on_error: bool = False,
+    args: dict = None,
 ):
     encoded_slug = encode_slug(slug)
     sending_result = send_commit_data(
@@ -34,6 +35,7 @@ def create_commit_logic(
         token=token,
         service=service,
         enterprise_url=enterprise_url,
+        args=args,
     )
 
     log_warnings_and_errors_if_any(sending_result, "Commit creating", fail_on_error)
@@ -41,7 +43,15 @@ def create_commit_logic(
 
 
 def send_commit_data(
-    commit_sha, parent_sha, pr, branch, slug, token, service, enterprise_url
+    commit_sha,
+    parent_sha,
+    pr,
+    branch,
+    slug,
+    token,
+    service,
+    enterprise_url,
+    args,
 ):
     # this is how the CLI receives the username of the user to whom the fork belongs
     # to and the branch name from the action
@@ -54,12 +64,17 @@ def send_commit_data(
         headers = get_token_header_or_fail(token)
 
     data = {
+        "branch": branch,
+        "cli_args": args,
         "commitid": commit_sha,
         "parent_commit_id": parent_sha,
         "pullid": pr,
-        "branch": branch,
     }
 
     upload_url = enterprise_url or CODECOV_API_URL
     url = f"{upload_url}/upload/{service}/{slug}/commits"
-    return send_post_request(url=url, data=data, headers=headers)
+    return send_post_request(
+        url=url,
+        data=data,
+        headers=headers,
+    )

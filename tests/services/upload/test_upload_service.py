@@ -70,6 +70,7 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
             pull_request_number="pr",
             git_service="git_service",
             enterprise_url=None,
+            args=None,
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
@@ -102,6 +103,7 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
         None,
         "service",
         "git_service",
+        None,
         None,
     )
 
@@ -191,6 +193,7 @@ def test_do_upload_logic_happy_path(mocker):
         None,
         "service",
         "git_service",
+        None,
         None,
     )
 
@@ -534,6 +537,7 @@ def test_do_upload_logic_happy_path_test_results(mocker):
             pull_request_number="pr",
             git_service="git_service",
             enterprise_url=None,
+            args={"args": "fake_args"}
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
@@ -565,4 +569,5 @@ def test_do_upload_logic_happy_path_test_results(mocker):
         "service",
         "git_service",
         None,
+        {"args": "fake_args"}
     )

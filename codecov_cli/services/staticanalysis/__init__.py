@@ -33,6 +33,7 @@ async def run_analysis_entrypoint(
     should_force: bool,
     folders_to_exclude: typing.List[Path],
     enterprise_url: typing.Optional[str],
+    args: dict,
 ):
     ff = select_file_finder(config)
     files = list(ff.find_files(folder, pattern, folders_to_exclude))

@@ -7,6 +7,7 @@ import click
 from codecov_cli.commands.commit import create_commit
 from codecov_cli.commands.report import create_report
 from codecov_cli.commands.upload import do_upload, global_upload_options
+from codecov_cli.helpers.args import get_cli_args
 from codecov_cli.helpers.options import global_options
 from codecov_cli.types import CommandContext
 
@@ -53,35 +54,11 @@ def upload_process(
     handle_no_reports_found: bool,
     report_type: str,
 ):
+    args = get_cli_args(ctx)
     logger.debug(
         "Starting upload process",
         extra=dict(
-            extra_log_attributes=dict(
-                commit_sha=commit_sha,
-                report_code=report_code,
-                build_code=build_code,
-                build_url=build_url,
-                job_code=job_code,
-                env_vars=env_vars,
-                flags=flags,
-                name=name,
-                network_filter=network_filter,
-                network_prefix=network_prefix,
-                network_root_folder=network_root_folder,
-                files_search_root_folder=files_search_root_folder,
-                files_search_exclude_folders=files_search_exclude_folders,
-                files_search_explicitly_listed_files=files_search_explicitly_listed_files,
-                plugin_names=plugin_names,
-                token=token,
-                branch=branch,
-                slug=slug,
-                pull_request_number=pull_request_number,
-                git_service=git_service,
-                disable_search=disable_search,
-                disable_file_fixes=disable_file_fixes,
-                fail_on_error=fail_on_error,
-                handle_no_reports_found=handle_no_reports_found,
-            )
+            extra_log_attributes=args,
         ),
     )
 

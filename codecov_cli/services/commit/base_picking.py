@@ -10,8 +10,9 @@ from codecov_cli.helpers.request import (
 logger = logging.getLogger("codecovcli")
 
 
-def base_picking_logic(base_sha, pr, slug, token, service, enterprise_url):
+def base_picking_logic(base_sha, pr, slug, token, service, enterprise_url, args):
     data = {
+        "cli_args": args,
         "user_provided_base_sha": base_sha,
     }
     headers = get_token_header_or_fail(token)

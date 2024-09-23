@@ -13,11 +13,13 @@ from test_results_parser import (
     parse_junit_xml,
 )
 
+from codecov_cli.helpers.args import get_cli_args
 from codecov_cli.helpers.request import (
     log_warnings_and_errors_if_any,
     send_post_request,
 )
 from codecov_cli.services.upload.file_finder import select_file_finder
+from codecov_cli.types import CommandContext
 
 logger = logging.getLogger("codecovcli")
 
@@ -83,8 +85,14 @@ class TestResultsNotificationPayload:
 
 @click.command()
 @process_test_results_options
+@click.pass_context
 def process_test_results(
-    dir=None, files=None, exclude_folders=None, disable_search=None, provider_token=None
+    ctx: CommandContext,
+    dir=None,
+    files=None,
+    exclude_folders=None,
+    disable_search=None,
+    provider_token=None,
 ):
     if provider_token is None:
         raise click.ClickException(
@@ -130,10 +138,11 @@ def process_test_results(
     # GITHUB_REF is documented here: https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables
     pr_number = ref.split("/")[2]
 
-    create_github_comment(provider_token, slug, pr_number, message)
+    args = get_cli_args(ctx)
+    create_github_comment(provider_token, slug, pr_number, message, args)
 
 
-def create_github_comment(token, repo_slug, pr_number, message):
+def create_github_comment(token, repo_slug, pr_number, message, args):
     url = f"https://api.github.com/repos/{repo_slug}/issues/{pr_number}/comments"
 
     headers = {
@@ -144,7 +153,14 @@ def create_github_comment(token, repo_slug, pr_number, message):
     logger.info("Posting github comment")
 
     log_warnings_and_errors_if_any(
-        send_post_request(url=url, data={"body": message}, headers=headers),
+        send_post_request(
+            url=url,
+            data={
+                "body": message,
+                "cli_args": args,
+            },
+            headers=headers,
+        ),
         "Posting test results comment",
     )
 

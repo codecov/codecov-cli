@@ -31,6 +31,7 @@ def test_report_results_command_with_warnings(mocker):
             slug="owner/repo",
             token="token",
             enterprise_url=None,
+            args=None,
         )
 
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
@@ -74,6 +75,7 @@ def test_report_results_command_with_error(mocker):
             slug="owner/repo",
             token="token",
             enterprise_url=None,
+            args=None,
         )
 
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
@@ -99,7 +101,7 @@ def test_report_results_request_200(mocker):
     )
     token = uuid.uuid4()
     res = send_reports_result_request(
-        "commit_sha", "report_code", "encoded_slug", "service", token, None
+        "commit_sha", "report_code", "encoded_slug", "service", token, None, None
     )
     assert res.error is None
     assert res.warnings == []
@@ -113,7 +115,7 @@ def test_report_results_403(mocker):
     )
     token = uuid.uuid4()
     res = send_reports_result_request(
-        "commit_sha", "report_code", "encoded_slug", "service", token, None
+        "commit_sha", "report_code", "encoded_slug", "service", token, None, None
     )
     assert res.error == RequestError(
         code="HTTP Error 403",

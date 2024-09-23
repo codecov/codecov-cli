@@ -136,6 +136,7 @@ class TestStaticAnalysisService:
                 should_force=False,
                 folders_to_exclude=[],
                 enterprise_url=None,
+                args=None
             )
         mock_file_finder.assert_called_with({})
         mock_file_finder.return_value.find_files.assert_called()
@@ -211,6 +212,7 @@ class TestStaticAnalysisService:
                     should_force=False,
                     folders_to_exclude=[],
                     enterprise_url=None,
+                    args=None,
                 )
         assert "Unknown error cancelled the upload tasks." in str(exp.value)
         mock_file_finder.assert_called_with({})
@@ -384,6 +386,7 @@ class TestStaticAnalysisService:
                     should_force=False,
                     folders_to_exclude=[],
                     enterprise_url=None,
+                    args=None,
                 )
         mock_file_finder.assert_called_with({})
         mock_file_finder.return_value.find_files.assert_called()
@@ -458,6 +461,7 @@ class TestStaticAnalysisService:
                     should_force=False,
                     folders_to_exclude=[],
                     enterprise_url=None,
+                    args=None,
                 )
         mock_file_finder.assert_called_with({})
         mock_file_finder.return_value.find_files.assert_called()
@@ -534,6 +538,7 @@ class TestStaticAnalysisService:
                 should_force=True,
                 folders_to_exclude=[],
                 enterprise_url=None,
+                args=None,
             )
         mock_file_finder.assert_called_with({})
         mock_file_finder.return_value.find_files.assert_called()
@@ -605,6 +610,7 @@ class TestStaticAnalysisService:
                 should_force=False,
                 folders_to_exclude=[],
                 enterprise_url=None,
+                args=None,
             )
         mock_file_finder.assert_called_with({})
         mock_file_finder.return_value.find_files.assert_called()

@@ -3,6 +3,7 @@ import logging
 import click
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
+from codecov_cli.helpers.args import get_cli_args
 from codecov_cli.helpers.options import global_options
 from codecov_cli.services.report import create_report_logic
 from codecov_cli.types import CommandContext
@@ -36,17 +37,11 @@ def create_report(
     pull_request_number: int,
 ):
     enterprise_url = ctx.obj.get("enterprise_url")
+    args = get_cli_args(ctx)
     logger.debug(
         "Starting create report process",
         extra=dict(
-            extra_log_attributes=dict(
-                commit_sha=commit_sha,
-                code=code,
-                slug=slug,
-                service=git_service,
-                enterprise_url=enterprise_url,
-                token=token,
-            )
+            extra_log_attributes=args,
         ),
     )
     res = create_report_logic(
@@ -58,6 +53,7 @@ def create_report(
         enterprise_url,
         pull_request_number,
         fail_on_error,
+        args,
     )
     if not res.error:
         logger.info(

@@ -52,8 +52,7 @@ def backoff_time(curr_retry):
     return 2 ** (curr_retry - 1)
 
 
-class RetryException(Exception):
-    ...
+class RetryException(Exception): ...
 
 
 def retry_request(func):
@@ -73,7 +72,7 @@ def retry_request(func):
                 requests.exceptions.ConnectionError,
                 requests.exceptions.Timeout,
                 RetryException,
-            ) as exp:
+            ):
                 logger.warning(
                     "Request failed. Retrying",
                     extra=dict(extra_log_attributes=dict(retry=retry)),
@@ -95,7 +94,7 @@ def send_post_request(
     return request_result(post(url=url, data=data, headers=headers, params=params))
 
 
-def get_token_header_or_fail(token: str) -> dict:
+def get_token_header_or_fail(token: str | None) -> dict:
     if token is None:
         raise click.ClickException(
             "Codecov token not found. Please provide Codecov token with -t flag."
@@ -103,7 +102,7 @@ def get_token_header_or_fail(token: str) -> dict:
     return {"Authorization": f"token {token}"}
 
 
-def get_token_header(token: str) -> Optional[dict]:
+def get_token_header(token: str | None) -> Optional[dict]:
     if token is None:
         return None
     return {"Authorization": f"token {token}"}

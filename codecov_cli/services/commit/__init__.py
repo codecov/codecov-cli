@@ -5,7 +5,7 @@ import typing
 from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.helpers.encoder import decode_slug, encode_slug
 from codecov_cli.helpers.request import (
-    get_token_header_or_fail,
+    get_token_header,
     log_warnings_and_errors_if_any,
     send_post_request,
 )
@@ -55,13 +55,14 @@ def send_commit_data(
 ):
     # this is how the CLI receives the username of the user to whom the fork belongs
     # to and the branch name from the action
-    tokenless = os.environ.get("TOKENLESS")
-    if tokenless:
-        headers = None  # type: ignore
-        branch = tokenless  # type: ignore
-        logger.info("The PR is happening in a forked repo. Using tokenless upload.")
-    else:
-        headers = get_token_header_or_fail(token)
+
+    if not token:
+        if branch and ":" in branch:
+            logger.info("Creating a commit on an unprotected branch")
+        else:
+            logger.warning("Token is missing, but branch is missing or protected")
+
+    headers = get_token_header(token)
 
     data = {
         "branch": branch,

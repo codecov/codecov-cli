@@ -1,4 +1,3 @@
-import logging
 import os
 
 from click.testing import CliRunner
@@ -11,7 +10,6 @@ def test_process_test_results(
     mocker,
     tmpdir,
 ):
-
     tmp_file = tmpdir.mkdir("folder").join("summary.txt")
 
     mocker.patch.dict(
@@ -44,12 +42,22 @@ def test_process_test_results(
 
     assert result.exit_code == 0
 
-
     mocked_post.assert_called_with(
         url="https://api.github.com/repos/fake/repo/issues/pull/comments",
         data={
             "body": "### :x: Failed Test Results: \nCompleted 4 tests with **`1 failed`**, 3 passed and 0 skipped.\n<details><summary>View the full list of failed tests</summary>\n\n| **Test Description** | **Failure message** |\n| :-- | :-- |\n| <pre>Testsuite:<br>api.temp.calculator.test_calculator::test_divide<br><br>Test name:<br>pytest<br></pre> | <pre>def<br>                test_divide():<br>                &amp;gt; assert Calculator.divide(1, 2) == 0.5<br>                E assert 1.0 == 0.5<br>                E + where 1.0 = &amp;lt;function Calculator.divide at 0x104c9eb90&amp;gt;(1, 2)<br>                E + where &amp;lt;function Calculator.divide at 0x104c9eb90&amp;gt; = Calculator.divide<br>                .../temp/calculator/test_calculator.py:30: AssertionError</pre> |",
-            "cli_args": {'auto_load_params_from': None, 'codecov_yml_path': None, 'enterprise_url': None, 'verbose': False, 'version': 'cli-0.7.4', 'command': 'process-test-results', 'provider_token': 'whatever', 'disable_search': True, 'dir': os.getcwd(), 'exclude_folders': ()},
+            "cli_args": {
+                "auto_load_params_from": None,
+                "codecov_yml_path": None,
+                "enterprise_url": None,
+                "verbose": False,
+                "version": "cli-0.7.4",
+                "command": "process-test-results",
+                "provider_token": "whatever",
+                "disable_search": True,
+                "dir": os.getcwd(),
+                "exclude_folders": (),
+            },
         },
         headers={
             "Accept": "application/vnd.github+json",
@@ -57,7 +65,6 @@ def test_process_test_results(
             "X-GitHub-Api-Version": "2022-11-28",
         },
     )
-
 
 
 def test_process_test_results_non_existent_file(mocker, tmpdir):
@@ -94,7 +101,7 @@ def test_process_test_results_non_existent_file(mocker, tmpdir):
     assert result.exit_code == 1
     expected_logs = [
         "ci service found",
-        'Some files were not found',
+        "Some files were not found",
     ]
     for log in expected_logs:
         assert log in result.output
@@ -181,7 +188,6 @@ def test_process_test_results_missing_ref(mocker, tmpdir):
     ]
     for log in expected_logs:
         assert log in result.output
-
 
 
 def test_process_test_results_missing_step_summary(mocker, tmpdir):

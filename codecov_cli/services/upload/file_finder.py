@@ -1,7 +1,7 @@
 import logging
 import os
-import typing
 from pathlib import Path
+from typing import Iterable, List, Optional, Pattern
 
 from codecov_cli.helpers.folder_searcher import globs_to_regex, search_files
 from codecov_cli.types import UploadCollectionResultFile
@@ -183,9 +183,9 @@ default_folders_to_ignore = [
 class FileFinder(object):
     def __init__(
         self,
-        search_root: Path = None,
-        folders_to_ignore: typing.List[str] = None,
-        explicitly_listed_files: typing.List[Path] = None,
+        search_root: Optional[Path] = None,
+        folders_to_ignore: Optional[List[str]] = None,
+        explicitly_listed_files: Optional[List[Path]] = None,
         disable_search: bool = False,
         report_type: str = "coverage",
     ):
@@ -195,7 +195,7 @@ class FileFinder(object):
         self.disable_search = disable_search
         self.report_type = report_type
 
-    def find_files(self) -> typing.List[UploadCollectionResultFile]:
+    def find_files(self) -> List[UploadCollectionResultFile]:
         if self.report_type == "coverage":
             files_excluded_patterns = coverage_files_excluded_patterns
             files_patterns = coverage_files_patterns
@@ -203,21 +203,21 @@ class FileFinder(object):
             files_excluded_patterns = test_results_files_excluded_patterns
             files_patterns = test_results_files_patterns
         regex_patterns_to_exclude = globs_to_regex(files_excluded_patterns)
-        files_paths = []
+        assert regex_patterns_to_exclude  # this is never `None`
+        files_paths: Iterable[Path] = []
         user_files_paths = []
         if self.explicitly_listed_files:
             user_files_paths = self.get_user_specified_files(regex_patterns_to_exclude)
         if not self.disable_search:
             regex_patterns_to_include = globs_to_regex(files_patterns)
+            assert regex_patterns_to_include  # this is never `None`
             files_paths = search_files(
                 self.search_root,
                 default_folders_to_ignore + self.folders_to_ignore,
                 filename_include_regex=regex_patterns_to_include,
                 filename_exclude_regex=regex_patterns_to_exclude,
             )
-        result_files = [
-            UploadCollectionResultFile(path) for path in files_paths if files_paths
-        ]
+        result_files = [UploadCollectionResultFile(path) for path in files_paths]
         user_result_files = [
             UploadCollectionResultFile(path)
             for path in user_files_paths
@@ -226,7 +226,7 @@ class FileFinder(object):
 
         return list(set(result_files + user_result_files))
 
-    def get_user_specified_files(self, regex_patterns_to_exclude):
+    def get_user_specified_files(self, regex_patterns_to_exclude: Pattern):
         user_filenames_to_include = []
         files_excluded_but_user_includes = []
         for file in self.explicitly_listed_files:

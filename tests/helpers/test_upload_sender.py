@@ -301,10 +301,14 @@ class TestUploadSender(object):
 
         assert sender.warnings is not None
 
-
     @pytest.mark.parametrize("error_code", [500, 502])
     def test_upload_sender_result_fail_post_500s(
-        self, mocker, mocked_responses, mocked_legacy_upload_endpoint, capsys, error_code
+        self,
+        mocker,
+        mocked_responses,
+        mocked_legacy_upload_endpoint,
+        capsys,
+        error_code,
     ):
         mocker.patch("codecov_cli.helpers.request.sleep")
         mocked_legacy_upload_endpoint.status = error_code

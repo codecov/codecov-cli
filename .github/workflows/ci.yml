@@ -83,7 +83,7 @@ jobs:
         codecovcli -v do-upload --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
         codecovcli do-upload --report-type test_results --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
     - name: Upload artifacts for test-results-processing
-      if: ${{ always() }}
+      if: ${{ !cancelled() }}
       uses: actions/upload-artifact@v4
       with:
         name: ${{matrix.python-version}}junit.xml
@@ -162,6 +162,6 @@ jobs:
           path: "test_results"
           merge-multiple: true
       - name: Dogfooding codecov-cli
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && github.ref }}
         run: |
           codecovcli process-test-results --provider-token ${{ secrets.GITHUB_TOKEN }} --dir test_results

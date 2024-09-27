@@ -124,5 +124,12 @@ def test_create_report_command_with_error(mocker):
         warnings=[],
     )
     mock_send_report_data.assert_called_with(
-        "commit_sha", "code", "github", "token", "owner::::repo", "enterprise_url", 1, None
+        "commit_sha",
+        "code",
+        "github",
+        "token",
+        "owner::::repo",
+        "enterprise_url",
+        1,
+        None,
     )

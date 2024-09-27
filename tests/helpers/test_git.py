@@ -133,5 +133,3 @@ def test_get_git_service_class():
     assert isinstance(git.get_git_service("github"), Github)
     assert git.get_git_service("gitlab") == None
     assert git.get_git_service("bitbucket") == None
-
-

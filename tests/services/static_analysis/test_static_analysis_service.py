@@ -136,7 +136,7 @@ class TestStaticAnalysisService:
                 should_force=False,
                 folders_to_exclude=[],
                 enterprise_url=None,
-                args=None
+                args=None,
             )
         mock_file_finder.assert_called_with({})
         mock_file_finder.return_value.find_files.assert_called()

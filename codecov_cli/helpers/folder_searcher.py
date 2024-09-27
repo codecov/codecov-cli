@@ -2,13 +2,13 @@ import functools
 import os
 import pathlib
 import re
-import typing
 from fnmatch import translate
+from typing import Generator, List, Optional, Pattern
 
 
 def _is_included(
-    filename_include_regex: typing.Pattern,
-    multipart_include_regex: typing.Optional[typing.Pattern],
+    filename_include_regex: Pattern,
+    multipart_include_regex: Optional[Pattern],
     path: pathlib.Path,
 ):
     return filename_include_regex.match(path.name) and (
@@ -18,8 +18,8 @@ def _is_included(
 
 
 def _is_excluded(
-    filename_exclude_regex: typing.Optional[typing.Pattern],
-    multipart_exclude_regex: typing.Optional[typing.Pattern],
+    filename_exclude_regex: Optional[Pattern],
+    multipart_exclude_regex: Optional[Pattern],
     path: pathlib.Path,
 ):
     return (
@@ -31,14 +31,14 @@ def _is_excluded(
 
 def search_files(
     folder_to_search: pathlib.Path,
-    folders_to_ignore: typing.List[str],
+    folders_to_ignore: List[str],
     *,
-    filename_include_regex: typing.Pattern,
-    filename_exclude_regex: typing.Optional[typing.Pattern] = None,
-    multipart_include_regex: typing.Optional[typing.Pattern] = None,
-    multipart_exclude_regex: typing.Optional[typing.Pattern] = None,
+    filename_include_regex: Pattern,
+    filename_exclude_regex: Optional[Pattern] = None,
+    multipart_include_regex: Optional[Pattern] = None,
+    multipart_exclude_regex: Optional[Pattern] = None,
     search_for_directories: bool = False,
-) -> typing.Generator[pathlib.Path, None, None]:
+) -> Generator[pathlib.Path, None, None]:
     """ "
     Searches for files or directories in a given folder
 
@@ -85,7 +85,7 @@ def search_files(
                     yield file_path
 
 
-def globs_to_regex(patterns: typing.List[str]) -> typing.Optional[typing.Pattern]:
+def globs_to_regex(patterns: List[str]) -> Optional[Pattern]:
     """
     Converts a list of glob patterns to a combined ORed regex
 

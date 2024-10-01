@@ -30,11 +30,13 @@ class UploadCollector(object):
         network_finder: NetworkFinder,
         file_finder: FileFinder,
         disable_file_fixes: bool = False,
+        plugin_config: dict,
     ):
         self.preparation_plugins = preparation_plugins
         self.network_finder = network_finder
         self.file_finder = file_finder
         self.disable_file_fixes = disable_file_fixes
+        self.plugin_config = plugin_config
 
     def _produce_file_fixes(
         self, files: typing.List[str]

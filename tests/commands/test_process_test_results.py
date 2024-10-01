@@ -3,6 +3,7 @@ import os
 
 from click.testing import CliRunner
 
+from codecov_cli import __version__
 from codecov_cli.main import cli
 from codecov_cli.types import RequestResult
 
@@ -53,7 +54,7 @@ def test_process_test_results(
                 "codecov_yml_path": None,
                 "enterprise_url": None,
                 "verbose": False,
-                "version": "cli-0.7.4",
+                "version": f"cli-{__version__}",
                 "command": "process-test-results",
                 "provider_token": "whatever",
                 "disable_search": True,

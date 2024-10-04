@@ -131,21 +131,7 @@ def maybe_write_to_github_action(
         # If no token is passed, then we will assume users are not running in a GitHub Action
         return
 
-    maybe_write_to_github_summary(message)
     maybe_write_to_github_comment(message, github_token, args)
-
-
-def maybe_write_to_github_summary(message: str) -> None:
-    summary_file_path = os.getenv("GITHUB_STEP_SUMMARY")
-    if summary_file_path is None:
-        raise click.ClickException(
-            "Error getting step summary file path from environment. "
-            "Can't find GITHUB_STEP_SUMMARY environment variable."
-        )
-
-    # write to step summary file
-    with open(summary_file_path, "w") as f:
-        f.write(message)
 
 
 def maybe_write_to_github_comment(

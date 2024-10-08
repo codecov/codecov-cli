@@ -173,7 +173,7 @@ def generate_message_payload(upload_collection_results):
         try:
             logger.info(f"Parsing {result.get_filename()}")
             testruns = parse_junit_xml(result.get_content())
-            for testrun in testruns:
+            for testrun in testruns.testruns:
                 if (
                     testrun.outcome == Outcome.Failure
                     or testrun.outcome == Outcome.Error

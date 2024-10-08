@@ -24,7 +24,7 @@ setup(
         "pyyaml==6.*",
         "responses==0.21.*",
         "tree-sitter==0.20.*",
-        "test-results-parser==0.1.*",
+        "test-results-parser==0.5.*",
         "regex",
     ],
     entry_points={

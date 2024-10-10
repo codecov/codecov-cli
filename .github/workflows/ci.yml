@@ -164,6 +164,6 @@ jobs:
           path: "test_results"
           merge-multiple: true
       - name: Dogfooding codecov-cli
-        if: ${{ !cancelled() && github.ref }}
+        if: ${{ !cancelled() && github.ref && contains(github.ref, 'pull') }}
         run: |
           codecovcli process-test-results --provider-token ${{ secrets.GITHUB_TOKEN }} --dir test_results

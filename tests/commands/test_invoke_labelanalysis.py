@@ -67,24 +67,87 @@ class TestLabelAnalysisNotInvoke(object):
                 "label_1",
                 "label_2",
                 "label_3",
+                "label_5",
                 "label_old",
                 "label_older",
             ],
             "absent_labels": [],
-            "present_diff_labels": ["label_2", "label_3", "label_old"],
+            "present_diff_labels": ["label_5", "label_3", "label_old"],
             "global_level_labels": ["label_1", "label_older"],
         }
-        collected_labels = ["label_1", "label_2", "label_3", "label_4"]
+        collected_labels = [
+            "label_2",
+            "label_3",
+            "label_6",
+            "label_1",
+            "label_4",
+            "label_5",
+        ]
         expected = {
-            "present_diff_labels": ["label_2", "label_3"],
+            "present_diff_labels": ["label_3", "label_5"],
             "global_level_labels": ["label_1"],
-            "absent_labels": ["label_4"],
-            "present_report_labels": ["label_1", "label_2", "label_3"],
+            "absent_labels": ["label_6", "label_4"],
+            "present_report_labels": ["label_2", "label_3", "label_1", "label_5"],
         }
-        assert (
-            _potentially_calculate_absent_labels(request_result, collected_labels)
-            == expected
-        )
+        result = _potentially_calculate_absent_labels(request_result, collected_labels)
+        assert result.get_tests_to_run_in_collection_order() == [
+            "label_3",
+            "label_6",
+            "label_1",
+            "label_4",
+            "label_5",
+        ]
+        assert result.get_tests_to_skip_in_collection_order() == ["label_2"]
+
+    def test_potentially_calculate_labels_recalculate(self):
+        request_result = {
+            "present_report_labels": [
+                "label_1",
+                "label_2",
+                "label_3",
+                "label_5",
+                "label_old",
+                "label_older",
+            ],
+            "absent_labels": [],
+            "present_diff_labels": ["label_5", "label_3", "label_old"],
+            "global_level_labels": ["label_1", "label_older"],
+        }
+        collected_labels = [
+            "label_2",
+            "label_3",
+            "label_6",
+            "label_1",
+            "label_4",
+            "label_5",
+        ]
+        expected = {
+            "present_diff_labels": ["label_3", "label_5"],
+            "global_level_labels": ["label_1"],
+            "absent_labels": ["label_4", "label_6"],
+            "present_report_labels": ["label_1", "label_2", "label_3", "label_5"],
+        }
+        res = _potentially_calculate_absent_labels(request_result, collected_labels)
+        # It's tricky to assert correctedness because the ordering is not guaranteed
+        # So we force some and test the individual lists.
+        # Plus we test the ordering that actually matters
+        assert sorted(res.absent_labels) == expected["absent_labels"]
+        assert sorted(res.global_level_labels) == expected["global_level_labels"]
+        assert sorted(res.present_diff_labels) == expected["present_diff_labels"]
+        assert sorted(res.present_report_labels) == expected["present_report_labels"]
+        # This is the only list that needs to actually be ordered
+        assert res.collected_labels_in_order == collected_labels
+        # And the ordering that matters most
+        assert res.get_tests_to_run_in_collection_order() == [
+            "label_3",
+            "label_6",
+            "label_1",
+            "label_4",
+            "label_5",
+        ]
+        assert res.get_tests_to_skip_in_collection_order() == [
+            "label_2",
+        ]
 
     def test_send_label_analysis_bad_payload(self):
         payload = {
@@ -274,7 +337,7 @@ class TestLabelAnalysisCommand(object):
             assert result.exit_code == 0
         mock_get_runner.assert_called()
         fake_runner.process_labelanalysis_result.assert_called_with(
-            label_analysis_result
+            {**label_analysis_result, "collected_labels_in_order": collected_labels}
         )
         print(result.output)
 
@@ -341,7 +404,7 @@ class TestLabelAnalysisCommand(object):
         )
         assert json.loads(result.stdout) == {
             "runner_options": ["--labels"],
-            "ats_tests_to_run": ["test_absent", "test_global", "test_in_diff"],
+            "ats_tests_to_run": ["test_absent", "test_in_diff", "test_global"],
             "ats_tests_to_skip": ["test_present"],
             "ats_fallback_reason": ats_fallback_reason,
         }
@@ -401,7 +464,7 @@ class TestLabelAnalysisCommand(object):
         assert result.exit_code == 0
         assert (
             result.stdout
-            == "TESTS_TO_RUN='--labels' 'test_absent' 'test_global' 'test_in_diff'\nTESTS_TO_SKIP='--labels' 'test_present'\n"
+            == "TESTS_TO_RUN='--labels' 'test_absent' 'test_in_diff' 'test_global'\nTESTS_TO_SKIP='--labels' 'test_present'\n"
         )
 
     def test_fallback_to_collected_labels(self, mocker):
@@ -413,6 +476,7 @@ class TestLabelAnalysisCommand(object):
                 "absent_labels": collected_labels,
                 "present_diff_labels": [],
                 "global_level_labels": [],
+                "collected_labels_in_order": collected_labels,
             }
         )
         _fallback_to_collected_labels(collected_labels, mock_runner)
@@ -457,6 +521,7 @@ class TestLabelAnalysisCommand(object):
                     "absent_labels": collected_labels,
                     "present_diff_labels": [],
                     "global_level_labels": [],
+                    "collected_labels_in_order": collected_labels,
                 }
             )
             print(result.output)
@@ -494,7 +559,7 @@ class TestLabelAnalysisCommand(object):
         # Dry run format defaults to json
         assert json.loads(result.stdout) == {
             "runner_options": ["--labels"],
-            "ats_tests_to_run": sorted(collected_labels),
+            "ats_tests_to_run": collected_labels,
             "ats_tests_to_skip": [],
             "ats_fallback_reason": "codecov_unavailable",
         }
@@ -554,6 +619,7 @@ class TestLabelAnalysisCommand(object):
                     "absent_labels": collected_labels,
                     "present_diff_labels": [],
                     "global_level_labels": [],
+                    "collected_labels_in_order": collected_labels,
                 }
             )
             print(result.output)
@@ -612,7 +678,7 @@ class TestLabelAnalysisCommand(object):
         # Dry run format defaults to json
         assert json.loads(result.stdout) == {
             "runner_options": ["--labels"],
-            "ats_tests_to_run": sorted(collected_labels),
+            "ats_tests_to_run": collected_labels,
             "ats_tests_to_skip": [],
             "ats_fallback_reason": "test_list_processing_failed",
         }
@@ -670,6 +736,7 @@ class TestLabelAnalysisCommand(object):
                 "absent_labels": collected_labels,
                 "present_diff_labels": [],
                 "global_level_labels": [],
+                "collected_labels_in_order": collected_labels,
             }
         )
 
@@ -720,13 +787,13 @@ class TestLabelAnalysisCommand(object):
             mock_get_runner.assert_called()
             fake_runner.process_labelanalysis_result.assert_not_called()
         # Dry run format defaults to json
+        assert result.exit_code == 0
         assert json.loads(result.stdout) == {
             "runner_options": ["--labels"],
-            "ats_tests_to_run": sorted(collected_labels),
+            "ats_tests_to_run": collected_labels,
             "ats_tests_to_skip": [],
             "ats_fallback_reason": "max_wait_time_exceeded",
         }
-        assert result.exit_code == 0
 
     def test_first_labelanalysis_request_fails_but_second_works(
         self, get_labelanalysis_deps, mocker, use_verbose_option
@@ -778,6 +845,6 @@ class TestLabelAnalysisCommand(object):
             assert result.exit_code == 0
         mock_get_runner.assert_called()
         fake_runner.process_labelanalysis_result.assert_called_with(
-            label_analysis_result
+            {**label_analysis_result, "collected_labels_in_order": collected_labels}
         )
         print(result.output)

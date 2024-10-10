@@ -21,6 +21,34 @@ class LabelAnalysisRequestResult(dict):
     def global_level_labels(self) -> List[str]:
         return self.get("global_level_labels", [])
 
+    @property
+    def collected_labels_in_order(self) -> List[str]:
+        """The list of collected labels, in the order returned by the testing tool.
+        This is a superset of all other lists.
+        """
+        return self.get("collected_labels_in_order", [])
+
+    def get_tests_to_run_in_collection_order(self) -> List[str]:
+        labels_to_run = set(
+            self.absent_labels + self.global_level_labels + self.present_diff_labels
+        )
+        output = []
+        for test_name in self.collected_labels_in_order:
+            if test_name in labels_to_run:
+                output.append(test_name)
+        return output
+
+    def get_tests_to_skip_in_collection_order(self) -> List[str]:
+        labels_to_run = set(
+            self.absent_labels + self.global_level_labels + self.present_diff_labels
+        )
+        labels_to_skip = set(self.present_report_labels) - labels_to_run
+        output = []
+        for test_name in self.collected_labels_in_order:
+            if test_name in labels_to_skip:
+                output.append(test_name)
+        return output
+
 
 class LabelAnalysisRunnerInterface(object):
     params: Dict = None

@@ -1,8 +1,9 @@
+import json
 import logging
 import os
 import pathlib
 from dataclasses import dataclass
-from typing import List
+from typing import Any, Dict, List, Optional
 
 import click
 from test_results_parser import (
@@ -16,12 +17,16 @@ from test_results_parser import (
 from codecov_cli.helpers.args import get_cli_args
 from codecov_cli.helpers.request import (
     log_warnings_and_errors_if_any,
+    send_get_request,
     send_post_request,
 )
 from codecov_cli.services.upload.file_finder import select_file_finder
-from codecov_cli.types import CommandContext
+from codecov_cli.types import CommandContext, RequestResult, UploadCollectionResultFile
 
 logger = logging.getLogger("codecovcli")
+
+# Search marker so that we can find the comment when looking for previously created comments
+CODECOV_SEARCH_MARKER = "<!-- Codecov -->"
 
 
 _process_test_results_options = [
@@ -61,8 +66,8 @@ _process_test_results_options = [
         default=False,
     ),
     click.option(
-        "--provider-token",
-        help="Token used to make calls to Repo provider API",
+        "--github-token",
+        help="If specified, output the message to the specified GitHub PR.",
         type=str,
         default=None,
     ),
@@ -92,65 +97,133 @@ def process_test_results(
     files=None,
     exclude_folders=None,
     disable_search=None,
-    provider_token=None,
+    github_token=None,
 ):
-    if provider_token is None:
-        raise click.ClickException(
-            "Provider token was not provided. Make sure to pass --provider-token option with the contents of the GITHUB_TOKEN secret, so we can make a comment."
-        )
-
-    summary_file_path = os.getenv("GITHUB_STEP_SUMMARY")
-    if summary_file_path is None:
-        raise click.ClickException(
-            "Error getting step summary file path from environment. Can't find GITHUB_STEP_SUMMARY environment variable."
-        )
-
-    slug = os.getenv("GITHUB_REPOSITORY")
-    if slug is None:
-        raise click.ClickException(
-            "Error getting repo slug from environment. Can't find GITHUB_REPOSITORY environment variable."
-        )
-
-    ref = os.getenv("GITHUB_REF")
-    if ref is None or "pull" not in ref:
-        raise click.ClickException(
-            "Error getting PR number from environment. Can't find GITHUB_REF environment variable."
-        )
-
     file_finder = select_file_finder(
         dir, exclude_folders, files, disable_search, report_type="test_results"
     )
 
-    upload_collection_results = file_finder.find_files()
+    upload_collection_results: List[
+        UploadCollectionResultFile
+    ] = file_finder.find_files()
     if len(upload_collection_results) == 0:
         raise click.ClickException(
             "No JUnit XML files were found. Make sure to specify them using the --file option."
         )
 
-    payload = generate_message_payload(upload_collection_results)
+    payload: TestResultsNotificationPayload = generate_message_payload(
+        upload_collection_results
+    )
 
-    message = build_message(payload)
+    message: str = f"{build_message(payload)} {CODECOV_SEARCH_MARKER}"
 
-    # write to step summary file
-    with open(summary_file_path, "w") as f:
-        f.write(message)
+    args: Dict[str, str] = get_cli_args(ctx)
 
+    maybe_write_to_github_action(message, github_token, args)
+
+    click.echo(message)
+
+
+def maybe_write_to_github_action(
+    message: str, github_token: str, args: Dict[str, str]
+) -> None:
+    if github_token is None:
+        # If no token is passed, then we will assume users are not running in a GitHub Action
+        return
+
+    maybe_write_to_github_comment(message, github_token, args)
+
+
+def maybe_write_to_github_comment(
+    message: str, github_token: str, args: Dict[str, str]
+) -> None:
+    slug = os.getenv("GITHUB_REPOSITORY")
+    if slug is None:
+        raise click.ClickException(
+            "Error getting repo slug from environment. "
+            "Can't find GITHUB_REPOSITORY environment variable."
+        )
+
+    ref = os.getenv("GITHUB_REF")
+    if ref is None or "pull" not in ref:
+        raise click.ClickException(
+            "Error getting PR number from environment. "
+            "Can't find GITHUB_REF environment variable."
+        )
     # GITHUB_REF is documented here: https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables
     pr_number = ref.split("/")[2]
 
-    args = get_cli_args(ctx)
-    create_github_comment(provider_token, slug, pr_number, message, args)
+    existing_comment = find_existing_github_comment(github_token, slug, pr_number)
+    comment_id = None
+    if existing_comment is not None:
+        comment_id = existing_comment.get("id")
+
+    create_or_update_github_comment(
+        github_token, slug, pr_number, message, comment_id, args
+    )
 
 
-def create_github_comment(token, repo_slug, pr_number, message, args):
+def find_existing_github_comment(
+    github_token: str, repo_slug: str, pr_number: int
+) -> Optional[Dict[str, Any]]:
     url = f"https://api.github.com/repos/{repo_slug}/issues/{pr_number}/comments"
+
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"Bearer {github_token}",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    page = 1
+
+    results = get_github_response_or_error(url, headers, page)
+    while results != []:
+        for comment in results:
+            comment_user = comment.get("user")
+            if (
+                CODECOV_SEARCH_MARKER in comment.get("body", "")
+                and comment_user
+                and comment_user.get("login", "") == "github-actions[bot]"
+            ):
+                return comment
+
+        page += 1
+        results = get_github_response_or_error(url, headers, page)
+
+    # No matches, return None
+    return None
+
+
+def get_github_response_or_error(
+    url: str, headers: Dict[str, str], page: int
+) -> Dict[str, Any]:
+    request_results: RequestResult = send_get_request(
+        url, headers, params={"page": page}
+    )
+    if request_results.status_code != 200:
+        raise click.ClickException("Cannot find existing GitHub comment for PR.")
+    results = json.loads(request_results.text)
+    return results
+
+
+def create_or_update_github_comment(
+    token: str,
+    repo_slug: str,
+    pr_number: str,
+    message: str,
+    comment_id: Optional[str],
+    args: Dict[str, Any],
+) -> None:
+    if comment_id is not None:
+        url = f"https://api.github.com/repos/{repo_slug}/issues/comments/{comment_id}"
+    else:
+        url = f"https://api.github.com/repos/{repo_slug}/issues/{pr_number}/comments"
 
     headers = {
         "Accept": "application/vnd.github+json",
         "Authorization": f"Bearer {token}",
         "X-GitHub-Api-Version": "2022-11-28",
     }
-    logger.info("Posting github comment")
+    logger.info(f"Posting GitHub comment {comment_id}")
 
     log_warnings_and_errors_if_any(
         send_post_request(
@@ -165,15 +238,16 @@ def create_github_comment(token, repo_slug, pr_number, message, args):
     )
 
 
-def generate_message_payload(upload_collection_results):
+def generate_message_payload(
+    upload_collection_results: List[UploadCollectionResultFile],
+) -> TestResultsNotificationPayload:
     payload = TestResultsNotificationPayload(failures=[])
 
     for result in upload_collection_results:
-        testruns = []
         try:
             logger.info(f"Parsing {result.get_filename()}")
-            testruns = parse_junit_xml(result.get_content())
-            for testrun in testruns.testruns:
+            parsed_info = parse_junit_xml(result.get_content())
+            for testrun in parsed_info.testruns:
                 if (
                     testrun.outcome == Outcome.Failure
                     or testrun.outcome == Outcome.Error

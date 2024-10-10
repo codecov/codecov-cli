@@ -95,6 +95,13 @@ def send_post_request(
     return request_result(post(url=url, data=data, headers=headers, params=params))
 
 
+@retry_request
+def send_get_request(
+    url: str, headers: dict = None, params: dict = None
+) -> RequestResult:
+    return request_result(get(url=url, headers=headers, params=params))
+
+
 def get_token_header_or_fail(token: str) -> dict:
     if token is None:
         raise click.ClickException(

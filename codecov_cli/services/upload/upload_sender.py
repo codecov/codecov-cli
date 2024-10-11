@@ -115,6 +115,10 @@ class UploadSender(object):
             payload = {
                 "test_results_files": self._get_files(upload_data),
             }
+        elif upload_file_type == "network":
+            payload = {
+                "network_files": network_files if network_files is not None else [],
+            }
 
         json_data = json.dumps(payload)
         return json_data.encode()
@@ -185,5 +189,10 @@ class UploadSender(object):
             data["commit"] = commit_sha
             data["service"] = git_service
             url = f"{upload_url}/upload/test_results/v1"
-
+        elif report_type == "network":
+            data["slug"] = encoded_slug
+            data["branch"] = branch
+            data["commit"] = commit_sha
+            data["service"] = git_service
+            url = f"{upload_url}/upload/network/v1"
         return url, data

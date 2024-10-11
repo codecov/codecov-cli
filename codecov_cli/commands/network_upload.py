@@ -4,18 +4,21 @@ import typing
 
 import click
 
+from codecov_cli.helpers.options import global_options
+from codecov_cli.helpers.request import log_warnings_and_errors_if_any
 from codecov_cli.services.upload.network_finder import NetworkFinder
 from codecov_cli.services.upload.upload_sender import UploadSender
-from codecov_cli.helpers.options import global_options
 from codecov_cli.types import CommandContext, UploadCollectionResult
-from codecov_cli.helpers.request import log_warnings_and_errors_if_any
 
 logger = logging.getLogger("codecovcli")
+
 
 @click.command()
 @click.option(
     "--root-dir",
-    type=click.Path(exists=True, file_okay=False, dir_okay=True, path_type=pathlib.Path),
+    type=click.Path(
+        exists=True, file_okay=False, dir_okay=True, path_type=pathlib.Path
+    ),
     default=pathlib.Path.cwd(),
     help="Root directory for searching files (default: current working directory)",
 )
@@ -81,7 +84,6 @@ def network_upload(
         return
 
     logger.info(f"Found {len(files)} files in the network:")
-    
 
     if dry_run:
         logger.info("Dry run: No files will be uploaded.")
@@ -123,11 +125,15 @@ def network_upload(
     )
 
     # Log any warnings or errors
-    log_warnings_and_errors_if_any(sending_result, "Network Upload", fail_on_error=False)
+    log_warnings_and_errors_if_any(
+        sending_result, "Network Upload", fail_on_error=False
+    )
 
     if sending_result.status_code == 200:
         logger.info("Network files successfully uploaded to Codecov.")
     else:
-        logger.error(f"Failed to upload network files. Status code: {sending_result.status_code}")
+        logger.error(
+            f"Failed to upload network files. Status code: {sending_result.status_code}"
+        )
         if fail_on_error:
-            exit(1) 
+            exit(1)

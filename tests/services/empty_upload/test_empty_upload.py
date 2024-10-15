@@ -1,6 +1,8 @@
 import json
 import uuid
 
+import click
+import pytest
 from click.testing import CliRunner
 
 from codecov_cli.services.empty_upload import empty_upload_logic
@@ -147,3 +149,16 @@ def test_empty_upload_force(mocker):
     assert res.error is None
     assert res.warnings == []
     mocked_response.assert_called_once()
+
+
+def test_empty_upload_no_token(mocker):
+    mocked_response = mocker.patch("codecov_cli.helpers.request.requests.post")
+    with pytest.raises(click.ClickException) as exp:
+        empty_upload_logic(
+            "commit_sha", "owner/repo", None, "service", None, False, False, None
+        )
+
+    assert "Codecov token not found. Please provide Codecov token with -t flag." in str(
+        exp.value
+    )
+    mocked_response.assert_not_called()

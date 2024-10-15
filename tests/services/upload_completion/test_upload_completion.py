@@ -1,6 +1,8 @@
 import json
 import uuid
 
+import click
+import pytest
 from click.testing import CliRunner
 
 from codecov_cli.services.upload_completion import upload_completion_logic
@@ -91,6 +93,18 @@ def test_upload_completion_200(mocker):
     assert res.error is None
     assert res.warnings == []
     mocked_response.assert_called_once()
+
+
+def test_upload_completion_no_token(mocker):
+    mocked_response = mocker.patch(
+        "codecov_cli.helpers.request.requests.post",
+    )
+    with pytest.raises(click.ClickException) as exp:
+        upload_completion_logic("commit_sha", "owner/repo", None, "service", None)
+    assert "Codecov token not found. Please provide Codecov token with -t flag." in str(
+        exp.value
+    )
+    mocked_response.assert_not_called()
 
 
 def test_upload_completion_403(mocker):

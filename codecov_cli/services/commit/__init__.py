@@ -3,9 +3,9 @@ import os
 import typing
 
 from codecov_cli.helpers.config import CODECOV_API_URL
-from codecov_cli.helpers.encoder import decode_slug, encode_slug
+from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.helpers.request import (
-    get_token_header_or_fail,
+    get_token_header,
     log_warnings_and_errors_if_any,
     send_post_request,
 )
@@ -19,7 +19,7 @@ def create_commit_logic(
     pr: typing.Optional[str],
     branch: typing.Optional[str],
     slug: typing.Optional[str],
-    token: str,
+    token: str | None,
     service: typing.Optional[str],
     enterprise_url: typing.Optional[str] = None,
     fail_on_error: bool = False,
@@ -61,7 +61,7 @@ def send_commit_data(
         branch = tokenless  # type: ignore
         logger.info("The PR is happening in a forked repo. Using tokenless upload.")
     else:
-        headers = get_token_header_or_fail(token)
+        headers = get_token_header(token)
 
     data = {
         "branch": branch,

@@ -51,7 +51,7 @@ def do_upload_logic(
     pull_request_number: typing.Optional[str],
     report_code: str,
     slug: typing.Optional[str],
-    token: str,
+    token: str | None,
     upload_file_type: str = "coverage",
     use_legacy_uploader: bool = False,
 ):

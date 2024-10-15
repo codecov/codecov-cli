@@ -27,7 +27,7 @@ class UploadSender(object):
         self,
         upload_data: UploadCollectionResult,
         commit_sha: str,
-        token: str | None,
+        token: typing.Union[str, None],
         env_vars: typing.Dict[str, str],
         report_code: str,
         upload_file_type: str = "coverage",

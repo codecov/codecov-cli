@@ -1,6 +1,7 @@
 import json
 import logging
 import time
+import typing
 
 from codecov_cli.helpers import request
 from codecov_cli.helpers.config import CODECOV_API_URL, CODECOV_INGEST_URL
@@ -21,7 +22,7 @@ def create_report_logic(
     code: str,
     slug: str,
     service: str,
-    token: str | None,
+    token: typing.Union[str, None],
     enterprise_url: str,
     pull_request_number: int,
     fail_on_error: bool = False,
@@ -67,7 +68,7 @@ def create_report_results_logic(
     code: str,
     slug: str,
     service: str,
-    token: str | None,
+    token: typing.Union[str, None],
     enterprise_url: str,
     fail_on_error: bool = False,
     args: dict = None,

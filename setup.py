@@ -26,7 +26,6 @@ setup(
         "tree-sitter==0.20.*",
         "test-results-parser==0.5.*",
         "regex",
-        "pytest-mock"
     ],
     entry_points={
         "console_scripts": [

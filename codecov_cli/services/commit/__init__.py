@@ -19,7 +19,7 @@ def create_commit_logic(
     pr: typing.Optional[str],
     branch: typing.Optional[str],
     slug: typing.Optional[str],
-    token: typing.Union[str, None],
+    token: typing.Optional[str],
     service: typing.Optional[str],
     enterprise_url: typing.Optional[str] = None,
     fail_on_error: bool = False,

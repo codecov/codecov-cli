@@ -178,6 +178,22 @@ _global_upload_options = [
         "--network-prefix",
         help="Specify a prefix on files listed in the network section of the Codecov report. Useful to help resolve path fixing",
     ),
+    click.option(
+        "--gcov-args",
+        help="Extra arguments to pass to gcov",
+    ),
+    click.option(
+        "--gcov-ignore",
+        help="Paths to ignore during gcov gathering",
+    ),
+    click.option(
+        "--gcov-include",
+        help="Paths to include during gcov gathering",
+    ),
+    click.option(
+        "--gcov-executable",
+        help="gcov executable to run. Defaults to 'gcov'",
+    ),
 ]
 
 
@@ -207,6 +223,10 @@ def do_upload(
     files_search_explicitly_listed_files: typing.List[pathlib.Path],
     files_search_root_folder: pathlib.Path,
     flags: typing.List[str],
+    gcov_args: typing.Optional[str],
+    gcov_executable: typing.Optional[str],
+    gcov_ignore: typing.Optional[str],
+    gcov_include: typing.Optional[str],
     git_service: typing.Optional[str],
     handle_no_reports_found: bool,
     job_code: typing.Optional[str],
@@ -251,6 +271,10 @@ def do_upload(
         files_search_explicitly_listed_files=list(files_search_explicitly_listed_files),
         files_search_root_folder=files_search_root_folder,
         flags=flags,
+        gcov_args=gcov_args,
+        gcov_executable=gcov_executable,
+        gcov_ignore=gcov_ignore,
+        gcov_include=gcov_include,
         git_service=git_service,
         handle_no_reports_found=handle_no_reports_found,
         job_code=job_code,

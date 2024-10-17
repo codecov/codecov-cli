@@ -55,6 +55,7 @@ def do_upload_logic(
     pull_request_number: typing.Optional[str],
     report_code: str,
     slug: typing.Optional[str],
+    swift_project: typing.Optional[str],
     token: str,
     upload_file_type: str = "coverage",
     use_legacy_uploader: bool = False,
@@ -66,6 +67,7 @@ def do_upload_logic(
         "gcov_ignore": gcov_ignore,
         "gcov_include": gcov_include,
         "project_root": files_search_root_folder,
+        "swift_project": swift_project,
     }
     if upload_file_type == "coverage":
         preparation_plugins = select_preparation_plugins(

@@ -80,7 +80,9 @@ def _get_plugin(cli_config, plugin_name, plugin_config):
         config = cli_config.get("plugins", {}).get("pycoverage", {})
         return Pycoverage(config)
     if plugin_name == "xcode":
-        return XcodePlugin()
+        return XcodePlugin(
+            plugin_config.get("swift_project", None),
+        )
     if plugin_name == "compress-pycoverage":
         config = cli_config.get("plugins", {}).get("compress-pycoverage", {})
         return CompressPycoverageContexts(config)

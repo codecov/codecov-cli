@@ -55,6 +55,7 @@ def upload_process(
     report_code: str,
     report_type: str,
     slug: typing.Optional[str],
+    swift_project: typing.Optional[str],
     token: typing.Optional[str],
     use_legacy_uploader: bool,
 ):
@@ -118,6 +119,7 @@ def upload_process(
         report_code=report_code,
         report_type=report_type,
         slug=slug,
+        swift_project=swift_project,
         token=token,
         use_legacy_uploader=use_legacy_uploader,
     )

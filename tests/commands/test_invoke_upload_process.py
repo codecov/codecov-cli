@@ -130,6 +130,7 @@ def test_upload_process_options(mocker):
             "  --gcov-ignore TEXT              Paths to ignore during gcov gathering",
             "  --gcov-include TEXT             Paths to include during gcov gathering",
             "  --gcov-executable TEXT          gcov executable to run. Defaults to 'gcov'",
+            "  --swift-project TEXT            Specify the swift project",
             "  --parent-sha TEXT               SHA (with 40 chars) of what should be the",
             "                                  parent of this commit",
             "  -h, --help                      Show this message and exit.",

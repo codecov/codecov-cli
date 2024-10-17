@@ -69,8 +69,9 @@ def _get_plugin(cli_config, plugin_name, plugin_config):
         return NoopPlugin()
     if plugin_name == "gcov":
         return GcovPlugin(
-            None,
-            plugin_config.get("gcov_exectuable", "gcov"),
+            plugin_config.get("project_root", None),
+            plugin_config.get("folders_to_ignore", None),
+            plugin_config.get("gcov_executable", "gcov"),
             plugin_config.get("gcov_include", None),
             plugin_config.get("gcov_ignore", None),
             plugin_config.get("gcov_args", None),

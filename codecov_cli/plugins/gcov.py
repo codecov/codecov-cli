@@ -15,13 +15,15 @@ class GcovPlugin(object):
     def __init__(
         self,
         project_root: typing.Optional[pathlib.Path] = None,
+        folders_to_ignore: typing.Optional[typing.List[str]] = None,
         executable: typing.Optional[str] = "gcov",
         patterns_to_include: typing.Optional[typing.List[str]] = None,
         patterns_to_ignore: typing.Optional[typing.List[str]] = None,
         extra_arguments: typing.Optional[typing.List[str]] = None,
     ):
-        self.executable = executable
+        self.executable = executable or "gcov"
         self.extra_arguments = extra_arguments or []
+        self.folders_to_ignore = folders_to_ignore or []
         self.patterns_to_ignore = patterns_to_ignore or []
         self.patterns_to_include = patterns_to_include or []
         self.project_root = project_root or pathlib.Path(os.getcwd())
@@ -42,7 +44,7 @@ class GcovPlugin(object):
             str(path)
             for path in search_files(
                 self.project_root,
-                [],
+                self.folders_to_ignore,
                 filename_include_regex=filename_include_regex,
                 filename_exclude_regex=filename_exclude_regex,
             )

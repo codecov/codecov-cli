@@ -29,8 +29,8 @@ class UploadCollector(object):
         preparation_plugins: typing.List[PreparationPluginInterface],
         network_finder: NetworkFinder,
         file_finder: FileFinder,
-        disable_file_fixes: bool = False,
         plugin_config: dict,
+        disable_file_fixes: bool = False,
     ):
         self.preparation_plugins = preparation_plugins
         self.network_finder = network_finder

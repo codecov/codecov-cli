@@ -41,7 +41,7 @@ def do_upload_logic(
     files_search_root_folder: Path,
     flags: typing.List[str],
     gcov_args: typing.Optional[str],
-    gcov_exectuable: typing.Optional[str],
+    gcov_executable: typing.Optional[str],
     gcov_ignore: typing.Optional[str],
     gcov_include: typing.Optional[str],
     git_service: typing.Optional[str],
@@ -60,12 +60,12 @@ def do_upload_logic(
     use_legacy_uploader: bool = False,
 ):
     plugin_config = {
-        "gcov": {
-            "gcov_args": gcov_args,
-            "gcov_exectuable": gcov_exectuable,
-            "gcov_ignore": gcov_ignore,
-            "gcov_include": gcov_include,
-        }
+        "folders_to_ignore": files_search_exclude_folders,
+        "gcov_args": gcov_args,
+        "gcov_executable": gcov_executable,
+        "gcov_ignore": gcov_ignore,
+        "gcov_include": gcov_include,
+        "project_root": files_search_root_folder,
     }
     if upload_file_type == "coverage":
         preparation_plugins = select_preparation_plugins(

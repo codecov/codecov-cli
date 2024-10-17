@@ -56,7 +56,7 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
             env_vars=None,
             flags=None,
             gcov_args=None,
-            gcov_exectuable=None,
+            gcov_executable=None,
             gcov_ignore=None,
             gcov_include=None,
             name="name",
@@ -85,7 +85,7 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
 
     assert res == LegacyUploadSender.send_upload_data.return_value
     mock_select_preparation_plugins.assert_called_with(
-        cli_config, ["first_plugin", "another", "forth"], {'gcov': {'gcov_args': None, 'gcov_exectuable': None, 'gcov_ignore': None, 'gcov_include': None}}
+        cli_config, ["first_plugin", "another", "forth"], {'folders_to_ignore': None, 'gcov_args': None, 'gcov_executable': None, 'gcov_ignore': None, 'gcov_include': None, 'project_root': None}
     )
     mock_select_file_finder.assert_called_with(None, None, None, False, "coverage")
     mock_select_network_finder.assert_called_with(
@@ -157,7 +157,7 @@ def test_do_upload_logic_happy_path(mocker):
             env_vars=None,
             flags=None,
             gcov_args=None,
-            gcov_exectuable=None,
+            gcov_executable=None,
             gcov_ignore=None,
             gcov_include=None,
             name="name",
@@ -184,7 +184,7 @@ def test_do_upload_logic_happy_path(mocker):
 
     assert res == UploadSender.send_upload_data.return_value
     mock_select_preparation_plugins.assert_called_with(
-        cli_config, ["first_plugin", "another", "forth"], {'gcov': {'gcov_args': None, 'gcov_exectuable': None, 'gcov_ignore': None, 'gcov_include': None}}
+        cli_config, ["first_plugin", "another", "forth"], {'folders_to_ignore': None, 'gcov_args': None, 'gcov_executable': None, 'gcov_ignore': None, 'gcov_include': None, 'project_root': None}
     )
     mock_select_file_finder.assert_called_with(None, None, None, False, "coverage")
     mock_select_network_finder.assert_called_with(
@@ -252,7 +252,7 @@ def test_do_upload_logic_dry_run(mocker):
             env_vars=None,
             flags=None,
             gcov_args=None,
-            gcov_exectuable=None,
+            gcov_executable=None,
             gcov_ignore=None,
             gcov_include=None,
             name="name",
@@ -282,7 +282,7 @@ def test_do_upload_logic_dry_run(mocker):
     assert mock_generate_upload_data.call_count == 1
     assert mock_send_upload_data.call_count == 0
     mock_select_preparation_plugins.assert_called_with(
-        cli_config, ["first_plugin", "another", "forth"], {'gcov': {'gcov_args': None, 'gcov_exectuable': None, 'gcov_ignore': None, 'gcov_include': None}}
+        cli_config, ["first_plugin", "another", "forth"], {'folders_to_ignore': None, 'gcov_args': None, 'gcov_executable': None, 'gcov_ignore': None, 'gcov_include': None, 'project_root': None}
     )
     assert out_bytes == [
         ("info", "dry-run option activated. NOT sending data to Codecov."),
@@ -327,7 +327,7 @@ def test_do_upload_logic_verbose(mocker, use_verbose_option):
             files_search_root_folder=None,
             flags=None,
             gcov_args=None,
-            gcov_exectuable=None,
+            gcov_executable=None,
             gcov_ignore=None,
             gcov_include=None,
             git_service="git_service",
@@ -405,7 +405,7 @@ def test_do_upload_no_cov_reports_found(mocker):
             env_vars=None,
             flags=None,
             gcov_args=None,
-            gcov_exectuable=None,
+            gcov_executable=None,
             gcov_ignore=None,
             gcov_include=None,
             name="name",
@@ -438,7 +438,7 @@ def test_do_upload_no_cov_reports_found(mocker):
         text="No coverage reports found. Triggering notificaions without uploading.",
     )
     mock_select_preparation_plugins.assert_called_with(
-        cli_config, ["first_plugin", "another", "forth"], {'gcov': {'gcov_args': None, 'gcov_exectuable': None, 'gcov_ignore': None, 'gcov_include': None}}
+        cli_config, ["first_plugin", "another", "forth"], {'folders_to_ignore': None, 'gcov_args': None, 'gcov_executable': None, 'gcov_ignore': None, 'gcov_include': None, 'project_root': None}
     )
     mock_select_file_finder.assert_called_with(None, None, None, False, "coverage")
     mock_select_network_finder.assert_called_with(
@@ -497,7 +497,7 @@ def test_do_upload_rase_no_cov_reports_found_error(mocker):
             env_vars=None,
             flags=None,
             gcov_args=None,
-            gcov_exectuable=None,
+            gcov_executable=None,
             gcov_ignore=None,
             gcov_include=None,
             name="name",
@@ -521,7 +521,7 @@ def test_do_upload_rase_no_cov_reports_found_error(mocker):
         == "No coverage reports found. Please make sure you're generating reports successfully."
     )
     mock_select_preparation_plugins.assert_called_with(
-        cli_config, ["first_plugin", "another", "forth"], {'gcov': {'gcov_args': None, 'gcov_exectuable': None, 'gcov_ignore': None, 'gcov_include': None}}
+        cli_config, ["first_plugin", "another", "forth"], {'folders_to_ignore': None, 'gcov_args': None, 'gcov_executable': None, 'gcov_ignore': None, 'gcov_include': None, 'project_root': None}
     )
     mock_select_file_finder.assert_called_with(None, None, None, False, "coverage")
     mock_select_network_finder.assert_called_with(
@@ -573,7 +573,7 @@ def test_do_upload_logic_happy_path_test_results(mocker):
             env_vars=None,
             flags=None,
             gcov_args=None,
-            gcov_exectuable=None,
+            gcov_executable=None,
             gcov_ignore=None,
             gcov_include=None,
             name="name",

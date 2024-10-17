@@ -11,7 +11,7 @@ from codecov_cli.types import UploadCollectionResultFile
 def test_fix_kt_files():
     kt_file = Path("tests/data/files_to_fix_examples/sample.kt")
 
-    col = UploadCollector(None, None, None)
+    col = UploadCollector(None, None, None, None)
 
     fixes = col._produce_file_fixes([kt_file])
 
@@ -31,7 +31,7 @@ def test_fix_kt_files():
 def test_fix_go_files():
     go_file = Path("tests/data/files_to_fix_examples/sample.go")
 
-    col = UploadCollector(None, None, None)
+    col = UploadCollector(None, None, None, None)
 
     fixes = col._produce_file_fixes([go_file])
 
@@ -57,7 +57,7 @@ def test_fix_bad_encoding_files(mock_open):
     mock_open.side_effect = UnicodeDecodeError("", bytes(), 0, 0, "")
     go_file = Path("tests/data/files_to_fix_examples/bad_encoding.go")
 
-    col = UploadCollector(None, None, None)
+    col = UploadCollector(None, None, None, None)
 
     fixes = col._produce_file_fixes([go_file])
     assert len(fixes) == 1
@@ -70,7 +70,7 @@ def test_fix_bad_encoding_files(mock_open):
 def test_fix_php_files():
     php_file = Path("tests/data/files_to_fix_examples/sample.php")
 
-    col = UploadCollector(None, None, None)
+    col = UploadCollector(None, None, None, None)
 
     fixes = col._produce_file_fixes([php_file])
 
@@ -85,7 +85,7 @@ def test_fix_php_files():
 def test_fix_for_cpp_swift_vala(tmp_path):
     cpp_file = Path("tests/data/files_to_fix_examples/sample.cpp")
 
-    col = UploadCollector(None, None, None)
+    col = UploadCollector(None, None, None, None)
 
     fixes = col._produce_file_fixes([cpp_file])
 
@@ -107,7 +107,7 @@ def test_fix_for_cpp_swift_vala(tmp_path):
 def test_fix_when_disabled_fixes(tmp_path):
     cpp_file = Path("tests/data/files_to_fix_examples/sample.cpp")
 
-    col = UploadCollector(None, None, None, True)
+    col = UploadCollector(None, None, None, None, True)
 
     fixes = col._produce_file_fixes([cpp_file])
 
@@ -166,7 +166,7 @@ def test_generate_upload_data(tmp_path):
 
     network_finder = NetworkFinder(GitVersioningSystem(), None, None, None)
 
-    collector = UploadCollector([], network_finder, file_finder)
+    collector = UploadCollector([], network_finder, file_finder, None)
 
     res = collector.generate_upload_data()
 

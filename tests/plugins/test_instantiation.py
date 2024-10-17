@@ -110,7 +110,7 @@ def test_get_plugin_gcov():
     assert isinstance(res, GcovPlugin)
 
     res = _get_plugin({}, "gcov", {
-        'gcov_exectuable': 'lcov',
+        'gcov_executable': 'lcov',
     })
     assert isinstance(res, GcovPlugin)
 

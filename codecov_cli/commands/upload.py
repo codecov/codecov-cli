@@ -194,6 +194,10 @@ _global_upload_options = [
         "--gcov-executable",
         help="gcov executable to run. Defaults to 'gcov'",
     ),
+    click.option(
+        "--swift-project",
+        help="Specify the swift project",
+    ),
 ]
 
 
@@ -238,6 +242,7 @@ def do_upload(
     pull_request_number: typing.Optional[str],
     report_type: str,
     slug: typing.Optional[str],
+    swift_project: typing.Optional[str],
     token: typing.Optional[str],
     use_legacy_uploader: bool,
 ):
@@ -286,6 +291,7 @@ def do_upload(
         pull_request_number=pull_request_number,
         report_code=report_code,
         slug=slug,
+        swift_project=swift_project,
         token=token,
         upload_file_type=report_type,
         use_legacy_uploader=use_legacy_uploader,

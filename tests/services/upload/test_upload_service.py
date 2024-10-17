@@ -79,6 +79,7 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
             branch="branch",
             use_legacy_uploader=True,
             slug="slug",
+            swift_project="App",
             pull_request_number="pr",
             git_service="git_service",
             enterprise_url=None,
@@ -95,6 +96,7 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
     mock_select_preparation_plugins.assert_called_with(
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         cli_config, ["first_plugin", "another", "forth"], {'folders_to_ignore': None, 'gcov_args': None, 'gcov_executable': None, 'gcov_ignore': None, 'gcov_include': None, 'project_root': None}
 =======
         cli_config, ["first_plugin", "another", "forth"], {'gcov': {'gcov_args': None, 'gcov_exectuable': None, 'gcov_ignore': None, 'gcov_include': None}}
@@ -102,6 +104,9 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
 =======
         cli_config, ["first_plugin", "another", "forth"], {'folders_to_ignore': None, 'gcov_args': None, 'gcov_executable': None, 'gcov_ignore': None, 'gcov_include': None, 'project_root': None}
 >>>>>>> 70386d1 (fix: update tests)
+=======
+        cli_config, ["first_plugin", "another", "forth"], {'folders_to_ignore': None, 'gcov_args': None, 'gcov_executable': None, 'gcov_ignore': None, 'gcov_include': None, 'project_root': None, 'swift_project': 'App'}
+>>>>>>> bc28236 (feat: allow for swift coverage)
     )
     mock_select_file_finder.assert_called_with(None, None, None, False, "coverage")
     mock_select_network_finder.assert_called_with(
@@ -195,6 +200,7 @@ def test_do_upload_logic_happy_path(mocker):
             token="token",
             branch="branch",
             slug="slug",
+            swift_project="App",
             pull_request_number="pr",
             git_service="git_service",
             enterprise_url=None,
@@ -210,6 +216,7 @@ def test_do_upload_logic_happy_path(mocker):
     mock_select_preparation_plugins.assert_called_with(
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         cli_config, ["first_plugin", "another", "forth"], {'folders_to_ignore': None, 'gcov_args': None, 'gcov_executable': None, 'gcov_ignore': None, 'gcov_include': None, 'project_root': None}
 =======
         cli_config, ["first_plugin", "another", "forth"], {'gcov': {'gcov_args': None, 'gcov_exectuable': None, 'gcov_ignore': None, 'gcov_include': None}}
@@ -217,6 +224,9 @@ def test_do_upload_logic_happy_path(mocker):
 =======
         cli_config, ["first_plugin", "another", "forth"], {'folders_to_ignore': None, 'gcov_args': None, 'gcov_executable': None, 'gcov_ignore': None, 'gcov_include': None, 'project_root': None}
 >>>>>>> 70386d1 (fix: update tests)
+=======
+        cli_config, ["first_plugin", "another", "forth"], {'folders_to_ignore': None, 'gcov_args': None, 'gcov_executable': None, 'gcov_ignore': None, 'gcov_include': None, 'project_root': None, 'swift_project': 'App'}
+>>>>>>> bc28236 (feat: allow for swift coverage)
     )
     mock_select_file_finder.assert_called_with(None, None, None, False, "coverage")
     mock_select_network_finder.assert_called_with(
@@ -306,6 +316,7 @@ def test_do_upload_logic_dry_run(mocker):
             token="token",
             branch="branch",
             slug="slug",
+            swift_project="App",
             pull_request_number="pr",
             dry_run=True,
             git_service="git_service",
@@ -324,6 +335,7 @@ def test_do_upload_logic_dry_run(mocker):
     mock_select_preparation_plugins.assert_called_with(
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         cli_config, ["first_plugin", "another", "forth"], {'folders_to_ignore': None, 'gcov_args': None, 'gcov_executable': None, 'gcov_ignore': None, 'gcov_include': None, 'project_root': None}
 =======
         cli_config, ["first_plugin", "another", "forth"], {'gcov': {'gcov_args': None, 'gcov_exectuable': None, 'gcov_ignore': None, 'gcov_include': None}}
@@ -331,6 +343,9 @@ def test_do_upload_logic_dry_run(mocker):
 =======
         cli_config, ["first_plugin", "another", "forth"], {'folders_to_ignore': None, 'gcov_args': None, 'gcov_executable': None, 'gcov_ignore': None, 'gcov_include': None, 'project_root': None}
 >>>>>>> 70386d1 (fix: update tests)
+=======
+        cli_config, ["first_plugin", "another", "forth"], {'folders_to_ignore': None, 'gcov_args': None, 'gcov_executable': None, 'gcov_ignore': None, 'gcov_include': None, 'project_root': None, 'swift_project': 'App'}
+>>>>>>> bc28236 (feat: allow for swift coverage)
     )
     assert out_bytes == [
         ("info", "dry-run option activated. NOT sending data to Codecov."),
@@ -396,6 +411,7 @@ def test_do_upload_logic_verbose(mocker, use_verbose_option):
             pull_request_number="pr",
             report_code="report_code",
             slug="slug",
+            swift_project="App",
             token="token",
             upload_file_type="coverage",
             use_legacy_uploader=True,
@@ -483,6 +499,7 @@ def test_do_upload_no_cov_reports_found(mocker):
             token="token",
             branch="branch",
             slug="slug",
+            swift_project="App",
             pull_request_number="pr",
             git_service="git_service",
             enterprise_url=None,
@@ -504,6 +521,7 @@ def test_do_upload_no_cov_reports_found(mocker):
     mock_select_preparation_plugins.assert_called_with(
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         cli_config, ["first_plugin", "another", "forth"], {'folders_to_ignore': None, 'gcov_args': None, 'gcov_executable': None, 'gcov_ignore': None, 'gcov_include': None, 'project_root': None}
 =======
         cli_config, ["first_plugin", "another", "forth"], {'gcov': {'gcov_args': None, 'gcov_exectuable': None, 'gcov_ignore': None, 'gcov_include': None}}
@@ -511,6 +529,9 @@ def test_do_upload_no_cov_reports_found(mocker):
 =======
         cli_config, ["first_plugin", "another", "forth"], {'folders_to_ignore': None, 'gcov_args': None, 'gcov_executable': None, 'gcov_ignore': None, 'gcov_include': None, 'project_root': None}
 >>>>>>> 70386d1 (fix: update tests)
+=======
+        cli_config, ["first_plugin", "another", "forth"], {'folders_to_ignore': None, 'gcov_args': None, 'gcov_executable': None, 'gcov_ignore': None, 'gcov_include': None, 'project_root': None, 'swift_project': 'App'}
+>>>>>>> bc28236 (feat: allow for swift coverage)
     )
     mock_select_file_finder.assert_called_with(None, None, None, False, "coverage")
     mock_select_network_finder.assert_called_with(
@@ -583,6 +604,7 @@ def test_do_upload_rase_no_cov_reports_found_error(mocker):
             token="token",
             branch="branch",
             slug="slug",
+            swift_project="App",
             pull_request_number="pr",
             git_service="git_service",
             enterprise_url=None,
@@ -593,7 +615,7 @@ def test_do_upload_rase_no_cov_reports_found_error(mocker):
         == "No coverage reports found. Please make sure you're generating reports successfully."
     )
     mock_select_preparation_plugins.assert_called_with(
-        cli_config, ["first_plugin", "another", "forth"], {'folders_to_ignore': None, 'gcov_args': None, 'gcov_executable': None, 'gcov_ignore': None, 'gcov_include': None, 'project_root': None}
+        cli_config, ["first_plugin", "another", "forth"], {'folders_to_ignore': None, 'gcov_args': None, 'gcov_executable': None, 'gcov_ignore': None, 'gcov_include': None, 'project_root': None, 'swift_project': 'App'}
     )
     mock_select_file_finder.assert_called_with(None, None, None, False, "coverage")
     mock_select_network_finder.assert_called_with(
@@ -636,41 +658,34 @@ def test_do_upload_logic_happy_path_test_results(mocker):
             cli_config,
             versioning_system,
             ci_adapter,
-            upload_file_type="test_results",
-            commit_sha="commit_sha",
-            report_code="report_code",
+            args={"args": "fake_args"},
+            branch="branch",
             build_code="build_code",
             build_url="build_url",
-            job_code="job_code",
+            commit_sha="commit_sha",
+            enterprise_url=None,
             env_vars=None,
+            files_search_exclude_folders=None,
+            files_search_explicitly_listed_files=None,
+            files_search_root_folder=None,
             flags=None,
             gcov_args=None,
-<<<<<<< HEAD
-<<<<<<< HEAD
             gcov_executable=None,
-=======
-            gcov_exectuable=None,
->>>>>>> 8fce810 (first pass)
-=======
-            gcov_executable=None,
->>>>>>> 70386d1 (fix: update tests)
             gcov_ignore=None,
             gcov_include=None,
+            git_service="git_service",
+            job_code="job_code",
             name="name",
             network_filter="some_dir",
             network_prefix="hello/",
             network_root_folder="root/",
-            files_search_root_folder=None,
-            files_search_exclude_folders=None,
-            files_search_explicitly_listed_files=None,
             plugin_names=["first_plugin", "another", "forth"],
-            token="token",
-            branch="branch",
-            slug="slug",
             pull_request_number="pr",
-            git_service="git_service",
-            enterprise_url=None,
-            args={"args": "fake_args"},
+            report_code="report_code",
+            slug="slug",
+            swift_project="App",
+            token="token",
+            upload_file_type="test_results",
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [

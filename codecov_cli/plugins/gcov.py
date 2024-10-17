@@ -44,7 +44,7 @@ class GcovPlugin(object):
             str(path)
             for path in search_files(
                 self.project_root,
-                [],
+                self.folders_to_ignore,
                 filename_include_regex=filename_include_regex,
                 filename_exclude_regex=filename_exclude_regex,
             )

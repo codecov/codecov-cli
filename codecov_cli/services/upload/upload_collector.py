@@ -31,7 +31,6 @@ class UploadCollector(object):
         file_finder: FileFinder,
         plugin_config: dict,
         disable_file_fixes: bool = False,
-        plugin_config: dict,
     ):
         self.preparation_plugins = preparation_plugins
         self.network_finder = network_finder

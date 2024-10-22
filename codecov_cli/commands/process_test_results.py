@@ -103,9 +103,9 @@ def process_test_results(
         dir, exclude_folders, files, disable_search, report_type="test_results"
     )
 
-    upload_collection_results: List[
-        UploadCollectionResultFile
-    ] = file_finder.find_files()
+    upload_collection_results: List[UploadCollectionResultFile] = (
+        file_finder.find_files()
+    )
     if len(upload_collection_results) == 0:
         raise click.ClickException(
             "No JUnit XML files were found. Make sure to specify them using the --file option."

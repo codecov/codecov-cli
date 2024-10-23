@@ -5,7 +5,10 @@ import time
 import requests
 
 from codecov_cli.helpers import request
-from codecov_cli.helpers.config import CODECOV_API_URL
+from codecov_cli.helpers.config import (
+    CODECOV_API_URL,
+    CODECOV_INGEST_URL,
+)
 from codecov_cli.helpers.encoder import decode_slug, encode_slug
 from codecov_cli.helpers.request import (
     get_token_header,
@@ -60,7 +63,7 @@ def send_create_report_request(
         "code": code,
     }
     headers = get_token_header(token)
-    upload_url = enterprise_url or CODECOV_API_URL
+    upload_url = enterprise_url or CODECOV_INGEST_URL
     url = f"{upload_url}/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports"
     return send_post_request(url=url, headers=headers, data=data)
 

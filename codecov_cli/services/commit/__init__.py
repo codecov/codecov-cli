@@ -2,7 +2,7 @@ import logging
 import os
 import typing
 
-from codecov_cli.helpers.config import CODECOV_API_URL
+from codecov_cli.helpers.config import CODECOV_INGEST_URL
 from codecov_cli.helpers.encoder import decode_slug, encode_slug
 from codecov_cli.helpers.request import (
     get_token_header_or_fail,
@@ -71,7 +71,7 @@ def send_commit_data(
         "pullid": pr,
     }
 
-    upload_url = enterprise_url or CODECOV_API_URL
+    upload_url = enterprise_url or CODECOV_INGEST_URL
     url = f"{upload_url}/upload/{service}/{slug}/commits"
     return send_post_request(
         url=url,

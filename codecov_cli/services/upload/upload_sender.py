@@ -6,7 +6,7 @@ import zlib
 from typing import Any, Dict
 
 from codecov_cli import __version__ as codecov_cli_version
-from codecov_cli.helpers.config import CODECOV_API_URL
+from codecov_cli.helpers.config import CODECOV_INGEST_URL
 from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.helpers.request import (
     get_token_header,
@@ -56,7 +56,7 @@ class UploadSender(object):
         }
         headers = get_token_header(token)
         encoded_slug = encode_slug(slug)
-        upload_url = enterprise_url or CODECOV_API_URL
+        upload_url = enterprise_url or CODECOV_INGEST_URL
         url, data = self.get_url_and_possibly_update_data(
             data,
             upload_file_type,

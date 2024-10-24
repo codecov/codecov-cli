@@ -43,6 +43,7 @@ def test_process_test_results(
     # Ensure that there's an output
     assert result.output
 
+
 def test_process_test_results_create_github_message(
     mocker,
     tmpdir,

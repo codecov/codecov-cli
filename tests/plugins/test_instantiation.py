@@ -109,9 +109,13 @@ def test_get_plugin_gcov():
     res = _get_plugin({}, "gcov", {})
     assert isinstance(res, GcovPlugin)
 
-    res = _get_plugin({}, "gcov", {
-        'gcov_executable': 'lcov',
-    })
+    res = _get_plugin(
+        {},
+        "gcov",
+        {
+            "gcov_executable": "lcov",
+        },
+    )
     assert isinstance(res, GcovPlugin)
 
 
@@ -186,7 +190,7 @@ def test_select_preparation_plugins(mocker):
             }
         },
         ["gcov", "something", "otherthing", "second", "lalalala"],
-        {}
+        {},
     )
     assert len(res) == 5
     assert isinstance(res[0], GcovPlugin)

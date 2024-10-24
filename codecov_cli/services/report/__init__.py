@@ -5,10 +5,7 @@ import time
 import requests
 
 from codecov_cli.helpers import request
-from codecov_cli.helpers.config import (
-    CODECOV_API_URL,
-    CODECOV_INGEST_URL,
-)
+from codecov_cli.helpers.config import CODECOV_API_URL, CODECOV_INGEST_URL
 from codecov_cli.helpers.encoder import decode_slug, encode_slug
 from codecov_cli.helpers.request import (
     get_token_header,

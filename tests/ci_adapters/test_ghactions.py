@@ -109,9 +109,9 @@ class TestGithubActions(object):
     def test_build_url(self, env_dict, slug, build_code, expected, mocker):
         mocker.patch.dict(os.environ, env_dict, clear=True)
         mocker.patch.object(GithubActionsCIAdapter, "_get_slug").return_value = slug
-        mocker.patch.object(
-            GithubActionsCIAdapter, "_get_build_code"
-        ).return_value = build_code
+        mocker.patch.object(GithubActionsCIAdapter, "_get_build_code").return_value = (
+            build_code
+        )
 
         actual = GithubActionsCIAdapter().get_fallback_value(
             FallbackFieldEnum.build_url

@@ -3,7 +3,7 @@ name ?= codecovcli
 tag_regex := ^v([0-9]{1,}\.){2}[0-9]{1,}([-_]\w+)?$
 
 lint:
-	pip install black==24.10.0 isort==5.10.1
+	pip install black==22.3.0 isort==5.10.1
 	black codecov_cli
 	isort --profile=black codecov_cli -p staticcodecov_languages
 	black tests

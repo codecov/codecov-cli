@@ -125,7 +125,7 @@ def send_put_request(
     return request_result(put(url=url, data=data, headers=headers))
 
 
-def request_result(resp):
+def request_result(resp: requests.Response) -> RequestResult:
     if resp.status_code >= 400:
         return RequestResult(
             status_code=resp.status_code,

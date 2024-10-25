@@ -69,7 +69,7 @@ def mocked_legacy_upload_endpoint(mocked_responses):
     encoded_slug = encode_slug(named_upload_data["slug"])
     resp = responses.Response(
         responses.POST,
-        f"https://api.codecov.io/upload/github/{encoded_slug}/commits/{random_sha}/reports/{named_upload_data['report_code']}/uploads",
+        f"https://ingest.codecov.io/upload/github/{encoded_slug}/commits/{random_sha}/reports/{named_upload_data['report_code']}/uploads",
         status=200,
         json={
             "raw_upload_location": "https://puturl.com",
@@ -84,7 +84,7 @@ def mocked_legacy_upload_endpoint(mocked_responses):
 def mocked_test_results_endpoint(mocked_responses):
     resp = responses.Response(
         responses.POST,
-        f"https://api.codecov.io/upload/test_results/v1",
+        f"https://ingest.codecov.io/upload/test_results/v1",
         status=200,
         json={
             "raw_upload_location": "https://puturl.com",
@@ -187,7 +187,7 @@ class TestUploadSender(object):
         assert response.get("url") == "https://app.codecov.io/commit-url"
         assert (
             post_req_made.url
-            == f"https://api.codecov.io/upload/github/{encoded_slug}/commits/{random_sha}/reports/{named_upload_data['report_code']}/uploads"
+            == f"https://ingest.codecov.io/upload/github/{encoded_slug}/commits/{random_sha}/reports/{named_upload_data['report_code']}/uploads"
         )
         assert (
             post_req_made.headers.items() >= headers.items()
@@ -217,7 +217,7 @@ class TestUploadSender(object):
         post_req_made = mocked_responses.calls[0].request
         response = json.loads(mocked_responses.calls[0].response.text)
         assert response.get("raw_upload_location") == "https://puturl.com"
-        assert post_req_made.url == "https://api.codecov.io/upload/test_results/v1"
+        assert post_req_made.url == "https://ingest.codecov.io/upload/test_results/v1"
         assert (
             post_req_made.headers.items() >= headers.items()
         )  # test dict is a subset of the other
@@ -254,7 +254,7 @@ class TestUploadSender(object):
         assert response.get("url") == "https://app.codecov.io/commit-url"
         assert (
             post_req_made.url
-            == f"https://api.codecov.io/upload/github/{encoded_slug}/commits/{random_sha}/reports/{named_upload_data['report_code']}/uploads"
+            == f"https://ingest.codecov.io/upload/github/{encoded_slug}/commits/{random_sha}/reports/{named_upload_data['report_code']}/uploads"
         )
         assert (
             post_req_made.headers.items() >= headers.items()

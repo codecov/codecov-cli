@@ -168,7 +168,7 @@ def test_commit_sender_with_forked_repo(mocker):
         None,
     )
     mocked_response.assert_called_with(
-        url="https://api.codecov.io/upload/github/codecov::::codecov-cli/commits",
+        url="https://ingest.codecov.io/upload/github/codecov::::codecov-cli/commits",
         data={
             "branch": "user_forked_repo/codecov-cli:branch",
             "cli_args": None,

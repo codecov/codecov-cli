@@ -240,14 +240,15 @@ are ignored by codecov (including README and configuration files)
 
 `Usage: codecovcli empty-upload [OPTIONS]`
 
-| Options | Description | usage
-| :---:  |  :---:  |  :---:  |
- | -C, --sha, --commit-sha TEXT    |Commit SHA (with 40 chars)  | Required
- |  -t, --token TEXT                |Codecov upload token |Required
-|  -r, --slug TEXT               |  owner/repo slug used instead of the private repo token in Self-hosted | Optional
-|  -Z, --fail-on-error            | Exit with non-zero code in case of error|Optional
-|  --git-service| Options: github, gitlab, bitbucket, github_enterprise, gitlab_enterprise, bitbucket_server | Optional
-| -h, --help                   |   Show this message and exit.|Optional
+|           Options            |                                        Description                                         |  usage   |
+| :--------------------------: | :----------------------------------------------------------------------------------------: | :------: |
+| -C, --sha, --commit-sha TEXT |                                 Commit SHA (with 40 chars)                                 | Required |
+|       -t, --token TEXT       |                                    Codecov upload token                                    | Required |
+|       -r, --slug TEXT        |           owner/repo slug used instead of the private repo token in Self-hosted            | Optional |
+|           --force            |                   Always emit passing checks regardless of changed files                   | Optional |
+|     -Z, --fail-on-error      |                          Exit with non-zero code in case of error                          | Optional |
+|        --git-service         | Options: github, gitlab, bitbucket, github_enterprise, gitlab_enterprise, bitbucket_server | Optional |
+|          -h, --help          |                                Show this message and exit.                                 | Optional |
 
 # How to Use Local Upload
 

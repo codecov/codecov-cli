@@ -9,6 +9,7 @@ from codecov_cli.helpers.versioning_systems import get_versioning_system
 logger = logging.getLogger("codecovcli")
 
 CODECOV_API_URL = "https://api.codecov.io"
+CODECOV_INGEST_URL = "https://ingest.codecov.io"
 LEGACY_CODECOV_API_URL = "https://codecov.io"
 
 # Relative to the project root

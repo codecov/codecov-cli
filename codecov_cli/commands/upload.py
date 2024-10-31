@@ -162,7 +162,7 @@ _global_upload_options = [
         "--handle-no-reports-found",
         "handle_no_reports_found",
         is_flag=True,
-        help="Raise no excpetions when no coverage reports found.",
+        help="Raise no exceptions when no coverage reports found.",
     ),
     click.option(
         "--report-type",

@@ -38,6 +38,8 @@ coverage_files_patterns = [
 test_results_files_patterns = [
     "*junit*.xml",
     "*test*.xml",
+    # the actual JUnit (Java) prefixes the tests with "TEST-"
+    "*TEST-*.xml"
 ]
 
 coverage_files_excluded_patterns = [

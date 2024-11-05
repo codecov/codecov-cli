@@ -43,6 +43,7 @@ def test_report_results_command_with_warnings(mocker):
 
     assert res == mock_send_reports_result_request.return_value
     mock_send_reports_result_request.assert_called_with(
+        args=None,
         commit_sha="commit_sha",
         report_code="code",
         service="service",
@@ -85,6 +86,7 @@ def test_report_results_command_with_error(mocker):
     ]
     assert res == mock_send_reports_result_request.return_value
     mock_send_reports_result_request.assert_called_with(
+        args=None,
         commit_sha="commit_sha",
         report_code="code",
         service="service",

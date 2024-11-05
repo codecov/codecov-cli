@@ -14,6 +14,7 @@ from codecov_cli.helpers.request import (
     request_result,
     send_post_request,
 )
+from typing import Union
 
 logger = logging.getLogger("codecovcli")
 MAX_NUMBER_TRIES = 3
@@ -73,7 +74,7 @@ def create_report_results_logic(
     token: str,
     enterprise_url: str,
     fail_on_error: bool = False,
-    args: dict | None = None,
+    args: Union[dict, None] = None,
 ):
     encoded_slug = encode_slug(slug)
     sending_result = send_reports_result_request(

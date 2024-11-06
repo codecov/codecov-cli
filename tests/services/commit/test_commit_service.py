@@ -186,7 +186,7 @@ def test_commit_without_token(mocker):
         return_value=mocker.MagicMock(status_code=200, text="success"),
     )
 
-    res = send_commit_data(
+    send_commit_data(
         "commit_sha",
         "parent_sha",
         "1",
@@ -198,7 +198,7 @@ def test_commit_without_token(mocker):
         None,
     )
     mocked_response.assert_called_with(
-        url="https://api.codecov.io/upload/github/codecov::::codecov-cli/commits",
+        url="https://ingest.codecov.io/upload/github/codecov::::codecov-cli/commits",
         data={
             "branch": "branch",
             "cli_args": None,

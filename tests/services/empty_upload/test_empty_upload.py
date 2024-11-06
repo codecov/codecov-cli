@@ -152,13 +152,28 @@ def test_empty_upload_force(mocker):
 
 
 def test_empty_upload_no_token(mocker):
-    mocked_response = mocker.patch("codecov_cli.helpers.request.requests.post")
-    with pytest.raises(click.ClickException) as exp:
-        empty_upload_logic(
+    res = {
+        "result": "All changed files are ignored. Triggering passing notifications.",
+        "non_ignored_files": [],
+    }
+    mocked_response = mocker.patch(
+        "codecov_cli.helpers.request.requests.post",
+        return_value=RequestResult(
+            status_code=200, error=None, warnings=[], text=json.dumps(res)
+        ),
+    )
+    runner = CliRunner()
+    with runner.isolation() as outstreams:
+        res = empty_upload_logic(
             "commit_sha", "owner/repo", None, "service", None, False, False, None
         )
 
-    assert "Codecov token not found. Please provide Codecov token with -t flag." in str(
-        exp.value
-    )
-    mocked_response.assert_not_called()
+    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+    assert out_bytes == [
+        ("info", "Process Empty Upload complete"),
+        ("info", "All changed files are ignored. Triggering passing notifications."),
+        ("info", "Non ignored files []"),
+    ]
+    assert res.error is None
+    assert res.warnings == []
+    mocked_response.assert_called_once()

@@ -96,15 +96,32 @@ def test_upload_completion_200(mocker):
 
 
 def test_upload_completion_no_token(mocker):
+    res = {
+        "uploads_total": 2,
+        "uploads_success": 2,
+        "uploads_processing": 0,
+        "uploads_error": 0,
+    }
     mocked_response = mocker.patch(
         "codecov_cli.helpers.request.requests.post",
+        return_value=RequestResult(
+            status_code=200, error=None, warnings=[], text=json.dumps(res)
+        ),
     )
-    with pytest.raises(click.ClickException) as exp:
-        upload_completion_logic("commit_sha", "owner/repo", None, "service", None)
-    assert "Codecov token not found. Please provide Codecov token with -t flag." in str(
-        exp.value
-    )
-    mocked_response.assert_not_called()
+    runner = CliRunner()
+    with runner.isolation() as outstreams:
+        res = upload_completion_logic("commit_sha", "owner/repo", None, "service", None)
+    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+    assert out_bytes == [
+        ("info", "Process Upload Completion complete"),
+        (
+            "info",
+            "{'uploads_total': 2, 'uploads_success': 2, 'uploads_processing': 0, 'uploads_error': 0}",
+        ),
+    ]
+    assert res.error is None
+    assert res.warnings == []
+    mocked_response.assert_called_once()
 
 
 def test_upload_completion_403(mocker):

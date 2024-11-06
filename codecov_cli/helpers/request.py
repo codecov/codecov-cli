@@ -52,7 +52,8 @@ def backoff_time(curr_retry):
     return 2 ** (curr_retry - 1)
 
 
-class RetryException(Exception): ...
+class RetryException(Exception):
+    ...
 
 
 def retry_request(func):
@@ -102,6 +103,9 @@ def send_get_request(
 
 
 def get_token_header_or_fail(token: Optional[str]) -> dict:
+    """
+    Rejects requests with no Authorization token. Prevents tokenless uploads.
+    """
     if token is None:
         raise click.ClickException(
             "Codecov token not found. Please provide Codecov token with -t flag."
@@ -110,6 +114,9 @@ def get_token_header_or_fail(token: Optional[str]) -> dict:
 
 
 def get_token_header(token: Optional[str]) -> Optional[dict]:
+    """
+    Allows requests with no Authorization token.
+    """
     if token is None:
         return None
     return {"Authorization": f"token {token}"}

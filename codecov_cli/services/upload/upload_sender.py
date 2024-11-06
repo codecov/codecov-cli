@@ -42,6 +42,8 @@ class UploadSender(object):
         ci_service: typing.Optional[str] = None,
         git_service: typing.Optional[str] = None,
         enterprise_url: typing.Optional[str] = None,
+        parent_sha: typing.Optional[str] = None,
+        combined_upload: bool = False,
         args: dict = None,
     ) -> RequestResult:
         data = {
@@ -54,6 +56,12 @@ class UploadSender(object):
             "name": name,
             "version": codecov_cli_version,
         }
+        if combined_upload:
+            data["branch"] = branch
+            data["commit_sha"] = commit_sha
+            data["parent_commit_id"] = parent_sha
+            data["code"] = report_code
+            data["pullid"] = pull_request_number
         headers = get_token_header(token)
         encoded_slug = encode_slug(slug)
         upload_url = enterprise_url or CODECOV_INGEST_URL
@@ -66,6 +74,7 @@ class UploadSender(object):
             encoded_slug,
             commit_sha,
             report_code,
+            combined_upload,
         )
         # Data that goes to storage
         reports_payload = self._generate_payload(
@@ -176,9 +185,13 @@ class UploadSender(object):
         encoded_slug,
         commit_sha,
         report_code,
+        combined_upload=False,
     ):
         if report_type == "coverage":
-            url = f"{upload_url}/upload/{git_service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads"
+            if combined_upload:
+                url = f"{upload_url}/upload/{git_service}/{encoded_slug}/combined-upload"
+            else:
+                url = f"{upload_url}/upload/{git_service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads"
         elif report_type == "test_results":
             data["slug"] = encoded_slug
             data["branch"] = branch

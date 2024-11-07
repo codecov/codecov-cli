@@ -58,9 +58,9 @@ class UploadSender(object):
         }
         if combined_upload:
             data["branch"] = branch
+            data["code"] = report_code
             data["commit_sha"] = commit_sha
             data["parent_commit_id"] = parent_sha
-            data["code"] = report_code
             data["pullid"] = pull_request_number
         headers = get_token_header(token)
         encoded_slug = encode_slug(slug)

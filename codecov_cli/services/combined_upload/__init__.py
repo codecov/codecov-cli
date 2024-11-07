@@ -1,30 +1,9 @@
-import logging
-import os
 import pathlib
 import typing
 
-import click
-
-from codecov_cli.fallbacks import FallbackFieldEnum
 from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
-from codecov_cli.helpers.config import CODECOV_INGEST_URL
-from codecov_cli.helpers.encoder import decode_slug, encode_slug
-from codecov_cli.helpers.request import (
-    get_token_header_or_fail,
-    log_warnings_and_errors_if_any,
-)
 from codecov_cli.helpers.versioning_systems import VersioningSystemInterface
-from codecov_cli.plugins import select_preparation_plugins
-from codecov_cli.services.upload.file_finder import select_file_finder
-from codecov_cli.services.upload.legacy_upload_sender import LegacyUploadSender
-from codecov_cli.services.upload.network_finder import select_network_finder
-from codecov_cli.services.upload.upload_collector import UploadCollector
-from codecov_cli.services.upload.upload_sender import UploadSender
-from codecov_cli.services.upload_completion import upload_completion_logic
-from codecov_cli.types import RequestResult
-
-logger = logging.getLogger("codecovcli")
-MAX_NUMBER_TRIES = 3
+from codecov_cli.services.upload import do_upload_logic
 
 
 def combined_upload_logic(
@@ -68,106 +47,44 @@ def combined_upload_logic(
     upload_file_type: str = "coverage",
     args: dict = None,
 ):
-    plugin_config = {
-        "folders_to_ignore": files_search_exclude_folders,
-        "gcov_args": gcov_args,
-        "gcov_executable": gcov_executable,
-        "gcov_ignore": gcov_ignore,
-        "gcov_include": gcov_include,
-        "project_root": files_search_root_folder,
-        "swift_project": swift_project,
-    }
-    if upload_file_type == "coverage":
-        preparation_plugins = select_preparation_plugins(
-            cli_config, plugin_names, plugin_config
-        )
-    elif upload_file_type == "test_results":
-        preparation_plugins = []
-    file_selector = select_file_finder(
-        files_search_root_folder,
-        files_search_exclude_folders,
-        files_search_explicitly_listed_files,
-        disable_search,
-        upload_file_type,
-    )
-    network_finder = select_network_finder(
-        versioning_system,
+    return do_upload_logic(
+        cli_config=cli_config,
+        versioning_system=versioning_system,
+        ci_adapter=ci_adapter,
+        combined_upload=True,
+        args=args,
+        branch=branch,
+        build_code=build_code,
+        build_url=build_url,
+        commit_sha=commit_sha,
+        disable_file_fixes=disable_file_fixes,
+        disable_search=disable_search,
+        dry_run=dry_run,
+        enterprise_url=enterprise_url,
+        env_vars=env_vars,
+        fail_on_error=fail_on_error,
+        files_search_exclude_folders=files_search_exclude_folders,
+        files_search_explicitly_listed_files=files_search_explicitly_listed_files,
+        files_search_root_folder=files_search_root_folder,
+        flags=flags,
+        gcov_args=gcov_args,
+        gcov_executable=gcov_executable,
+        gcov_ignore=gcov_ignore,
+        gcov_include=gcov_include,
+        git_service=git_service,
+        handle_no_reports_found=handle_no_reports_found,
+        job_code=job_code,
+        name=name,
         network_filter=network_filter,
         network_prefix=network_prefix,
         network_root_folder=network_root_folder,
+        parent_sha=parent_sha,
+        plugin_names=plugin_names,
+        pull_request_number=pull_request_number,
+        report_code=report_code,
+        slug=slug,
+        swift_project=swift_project,
+        token=token,
+        use_legacy_uploader=use_legacy_uploader,
+        upload_file_type=upload_file_type,
     )
-    collector = UploadCollector(
-        preparation_plugins,
-        network_finder,
-        file_selector,
-        disable_file_fixes,
-        plugin_config,
-    )
-    try:
-        upload_data = collector.generate_upload_data(upload_file_type)
-    except click.ClickException as exp:
-        if handle_no_reports_found:
-            logger.info(
-                "No coverage reports found. Triggering notificaions without uploading."
-            )
-            upload_completion_logic(
-                commit_sha=commit_sha,
-                slug=slug,
-                token=token,
-                git_service=git_service,
-                enterprise_url=enterprise_url,
-                fail_on_error=fail_on_error,
-            )
-            return RequestResult(
-                error=None,
-                warnings=None,
-                status_code=200,
-                text="No coverage reports found. Triggering notificaions without uploading.",
-            )
-        else:
-            raise exp
-    if use_legacy_uploader:
-        # sender = LegacyUploadSender()
-        raise NotImplementedError("Legacy uploader is not implemented")
-    else:
-        sender = UploadSender()
-    logger.debug(f"Selected uploader to use: {type(sender)}")
-    ci_service = (
-        ci_adapter.get_fallback_value(FallbackFieldEnum.service)
-        if ci_adapter is not None
-        else None
-    )
-
-    if not dry_run:
-        sending_result = sender.send_upload_data(
-            upload_data,
-            branch=branch,
-            build_code=build_code,
-            build_url=build_url,
-            ci_service=ci_service,
-            commit_sha=commit_sha,
-            enterprise_url=enterprise_url,
-            env_vars=env_vars,
-            flags=flags,
-            git_service=git_service,
-            job_code=job_code,
-            name=name,
-            parent_sha=parent_sha,
-            pull_request_number=pull_request_number,
-            report_code=report_code,
-            slug=slug,
-            token=token,
-            upload_file_type=upload_file_type,
-            combined_upload=True,
-            args=args,
-        )
-    else:
-        logger.info("dry-run option activated. NOT sending data to Codecov.")
-        sending_result = RequestResult(
-            error=None,
-            warnings=None,
-            status_code=200,
-            text="Data NOT sent to Codecov because of dry-run option",
-        )
-    log_warnings_and_errors_if_any(sending_result, "Upload", fail_on_error)
-    return sending_result

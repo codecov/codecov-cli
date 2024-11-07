@@ -44,6 +44,8 @@ def test_upload_process_raise_Z_option(mocker, use_verbose_option):
                     "command-sha",
                     "--slug",
                     "owner/repo",
+                    "--report-type",
+                    "test_results",
                 ],
                 obj={},
             )

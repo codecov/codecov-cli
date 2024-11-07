@@ -60,7 +60,6 @@ def upload_process(
     use_legacy_uploader: bool,
 ):
     args = get_cli_args(ctx)
-    logger.info("HI FRANDS")
     logger.debug(
         "Starting upload process",
         extra=dict(

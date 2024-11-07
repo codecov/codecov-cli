@@ -4,7 +4,7 @@ import logging
 from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.helpers.request import (
-    get_token_header_or_fail,
+    get_token_header,
     log_warnings_and_errors_if_any,
     send_post_request,
 )
@@ -23,7 +23,7 @@ def empty_upload_logic(
     args,
 ):
     encoded_slug = encode_slug(slug)
-    headers = get_token_header_or_fail(token)
+    headers = get_token_header(token)
     upload_url = enterprise_url or CODECOV_API_URL
     url = f"{upload_url}/upload/{git_service}/{encoded_slug}/commits/{commit_sha}/empty-upload"
     sending_result = send_post_request(

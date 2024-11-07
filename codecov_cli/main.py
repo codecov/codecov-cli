@@ -65,6 +65,7 @@ def cli(
         ctx.default_map = {ctx.invoked_subcommand: {"token": token}}
     ctx.obj["enterprise_url"] = enterprise_url
 
+
 cli.add_command(combined_upload)
 cli.add_command(do_upload)
 cli.add_command(create_commit)

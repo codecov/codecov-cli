@@ -18,6 +18,7 @@ logger = logging.getLogger("codecovcli")
 def _turn_env_vars_into_dict(ctx, params, value):
     return dict((v, os.getenv(v, None)) for v in value)
 
+
 @click.command()
 @click.option(
     "--parent-sha",

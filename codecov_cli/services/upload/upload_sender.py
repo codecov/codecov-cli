@@ -189,7 +189,9 @@ class UploadSender(object):
     ):
         if report_type == "coverage":
             if combined_upload:
-                url = f"{upload_url}/upload/{git_service}/{encoded_slug}/combined-upload"
+                url = (
+                    f"{upload_url}/upload/{git_service}/{encoded_slug}/combined-upload"
+                )
             else:
                 url = f"{upload_url}/upload/{git_service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads"
         elif report_type == "test_results":

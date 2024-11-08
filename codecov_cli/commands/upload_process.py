@@ -67,7 +67,7 @@ def upload_process(
             extra_log_attributes=args,
         ),
     )
-    
+
     if not use_legacy_uploader and report_type == "coverage":
         ctx.invoke(
             combined_upload,

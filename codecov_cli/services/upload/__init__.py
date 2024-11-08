@@ -121,12 +121,7 @@ def do_upload_logic(
         else:
             raise exp
     if use_legacy_uploader:
-        if combined_upload:
-            raise NotImplementedError(
-                "Combined upload is not supported with legacy uploader"
-            )
-        else:
-            sender = LegacyUploadSender()
+        sender = LegacyUploadSender()
     else:
         sender = UploadSender()
     logger.debug(f"Selected uploader to use: {type(sender)}")

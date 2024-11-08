@@ -58,7 +58,7 @@ def do_upload_logic(
     report_code: str,
     slug: typing.Optional[str],
     swift_project: typing.Optional[str],
-    token: str,
+    token: typing.Optional[str],
     upload_file_type: str = "coverage",
     use_legacy_uploader: bool = False,
 ):

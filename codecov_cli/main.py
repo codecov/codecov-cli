@@ -6,7 +6,6 @@ import click
 
 from codecov_cli import __version__
 from codecov_cli.commands.base_picking import pr_base_picking
-from codecov_cli.commands.combined_upload import combined_upload
 from codecov_cli.commands.commit import create_commit
 from codecov_cli.commands.create_report_result import create_report_results
 from codecov_cli.commands.empty_upload import empty_upload
@@ -66,7 +65,6 @@ def cli(
     ctx.obj["enterprise_url"] = enterprise_url
 
 
-cli.add_command(combined_upload)
 cli.add_command(do_upload)
 cli.add_command(create_commit)
 cli.add_command(create_report)

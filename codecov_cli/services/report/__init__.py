@@ -29,7 +29,7 @@ def create_report_logic(
     enterprise_url: str,
     pull_request_number: int,
     fail_on_error: bool = False,
-    args: dict | None = None,
+    args: Union[dict, None] = None,
 ):
     encoded_slug = encode_slug(slug)
     sending_result = send_create_report_request(

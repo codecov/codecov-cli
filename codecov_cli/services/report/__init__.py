@@ -1,6 +1,7 @@
 import json
 import logging
 import time
+from typing import Union
 
 import requests
 
@@ -14,7 +15,6 @@ from codecov_cli.helpers.request import (
     request_result,
     send_post_request,
 )
-from typing import Union
 
 logger = logging.getLogger("codecovcli")
 MAX_NUMBER_TRIES = 3

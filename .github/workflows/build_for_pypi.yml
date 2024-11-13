@@ -37,5 +37,5 @@ jobs:
         if: inputs.publish == true
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
+          attestations: false
           verbose: true
-          attestation: true

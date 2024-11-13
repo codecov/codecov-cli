@@ -139,3 +139,27 @@ def test_base_picking_command_error(mocker):
         "error",
         "Base picking failed: Unauthorized",
     ) in parse_outstreams_into_log_lines(result.output)
+
+
+def test_base_picking_no_token(mocker):
+    mocked_response = mocker.patch(
+        "codecov_cli.services.commit.base_picking.send_put_request",
+        return_value=RequestResult(status_code=200, error=None, warnings=[], text=""),
+    )
+    runner = CliRunner()
+    result = runner.invoke(
+        pr_base_picking,
+        [
+            "--pr",
+            "11",
+            "--base-sha",
+            "9a6902ee94c18e8e27561ce316b16d75a02c7bc1",
+            "--service",
+            "github",
+            "--slug",
+            "owner/repo",
+        ],
+        obj=mocker.MagicMock(),  # context object
+    )
+    assert result.exit_code == 0
+    mocked_response.assert_called_once()

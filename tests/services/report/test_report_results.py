@@ -110,6 +110,19 @@ def test_report_results_request_200(mocker):
     mocked_response.assert_called_once()
 
 
+def test_report_results_request_no_token(mocker):
+    mocked_response = mocker.patch(
+        "codecov_cli.helpers.request.requests.post",
+        return_value=mocker.MagicMock(status_code=200),
+    )
+    res = send_reports_result_request(
+        "commit_sha", "report_code", "encoded_slug", "service", None, None, None
+    )
+    assert res.error is None
+    assert res.warnings == []
+    mocked_response.assert_called_once()
+
+
 def test_report_results_403(mocker):
     mocked_response = mocker.patch(
         "codecov_cli.helpers.request.requests.post",
@@ -129,7 +142,7 @@ def test_report_results_403(mocker):
 
 def test_get_report_results_200_completed(mocker, capsys):
     mocked_response = mocker.patch(
-        "codecov_cli.services.report.requests.get",
+        "codecov_cli.helpers.request.requests.get",
         return_value=mocker.MagicMock(
             status_code=200,
             text='{"state": "completed", "result": {"state": "failure","message": "33.33% of diff hit (target 77.77%)"}}',
@@ -149,11 +162,27 @@ def test_get_report_results_200_completed(mocker, capsys):
     ) in output
 
 
+def test_get_report_results_no_token(mocker, capsys):
+    mocked_response = mocker.patch(
+        "codecov_cli.helpers.request.requests.get",
+        return_value=mocker.MagicMock(
+            status_code=200,
+            text='{"state": "completed", "result": {"state": "failure","message": "33.33% of diff hit (target 77.77%)"}}',
+        ),
+    )
+    res = send_reports_result_get_request(
+        "commit_sha", "report_code", "encoded_slug", "service", None, None
+    )
+    assert res.error is None
+    assert res.warnings == []
+    mocked_response.assert_called_once()
+
+
 @patch("codecov_cli.services.report.MAX_NUMBER_TRIES", 1)
 def test_get_report_results_200_pending(mocker, capsys):
     mocker.patch("codecov_cli.services.report.time.sleep")
     mocked_response = mocker.patch(
-        "codecov_cli.services.report.requests.get",
+        "codecov_cli.helpers.request.requests.get",
         return_value=mocker.MagicMock(
             status_code=200, text='{"state": "pending", "result": {}}'
         ),
@@ -171,7 +200,7 @@ def test_get_report_results_200_pending(mocker, capsys):
 
 def test_get_report_results_200_error(mocker, capsys):
     mocked_response = mocker.patch(
-        "codecov_cli.services.report.requests.get",
+        "codecov_cli.helpers.request.requests.get",
         return_value=mocker.MagicMock(
             status_code=200, text='{"state": "error", "result": {}}'
         ),
@@ -192,7 +221,7 @@ def test_get_report_results_200_error(mocker, capsys):
 
 def test_get_report_results_200_undefined_state(mocker, capsys):
     mocked_response = mocker.patch(
-        "codecov_cli.services.report.requests.get",
+        "codecov_cli.helpers.request.requests.get",
         return_value=mocker.MagicMock(
             status_code=200, text='{"state": "undefined_state", "result": {}}'
         ),
@@ -210,7 +239,7 @@ def test_get_report_results_200_undefined_state(mocker, capsys):
 
 def test_get_report_results_401(mocker, capsys):
     mocked_response = mocker.patch(
-        "codecov_cli.services.report.requests.get",
+        "codecov_cli.helpers.request.requests.get",
         return_value=mocker.MagicMock(
             status_code=401, text='{"detail": "Invalid token."}'
         ),

@@ -19,7 +19,7 @@ setup(
     author_email="support@codecov.io",
     install_requires=[
         "click==8.*",
-        "httpx==0.23.*",
+        "httpx==0.27.*",
         "ijson==3.*",
         "pyyaml==6.*",
         "responses==0.21.*",

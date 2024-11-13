@@ -13,7 +13,7 @@ jobs:
   build-test-upload:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5.0.0-beta
+    - uses: actions/checkout@v4
       with:
         submodules: true
         fetch-depth: 2

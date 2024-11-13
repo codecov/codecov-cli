@@ -35,7 +35,4 @@ jobs:
           python setup.py bdist_wheel --plat-name=win_amd64
       - name: Publish package to PyPi
         if: inputs.publish == true
-        uses: pypa/gh-action-pypi-publish@release/v1
-
-
-
+        uses: pypa/gh-action-pypi-publish@v1.11.0  # Currently an issue with attestations on `release/v1`

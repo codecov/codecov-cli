@@ -1,7 +1,7 @@
 import json
 import logging
 import time
-from typing import Union
+import typing
 
 import requests
 
@@ -28,7 +28,7 @@ def create_report_logic(
     enterprise_url: str,
     pull_request_number: int,
     fail_on_error: bool = False,
-    args: Union[dict, None] = None,
+    args: typing.Union[dict, None] = None,
 ):
     encoded_slug = encode_slug(slug)
     sending_result = send_create_report_request(
@@ -73,7 +73,7 @@ def create_report_results_logic(
     token: typing.Optional[str],
     enterprise_url: str,
     fail_on_error: bool = False,
-    args: Union[dict, None] = None,
+    args: typing.Union[dict, None] = None,
 ):
     encoded_slug = encode_slug(slug)
     sending_result = send_reports_result_request(

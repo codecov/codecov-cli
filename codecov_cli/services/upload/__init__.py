@@ -24,7 +24,7 @@ def do_upload_logic(
     cli_config: typing.Dict,
     versioning_system: VersioningSystemInterface,
     ci_adapter: CIAdapterBase,
-    combined_upload: bool = False,
+    upload_coverage: bool = False,
     *,
     args: dict = None,
     branch: typing.Optional[str],
@@ -151,7 +151,7 @@ def do_upload_logic(
             git_service,
             enterprise_url,
             parent_sha,
-            combined_upload,
+            upload_coverage,
             args,
         )
     else:

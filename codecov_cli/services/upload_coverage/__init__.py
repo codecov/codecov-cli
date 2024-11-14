@@ -6,7 +6,7 @@ from codecov_cli.helpers.versioning_systems import VersioningSystemInterface
 from codecov_cli.services.upload import do_upload_logic
 
 
-def combined_upload_logic(
+def upload_coverage_logic(
     cli_config: typing.Dict,
     versioning_system: VersioningSystemInterface,
     ci_adapter: CIAdapterBase,
@@ -51,7 +51,7 @@ def combined_upload_logic(
         cli_config=cli_config,
         versioning_system=versioning_system,
         ci_adapter=ci_adapter,
-        combined_upload=True,
+        upload_coverage=True,
         args=args,
         branch=branch,
         build_code=build_code,

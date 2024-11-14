@@ -4,12 +4,12 @@ import typing
 
 import click
 
-from codecov_cli.commands.combined_upload import combined_upload
 from codecov_cli.commands.commit import create_commit
 from codecov_cli.commands.report import create_report
 from codecov_cli.commands.upload import do_upload, global_upload_options
 from codecov_cli.helpers.args import get_cli_args
 from codecov_cli.helpers.options import global_options
+from codecov_cli.services.upload_coverage import upload_coverage_logic
 from codecov_cli.types import CommandContext
 
 logger = logging.getLogger("codecovcli")
@@ -24,7 +24,7 @@ logger = logging.getLogger("codecovcli")
     help="SHA (with 40 chars) of what should be the parent of this commit",
 )
 @click.pass_context
-def upload_process(
+def upload_coverage(
     ctx: CommandContext,
     branch: typing.Optional[str],
     build_code: typing.Optional[str],
@@ -62,15 +62,24 @@ def upload_process(
 ):
     args = get_cli_args(ctx)
     logger.debug(
-        "Starting upload process",
+        "Starting upload coverage",
         extra=dict(
             extra_log_attributes=args,
         ),
     )
 
     if not use_legacy_uploader and report_type == "coverage":
+        versioning_system = ctx.obj["versioning_system"]
+        codecov_yaml = ctx.obj["codecov_yaml"] or {}
+        cli_config = codecov_yaml.get("cli", {})
+        ci_adapter = ctx.obj.get("ci_adapter")
+        enterprise_url = ctx.obj.get("enterprise_url")
+        args = get_cli_args(ctx)
         ctx.invoke(
-            combined_upload,
+            upload_coverage_logic,
+            cli_config,
+            versioning_system,
+            ci_adapter,
             branch=branch,
             build_code=build_code,
             build_url=build_url,
@@ -78,6 +87,7 @@ def upload_process(
             disable_file_fixes=disable_file_fixes,
             disable_search=disable_search,
             dry_run=dry_run,
+            enterprise_url=enterprise_url,
             env_vars=env_vars,
             fail_on_error=fail_on_error,
             files_search_exclude_folders=files_search_exclude_folders,
@@ -99,11 +109,12 @@ def upload_process(
             plugin_names=plugin_names,
             pull_request_number=pull_request_number,
             report_code=report_code,
-            report_type=report_type,
             slug=slug,
             swift_project=swift_project,
             token=token,
+            upload_file_type=report_type,
             use_legacy_uploader=use_legacy_uploader,
+            args=args,
         )
         return
 

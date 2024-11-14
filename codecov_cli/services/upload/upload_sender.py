@@ -43,7 +43,7 @@ class UploadSender(object):
         git_service: typing.Optional[str] = None,
         enterprise_url: typing.Optional[str] = None,
         parent_sha: typing.Optional[str] = None,
-        combined_upload: bool = False,
+        upload_coverage: bool = False,
         args: dict = None,
     ) -> RequestResult:
         data = {
@@ -56,7 +56,7 @@ class UploadSender(object):
             "name": name,
             "version": codecov_cli_version,
         }
-        if combined_upload:
+        if upload_coverage:
             data["branch"] = branch
             data["code"] = report_code
             data["commit_sha"] = commit_sha
@@ -74,7 +74,7 @@ class UploadSender(object):
             encoded_slug,
             commit_sha,
             report_code,
-            combined_upload,
+            upload_coverage,
         )
         # Data that goes to storage
         reports_payload = self._generate_payload(
@@ -185,12 +185,12 @@ class UploadSender(object):
         encoded_slug,
         commit_sha,
         report_code,
-        combined_upload=False,
+        upload_coverage=False,
     ):
         if report_type == "coverage":
             base_url = f"{upload_url}/upload/{git_service}/{encoded_slug}"
-            if combined_upload:
-                url = f"{base_url}/combined-upload"
+            if upload_coverage:
+                url = f"{base_url}/upload-coverage"
             else:
                 url = f"{base_url}/commits/{commit_sha}/reports/{report_code}/uploads"
         elif report_type == "test_results":

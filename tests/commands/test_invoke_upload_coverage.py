@@ -66,7 +66,7 @@ def test_upload_coverage_options(mocker):
         print(result.output)
 
         assert result.output.split("\n")[1:] == [
-            "Usage: cli upload-process [OPTIONS]",
+            "Usage: cli upload-coverage [OPTIONS]",
             "",
             "Options:",
             "  -C, --sha, --commit-sha TEXT    Commit SHA (with 40 chars)  [required]",

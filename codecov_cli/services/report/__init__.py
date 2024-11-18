@@ -3,6 +3,8 @@ import logging
 import time
 import typing
 
+import requests
+
 from codecov_cli.helpers import request
 from codecov_cli.helpers.config import CODECOV_API_URL, CODECOV_INGEST_URL
 from codecov_cli.helpers.encoder import encode_slug
@@ -26,7 +28,7 @@ def create_report_logic(
     enterprise_url: str,
     pull_request_number: int,
     fail_on_error: bool = False,
-    args: dict = None,
+    args: typing.Union[dict, None] = None,
 ):
     encoded_slug = encode_slug(slug)
     sending_result = send_create_report_request(
@@ -71,7 +73,7 @@ def create_report_results_logic(
     token: typing.Optional[str],
     enterprise_url: str,
     fail_on_error: bool = False,
-    args: dict = None,
+    args: typing.Union[dict, None] = None,
 ):
     encoded_slug = encode_slug(slug)
     sending_result = send_reports_result_request(
@@ -81,6 +83,7 @@ def create_report_results_logic(
         service=service,
         token=token,
         enterprise_url=enterprise_url,
+        args=args,
     )
 
     log_warnings_and_errors_if_any(

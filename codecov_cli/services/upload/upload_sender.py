@@ -59,7 +59,7 @@ class UploadSender(object):
         if upload_coverage:
             data["branch"] = branch
             data["code"] = report_code
-            data["commit_sha"] = commit_sha
+            data["commitid"] = commit_sha
             data["parent_commit_id"] = parent_sha
             data["pullid"] = pull_request_number
         headers = get_token_header(token)

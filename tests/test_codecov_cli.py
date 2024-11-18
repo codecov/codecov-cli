@@ -15,4 +15,5 @@ def test_existing_commands():
         "send-notifications",
         "static-analysis",
         "upload-coverage",
+        "upload-process",
     ]

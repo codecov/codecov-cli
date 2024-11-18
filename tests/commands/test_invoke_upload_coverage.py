@@ -8,7 +8,7 @@ from codecov_cli.types import RequestError, RequestResult
 from tests.factory import FakeProvider, FakeVersioningSystem
 
 
-def test_upload_coverage_missing_commit_sha(mocker):
+def test_upload_process_missing_commit_sha(mocker):
     fake_ci_provider = FakeProvider({FallbackFieldEnum.commit_sha: None})
     fake_versioning_system = FakeVersioningSystem({FallbackFieldEnum.commit_sha: None})
     mocker.patch(
@@ -17,11 +17,11 @@ def test_upload_coverage_missing_commit_sha(mocker):
     mocker.patch("codecov_cli.main.get_ci_adapter", return_value=fake_ci_provider)
     runner = CliRunner()
     with runner.isolated_filesystem():
-        result = runner.invoke(cli, ["upload-coverage"], obj={})
+        result = runner.invoke(cli, ["upload-process"], obj={})
         assert result.exit_code != 0
 
 
-def test_upload_coverage_raise_Z_option(mocker, use_verbose_option):
+def test_upload_process_raise_Z_option(mocker, use_verbose_option):
     error = RequestError(
         code=401, params={"some": "params"}, description="Unauthorized"
     )
@@ -38,7 +38,7 @@ def test_upload_coverage_raise_Z_option(mocker, use_verbose_option):
             result = runner.invoke(
                 cli,
                 [
-                    "upload-coverage",
+                    "upload-process",
                     "--fail-on-error",
                     "-C",
                     "command-sha",
@@ -55,18 +55,18 @@ def test_upload_coverage_raise_Z_option(mocker, use_verbose_option):
     assert str(result) == "<Result SystemExit(1)>"
 
 
-def test_upload_coverage_options(mocker):
+def test_upload_process_options(mocker):
     runner = CliRunner()
     fake_ci_provider = FakeProvider({FallbackFieldEnum.commit_sha: None})
     mocker.patch("codecov_cli.main.get_ci_adapter", return_value=fake_ci_provider)
     with runner.isolated_filesystem():
         runner = CliRunner()
-        result = runner.invoke(cli, ["upload-coverage", "-h"], obj={})
+        result = runner.invoke(cli, ["upload-process", "-h"], obj={})
         assert result.exit_code == 0
         print(result.output)
 
         assert result.output.split("\n")[1:] == [
-            "Usage: cli upload-coverage [OPTIONS]",
+            "Usage: cli upload-process [OPTIONS]",
             "",
             "Options:",
             "  -C, --sha, --commit-sha TEXT    Commit SHA (with 40 chars)  [required]",

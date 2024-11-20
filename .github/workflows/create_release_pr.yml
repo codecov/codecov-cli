@@ -41,7 +41,7 @@ jobs:
         with:
           github_token: ${{ secrets.GH_RELEASE_TOKEN }}
           head: release/${{ github.event.inputs.versionName }}
-          base: main
+          base: release
           title: Release ${{ github.event.inputs.versionName }}
           reviewers: ${{ github.event.issue.user.login }}
           body: |

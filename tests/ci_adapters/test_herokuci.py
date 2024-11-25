@@ -73,7 +73,7 @@ class TestHerokuCI(object):
         assert actual == expected
 
     def test_raises_value_error_if_invalid_field(self):
-        with pytest.raises(ValueError) as _:
+        with pytest.raises(ValueError):
             HerokuCIAdapter().get_fallback_value("some_random_key")
 
     def test_service(self):

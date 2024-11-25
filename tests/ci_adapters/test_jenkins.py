@@ -28,7 +28,6 @@ class TestJenkins(object):
         actual = JenkinsAdapter().detect()
         assert actual == expected
 
-
     @pytest.mark.parametrize(
         "env_dict,expected",
         [

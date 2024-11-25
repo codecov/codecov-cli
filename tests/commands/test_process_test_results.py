@@ -11,7 +11,6 @@ def test_process_test_results(
     mocker,
     tmpdir,
 ):
-
     _ = tmpdir.mkdir("folder").join("summary.txt")
 
     mocker.patch.dict(
@@ -48,7 +47,6 @@ def test_process_test_results_create_github_message(
     mocker,
     tmpdir,
 ):
-
     _ = tmpdir.mkdir("folder").join("summary.txt")
 
     mocker.patch.dict(
@@ -95,7 +93,6 @@ def test_process_test_results_update_github_message(
     mocker,
     tmpdir,
 ):
-
     _ = tmpdir.mkdir("folder").join("summary.txt")
 
     mocker.patch.dict(
@@ -166,7 +163,6 @@ def test_process_test_results_errors_getting_comments(
     mocker,
     tmpdir,
 ):
-
     _ = tmpdir.mkdir("folder").join("summary.txt")
 
     mocker.patch.dict(

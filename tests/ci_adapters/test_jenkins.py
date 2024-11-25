@@ -28,17 +28,6 @@ class TestJenkins(object):
         actual = JenkinsAdapter().detect()
         assert actual == expected
 
-    @pytest.mark.parametrize(
-        "env_dict,expected",
-        [
-            ({}, None),
-            ({JenkinsCIEnvEnum.BUILD_URL: "url"}, "url"),
-        ],
-    )
-    def test_build_url(self, env_dict, expected, mocker):
-        mocker.patch.dict(os.environ, env_dict)
-        actual = JenkinsAdapter().get_fallback_value(FallbackFieldEnum.build_url)
-        assert actual == expected
 
     @pytest.mark.parametrize(
         "env_dict,expected",
@@ -99,6 +88,6 @@ class TestJenkins(object):
         )
 
     def test_none_values(self):
-        JenkinsAdapter().get_fallback_value(FallbackFieldEnum.slug) == None
-        JenkinsAdapter().get_fallback_value(FallbackFieldEnum.commit_sha) == None
-        JenkinsAdapter().get_fallback_value(FallbackFieldEnum.job_code) == None
+        JenkinsAdapter().get_fallback_value(FallbackFieldEnum.slug) is None
+        JenkinsAdapter().get_fallback_value(FallbackFieldEnum.commit_sha) is None
+        JenkinsAdapter().get_fallback_value(FallbackFieldEnum.job_code) is None

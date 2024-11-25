@@ -27,7 +27,7 @@ class TestLocalAdapter(object):
             "codecov_cli.helpers.ci_adapters.local.subprocess.run",
             return_value=mocker.MagicMock(returncode=1),
         )
-        assert LocalAdapter().detect() == False
+        assert not LocalAdapter().detect()
         mocked_subprocess.assert_called_once()
 
     @pytest.mark.parametrize(

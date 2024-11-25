@@ -111,7 +111,7 @@ async def run_analysis_entrypoint(
         failed_uploads = []
         with click.progressbar(
             length=len(files_that_need_upload),
-            label=f"Upload info to storage",
+            label="Upload info to storage",
         ) as bar:
             # It's better to have less files competing over CPU time when uploading
             # Especially if we might have large files

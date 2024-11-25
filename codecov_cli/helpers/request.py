@@ -73,7 +73,7 @@ def retry_request(func):
                 requests.exceptions.ConnectionError,
                 requests.exceptions.Timeout,
                 RetryException,
-            ) as exp:
+            ):
                 logger.warning(
                     "Request failed. Retrying",
                     extra=dict(extra_log_attributes=dict(retry=retry)),

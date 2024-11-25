@@ -131,5 +131,5 @@ def test_parse_git_service_invalid_service(url):
 
 def test_get_git_service_class():
     assert isinstance(git.get_git_service("github"), Github)
-    assert git.get_git_service("gitlab") == None
-    assert git.get_git_service("bitbucket") == None
+    assert git.get_git_service("gitlab") is None
+    assert git.get_git_service("bitbucket") is None

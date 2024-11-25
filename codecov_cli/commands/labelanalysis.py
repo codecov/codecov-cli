@@ -390,12 +390,12 @@ def _dry_run_list_output(
         logger.warning(f"label-analysis didn't run correctly. Error: {fallback_reason}")
 
     to_run_line = " ".join(
-        sorted(map(lambda l: f"'{l}'", runner_options))
-        + sorted(map(lambda l: f"'{l}'", labels_to_run))
+        sorted(map(lambda option: f"'{option}'", runner_options))
+        + sorted(map(lambda label: f"'{label}'", labels_to_run))
     )
     to_skip_line = " ".join(
-        sorted(map(lambda l: f"'{l}'", runner_options))
-        + sorted(map(lambda l: f"'{l}'", labels_to_skip))
+        sorted(map(lambda option: f"'{option}'", runner_options))
+        + sorted(map(lambda label: f"'{label}'", labels_to_skip))
     )
     # ⚠️ DON'T use logger
     # logger goes to stderr, we want it in stdout

@@ -10,6 +10,7 @@ def test_existing_commands():
         "empty-upload",
         "get-report-results",
         "label-analysis",
+        "network-upload",
         "pr-base-picking",
         "process-test-results",
         "send-notifications",

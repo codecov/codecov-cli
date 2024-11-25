@@ -11,6 +11,7 @@ from codecov_cli.commands.create_report_result import create_report_results
 from codecov_cli.commands.empty_upload import empty_upload
 from codecov_cli.commands.get_report_results import get_report_results
 from codecov_cli.commands.labelanalysis import label_analysis
+from codecov_cli.commands.network_upload import network_upload
 from codecov_cli.commands.process_test_results import process_test_results
 from codecov_cli.commands.report import create_report
 from codecov_cli.commands.send_notifications import send_notifications
@@ -79,6 +80,7 @@ cli.add_command(upload_coverage)
 cli.add_command(upload_process)
 cli.add_command(send_notifications)
 cli.add_command(process_test_results)
+cli.add_command(network_upload)
 
 
 def run():

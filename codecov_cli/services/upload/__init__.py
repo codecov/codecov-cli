@@ -24,6 +24,7 @@ def do_upload_logic(
     cli_config: typing.Dict,
     versioning_system: VersioningSystemInterface,
     ci_adapter: CIAdapterBase,
+    upload_coverage: bool = False,
     *,
     args: dict = None,
     branch: typing.Optional[str],
@@ -51,6 +52,7 @@ def do_upload_logic(
     network_filter: typing.Optional[str],
     network_prefix: typing.Optional[str],
     network_root_folder: Path,
+    parent_sha: typing.Optional[str] = None,
     plugin_names: typing.List[str],
     pull_request_number: typing.Optional[str],
     report_code: str,
@@ -148,6 +150,8 @@ def do_upload_logic(
             ci_service,
             git_service,
             enterprise_url,
+            parent_sha,
+            upload_coverage,
             args,
         )
     else:

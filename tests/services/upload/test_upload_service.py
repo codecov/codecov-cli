@@ -125,6 +125,8 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
         "git_service",
         None,
         None,
+        False,
+        None,
     )
 
 
@@ -234,6 +236,8 @@ def test_do_upload_logic_happy_path(mocker):
         "service",
         "git_service",
         None,
+        None,
+        False,
         None,
     )
 
@@ -684,5 +688,7 @@ def test_do_upload_logic_happy_path_test_results(mocker):
         "service",
         "git_service",
         None,
+        None,
+        False,
         {"args": "fake_args"},
     )

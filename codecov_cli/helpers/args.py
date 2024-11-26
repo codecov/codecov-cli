@@ -20,12 +20,12 @@ def get_cli_args(ctx: click.Context):
     filtered_args = {}
     for k in args.keys():
         try:
-            if type(args[k]) == PosixPath:
+            if isinstance(args[k], PosixPath):
                 filtered_args[k] = str(args[k])
             else:
                 json.dumps(args[k])
                 filtered_args[k] = args[k]
-        except Exception as e:
+        except Exception:
             continue
 
     return filtered_args

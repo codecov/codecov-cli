@@ -228,7 +228,7 @@ class TestLabelAnalysisCommand(object):
     ):
         mock_get_runner = get_labelanalysis_deps["mock_get_runner"]
         fake_runner = get_labelanalysis_deps["fake_runner"]
-        collected_labels = get_labelanalysis_deps["collected_labels"]
+        _ = get_labelanalysis_deps["collected_labels"]
 
         label_analysis_result = {
             "present_report_labels": ["test_present"],
@@ -349,7 +349,7 @@ class TestLabelAnalysisCommand(object):
     def test_invoke_label_analysis_dry_run_pytest_format(
         self, get_labelanalysis_deps, mocker
     ):
-        mock_get_runner = get_labelanalysis_deps["mock_get_runner"]
+        _ = get_labelanalysis_deps["mock_get_runner"]
         fake_runner = get_labelanalysis_deps["fake_runner"]
 
         label_analysis_result = {
@@ -733,7 +733,7 @@ class TestLabelAnalysisCommand(object):
     ):
         mock_get_runner = get_labelanalysis_deps["mock_get_runner"]
         fake_runner = get_labelanalysis_deps["fake_runner"]
-        collected_labels = get_labelanalysis_deps["collected_labels"]
+        _ = get_labelanalysis_deps["collected_labels"]
 
         label_analysis_result = {
             "present_report_labels": ["test_present"],

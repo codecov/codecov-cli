@@ -100,7 +100,7 @@ def mocked_upload_coverage_endpoint(mocked_responses):
 def mocked_test_results_endpoint(mocked_responses):
     resp = responses.Response(
         responses.POST,
-        f"https://ingest.codecov.io/upload/test_results/v1",
+        "https://ingest.codecov.io/upload/test_results/v1",
         status=200,
         json={
             "raw_upload_location": "https://puturl.com",

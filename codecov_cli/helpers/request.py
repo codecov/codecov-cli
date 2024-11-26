@@ -52,8 +52,7 @@ def backoff_time(curr_retry):
     return 2 ** (curr_retry - 1)
 
 
-class RetryException(Exception):
-    ...
+class RetryException(Exception): ...
 
 
 def retry_request(func):
@@ -73,7 +72,7 @@ def retry_request(func):
                 requests.exceptions.ConnectionError,
                 requests.exceptions.Timeout,
                 RetryException,
-            ) as exp:
+            ):
                 logger.warning(
                     "Request failed. Retrying",
                     extra=dict(extra_log_attributes=dict(retry=retry)),

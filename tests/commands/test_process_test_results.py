@@ -11,8 +11,7 @@ def test_process_test_results(
     mocker,
     tmpdir,
 ):
-
-    tmp_file = tmpdir.mkdir("folder").join("summary.txt")
+    _ = tmpdir.mkdir("folder").join("summary.txt")
 
     mocker.patch.dict(
         os.environ,
@@ -21,7 +20,7 @@ def test_process_test_results(
             "GITHUB_REF": "pull/fake/pull",
         },
     )
-    mocked_post = mocker.patch(
+    _ = mocker.patch(
         "codecov_cli.commands.process_test_results.send_post_request",
         return_value=RequestResult(
             status_code=200, error=None, warnings=[], text="yay it worked"
@@ -48,8 +47,7 @@ def test_process_test_results_create_github_message(
     mocker,
     tmpdir,
 ):
-
-    tmp_file = tmpdir.mkdir("folder").join("summary.txt")
+    _ = tmpdir.mkdir("folder").join("summary.txt")
 
     mocker.patch.dict(
         os.environ,
@@ -95,8 +93,7 @@ def test_process_test_results_update_github_message(
     mocker,
     tmpdir,
 ):
-
-    tmp_file = tmpdir.mkdir("folder").join("summary.txt")
+    _ = tmpdir.mkdir("folder").join("summary.txt")
 
     mocker.patch.dict(
         os.environ,
@@ -166,8 +163,7 @@ def test_process_test_results_errors_getting_comments(
     mocker,
     tmpdir,
 ):
-
-    tmp_file = tmpdir.mkdir("folder").join("summary.txt")
+    _ = tmpdir.mkdir("folder").join("summary.txt")
 
     mocker.patch.dict(
         os.environ,
@@ -187,7 +183,7 @@ def test_process_test_results_errors_getting_comments(
         ),
     )
 
-    mocked_post = mocker.patch(
+    _ = mocker.patch(
         "codecov_cli.commands.process_test_results.send_post_request",
         return_value=RequestResult(
             status_code=200, error=None, warnings=[], text="yay it worked"
@@ -211,7 +207,7 @@ def test_process_test_results_errors_getting_comments(
 
 
 def test_process_test_results_non_existent_file(mocker, tmpdir):
-    tmp_file = tmpdir.mkdir("folder").join("summary.txt")
+    _ = tmpdir.mkdir("folder").join("summary.txt")
 
     mocker.patch.dict(
         os.environ,
@@ -220,7 +216,7 @@ def test_process_test_results_non_existent_file(mocker, tmpdir):
             "GITHUB_REF": "pull/fake/pull",
         },
     )
-    mocked_post = mocker.patch(
+    _ = mocker.patch(
         "codecov_cli.commands.process_test_results.send_post_request",
         return_value=RequestResult(
             status_code=200, error=None, warnings=[], text="yay it worked"
@@ -248,7 +244,7 @@ def test_process_test_results_non_existent_file(mocker, tmpdir):
 
 
 def test_process_test_results_missing_repo(mocker, tmpdir):
-    tmp_file = tmpdir.mkdir("folder").join("summary.txt")
+    _ = tmpdir.mkdir("folder").join("summary.txt")
 
     mocker.patch.dict(
         os.environ,
@@ -258,7 +254,7 @@ def test_process_test_results_missing_repo(mocker, tmpdir):
     )
     if "GITHUB_REPOSITORY" in os.environ:
         del os.environ["GITHUB_REPOSITORY"]
-    mocked_post = mocker.patch(
+    _ = mocker.patch(
         "codecov_cli.commands.process_test_results.send_post_request",
         return_value=RequestResult(
             status_code=200, error=None, warnings=[], text="yay it worked"
@@ -288,7 +284,7 @@ def test_process_test_results_missing_repo(mocker, tmpdir):
 
 
 def test_process_test_results_missing_ref(mocker, tmpdir):
-    tmp_file = tmpdir.mkdir("folder").join("summary.txt")
+    _ = tmpdir.mkdir("folder").join("summary.txt")
 
     mocker.patch.dict(
         os.environ,
@@ -299,7 +295,7 @@ def test_process_test_results_missing_ref(mocker, tmpdir):
 
     if "GITHUB_REF" in os.environ:
         del os.environ["GITHUB_REF"]
-    mocked_post = mocker.patch(
+    _ = mocker.patch(
         "codecov_cli.commands.process_test_results.send_post_request",
         return_value=RequestResult(
             status_code=200, error=None, warnings=[], text="yay it worked"

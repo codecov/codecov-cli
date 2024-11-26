@@ -102,7 +102,7 @@ def do_upload_logic(
     except click.ClickException as exp:
         if handle_no_reports_found:
             logger.info(
-                "No coverage reports found. Triggering notificaions without uploading."
+                "No coverage reports found. Triggering notifications without uploading."
             )
             upload_completion_logic(
                 commit_sha=commit_sha,
@@ -116,7 +116,7 @@ def do_upload_logic(
                 error=None,
                 warnings=None,
                 status_code=200,
-                text="No coverage reports found. Triggering notificaions without uploading.",
+                text="No coverage reports found. Triggering notifications without uploading.",
             )
         else:
             raise exp

@@ -101,7 +101,12 @@ class TestCoverageFileFinder(object):
         (tmp_path / "sub" / "subsub").mkdir()
         (tmp_path / "node_modules").mkdir()
 
-        should_find = ["junit.xml", "abc.junit.xml", "sub/junit.xml"]
+        should_find = [
+            "junit.xml",
+            "abc.junit.xml",
+            "sub/junit.xml",
+            "sub/TEST-something.xml",
+        ]
 
         should_ignore = [
             "abc.codecov.exe",
@@ -330,6 +335,7 @@ class TestCoverageFileFinderUserInput:
             project_root / "coverage.xml",
             project_root / "subdirectory" / "test_coverage.xml",
             project_root / ".tox" / "another_file.abc",
+            project_root / ".tox" / "ANOTHER_FILE.abc",
         ]
         (project_root / "subdirectory").mkdir()
         (project_root / ".tox").mkdir()

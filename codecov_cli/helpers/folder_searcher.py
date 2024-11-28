@@ -85,7 +85,9 @@ def search_files(
                     yield file_path
 
 
-def globs_to_regex(patterns: List[str]) -> Optional[Pattern]:
+def globs_to_regex(
+    patterns: List[str], case_sensitive: bool = True
+) -> Optional[Pattern]:
     """
     Converts a list of glob patterns to a combined ORed regex
 
@@ -100,4 +102,8 @@ def globs_to_regex(patterns: List[str]) -> Optional[Pattern]:
         return None
 
     regex_str = ["(" + translate(pattern) + ")" for pattern in patterns]
-    return re.compile("|".join(regex_str))
+    # return re.compile("|".join(regex_str))
+    if case_sensitive:
+        return re.compile("|".join(regex_str))
+    else:
+        return re.compile("|".join(regex_str), re.IGNORECASE)

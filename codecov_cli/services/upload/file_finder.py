@@ -209,7 +209,9 @@ class FileFinder(object):
         if self.explicitly_listed_files:
             user_files_paths = self.get_user_specified_files(regex_patterns_to_exclude)
         if not self.disable_search:
-            regex_patterns_to_include = globs_to_regex(files_patterns)
+            regex_patterns_to_include = globs_to_regex(
+                files_patterns, case_sensitive=False
+            )
             assert regex_patterns_to_include  # this is never `None`
             files_paths = search_files(
                 self.search_root,

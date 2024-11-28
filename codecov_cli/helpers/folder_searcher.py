@@ -102,7 +102,6 @@ def globs_to_regex(
         return None
 
     regex_str = ["(" + translate(pattern) + ")" for pattern in patterns]
-    # return re.compile("|".join(regex_str))
     if case_sensitive:
         return re.compile("|".join(regex_str))
     else:

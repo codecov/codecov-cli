@@ -38,7 +38,7 @@ def test_log_error_no_raise(mocker):
         error=error, warnings=[], status_code=401, text="Unauthorized"
     )
     log_warnings_and_errors_if_any(result, "Process", fail_on_error=False)
-    mock_log_error.assert_called_with(f"Process failed: Unauthorized")
+    mock_log_error.assert_called_with("Process failed: Unauthorized")
 
 
 def test_log_error_raise(mocker):
@@ -51,7 +51,7 @@ def test_log_error_raise(mocker):
     )
     with pytest.raises(SystemExit):
         log_warnings_and_errors_if_any(result, "Process", fail_on_error=True)
-    mock_log_error.assert_called_with(f"Process failed: Unauthorized")
+    mock_log_error.assert_called_with("Process failed: Unauthorized")
 
 
 def test_log_result_without_token(mocker):
@@ -137,7 +137,7 @@ def test_request_retry(mocker, valid_response):
 
 
 def test_request_retry_too_many_errors(mocker):
-    mock_sleep = mocker.patch("codecov_cli.helpers.request.sleep")
+    _ = mocker.patch("codecov_cli.helpers.request.sleep")
     mocker.patch.object(
         requests,
         "post",
@@ -150,7 +150,7 @@ def test_request_retry_too_many_errors(mocker):
         ],
     )
     with pytest.raises(Exception) as exp:
-        resp = send_post_request("my_url")
+        _ = send_post_request("my_url")
     assert str(exp.value) == "Request failed after too many retries"
 
 

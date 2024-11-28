@@ -16,16 +16,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
-      - name: Install dependencies
+      - name: Check linting with ruff
         run: |
-          python -m pip install --upgrade pip
-          pip install black==22.3.0 isort==5.10.1
-      - name: Check linting with black
-        run: |
-          black --check codecov_cli
-      - name: Check imports order with isort
-        run: |
-          isort --check --profile=black codecov_cli -p staticcodecov_languages
+          make lint
+
 
   codecov-startup:
     runs-on: ubuntu-latest

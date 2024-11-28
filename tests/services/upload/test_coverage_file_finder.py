@@ -357,7 +357,6 @@ class TestCoverageFileFinderUserInput:
     def test_find_coverage_files_with_user_specified_files_in_default_ignored_folder(
         self, coverage_file_finder_fixture
     ):
-
         (
             project_root,
             coverage_file_finder,

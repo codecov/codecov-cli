@@ -128,7 +128,7 @@ coverage_files_excluded_patterns = [
     "inputFiles.lst",
     "phpunit-code-coverage.xml",
     "phpunit-coverage.xml",
-    "remapInstanbul.coverage*.json",
+    "remapIstanbul.coverage*.json",
     "scoverage.measurements.*",
     "test_*_coverage.txt",
     "test-result-*-codecoverage.json",

@@ -114,7 +114,7 @@ def test_upload_coverage_options(mocker):
             "  -d, --dry-run                   Don't upload files to Codecov",
             "  --legacy, --use-legacy-uploader",
             "                                  Use the legacy upload endpoint",
-            "  --handle-no-reports-found       Raise no excpetions when no coverage reports",
+            "  --handle-no-reports-found       Raise no exceptions when no coverage reports",
             "                                  found.",
             "  --report-type [coverage|test_results]",
             "                                  The type of the file to upload, coverage by",

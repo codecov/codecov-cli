@@ -1,15 +1,15 @@
 import json
 import logging
 import time
+import typing
 
 import requests
 
 from codecov_cli.helpers import request
 from codecov_cli.helpers.config import CODECOV_API_URL, CODECOV_INGEST_URL
-from codecov_cli.helpers.encoder import decode_slug, encode_slug
+from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.helpers.request import (
     get_token_header,
-    get_token_header_or_fail,
     log_warnings_and_errors_if_any,
     request_result,
     send_post_request,
@@ -24,11 +24,11 @@ def create_report_logic(
     code: str,
     slug: str,
     service: str,
-    token: str,
+    token: typing.Optional[str],
     enterprise_url: str,
     pull_request_number: int,
     fail_on_error: bool = False,
-    args: dict = None,
+    args: typing.Union[dict, None] = None,
 ):
     encoded_slug = encode_slug(slug)
     sending_result = send_create_report_request(
@@ -70,10 +70,10 @@ def create_report_results_logic(
     code: str,
     slug: str,
     service: str,
-    token: str,
+    token: typing.Optional[str],
     enterprise_url: str,
     fail_on_error: bool = False,
-    args: dict = None,
+    args: typing.Union[dict, None] = None,
 ):
     encoded_slug = encode_slug(slug)
     sending_result = send_reports_result_request(
@@ -83,6 +83,7 @@ def create_report_results_logic(
         service=service,
         token=token,
         enterprise_url=enterprise_url,
+        args=args,
     )
 
     log_warnings_and_errors_if_any(
@@ -103,7 +104,7 @@ def send_reports_result_request(
     data = {
         "cli_args": args,
     }
-    headers = get_token_header_or_fail(token)
+    headers = get_token_header(token)
     upload_url = enterprise_url or CODECOV_API_URL
     url = f"{upload_url}/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/results"
     return send_post_request(url=url, data=data, headers=headers)
@@ -118,7 +119,7 @@ def send_reports_result_get_request(
     enterprise_url,
     fail_on_error=False,
 ):
-    headers = get_token_header_or_fail(token)
+    headers = get_token_header(token)
     upload_url = enterprise_url or CODECOV_API_URL
     url = f"{upload_url}/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/results"
     number_tries = 0

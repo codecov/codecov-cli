@@ -81,10 +81,26 @@ def mocked_legacy_upload_endpoint(mocked_responses):
 
 
 @pytest.fixture
+def mocked_upload_coverage_endpoint(mocked_responses):
+    encoded_slug = encode_slug(named_upload_data["slug"])
+    resp = responses.Response(
+        responses.POST,
+        f"https://ingest.codecov.io/upload/github/{encoded_slug}/upload-coverage",
+        status=200,
+        json={
+            "raw_upload_location": "https://puturl.com",
+            "url": "https://app.codecov.io/commit-url",
+        },
+    )
+    mocked_responses.add(resp)
+    yield resp
+
+
+@pytest.fixture
 def mocked_test_results_endpoint(mocked_responses):
     resp = responses.Response(
         responses.POST,
-        f"https://ingest.codecov.io/upload/test_results/v1",
+        "https://ingest.codecov.io/upload/test_results/v1",
         status=200,
         json={
             "raw_upload_location": "https://puturl.com",
@@ -188,6 +204,31 @@ class TestUploadSender(object):
         assert (
             post_req_made.url
             == f"https://ingest.codecov.io/upload/github/{encoded_slug}/commits/{random_sha}/reports/{named_upload_data['report_code']}/uploads"
+        )
+        assert (
+            post_req_made.headers.items() >= headers.items()
+        )  # test dict is a subset of the other
+
+    def test_upload_sender_post_called_with_right_parameters_and_upload_coverage(
+        self, mocked_responses, mocked_upload_coverage_endpoint, mocked_storage_server
+    ):
+        headers = {"Authorization": f"token {random_token}"}
+
+        sending_result = UploadSender().send_upload_data(
+            upload_collection, random_sha, random_token, upload_coverage=True, **named_upload_data
+        )
+        assert sending_result.error is None
+        assert sending_result.warnings == []
+
+        assert len(mocked_responses.calls) == 2
+
+        post_req_made = mocked_responses.calls[0].request
+        encoded_slug = encode_slug(named_upload_data["slug"])
+        response = json.loads(mocked_responses.calls[0].response.text)
+        assert response.get("url") == "https://app.codecov.io/commit-url"
+        assert (
+            post_req_made.url
+            == f"https://ingest.codecov.io/upload/github/{encoded_slug}/upload-coverage"
         )
         assert (
             post_req_made.headers.items() >= headers.items()

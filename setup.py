@@ -10,7 +10,7 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="codecov-cli",
-    version="0.8.0",
+    version="0.9.4",
     packages=find_packages(exclude=["contrib", "docs", "tests*"]),
     description="Codecov Command Line Interface",
     long_description=long_description,
@@ -19,7 +19,7 @@ setup(
     author_email="support@codecov.io",
     install_requires=[
         "click==8.*",
-        "httpx==0.23.*",
+        "httpx==0.27.*",
         "ijson==3.*",
         "pyyaml==6.*",
         "responses==0.21.*",

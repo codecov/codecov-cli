@@ -125,6 +125,8 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
         "git_service",
         None,
         None,
+        False,
+        None,
     )
 
 
@@ -234,6 +236,8 @@ def test_do_upload_logic_happy_path(mocker):
         "service",
         "git_service",
         None,
+        None,
+        False,
         None,
     )
 
@@ -529,7 +533,7 @@ def test_do_upload_rase_no_cov_reports_found_error(mocker):
     ci_adapter.get_fallback_value.return_value = "service"
 
     with pytest.raises(click.ClickException) as exp:
-        res = do_upload_logic(
+        _ = do_upload_logic(
             cli_config,
             versioning_system,
             ci_adapter,
@@ -684,5 +688,7 @@ def test_do_upload_logic_happy_path_test_results(mocker):
         "service",
         "git_service",
         None,
+        None,
+        False,
         {"args": "fake_args"},
     )

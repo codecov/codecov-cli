@@ -133,7 +133,6 @@ class TestGitlabCI(object):
         ],
     )
     def test_slug(self, env_dict, expected, mocker):
-
         mocker.patch.dict(
             os.environ,
             env_dict,

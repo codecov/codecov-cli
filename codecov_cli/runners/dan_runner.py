@@ -54,7 +54,7 @@ class DoAnythingNowRunner(LabelAnalysisRunnerInterface):
                 "DAN runner missing 'process_labelanalysis_result_command' configuration value"
             )
         command_list = []
-        if type(command) == list:
+        if isinstance(command, list):
             command_list.extend(command)
         else:
             command_list.append(command)

@@ -2,12 +2,26 @@ name ?= codecovcli
 # Semantic versioning format https://semver.org/
 tag_regex := ^v([0-9]{1,}\.){2}[0-9]{1,}([-_]\w+)?$
 
+lint.install:
+	echo "Installing ruff..."
+	pip install -Iv ruff
+
+# The preferred method (for now) w.r.t. fixable rules is to manually update the makefile
+# with --fix and re-run 'make lint.' Since ruff is constantly adding rules this is a slight
+# amount of "needed" friction imo.
+lint.run:
+	ruff check --ignore F401 --exclude languages --exclude samples
+	ruff format --exclude languages --exclude samples
+
+lint.check:
+	echo "Linting..."
+	ruff check --ignore F401 --exclude languages --exclude samples
+	echo "Formatting..."
+	ruff format --check --exclude languages --exclude samples
+
 lint:
-	pip install black==22.3.0 isort==5.10.1
-	black codecov_cli
-	isort --profile=black codecov_cli -p staticcodecov_languages
-	black tests
-	isort --profile black tests
+	make lint.install
+	make lint.run
 
 tag.release:
 ifeq ($(shell echo ${version} | egrep "${tag_regex}"),)

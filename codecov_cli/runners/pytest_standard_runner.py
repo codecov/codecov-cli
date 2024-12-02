@@ -57,7 +57,6 @@ class PytestStandardRunnerConfigParams(dict):
 
 
 class PytestStandardRunner(LabelAnalysisRunnerInterface):
-
     dry_run_runner_options = ["--cov-context=test"]
     params: PytestStandardRunnerConfigParams
 

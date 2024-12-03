@@ -53,15 +53,21 @@ def send_commit_data(
     enterprise_url,
     args,
 ):
-    # this is how the CLI receives the username of the user to whom the fork belongs
-    # to and the branch name from the action
-    tokenless = os.environ.get("TOKENLESS")
-    if tokenless:
-        headers = None  # type: ignore
-        branch = tokenless  # type: ignore
-        logger.info("The PR is happening in a forked repo. Using tokenless upload.")
+    # Old versions of the GHA use this env var instead of the regular branch
+    # argument to provide an unprotected branch name
+    if tokenless := os.environ.get("TOKENLESS"):
+        branch = tokenless
+
+    if branch and ":" in branch:
+        logger.info(f"Creating a commit for an unprotected branch: {branch}")
+    elif token is None:
+        logger.warning(
+            f"Branch `{branch}` is protected but no token was provided\nFor information on Codecov upload tokens, see https://docs.codecov.com/docs/codecov-tokens"
+        )
     else:
-        headers = get_token_header(token)
+        logger.info("Using token to create a commit for protected branch `{branch}`")
+
+    headers = get_token_header(token)
 
     data = {
         "branch": branch,

@@ -88,6 +88,17 @@ codecovcli upload-process
 ```
 codecovcli upload-process is a wrapper for create-commit, create-report and do-upload. 
 
+A complete command to upload a coverage report may look something like this (using a Github Actions example):
+```
+# here we'll upload the test report called  coverage-service.xml, we are passing 
+# in the flag called "service" nad a dyncamic name to specify a specifc test run 
+# (it will be useful to see in the Codecov UI)
+# we are using some options params like --verbose and --fail-on-error
+# Note: the most important param that you must pass in this case is the upload token
+
+./codecov --verbose upload-process --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} -n 'service'-${{ github.run_id }} -F service -f coverage-service.xml
+```
+
 You can customize the commands with the options aligned with each command. 
 
 Note that these commands will automatically search your environment for a `$CODECOV_TOKEN` environment variable and use it if found. If you do not have a repository upload token, or global upload token, stored as an environment variable, you will need to pass it into **each command manually**, like so: `-t {$CODECOV_TOKEN}`. 

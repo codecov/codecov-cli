@@ -5,15 +5,15 @@ import click
 
 
 class FallbackFieldEnum(Enum):
-    commit_sha = auto()
-    build_url = auto()
+    branch = auto()
     build_code = auto()
+    build_url = auto()
+    commit_sha = auto()
+    git_service = auto()
     job_code = auto()
     pull_request_number = auto()
-    slug = auto()
-    branch = auto()
     service = auto()
-    git_service = auto()
+    slug = auto()
 
 
 class CodecovOption(click.Option):

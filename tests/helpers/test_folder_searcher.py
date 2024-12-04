@@ -43,6 +43,7 @@ def test_search_files_with_folder_exclusion(tmp_path):
         "another/some/banana.py",
         "from/some/banana.py",
         "to/some/banana.py",
+        "path/folder with space/banana.py",
         "apple.py",
         "banana.py",
     ]
@@ -56,6 +57,7 @@ def test_search_files_with_folder_exclusion(tmp_path):
             tmp_path / "banana.py",
             tmp_path / "from/some/banana.py",
             tmp_path / "another/some/banana.py",
+            tmp_path / "path/folder with space/banana.py",
         ]
     )
     assert expected_results == sorted(

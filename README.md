@@ -20,6 +20,8 @@ CodecovCLI is a new way for users to interact with Codecov directly from the use
   - [create-report-results](#create-report-results)
   - [get-report-results](#get-report-results)
   - [pr-base-picking](#pr-base-picking)
+  - [send-notifications](#send-notifications)
+  - [empty-upload](#empty-upload)
 - [How to Use Local Upload](#how-to-use-local-upload)
 - [Work in Progress Features](#work-in-progress-features)
   - [Plugin System](#plugin-system)
@@ -27,6 +29,7 @@ CodecovCLI is a new way for users to interact with Codecov directly from the use
 - [Contributions](#contributions)
   - [Requirements](#requirements)
   - [Guidelines](#guidelines)
+  - [Dependencies](#dependencies)
 - [Releases](#releases)
 
 # Installing
@@ -121,7 +124,7 @@ Codecov-cli supports user input. These inputs, along with their descriptions and
 | `get-report-results` | Used for local upload. It asks codecov to provide you the report results you calculated with the previous command. 
 | `pr-base-picking` | Tells codecov that you want to explicitly define a base for your PR
 | `upload-process` | A wrapper for 3 commands. Create-commit, create-report and do-upload. You can use this command to upload to codecov instead of using the previosly mentioned commands.
-| `send-notification` | A command that tells Codecov that you finished uploading and you want to be sent notifications. To disable automatically sent notifications please consider adding manual_trigger to your codecov.yml, so it will look like codecov: notify: manual_trigger: true. 
+| `send-notifications` | A command that tells Codecov that you finished uploading and you want to be sent notifications. To disable automatically sent notifications please consider adding manual_trigger to your codecov.yml, so it will look like codecov: notify: manual_trigger: true.
 >**Note**: Every command has its own different options that will be mentioned later in this doc. Codecov will try to load these options from your CI environment variables, if not, it will try to load them from git, if not found, you may need to add them manually. 
 
 
@@ -225,9 +228,27 @@ Codecov-cli supports user input. These inputs, along with their descriptions and
 | :---:     |     :---:   |    :---:   | 
 | -C, --sha, --commit-sha TEXT    |Commit SHA (with 40 chars) | Required
 | -r, --slug TEXT                 |owner/repo slug used instead of the private repo token in Self-hosted | Required
-| -t, --token UUID                |Codecov upload token | Required
+| -t, --token TEXT                |Codecov upload token | Required
 | --git-service | Git provider. Options: github, gitlab, bitbucket, github_enterprise, gitlab_enterprise, bitbucket_server | Optional
 | -h,--help                      |Show this message and exit.
+
+## empty-upload
+
+Used if the changes made don't need testing, but PRs require a passing codecov status to be merged.
+This command will scan the files in the commit and send passing status checks configured if all the changed files
+are ignored by codecov (including README and configuration files)
+
+`Usage: codecovcli empty-upload [OPTIONS]`
+
+|           Options            |                                        Description                                         |  usage   |
+| :--------------------------: | :----------------------------------------------------------------------------------------: | :------: |
+| -C, --sha, --commit-sha TEXT |                                 Commit SHA (with 40 chars)                                 | Required |
+|       -t, --token TEXT       |                                    Codecov upload token                                    | Required |
+|       -r, --slug TEXT        |           owner/repo slug used instead of the private repo token in Self-hosted            | Optional |
+|           --force            |                   Always emit passing checks regardless of changed files                   | Optional |
+|     -Z, --fail-on-error      |                          Exit with non-zero code in case of error                          | Optional |
+|        --git-service         | Options: github, gitlab, bitbucket, github_enterprise, gitlab_enterprise, bitbucket_server | Optional |
+|          -h, --help          |                                Show this message and exit.                                 | Optional |
 
 # How to Use Local Upload
 

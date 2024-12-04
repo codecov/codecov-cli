@@ -1,7 +1,12 @@
 import logging
 import re
 from enum import Enum
+from typing import Optional
 from urllib.parse import urlparse
+
+from codecov_cli.helpers.encoder import decode_slug
+from codecov_cli.helpers.git_services import PullDict
+from codecov_cli.helpers.git_services.github import Github
 
 slug_regex = re.compile(r"[^/\s]+\/[^/\s]+$")
 
@@ -15,6 +20,11 @@ class GitService(Enum):
     GITHUB_ENTERPRISE = "github_enterprise"
     GITLAB_ENTERPRISE = "gitlab_enterprise"
     BITBUCKET_SERVER = "bitbucket_server"
+
+
+def get_git_service(git):
+    if git == "github":
+        return Github()
 
 
 def parse_slug(remote_repo_url: str):
@@ -51,13 +61,16 @@ def parse_git_service(remote_repo_url: str):
     Possible cases we're considering:
     - https://github.com/codecov/codecov-cli.git returns github
     - git@github.com:codecov/codecov-cli.git returns github
+    - ssh://git@github.com/gitcodecov/codecov-cli returns github
+    - ssh://git@github.com:gitcodecov/codecov-cli returns github
     - https://user-name@bitbucket.org/namespace-codecov/first_repo.git returns bitbucket
     """
     services = [service.value for service in GitService]
     parsed_url = urlparse(remote_repo_url)
     service = None
 
-    if remote_repo_url.startswith("https://"):
+    scheme = parsed_url.scheme
+    if scheme in ("https", "ssh"):
         netloc = parsed_url.netloc
         if "@" in netloc:
             netloc = netloc.split("@", 1)[1]

@@ -143,7 +143,7 @@ class TestCircleCI(object):
         assert actual == expected
 
     def test_raises_value_error_if_invalid_field(self):
-        with pytest.raises(ValueError) as ex:
+        with pytest.raises(ValueError):
             CircleCICIAdapter().get_fallback_value("some random key x 123")
 
     def test_service(self):

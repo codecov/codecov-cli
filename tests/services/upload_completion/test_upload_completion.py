@@ -1,6 +1,8 @@
 import json
 import uuid
 
+import click
+import pytest
 from click.testing import CliRunner
 
 from codecov_cli.services.upload_completion import upload_completion_logic
@@ -80,6 +82,35 @@ def test_upload_completion_200(mocker):
         res = upload_completion_logic(
             "commit_sha", "owner/repo", token, "service", None
         )
+    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+    assert out_bytes == [
+        ("info", "Process Upload Completion complete"),
+        (
+            "info",
+            "{'uploads_total': 2, 'uploads_success': 2, 'uploads_processing': 0, 'uploads_error': 0}",
+        ),
+    ]
+    assert res.error is None
+    assert res.warnings == []
+    mocked_response.assert_called_once()
+
+
+def test_upload_completion_no_token(mocker):
+    res = {
+        "uploads_total": 2,
+        "uploads_success": 2,
+        "uploads_processing": 0,
+        "uploads_error": 0,
+    }
+    mocked_response = mocker.patch(
+        "codecov_cli.helpers.request.requests.post",
+        return_value=RequestResult(
+            status_code=200, error=None, warnings=[], text=json.dumps(res)
+        ),
+    )
+    runner = CliRunner()
+    with runner.isolation() as outstreams:
+        res = upload_completion_logic("commit_sha", "owner/repo", None, "service", None)
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
         ("info", "Process Upload Completion complete"),

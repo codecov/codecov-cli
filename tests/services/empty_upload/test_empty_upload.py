@@ -1,6 +1,8 @@
 import json
 import uuid
 
+import click
+import pytest
 from click.testing import CliRunner
 
 from codecov_cli.services.empty_upload import empty_upload_logic
@@ -21,7 +23,14 @@ def test_empty_upload_with_warnings(mocker):
     runner = CliRunner()
     with runner.isolation() as outstreams:
         res = empty_upload_logic(
-            "commit_sha", "owner/repo", uuid.uuid4(), "service", None, False
+            "commit_sha",
+            "owner/repo",
+            uuid.uuid4(),
+            "service",
+            None,
+            False,
+            False,
+            None,
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
@@ -50,7 +59,14 @@ def test_empty_upload_with_error(mocker):
     runner = CliRunner()
     with runner.isolation() as outstreams:
         res = empty_upload_logic(
-            "commit_sha", "owner/repo", uuid.uuid4(), "service", None, False
+            "commit_sha",
+            "owner/repo",
+            uuid.uuid4(),
+            "service",
+            None,
+            False,
+            False,
+            None,
         )
 
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
@@ -77,7 +93,7 @@ def test_empty_upload_200(mocker):
     runner = CliRunner()
     with runner.isolation() as outstreams:
         res = empty_upload_logic(
-            "commit_sha", "owner/repo", token, "service", None, False
+            "commit_sha", "owner/repo", token, "service", None, False, False, None
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
@@ -96,10 +112,68 @@ def test_empty_upload_403(mocker):
         return_value=mocker.MagicMock(status_code=403, text="Permission denied"),
     )
     token = uuid.uuid4()
-    res = empty_upload_logic("commit_sha", "owner/repo", token, "service", None, False)
+    res = empty_upload_logic(
+        "commit_sha", "owner/repo", token, "service", None, False, False, None
+    )
     assert res.error == RequestError(
         code="HTTP Error 403",
         description="Permission denied",
         params={},
     )
+    mocked_response.assert_called_once()
+
+
+def test_empty_upload_force(mocker):
+    res = {
+        "result": "Force option was enabled. Triggering passing notifications.",
+        "non_ignored_files": [],
+    }
+    mocked_response = mocker.patch(
+        "codecov_cli.helpers.request.requests.post",
+        return_value=RequestResult(
+            status_code=200, error=None, warnings=[], text=json.dumps(res)
+        ),
+    )
+    token = uuid.uuid4()
+    runner = CliRunner()
+    with runner.isolation() as outstreams:
+        res = empty_upload_logic(
+            "commit_sha", "owner/repo", token, "service", None, False, True, None
+        )
+    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+    assert out_bytes == [
+        ("info", "Process Empty Upload complete"),
+        ("info", "Force option was enabled. Triggering passing notifications."),
+        ("info", "Non ignored files []"),
+    ]
+    assert res.error is None
+    assert res.warnings == []
+    mocked_response.assert_called_once()
+
+
+def test_empty_upload_no_token(mocker):
+    res = {
+        "result": "All changed files are ignored. Triggering passing notifications.",
+        "non_ignored_files": [],
+    }
+    mocked_response = mocker.patch(
+        "codecov_cli.helpers.request.requests.post",
+        return_value=RequestResult(
+            status_code=200, error=None, warnings=[], text=json.dumps(res)
+        ),
+    )
+    runner = CliRunner()
+    with runner.isolation() as outstreams:
+        res = empty_upload_logic(
+            "commit_sha", "owner/repo", None, "service", None, False, False, None
+        )
+
+    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+    assert out_bytes == [
+        ("info", "Process Empty Upload complete"),
+        ("info", "All changed files are ignored. Triggering passing notifications."),
+        ("info", "Non ignored files []"),
+    ]
+    assert res.error is None
+    assert res.warnings == []
     mocked_response.assert_called_once()

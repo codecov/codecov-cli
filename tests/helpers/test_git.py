@@ -1,6 +1,11 @@
+import json
+
 import pytest
+import requests
+from requests import Response
 
 from codecov_cli.helpers import git
+from codecov_cli.helpers.git_services.github import Github
 
 
 @pytest.mark.parametrize(
@@ -48,6 +53,7 @@ from codecov_cli.helpers import git
         ("ssh://host.abc.xz/owner/repo.git", "owner/repo"),
         ("user-name@host.xz:owner/repo.git/", "owner/repo"),
         ("host.xz:owner/repo.git/", "owner/repo"),
+        ("ssh://git@github.com/gitcodecov/codecov-cli", "gitcodecov/codecov-cli"),
     ],
 )
 def test_parse_slug_valid_address(address, slug):
@@ -102,6 +108,8 @@ def test_parse_slug_invalid_address(address):
             "bitbucket",
         ),
         ("git@bitbucket.org:name-codecov/abc.git.git", "bitbucket"),
+        ("ssh://git@github.com/gitcodecov/codecov-cli", "github"),
+        ("ssh://git@github.com:gitcodecov/codecov-cli", "github"),
     ],
 )
 def test_parse_git_service_valid_address(address, git_service):
@@ -119,3 +127,9 @@ def test_parse_git_service_valid_address(address, git_service):
 )
 def test_parse_git_service_invalid_service(url):
     assert git.parse_git_service(url) is None
+
+
+def test_get_git_service_class():
+    assert isinstance(git.get_git_service("github"), Github)
+    assert git.get_git_service("gitlab") is None
+    assert git.get_git_service("bitbucket") is None

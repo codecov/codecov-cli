@@ -8,16 +8,27 @@ from codecov_cli.helpers.versioning_systems import GitVersioningSystem
 
 class TestGitVersioningSystem(object):
     @pytest.mark.parametrize(
-        "commit_sha,expected", [("", None), (b" random_sha  ", "random_sha")]
+        "runs_output,expected",
+        [
+            # No output for parents nor commit
+            ([b"", b""], None),
+            # No output for parents, commit has SHA
+            ([b"", b" random_sha"], "random_sha"),
+            # Commit is NOT a merge-commit
+            ([b" parent_sha", b" random_sha  "], "random_sha"),
+            # Commit IS a merge-commit
+            ([b" parent_sha0\nparent_sha1", b" random_sha"], "parent_sha1"),
+        ],
     )
-    def test_commit_sha(self, mocker, commit_sha, expected):
-        mocked_subprocess = MagicMock()
+    def test_commit_sha(self, mocker, runs_output, expected):
+        mocked_subprocess = [
+            MagicMock(**{"stdout": runs_output[0]}),
+            MagicMock(**{"stdout": runs_output[1]}),
+        ]
         mocker.patch(
             "codecov_cli.helpers.versioning_systems.subprocess.run",
-            return_value=mocked_subprocess,
+            side_effect=mocked_subprocess,
         )
-
-        mocked_subprocess.stdout = commit_sha
 
         assert (
             GitVersioningSystem().get_fallback_value(FallbackFieldEnum.commit_sha)
@@ -95,7 +106,7 @@ class TestGitVersioningSystem(object):
             return_value=mocked_subprocess,
         )
         # git ls-files diplays a single \n as \\\\n
-        mocked_subprocess.stdout = b'a.txt\nb.txt\n"a\\\\nb.txt"\nc.txt\nd.txt'
+        mocked_subprocess.stdout = b'a.txt\nb.txt\n"a\\\\nb.txt"\nc.txt\nd.txt\n.circleci/config.yml\nLICENSE\napp/advanced calculations/advanced_calculator.js\n'
 
         vs = GitVersioningSystem()
 
@@ -105,6 +116,9 @@ class TestGitVersioningSystem(object):
             "a\\nb.txt",
             "c.txt",
             "d.txt",
+            ".circleci/config.yml",
+            "LICENSE",
+            "app/advanced calculations/advanced_calculator.js",
         ]
 
     def test_list_relevant_files_fails_if_no_root_is_found(self, mocker):
@@ -114,5 +128,5 @@ class TestGitVersioningSystem(object):
         )
 
         vs = GitVersioningSystem()
-        with pytest.raises(ValueError) as ex:
+        with pytest.raises(ValueError):
             vs.list_relevant_files()

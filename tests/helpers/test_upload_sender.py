@@ -1,5 +1,5 @@
 import json
-import uuid
+import re
 from pathlib import Path
 
 import pytest
@@ -13,9 +13,26 @@ from codecov_cli.types import UploadCollectionResult, UploadCollectionResultFile
 from tests.data import reports_examples
 
 upload_collection = UploadCollectionResult(["1", "apple.py", "3"], [], [])
-random_token = uuid.UUID("f359afb9-8a2a-42ab-a448-c3d267ff495b")
+random_token = "f359afb9-8a2a-42ab-a448-c3d267ff495b"
 random_sha = "845548c6b95223f12e8317a1820705f64beaf69e"
 named_upload_data = {
+    "args": None,
+    "upload_file_type": "coverage",
+    "report_code": "report_code",
+    "env_vars": {},
+    "name": "name",
+    "branch": "branch",
+    "slug": "org/repo",
+    "pull_request_number": "pr",
+    "build_code": "build_code",
+    "build_url": "build_url",
+    "job_code": "job_code",
+    "flags": "flags",
+    "ci_service": "ci_service",
+    "git_service": "github",
+}
+test_results_named_upload_data = {
+    "upload_file_type": "test_results",
     "report_code": "report_code",
     "env_vars": {},
     "name": "name",
@@ -30,7 +47,9 @@ named_upload_data = {
     "git_service": "github",
 }
 request_data = {
+    "ci_service": "ci_service",
     "ci_url": "build_url",
+    "cli_args": None,
     "env": {},
     "flags": "flags",
     "job_code": "job_code",
@@ -50,11 +69,41 @@ def mocked_legacy_upload_endpoint(mocked_responses):
     encoded_slug = encode_slug(named_upload_data["slug"])
     resp = responses.Response(
         responses.POST,
-        f"https://api.codecov.io/upload/github/{encoded_slug}/commits/{random_sha}/reports/{named_upload_data['report_code']}/uploads",
+        f"https://ingest.codecov.io/upload/github/{encoded_slug}/commits/{random_sha}/reports/{named_upload_data['report_code']}/uploads",
         status=200,
         json={
             "raw_upload_location": "https://puturl.com",
             "url": "https://app.codecov.io/commit-url",
+        },
+    )
+    mocked_responses.add(resp)
+    yield resp
+
+
+@pytest.fixture
+def mocked_upload_coverage_endpoint(mocked_responses):
+    encoded_slug = encode_slug(named_upload_data["slug"])
+    resp = responses.Response(
+        responses.POST,
+        f"https://ingest.codecov.io/upload/github/{encoded_slug}/upload-coverage",
+        status=200,
+        json={
+            "raw_upload_location": "https://puturl.com",
+            "url": "https://app.codecov.io/commit-url",
+        },
+    )
+    mocked_responses.add(resp)
+    yield resp
+
+
+@pytest.fixture
+def mocked_test_results_endpoint(mocked_responses):
+    resp = responses.Response(
+        responses.POST,
+        "https://ingest.codecov.io/upload/test_results/v1",
+        status=200,
+        json={
+            "raw_upload_location": "https://puturl.com",
         },
     )
     mocked_responses.add(resp)
@@ -133,7 +182,7 @@ class TestUploadSender(object):
     def test_upload_sender_post_called_with_right_parameters(
         self, mocked_responses, mocked_legacy_upload_endpoint, mocked_storage_server
     ):
-        headers = {"Authorization": f"token {random_token.hex}"}
+        headers = {"Authorization": f"token {random_token}"}
 
         mocked_legacy_upload_endpoint.match = [
             matchers.json_params_matcher(request_data),
@@ -154,7 +203,99 @@ class TestUploadSender(object):
         assert response.get("url") == "https://app.codecov.io/commit-url"
         assert (
             post_req_made.url
-            == f"https://api.codecov.io/upload/github/{encoded_slug}/commits/{random_sha}/reports/{named_upload_data['report_code']}/uploads"
+            == f"https://ingest.codecov.io/upload/github/{encoded_slug}/commits/{random_sha}/reports/{named_upload_data['report_code']}/uploads"
+        )
+        assert (
+            post_req_made.headers.items() >= headers.items()
+        )  # test dict is a subset of the other
+
+    def test_upload_sender_post_called_with_right_parameters_and_upload_coverage(
+        self, mocked_responses, mocked_upload_coverage_endpoint, mocked_storage_server
+    ):
+        headers = {"Authorization": f"token {random_token}"}
+
+        sending_result = UploadSender().send_upload_data(
+            upload_collection, random_sha, random_token, upload_coverage=True, **named_upload_data
+        )
+        assert sending_result.error is None
+        assert sending_result.warnings == []
+
+        assert len(mocked_responses.calls) == 2
+
+        post_req_made = mocked_responses.calls[0].request
+        encoded_slug = encode_slug(named_upload_data["slug"])
+        response = json.loads(mocked_responses.calls[0].response.text)
+        assert response.get("url") == "https://app.codecov.io/commit-url"
+        assert (
+            post_req_made.url
+            == f"https://ingest.codecov.io/upload/github/{encoded_slug}/upload-coverage"
+        )
+        assert (
+            post_req_made.headers.items() >= headers.items()
+        )  # test dict is a subset of the other
+
+    def test_upload_sender_post_called_with_right_parameters_test_results(
+        self, mocked_responses, mocked_test_results_endpoint, mocked_storage_server
+    ):
+        headers = {"Authorization": f"token {random_token}"}
+
+        mocked_legacy_upload_endpoint.match = [
+            matchers.json_params_matcher(request_data),
+            matchers.header_matcher(headers),
+        ]
+
+        sending_result = UploadSender().send_upload_data(
+            upload_collection,
+            random_sha,
+            random_token,
+            **test_results_named_upload_data,
+        )
+        assert sending_result.error is None
+        assert sending_result.warnings == []
+
+        assert len(mocked_responses.calls) == 2
+
+        post_req_made = mocked_responses.calls[0].request
+        response = json.loads(mocked_responses.calls[0].response.text)
+        assert response.get("raw_upload_location") == "https://puturl.com"
+        assert post_req_made.url == "https://ingest.codecov.io/upload/test_results/v1"
+        assert (
+            post_req_made.headers.items() >= headers.items()
+        )  # test dict is a subset of the other
+
+        put_req_made = mocked_responses.calls[1].request
+        assert put_req_made.url == "https://puturl.com/"
+        assert "test_results_files" in put_req_made.body.decode("utf-8")
+
+    def test_upload_sender_post_called_with_right_parameters_tokenless(
+        self,
+        mocked_responses,
+        mocked_legacy_upload_endpoint,
+        mocked_storage_server,
+        mocker,
+    ):
+        headers = {}
+
+        mocked_legacy_upload_endpoint.match = [
+            matchers.json_params_matcher(request_data),
+            matchers.header_matcher(headers),
+        ]
+
+        sending_result = UploadSender().send_upload_data(
+            upload_collection, random_sha, None, **named_upload_data
+        )
+        assert sending_result.error is None
+        assert sending_result.warnings == []
+
+        assert len(mocked_responses.calls) == 2
+
+        post_req_made = mocked_responses.calls[0].request
+        encoded_slug = encode_slug(named_upload_data["slug"])
+        response = json.loads(mocked_responses.calls[0].response.text)
+        assert response.get("url") == "https://app.codecov.io/commit-url"
+        assert (
+            post_req_made.url
+            == f"https://ingest.codecov.io/upload/github/{encoded_slug}/commits/{random_sha}/reports/{named_upload_data['report_code']}/uploads"
         )
         assert (
             post_req_made.headers.items() >= headers.items()
@@ -201,6 +342,29 @@ class TestUploadSender(object):
 
         assert sender.warnings is not None
 
+    @pytest.mark.parametrize("error_code", [500, 502])
+    def test_upload_sender_result_fail_post_500s(
+        self,
+        mocker,
+        mocked_responses,
+        mocked_legacy_upload_endpoint,
+        capsys,
+        error_code,
+    ):
+        mocker.patch("codecov_cli.helpers.request.sleep")
+        mocked_legacy_upload_endpoint.status = error_code
+
+        with pytest.raises(Exception, match="Request failed after too many retries"):
+            _ = UploadSender().send_upload_data(
+                upload_collection, random_sha, random_token, **named_upload_data
+            )
+
+        matcher = re.compile(
+            rf"(warning.*((Response status code was {error_code})|(Request failed\. Retrying)).*(\n)?){{6}}"
+        )
+
+        assert matcher.match(capsys.readouterr().err) is not None
+
     def test_upload_sender_result_fail_put_400(
         self, mocked_responses, mocked_legacy_upload_endpoint, mocked_storage_server
     ):
@@ -237,7 +401,7 @@ class TestPayloadGeneration(object):
             get_fake_upload_collection_result(mocked_coverage_file), None
         )
         expected_report = {
-            "path_fixes": {
+            "report_fixes": {
                 "format": "legacy",
                 "value": {
                     "SwiftExample/AppDelegate.swift": {
@@ -304,7 +468,7 @@ class TestPayloadGeneration(object):
             UploadCollectionResult([], [], []), None
         )
         expected_report = {
-            "path_fixes": {
+            "report_fixes": {
                 "format": "legacy",
                 "value": {},
             },
@@ -329,9 +493,7 @@ class TestPayloadGeneration(object):
             "codecov_cli.services.upload.upload_sender.UploadSender._get_format_info",
             return_value=("base64+compressed", "encoded_file_data"),
         )
-        json_formatted_coverage_file = UploadSender()._format_coverage_file(
-            mocked_coverage_file
-        )
+        json_formatted_coverage_file = UploadSender()._format_file(mocked_coverage_file)
         print(json_formatted_coverage_file["data"])
         assert json_formatted_coverage_file == {
             "filename": mocked_coverage_file.get_filename().decode(),

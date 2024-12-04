@@ -1,9 +1,6 @@
 import logging
 import typing
-import uuid
 from dataclasses import dataclass
-
-import requests
 
 from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.helpers.config import LEGACY_CODECOV_API_URL
@@ -39,9 +36,10 @@ class LegacyUploadSender(object):
         self,
         upload_data: UploadCollectionResult,
         commit_sha: str,
-        token: uuid.UUID,
+        token: str,
         env_vars: typing.Dict[str, str],
         report_code: str = None,
+        upload_file_type: str = None,
         name: typing.Optional[str] = None,
         branch: typing.Optional[str] = None,
         slug: typing.Optional[str] = None,
@@ -53,8 +51,8 @@ class LegacyUploadSender(object):
         ci_service: typing.Optional[str] = None,
         git_service: typing.Optional[str] = None,
         enterprise_url: typing.Optional[str] = None,
+        args: dict = None,
     ) -> UploadSendingResult:
-
         params = {
             "package": f"codecov-cli/{codecov_cli_version}",
             "commit": commit_sha,
@@ -70,14 +68,18 @@ class LegacyUploadSender(object):
         }
 
         if token:
-            headers = {"X-Upload-Token": token.hex}
+            headers = {"X-Upload-Token": token}
         else:
             logger.warning("Token is empty.")
             headers = {"X-Upload-Token": ""}
 
+        data = {
+            "cli_args": args,
+        }
+
         upload_url = enterprise_url or LEGACY_CODECOV_API_URL
         resp = send_post_request(
-            f"{upload_url}/upload/v4", headers=headers, params=params
+            f"{upload_url}/upload/v4", data=data, headers=headers, params=params
         )
         if resp.status_code >= 400:
             return resp
@@ -119,9 +121,7 @@ class LegacyUploadSender(object):
         return network_files_section.encode() + b"<<<<<< network\n"
 
     def _generate_coverage_files_section(self, upload_data: UploadCollectionResult):
-        return b"".join(
-            self._format_coverage_file(file) for file in upload_data.coverage_files
-        )
+        return b"".join(self._format_coverage_file(file) for file in upload_data.files)
 
     def _format_coverage_file(self, file: UploadCollectionResultFile) -> bytes:
         header = b"# path=" + file.get_filename() + b"\n"

@@ -9,11 +9,38 @@ from tests.test_helpers import parse_outstreams_into_log_lines
 
 def test_send_create_report_request_200(mocker):
     mocked_response = mocker.patch(
-        "codecov_cli.services.report.requests.post",
+        "codecov_cli.helpers.request.requests.post",
         return_value=mocker.MagicMock(status_code=200),
     )
     res = send_create_report_request(
-        "commit_sha", "code", "github", uuid.uuid4(), "slug", "enterprise_url"
+        "commit_sha",
+        "code",
+        "github",
+        uuid.uuid4(),
+        "owner::::repo",
+        "enterprise_url",
+        1,
+        None,
+    )
+    assert res.error is None
+    assert res.warnings == []
+    mocked_response.assert_called_once()
+
+
+def test_send_create_report_request_no_token(mocker):
+    mocked_response = mocker.patch(
+        "codecov_cli.helpers.request.requests.post",
+        return_value=mocker.MagicMock(status_code=200),
+    )
+    res = send_create_report_request(
+        "commit_sha",
+        "code",
+        "github",
+        None,
+        "owner::::repo",
+        "enterprise_url",
+        1,
+        None,
     )
     assert res.error is None
     assert res.warnings == []
@@ -22,11 +49,11 @@ def test_send_create_report_request_200(mocker):
 
 def test_send_create_report_request_403(mocker):
     mocked_response = mocker.patch(
-        "codecov_cli.services.report.requests.post",
+        "codecov_cli.helpers.request.requests.post",
         return_value=mocker.MagicMock(status_code=403, text="Permission denied"),
     )
     res = send_create_report_request(
-        "commit_sha", "code", "github", uuid.uuid4(), "slug", None
+        "commit_sha", "code", "github", uuid.uuid4(), "owner::::repo", None, 1, None
     )
     assert res.error == RequestError(
         code="HTTP Error 403",
@@ -55,6 +82,7 @@ def test_create_report_command_with_warnings(mocker):
             service="github",
             token="token",
             enterprise_url=None,
+            pull_request_number=1,
         )
 
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
@@ -70,7 +98,7 @@ def test_create_report_command_with_warnings(mocker):
         text="",
     )
     mocked_send_request.assert_called_with(
-        "commit_sha", "code", "github", "token", "owner::::repo", None
+        "commit_sha", "code", "github", "token", "owner::::repo", None, 1, None
     )
 
 
@@ -96,6 +124,7 @@ def test_create_report_command_with_error(mocker):
             slug="owner/repo",
             service="github",
             token="token",
+            pull_request_number=1,
             enterprise_url="enterprise_url",
         )
 
@@ -115,5 +144,12 @@ def test_create_report_command_with_error(mocker):
         warnings=[],
     )
     mock_send_report_data.assert_called_with(
-        "commit_sha", "code", "github", "token", "owner::::repo", "enterprise_url"
+        "commit_sha",
+        "code",
+        "github",
+        "token",
+        "owner::::repo",
+        "enterprise_url",
+        1,
+        None,
     )

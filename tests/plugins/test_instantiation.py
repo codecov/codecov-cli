@@ -106,35 +106,50 @@ def test_load_plugin_from_yaml_empty_params(mocker):
 
 
 def test_get_plugin_gcov():
-    res = _get_plugin({}, "gcov")
+    res = _get_plugin({}, "gcov", {})
+    assert isinstance(res, GcovPlugin)
+
+    res = _get_plugin(
+        {},
+        "gcov",
+        {
+            "gcov_executable": "lcov",
+        },
+    )
     assert isinstance(res, GcovPlugin)
 
 
 def test_get_plugin_xcode():
-    res = _get_plugin({}, "xcode")
+    res = _get_plugin({}, "xcode", {})
     assert isinstance(res, XcodePlugin)
 
 
+def test_get_plugin_noop():
+    res = _get_plugin({}, "noop", {})
+    assert isinstance(res, NoopPlugin)
+
+
 def test_get_plugin_pycoverage():
-    res = _get_plugin({}, "pycoverage")
+    res = _get_plugin({}, "pycoverage", {})
     assert isinstance(res, Pycoverage)
     assert res.config == PycoverageConfig()
     assert res.config.report_type == "xml"
 
     pycoverage_config = {"project_root": "project/root", "report_type": "json"}
-    res = _get_plugin({"plugins": {"pycoverage": pycoverage_config}}, "pycoverage")
+    res = _get_plugin({"plugins": {"pycoverage": pycoverage_config}}, "pycoverage", {})
     assert isinstance(res, Pycoverage)
     assert res.config == PycoverageConfig(pycoverage_config)
     assert res.config.report_type == "json"
 
 
 def test_get_plugin_compress_pycoverage():
-    res = _get_plugin({}, "compress-pycoverage")
+    res = _get_plugin({}, "compress-pycoverage", {})
     assert isinstance(res, CompressPycoverageContexts)
 
     res = _get_plugin(
         {"plugins": {"compress-pycoverage": {"file_to_compress": "something.json"}}},
         "compress-pycoverage",
+        {},
     )
     assert isinstance(res, CompressPycoverageContexts)
     assert str(res.file_to_compress) == "something.json"
@@ -175,6 +190,7 @@ def test_select_preparation_plugins(mocker):
             }
         },
         ["gcov", "something", "otherthing", "second", "lalalala"],
+        {},
     )
     assert len(res) == 5
     assert isinstance(res[0], GcovPlugin)

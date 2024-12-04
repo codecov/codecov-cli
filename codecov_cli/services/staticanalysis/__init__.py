@@ -3,7 +3,7 @@ import json
 import logging
 import typing
 from functools import partial
-from multiprocessing import get_context
+from multiprocessing import Pool
 from pathlib import Path
 
 import click
@@ -33,6 +33,7 @@ async def run_analysis_entrypoint(
     should_force: bool,
     folders_to_exclude: typing.List[Path],
     enterprise_url: typing.Optional[str],
+    args: dict,
 ):
     ff = select_file_finder(config)
     files = list(ff.find_files(folder, pattern, folders_to_exclude))
@@ -110,7 +111,7 @@ async def run_analysis_entrypoint(
         failed_uploads = []
         with click.progressbar(
             length=len(files_that_need_upload),
-            label=f"Upload info to storage",
+            label="Upload info to storage",
         ) as bar:
             # It's better to have less files competing over CPU time when uploading
             # Especially if we might have large files
@@ -187,7 +188,9 @@ async def process_files(
         length=len(files_to_analyze),
         label="Analyzing files",
     ) as bar:
-        with get_context("fork").Pool(processes=numberprocesses) as pool:
+        # https://docs.python.org/3/library/multiprocessing.html#contexts-and-start-methods
+        # from the link above, we want to use the default start methods
+        with Pool(processes=numberprocesses) as pool:
             file_results = pool.imap_unordered(mapped_func, files_to_analyze)
             for result in file_results:
                 bar.update(1, result)

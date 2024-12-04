@@ -1,12 +1,13 @@
 import logging
 import typing
-import uuid
 
 import click
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
+from codecov_cli.helpers.args import get_cli_args
 from codecov_cli.helpers.encoder import slug_without_subgroups_is_invalid
 from codecov_cli.services.commit.base_picking import base_picking_logic
+from codecov_cli.types import CommandContext
 
 logger = logging.getLogger("codecovcli")
 
@@ -36,7 +37,6 @@ logger = logging.getLogger("codecovcli")
     "-t",
     "--token",
     help="Codecov upload token",
-    type=click.UUID,
     envvar="CODECOV_TOKEN",
 )
 @click.option(
@@ -47,24 +47,19 @@ logger = logging.getLogger("codecovcli")
 )
 @click.pass_context
 def pr_base_picking(
-    ctx,
+    ctx: CommandContext,
     base_sha: str,
     pr: typing.Optional[int],
     slug: typing.Optional[str],
-    token: typing.Optional[uuid.UUID],
+    token: typing.Optional[str],
     service: typing.Optional[str],
 ):
     enterprise_url = ctx.obj.get("enterprise_url")
+    args = get_cli_args(ctx)
     logger.debug(
         "Starting base picking process",
         extra=dict(
-            extra_log_attributes=dict(
-                pr=pr,
-                slug=slug,
-                token=token,
-                service=service,
-                enterprise_url=enterprise_url,
-            )
+            extra_log_attributes=args,
         ),
     )
 
@@ -74,4 +69,4 @@ def pr_base_picking(
         )
         return
 
-    base_picking_logic(base_sha, pr, slug, token, service, enterprise_url)
+    base_picking_logic(base_sha, pr, slug, token, service, enterprise_url, args)

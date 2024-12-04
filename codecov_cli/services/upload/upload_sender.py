@@ -2,15 +2,14 @@ import base64
 import json
 import logging
 import typing
-import uuid
 import zlib
 from typing import Any, Dict
 
 from codecov_cli import __version__ as codecov_cli_version
-from codecov_cli.helpers.config import CODECOV_API_URL
+from codecov_cli.helpers.config import CODECOV_INGEST_URL
 from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.helpers.request import (
-    get_token_header_or_fail,
+    get_token_header,
     send_post_request,
     send_put_request,
 )
@@ -28,9 +27,10 @@ class UploadSender(object):
         self,
         upload_data: UploadCollectionResult,
         commit_sha: str,
-        token: uuid.UUID,
+        token: typing.Optional[str],
         env_vars: typing.Dict[str, str],
         report_code: str,
+        upload_file_type: str = "coverage",
         name: typing.Optional[str] = None,
         branch: typing.Optional[str] = None,
         slug: typing.Optional[str] = None,
@@ -42,23 +42,44 @@ class UploadSender(object):
         ci_service: typing.Optional[str] = None,
         git_service: typing.Optional[str] = None,
         enterprise_url: typing.Optional[str] = None,
+        parent_sha: typing.Optional[str] = None,
+        upload_coverage: bool = False,
+        args: dict = None,
     ) -> RequestResult:
         data = {
+            "ci_service": ci_service,
             "ci_url": build_url,
-            "flags": flags,
+            "cli_args": args,
             "env": env_vars,
-            "name": name,
+            "flags": flags,
             "job_code": job_code,
+            "name": name,
             "version": codecov_cli_version,
         }
-
-        # Data to upload to Codecov
-        headers = get_token_header_or_fail(token)
+        if upload_coverage:
+            data["branch"] = branch
+            data["code"] = report_code
+            data["commitid"] = commit_sha
+            data["parent_commit_id"] = parent_sha
+            data["pullid"] = pull_request_number
+        headers = get_token_header(token)
         encoded_slug = encode_slug(slug)
-        upload_url = enterprise_url or CODECOV_API_URL
-        url = f"{upload_url}/upload/{git_service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads"
+        upload_url = enterprise_url or CODECOV_INGEST_URL
+        url, data = self.get_url_and_possibly_update_data(
+            data,
+            upload_file_type,
+            upload_url,
+            git_service,
+            branch,
+            encoded_slug,
+            commit_sha,
+            report_code,
+            upload_coverage,
+        )
         # Data that goes to storage
-        reports_payload = self._generate_payload(upload_data, env_vars)
+        reports_payload = self._generate_payload(
+            upload_data, env_vars, upload_file_type
+        )
 
         logger.debug("Sending upload request to Codecov")
         resp_from_codecov = send_post_request(
@@ -83,18 +104,26 @@ class UploadSender(object):
         return resp_from_storage
 
     def _generate_payload(
-        self, upload_data: UploadCollectionResult, env_vars: typing.Dict[str, str]
+        self,
+        upload_data: UploadCollectionResult,
+        env_vars: typing.Dict[str, str],
+        upload_file_type="coverage",
     ) -> bytes:
         network_files = upload_data.network
-        payload = {
-            "path_fixes": {
-                "format": "legacy",
-                "value": self._get_file_fixers(upload_data),
-            },
-            "network_files": network_files if network_files is not None else [],
-            "coverage_files": self._get_coverage_files(upload_data),
-            "metadata": {},
-        }
+        if upload_file_type == "coverage":
+            payload = {
+                "report_fixes": {
+                    "format": "legacy",
+                    "value": self._get_file_fixers(upload_data),
+                },
+                "network_files": network_files if network_files is not None else [],
+                "coverage_files": self._get_files(upload_data),
+                "metadata": {},
+            }
+        elif upload_file_type == "test_results":
+            payload = {
+                "test_results_files": self._get_files(upload_data),
+            }
 
         json_data = json.dumps(payload)
         return json_data.encode()
@@ -127,10 +156,10 @@ class UploadSender(object):
 
         return file_fixers
 
-    def _get_coverage_files(self, upload_data: UploadCollectionResult):
-        return [self._format_coverage_file(file) for file in upload_data.coverage_files]
+    def _get_files(self, upload_data: UploadCollectionResult):
+        return [self._format_file(file) for file in upload_data.files]
 
-    def _format_coverage_file(self, file: UploadCollectionResultFile):
+    def _format_file(self, file: UploadCollectionResultFile):
         format, formatted_content = self._get_format_info(file)
         return {
             "filename": file.get_filename().decode(),
@@ -145,3 +174,30 @@ class UploadSender(object):
             base64.b64encode(zlib.compress((file.get_content())))
         ).decode()
         return format, formatted_content
+
+    def get_url_and_possibly_update_data(
+        self,
+        data,
+        report_type,
+        upload_url,
+        git_service,
+        branch,
+        encoded_slug,
+        commit_sha,
+        report_code,
+        upload_coverage=False,
+    ):
+        if report_type == "coverage":
+            base_url = f"{upload_url}/upload/{git_service}/{encoded_slug}"
+            if upload_coverage:
+                url = f"{base_url}/upload-coverage"
+            else:
+                url = f"{base_url}/commits/{commit_sha}/reports/{report_code}/uploads"
+        elif report_type == "test_results":
+            data["slug"] = encoded_slug
+            data["branch"] = branch
+            data["commit"] = commit_sha
+            data["service"] = git_service
+            url = f"{upload_url}/upload/test_results/v1"
+
+        return url, data

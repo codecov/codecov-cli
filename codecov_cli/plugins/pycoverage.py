@@ -54,7 +54,6 @@ class Pycoverage(object):
         self.config = PycoverageConfig(config)
 
     def run_preparation(self, collector) -> PreparationPluginReturn:
-
         if shutil.which("coverage") is None:
             logger.warning("coverage.py is not installed or can't be found.")
             return

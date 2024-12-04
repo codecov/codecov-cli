@@ -1,3 +1,4 @@
+import inspect
 import logging
 import random
 import subprocess
@@ -16,6 +17,11 @@ logger = logging.getLogger("codecovcli")
 
 
 class PytestStandardRunnerConfigParams(dict):
+    @property
+    def python_path(self) -> str:
+        python_path = self.get("python_path")
+        return python_path or "python"
+
     @property
     def collect_tests_options(self) -> List[str]:
         return self.get("collect_tests_options", [])
@@ -37,16 +43,40 @@ class PytestStandardRunnerConfigParams(dict):
         """
         return self.get("coverage_root", "./")
 
+    @classmethod
+    def get_available_params(cls) -> List[str]:
+        """Lists all the @property attribute names of this class.
+        These attributes are considered the 'valid config options'
+        """
+        klass_methods = [
+            x
+            for x in dir(cls)
+            if (inspect.isdatadescriptor(getattr(cls, x)) and not x.startswith("__"))
+        ]
+        return klass_methods
+
 
 class PytestStandardRunner(LabelAnalysisRunnerInterface):
-
     dry_run_runner_options = ["--cov-context=test"]
+    params: PytestStandardRunnerConfigParams
 
     def __init__(self, config_params: Optional[dict] = None) -> None:
         super().__init__()
         if config_params is None:
             config_params = {}
+        # Before we create the config params we emit warnings if any param is unknown
+        # So the user knows something is wrong with their config
+        self._possibly_warn_bad_config(config_params)
         self.params = PytestStandardRunnerConfigParams(config_params)
+
+    def _possibly_warn_bad_config(self, config_params: dict):
+        available_config_params = (
+            PytestStandardRunnerConfigParams.get_available_params()
+        )
+        provided_config_params = config_params.keys()
+        for provided_param in provided_config_params:
+            if provided_param not in available_config_params:
+                logger.warning(f"Config parameter '{provided_param}' is unknonw.")
 
     def parse_captured_output_error(self, exp: CalledProcessError) -> str:
         result = ""
@@ -62,7 +92,7 @@ class PytestStandardRunner(LabelAnalysisRunnerInterface):
         Raises Exception if pytest fails
         Returns the complete pytest output
         """
-        command = ["python", "-m", "pytest"] + pytest_args
+        command = [self.params.python_path, "-m", "pytest"] + pytest_args
         try:
             result = subprocess.run(
                 command,
@@ -92,7 +122,10 @@ class PytestStandardRunner(LabelAnalysisRunnerInterface):
         logger.info(
             "Collecting tests",
             extra=dict(
-                extra_log_attributes=dict(pytest_options=options_to_use),
+                extra_log_attributes=dict(
+                    pytest_command=[self.params.python_path, "-m", "pytest"],
+                    pytest_options=options_to_use,
+                ),
             ),
         )
 

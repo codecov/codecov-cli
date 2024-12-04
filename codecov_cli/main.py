@@ -11,10 +11,12 @@ from codecov_cli.commands.create_report_result import create_report_results
 from codecov_cli.commands.empty_upload import empty_upload
 from codecov_cli.commands.get_report_results import get_report_results
 from codecov_cli.commands.labelanalysis import label_analysis
+from codecov_cli.commands.process_test_results import process_test_results
 from codecov_cli.commands.report import create_report
 from codecov_cli.commands.send_notifications import send_notifications
 from codecov_cli.commands.staticanalysis import static_analysis
 from codecov_cli.commands.upload import do_upload
+from codecov_cli.commands.upload_coverage import upload_coverage
 from codecov_cli.commands.upload_process import upload_process
 from codecov_cli.helpers.ci_adapters import get_ci_adapter, get_ci_providers_list
 from codecov_cli.helpers.config import load_cli_config
@@ -35,7 +37,7 @@ logger = logging.getLogger("codecovcli")
 @click.option(
     "--codecov-yml-path",
     type=click.Path(path_type=pathlib.Path),
-    default=pathlib.Path("codecov.yml"),
+    default=None,
 )
 @click.option(
     "--enterprise-url", "--url", "-u", help="Change the upload host (Enterprise use)"
@@ -50,6 +52,8 @@ def cli(
     enterprise_url: str,
     verbose: bool = False,
 ):
+    ctx.obj["cli_args"] = ctx.params
+    ctx.obj["cli_args"]["version"] = f"cli-{__version__}"
     configure_logger(logger, log_level=(logging.DEBUG if verbose else logging.INFO))
     ctx.help_option_names = ["-h", "--help"]
     ctx.obj["ci_adapter"] = get_ci_adapter(auto_load_params_from)
@@ -57,6 +61,8 @@ def cli(
     ctx.obj["codecov_yaml"] = load_cli_config(codecov_yml_path)
     if ctx.obj["codecov_yaml"] is None:
         logger.debug("No codecov_yaml found")
+    elif (token := ctx.obj["codecov_yaml"].get("codecov", {}).get("token")) is not None:
+        ctx.default_map = {ctx.invoked_subcommand: {"token": token}}
     ctx.obj["enterprise_url"] = enterprise_url
 
 
@@ -69,8 +75,10 @@ cli.add_command(pr_base_picking)
 cli.add_command(label_analysis)
 cli.add_command(static_analysis)
 cli.add_command(empty_upload)
+cli.add_command(upload_coverage)
 cli.add_command(upload_process)
 cli.add_command(send_notifications)
+cli.add_command(process_test_results)
 
 
 def run():

@@ -138,6 +138,8 @@ def do_upload_logic(
             token=token,
             env_vars=env_vars,
             name=name,
+            report_code=report_code,
+            upload_file_type=upload_file_type,
             branch=branch,
             slug=slug,
             pull_request_number=pull_request_number,

@@ -215,7 +215,11 @@ class TestUploadSender(object):
         headers = {"Authorization": f"token {random_token}"}
 
         sending_result = UploadSender().send_upload_data(
-            upload_collection, random_sha, random_token, upload_coverage=True, **named_upload_data
+            upload_collection,
+            random_sha,
+            random_token,
+            upload_coverage=True,
+            **named_upload_data,
         )
         assert sending_result.error is None
         assert sending_result.warnings == []

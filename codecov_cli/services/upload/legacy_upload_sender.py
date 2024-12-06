@@ -51,6 +51,8 @@ class LegacyUploadSender(object):
         ci_service: typing.Optional[str] = None,
         git_service: typing.Optional[str] = None,
         enterprise_url: typing.Optional[str] = None,
+        parent_sha: typing.Optional[str] = None,
+        upload_coverage: bool = False,
         args: dict = None,
     ) -> UploadSendingResult:
         params = {

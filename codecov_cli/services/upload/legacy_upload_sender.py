@@ -38,8 +38,6 @@ class LegacyUploadSender(object):
         commit_sha: str,
         token: str,
         env_vars: typing.Dict[str, str],
-        report_code: str = None,
-        upload_file_type: str = None,
         name: typing.Optional[str] = None,
         branch: typing.Optional[str] = None,
         slug: typing.Optional[str] = None,
@@ -49,11 +47,9 @@ class LegacyUploadSender(object):
         job_code: typing.Optional[str] = None,
         flags: typing.List[str] = None,
         ci_service: typing.Optional[str] = None,
-        git_service: typing.Optional[str] = None,
         enterprise_url: typing.Optional[str] = None,
-        parent_sha: typing.Optional[str] = None,
-        upload_coverage: bool = False,
         args: dict = None,
+        **kwargs,
     ) -> UploadSendingResult:
         params = {
             "package": f"codecov-cli/{codecov_cli_version}",

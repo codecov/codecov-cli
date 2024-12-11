@@ -65,7 +65,7 @@ def send_commit_data(
             f"Branch `{branch}` is protected but no token was provided\nFor information on Codecov upload tokens, see https://docs.codecov.com/docs/codecov-tokens"
         )
     else:
-        logger.info("Using token to create a commit for protected branch `{branch}`")
+        logger.info(f"Using token to create a commit for protected branch `{branch}`")
 
     headers = get_token_header(token)
 

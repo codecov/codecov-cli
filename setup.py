@@ -33,7 +33,7 @@ setup(
             "codecovcli = codecov_cli.main:run",
         ],
     },
-    python_requires=">=3.8",
+    python_requires=">=3.9",
     ext_modules=[
         Extension(
             "staticcodecov_languages",

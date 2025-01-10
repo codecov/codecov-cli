@@ -9,6 +9,7 @@ from fnmatch import fnmatch
 import click
 import sentry_sdk
 
+from codecov_cli.helpers.upload_type import ReportType
 from codecov_cli.services.upload.file_finder import FileFinder
 from codecov_cli.services.upload.network_finder import NetworkFinder
 from codecov_cli.types import (
@@ -149,7 +150,9 @@ class UploadCollector(object):
             path, fixed_lines_without_reason, fixed_lines_with_reason, eof
         )
 
-    def generate_upload_data(self, report_type="coverage") -> UploadCollectionResult:
+    def generate_upload_data(
+        self, report_type: ReportType = ReportType.COVERAGE
+    ) -> UploadCollectionResult:
         with sentry_sdk.start_span(name="upload_collector"):
             for prep in self.preparation_plugins:
                 logger.debug(f"Running preparation plugin: {type(prep)}")
@@ -158,9 +161,11 @@ class UploadCollector(object):
             with sentry_sdk.start_span(name="file_collector"):
                 network = self.network_finder.find_files()
                 report_files = self.file_finder.find_files()
-            logger.info(f"Found {len(report_files)} {report_type} files to report")
+            logger.info(
+                f"Found {len(report_files)} {report_type.value} files to report"
+            )
             if not report_files:
-                if report_type == "test_results":
+                if report_type == ReportType.TEST_RESULTS:
                     error_message = "No JUnit XML reports found. Please review our documentation (https://docs.codecov.com/docs/test-result-ingestion-beta) to generate and upload the file."
                 else:
                     error_message = "No coverage reports found. Please make sure you're generating reports successfully."

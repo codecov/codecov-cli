@@ -4,6 +4,7 @@ import typing
 from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
 from codecov_cli.helpers.versioning_systems import VersioningSystemInterface
 from codecov_cli.services.upload import do_upload_logic
+from codecov_cli.helpers.upload_type import ReportType
 
 
 def upload_coverage_logic(
@@ -44,7 +45,7 @@ def upload_coverage_logic(
     swift_project: typing.Optional[str],
     token: typing.Optional[str],
     use_legacy_uploader: bool,
-    upload_file_type: str = "coverage",
+    report_type: ReportType = ReportType.COVERAGE,
     args: dict = None,
 ):
     return do_upload_logic(
@@ -86,5 +87,5 @@ def upload_coverage_logic(
         swift_project=swift_project,
         token=token,
         use_legacy_uploader=use_legacy_uploader,
-        upload_file_type=upload_file_type,
+        report_type=report_type,
     )

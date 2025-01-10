@@ -11,13 +11,14 @@ from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.services.upload.upload_sender import UploadSender
 from codecov_cli.types import UploadCollectionResult, UploadCollectionResultFileFixer
 from tests.data import reports_examples
+from codecov_cli.helpers.upload_type import ReportType
 
 upload_collection = UploadCollectionResult(["1", "apple.py", "3"], [], [])
 random_token = "f359afb9-8a2a-42ab-a448-c3d267ff495b"
 random_sha = "845548c6b95223f12e8317a1820705f64beaf69e"
 named_upload_data = {
     "args": None,
-    "upload_file_type": "coverage",
+    "report_type": ReportType.COVERAGE,
     "report_code": "report_code",
     "env_vars": {},
     "name": "name",
@@ -32,7 +33,7 @@ named_upload_data = {
     "git_service": "github",
 }
 test_results_named_upload_data = {
-    "upload_file_type": "test_results",
+    "report_type": ReportType.TEST_RESULTS,
     "report_code": "report_code",
     "env_vars": {},
     "name": "name",

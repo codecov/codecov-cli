@@ -2,7 +2,6 @@ import logging
 import os
 import pathlib
 import typing
-
 import click
 import sentry_sdk
 
@@ -11,6 +10,7 @@ from codecov_cli.helpers.args import get_cli_args
 from codecov_cli.helpers.options import global_options
 from codecov_cli.services.upload import do_upload_logic
 from codecov_cli.types import CommandContext
+from codecov_cli.helpers.upload_type import report_type_from_str, ReportType
 
 logger = logging.getLogger("codecovcli")
 
@@ -167,6 +167,7 @@ _global_upload_options = [
     ),
     click.option(
         "--report-type",
+        "report_type_str",
         help="The type of the file to upload, coverage by default. Possible values are: testing, coverage.",
         default="coverage",
         type=click.Choice(["coverage", "test_results"]),
@@ -241,7 +242,7 @@ def do_upload(
     network_root_folder: pathlib.Path,
     plugin_names: typing.List[str],
     pull_request_number: typing.Optional[str],
-    report_type: str,
+    report_type_str: str,
     slug: typing.Optional[str],
     swift_project: typing.Optional[str],
     token: typing.Optional[str],
@@ -261,6 +262,8 @@ def do_upload(
                     extra_log_attributes=args,
                 ),
             )
+
+            report_type: ReportType = report_type_from_str(report_type_str)
             do_upload_logic(
                 cli_config,
                 versioning_system,
@@ -276,7 +279,9 @@ def do_upload(
                 env_vars=env_vars,
                 fail_on_error=fail_on_error,
                 files_search_exclude_folders=list(files_search_exclude_folders),
-                files_search_explicitly_listed_files=list(files_search_explicitly_listed_files),
+                files_search_explicitly_listed_files=list(
+                    files_search_explicitly_listed_files
+                ),
                 files_search_root_folder=files_search_root_folder,
                 flags=flags,
                 gcov_args=gcov_args,
@@ -296,7 +301,7 @@ def do_upload(
                 slug=slug,
                 swift_project=swift_project,
                 token=token,
-                upload_file_type=report_type,
+                report_type=report_type,
                 use_legacy_uploader=use_legacy_uploader,
                 args=args,
             )

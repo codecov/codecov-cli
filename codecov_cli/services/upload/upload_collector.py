@@ -29,12 +29,14 @@ class UploadCollector(object):
         preparation_plugins: typing.List[PreparationPluginInterface],
         network_finder: NetworkFinder,
         file_finder: FileFinder,
+        plugin_config: dict,
         disable_file_fixes: bool = False,
     ):
         self.preparation_plugins = preparation_plugins
         self.network_finder = network_finder
         self.file_finder = file_finder
         self.disable_file_fixes = disable_file_fixes
+        self.plugin_config = plugin_config
 
     def _produce_file_fixes(
         self, files: typing.List[str]
@@ -139,7 +141,7 @@ class UploadCollector(object):
                     reason=err.reason,
                 ),
             )
-        except IsADirectoryError as err:
+        except IsADirectoryError:
             logger.info(f"Skipping {filename}, found a directory not a file")
 
         return UploadCollectionResultFileFixer(

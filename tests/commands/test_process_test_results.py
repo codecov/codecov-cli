@@ -1,4 +1,4 @@
-import logging
+import json
 import os
 
 from click.testing import CliRunner
@@ -11,18 +11,16 @@ def test_process_test_results(
     mocker,
     tmpdir,
 ):
-
-    tmp_file = tmpdir.mkdir("folder").join("summary.txt")
+    _ = tmpdir.mkdir("folder").join("summary.txt")
 
     mocker.patch.dict(
         os.environ,
         {
             "GITHUB_REPOSITORY": "fake/repo",
             "GITHUB_REF": "pull/fake/pull",
-            "GITHUB_STEP_SUMMARY": tmp_file.dirname + tmp_file.basename,
         },
     )
-    mocked_post = mocker.patch(
+    _ = mocker.patch(
         "codecov_cli.commands.process_test_results.send_post_request",
         return_value=RequestResult(
             status_code=200, error=None, warnings=[], text="yay it worked"
@@ -33,8 +31,6 @@ def test_process_test_results(
         cli,
         [
             "process-test-results",
-            "--provider-token",
-            "whatever",
             "--file",
             "samples/junit.xml",
             "--disable-search",
@@ -43,33 +39,29 @@ def test_process_test_results(
     )
 
     assert result.exit_code == 0
+    # Ensure that there's an output
+    assert result.output
 
 
-    mocked_post.assert_called_with(
-        url="https://api.github.com/repos/fake/repo/issues/pull/comments",
-        data={
-            "body": "### :x: Failed Test Results: \nCompleted 4 tests with **`1 failed`**, 3 passed and 0 skipped.\n<details><summary>View the full list of failed tests</summary>\n\n| **Test Description** | **Failure message** |\n| :-- | :-- |\n| <pre>Testsuite:<br>api.temp.calculator.test_calculator::test_divide<br><br>Test name:<br>pytest<br></pre> | <pre>def<br>                test_divide():<br>                &amp;gt; assert Calculator.divide(1, 2) == 0.5<br>                E assert 1.0 == 0.5<br>                E + where 1.0 = &amp;lt;function Calculator.divide at 0x104c9eb90&amp;gt;(1, 2)<br>                E + where &amp;lt;function Calculator.divide at 0x104c9eb90&amp;gt; = Calculator.divide<br>                .../temp/calculator/test_calculator.py:30: AssertionError</pre> |"
-        },
-        headers={
-            "Accept": "application/vnd.github+json",
-            "Authorization": "Bearer whatever",
-            "X-GitHub-Api-Version": "2022-11-28",
-        },
-    )
-
-
-
-def test_process_test_results_non_existent_file(mocker, tmpdir):
-    tmp_file = tmpdir.mkdir("folder").join("summary.txt")
+def test_process_test_results_create_github_message(
+    mocker,
+    tmpdir,
+):
+    _ = tmpdir.mkdir("folder").join("summary.txt")
 
     mocker.patch.dict(
         os.environ,
         {
             "GITHUB_REPOSITORY": "fake/repo",
-            "GITHUB_REF": "pull/fake/pull",
-            "GITHUB_STEP_SUMMARY": tmp_file.dirname + tmp_file.basename,
+            "GITHUB_REF": "pull/fake/123",
         },
     )
+
+    mocker.patch(
+        "codecov_cli.commands.process_test_results.send_get_request",
+        return_value=RequestResult(status_code=200, error=None, warnings=[], text="[]"),
+    )
+
     mocked_post = mocker.patch(
         "codecov_cli.commands.process_test_results.send_post_request",
         return_value=RequestResult(
@@ -81,8 +73,160 @@ def test_process_test_results_non_existent_file(mocker, tmpdir):
         cli,
         [
             "process-test-results",
-            "--provider-token",
-            "whatever",
+            "--github-token",
+            "fake-token",
+            "--file",
+            "samples/junit.xml",
+            "--disable-search",
+        ],
+        obj={},
+    )
+
+    assert result.exit_code == 0
+    assert (
+        mocked_post.call_args.kwargs["url"]
+        == "https://api.github.com/repos/fake/repo/issues/123/comments"
+    )
+
+
+def test_process_test_results_update_github_message(
+    mocker,
+    tmpdir,
+):
+    _ = tmpdir.mkdir("folder").join("summary.txt")
+
+    mocker.patch.dict(
+        os.environ,
+        {
+            "GITHUB_REPOSITORY": "fake/repo",
+            "GITHUB_REF": "pull/fake/123",
+        },
+    )
+
+    github_fake_comments1 = [
+        {"id": 54321, "user": {"login": "fake"}, "body": "some text"},
+    ]
+    github_fake_comments2 = [
+        {
+            "id": 12345,
+            "user": {"login": "github-actions[bot]"},
+            "body": "<!-- Codecov --> and some other fake body",
+        },
+    ]
+
+    mocker.patch(
+        "codecov_cli.commands.process_test_results.send_get_request",
+        side_effect=[
+            RequestResult(
+                status_code=200,
+                error=None,
+                warnings=[],
+                text=json.dumps(github_fake_comments1),
+            ),
+            RequestResult(
+                status_code=200,
+                error=None,
+                warnings=[],
+                text=json.dumps(github_fake_comments2),
+            ),
+        ],
+    )
+
+    mocked_post = mocker.patch(
+        "codecov_cli.commands.process_test_results.send_post_request",
+        return_value=RequestResult(
+            status_code=200, error=None, warnings=[], text="yay it worked"
+        ),
+    )
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "process-test-results",
+            "--github-token",
+            "fake-token",
+            "--file",
+            "samples/junit.xml",
+            "--disable-search",
+        ],
+        obj={},
+    )
+
+    assert result.exit_code == 0
+    assert (
+        mocked_post.call_args.kwargs["url"]
+        == "https://api.github.com/repos/fake/repo/issues/comments/12345"
+    )
+
+
+def test_process_test_results_errors_getting_comments(
+    mocker,
+    tmpdir,
+):
+    _ = tmpdir.mkdir("folder").join("summary.txt")
+
+    mocker.patch.dict(
+        os.environ,
+        {
+            "GITHUB_REPOSITORY": "fake/repo",
+            "GITHUB_REF": "pull/fake/123",
+        },
+    )
+
+    mocker.patch(
+        "codecov_cli.commands.process_test_results.send_get_request",
+        return_value=RequestResult(
+            status_code=400,
+            error=None,
+            warnings=[],
+            text="",
+        ),
+    )
+
+    _ = mocker.patch(
+        "codecov_cli.commands.process_test_results.send_post_request",
+        return_value=RequestResult(
+            status_code=200, error=None, warnings=[], text="yay it worked"
+        ),
+    )
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "process-test-results",
+            "--github-token",
+            "fake-token",
+            "--file",
+            "samples/junit.xml",
+            "--disable-search",
+        ],
+        obj={},
+    )
+
+    assert result.exit_code == 1
+
+
+def test_process_test_results_non_existent_file(mocker, tmpdir):
+    _ = tmpdir.mkdir("folder").join("summary.txt")
+
+    mocker.patch.dict(
+        os.environ,
+        {
+            "GITHUB_REPOSITORY": "fake/repo",
+            "GITHUB_REF": "pull/fake/pull",
+        },
+    )
+    _ = mocker.patch(
+        "codecov_cli.commands.process_test_results.send_post_request",
+        return_value=RequestResult(
+            status_code=200, error=None, warnings=[], text="yay it worked"
+        ),
+    )
+    runner = CliRunner()
+    result = runner.invoke(
+        cli,
+        [
+            "process-test-results",
             "--file",
             "samples/fake.xml",
             "--disable-search",
@@ -93,25 +237,24 @@ def test_process_test_results_non_existent_file(mocker, tmpdir):
     assert result.exit_code == 1
     expected_logs = [
         "ci service found",
-        'Some files were not found',
+        "Some files were not found",
     ]
     for log in expected_logs:
         assert log in result.output
 
 
 def test_process_test_results_missing_repo(mocker, tmpdir):
-    tmp_file = tmpdir.mkdir("folder").join("summary.txt")
+    _ = tmpdir.mkdir("folder").join("summary.txt")
 
     mocker.patch.dict(
         os.environ,
         {
             "GITHUB_REF": "pull/fake/pull",
-            "GITHUB_STEP_SUMMARY": tmp_file.dirname + tmp_file.basename,
         },
     )
     if "GITHUB_REPOSITORY" in os.environ:
         del os.environ["GITHUB_REPOSITORY"]
-    mocked_post = mocker.patch(
+    _ = mocker.patch(
         "codecov_cli.commands.process_test_results.send_post_request",
         return_value=RequestResult(
             status_code=200, error=None, warnings=[], text="yay it worked"
@@ -122,7 +265,7 @@ def test_process_test_results_missing_repo(mocker, tmpdir):
         cli,
         [
             "process-test-results",
-            "--provider-token",
+            "--github-token",
             "whatever",
             "--file",
             "samples/junit.xml",
@@ -141,19 +284,18 @@ def test_process_test_results_missing_repo(mocker, tmpdir):
 
 
 def test_process_test_results_missing_ref(mocker, tmpdir):
-    tmp_file = tmpdir.mkdir("folder").join("summary.txt")
+    _ = tmpdir.mkdir("folder").join("summary.txt")
 
     mocker.patch.dict(
         os.environ,
         {
             "GITHUB_REPOSITORY": "fake/repo",
-            "GITHUB_STEP_SUMMARY": tmp_file.dirname + tmp_file.basename,
         },
     )
 
     if "GITHUB_REF" in os.environ:
         del os.environ["GITHUB_REF"]
-    mocked_post = mocker.patch(
+    _ = mocker.patch(
         "codecov_cli.commands.process_test_results.send_post_request",
         return_value=RequestResult(
             status_code=200, error=None, warnings=[], text="yay it worked"
@@ -164,7 +306,7 @@ def test_process_test_results_missing_ref(mocker, tmpdir):
         cli,
         [
             "process-test-results",
-            "--provider-token",
+            "--github-token",
             "whatever",
             "--file",
             "samples/junit.xml",
@@ -177,48 +319,6 @@ def test_process_test_results_missing_ref(mocker, tmpdir):
     expected_logs = [
         "ci service found",
         "Error: Error getting PR number from environment. Can't find GITHUB_REF environment variable.",
-    ]
-    for log in expected_logs:
-        assert log in result.output
-
-
-
-def test_process_test_results_missing_step_summary(mocker, tmpdir):
-    tmp_file = tmpdir.mkdir("folder").join("summary.txt")
-
-    mocker.patch.dict(
-        os.environ,
-        {
-            "GITHUB_REPOSITORY": "fake/repo",
-            "GITHUB_REF": "pull/fake/pull",
-        },
-    )
-    if "GITHUB_STEP_SUMMARY" in os.environ:
-        del os.environ["GITHUB_STEP_SUMMARY"]
-    mocked_post = mocker.patch(
-        "codecov_cli.commands.process_test_results.send_post_request",
-        return_value=RequestResult(
-            status_code=200, error=None, warnings=[], text="yay it worked"
-        ),
-    )
-    runner = CliRunner()
-    result = runner.invoke(
-        cli,
-        [
-            "process-test-results",
-            "--provider-token",
-            "whatever",
-            "--file",
-            "samples/junit.xml",
-            "--disable-search",
-        ],
-        obj={},
-    )
-
-    assert result.exit_code == 1
-    expected_logs = [
-        "ci service found",
-        "Error: Error getting step summary file path from environment. Can't find GITHUB_STEP_SUMMARY environment variable.",
     ]
     for log in expected_logs:
         assert log in result.output

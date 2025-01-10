@@ -1,30 +1,16 @@
-import logging
 import pathlib
 import typing
 
-import click
-
-from codecov_cli.commands.commit import create_commit
-from codecov_cli.commands.report import create_report
-from codecov_cli.commands.upload import do_upload, global_upload_options
-from codecov_cli.helpers.args import get_cli_args
-from codecov_cli.helpers.options import global_options
-from codecov_cli.types import CommandContext
-
-logger = logging.getLogger("codecovcli")
+from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
+from codecov_cli.helpers.versioning_systems import VersioningSystemInterface
+from codecov_cli.services.upload import do_upload_logic
 
 
-# These options are the combined options of commit, report and upload commands
-@click.command()
-@global_options
-@global_upload_options
-@click.option(
-    "--parent-sha",
-    help="SHA (with 40 chars) of what should be the parent of this commit",
-)
-@click.pass_context
-def upload_process(
-    ctx: CommandContext,
+def upload_coverage_logic(
+    cli_config: typing.Dict,
+    versioning_system: VersioningSystemInterface,
+    ci_adapter: CIAdapterBase,
+    *,
     branch: typing.Optional[str],
     build_code: typing.Optional[str],
     build_url: typing.Optional[str],
@@ -32,6 +18,7 @@ def upload_process(
     disable_file_fixes: bool,
     disable_search: bool,
     dry_run: bool,
+    enterprise_url: typing.Optional[str],
     env_vars: typing.Dict[str, str],
     fail_on_error: bool,
     files_search_exclude_folders: typing.List[pathlib.Path],
@@ -53,43 +40,19 @@ def upload_process(
     plugin_names: typing.List[str],
     pull_request_number: typing.Optional[str],
     report_code: str,
-    report_type: str,
     slug: typing.Optional[str],
     swift_project: typing.Optional[str],
     token: typing.Optional[str],
     use_legacy_uploader: bool,
+    upload_file_type: str = "coverage",
+    args: dict = None,
 ):
-    args = get_cli_args(ctx)
-    logger.debug(
-        "Starting upload process",
-        extra=dict(
-            extra_log_attributes=args,
-        ),
-    )
-
-    ctx.invoke(
-        create_commit,
-        commit_sha=commit_sha,
-        parent_sha=parent_sha,
-        pull_request_number=pull_request_number,
-        branch=branch,
-        slug=slug,
-        token=token,
-        git_service=git_service,
-        fail_on_error=True,
-    )
-    if report_type == "coverage":
-        ctx.invoke(
-            create_report,
-            token=token,
-            code=report_code,
-            fail_on_error=True,
-            commit_sha=commit_sha,
-            slug=slug,
-            git_service=git_service,
-        )
-    ctx.invoke(
-        do_upload,
+    return do_upload_logic(
+        cli_config=cli_config,
+        versioning_system=versioning_system,
+        ci_adapter=ci_adapter,
+        upload_coverage=True,
+        args=args,
         branch=branch,
         build_code=build_code,
         build_url=build_url,
@@ -97,6 +60,7 @@ def upload_process(
         disable_file_fixes=disable_file_fixes,
         disable_search=disable_search,
         dry_run=dry_run,
+        enterprise_url=enterprise_url,
         env_vars=env_vars,
         fail_on_error=fail_on_error,
         files_search_exclude_folders=files_search_exclude_folders,
@@ -114,12 +78,13 @@ def upload_process(
         network_filter=network_filter,
         network_prefix=network_prefix,
         network_root_folder=network_root_folder,
+        parent_sha=parent_sha,
         plugin_names=plugin_names,
         pull_request_number=pull_request_number,
         report_code=report_code,
-        report_type=report_type,
         slug=slug,
         swift_project=swift_project,
         token=token,
         use_legacy_uploader=use_legacy_uploader,
+        upload_file_type=upload_file_type,
     )

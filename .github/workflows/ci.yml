@@ -16,16 +16,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
-      - name: Install dependencies
+      - name: Check linting with ruff
         run: |
-          python -m pip install --upgrade pip
-          pip install black==22.3.0 isort==5.10.1
-      - name: Check linting with black
-        run: |
-          black --check codecov_cli
-      - name: Check imports order with isort
-        run: |
-          isort --check --profile=black codecov_cli -p staticcodecov_languages
+          make lint
+
 
   codecov-startup:
     runs-on: ubuntu-latest
@@ -76,12 +70,18 @@ jobs:
         pip install -r tests/requirements.txt
     - name: Test with pytest
       run: |
-        pytest --cov --junitxml=junit.xml
+        pytest --cov --junitxml=${{matrix.python-version}}junit.xml
     - name: Dogfooding codecov-cli
       if: ${{ !github.event.pull_request.head.repo.fork && github.repository_owner == 'codecov' }}
       run: |
         codecovcli -v do-upload --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
         codecovcli do-upload --report-type test_results --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
+    - name: Upload artifacts for test-results-processing
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{matrix.python-version}}junit.xml
+        path: ${{matrix.python-version}}junit.xml
 
   static-analysis:
     runs-on: ubuntu-latest
@@ -118,10 +118,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Install CLI
+      - name: Install dependencies for Dogfooding
         run: |
-          pip install -r requirements.txt -r tests/requirements.txt
-          pip install codecov-cli
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python -m pip install -e .
+          pip install -r tests/requirements.txt
       - name: Label Analysis
         run: |
           BASE_SHA=$(git merge-base HEAD^ origin/main)
@@ -131,38 +133,32 @@ jobs:
         run: |
           codecovcli --codecov-yml-path=codecov.yml do-upload --plugin pycoverage --plugin compress-pycoverage --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --flag smart-labels
 
-  test-process-test-results-cmd:
+  process-test-results:
+    if: ${{ always() }}
+    needs: build-test-upload
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - python-version: "3.12"
-          - python-version: "3.11"
-          - python-version: "3.10"
-          - python-version: "3.9"
-          - python-version: "3.8"
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
-        fetch-depth: 2
-    - name: Set up Python ${{matrix.python-version}}
-      uses: actions/setup-python@v5
-      with:
-        python-version: "${{matrix.python-version}}"
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        python -m pip install -e .
-        pip install -r tests/requirements.txt
-    - name: Test with pytest
-      run: |
-        pytest --cov --junitxml=junit.xml
-    - name: Dogfooding codecov-cli
-      if: ${{ !cancelled() }}
-      run: |
-        codecovcli process-test-results --provider-token ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies for Dogfooding
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python -m pip install -e .
+          pip install -r tests/requirements.txt
+      - name: Download all test results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "*junit.xml"
+          path: "test_results"
+          merge-multiple: true
+
+      - name: Dogfooding codecov-cli
+        if: ${{ !cancelled() && github.ref && contains(github.ref, 'pull') }}
+        run: |
+          codecovcli process-test-results --dir test_results --github-token ${{ secrets.GITHUB_TOKEN }}

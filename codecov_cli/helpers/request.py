@@ -1,3 +1,4 @@
+import json
 import logging
 from sys import exit
 from time import sleep
@@ -51,8 +52,7 @@ def backoff_time(curr_retry):
     return 2 ** (curr_retry - 1)
 
 
-class RetryException(Exception):
-    ...
+class RetryException(Exception): ...
 
 
 def retry_request(func):
@@ -72,7 +72,7 @@ def retry_request(func):
                 requests.exceptions.ConnectionError,
                 requests.exceptions.Timeout,
                 RetryException,
-            ) as exp:
+            ):
                 logger.warning(
                     "Request failed. Retrying",
                     extra=dict(extra_log_attributes=dict(retry=retry)),
@@ -94,7 +94,17 @@ def send_post_request(
     return request_result(post(url=url, data=data, headers=headers, params=params))
 
 
-def get_token_header_or_fail(token: str) -> dict:
+@retry_request
+def send_get_request(
+    url: str, headers: dict = None, params: dict = None
+) -> RequestResult:
+    return request_result(get(url=url, headers=headers, params=params))
+
+
+def get_token_header_or_fail(token: Optional[str]) -> dict:
+    """
+    Rejects requests with no Authorization token. Prevents tokenless uploads.
+    """
     if token is None:
         raise click.ClickException(
             "Codecov token not found. Please provide Codecov token with -t flag."
@@ -102,7 +112,10 @@ def get_token_header_or_fail(token: str) -> dict:
     return {"Authorization": f"token {token}"}
 
 
-def get_token_header(token: str) -> Optional[dict]:
+def get_token_header(token: Optional[str]) -> Optional[dict]:
+    """
+    Allows requests with no Authorization token.
+    """
     if token is None:
         return None
     return {"Authorization": f"token {token}"}
@@ -117,7 +130,7 @@ def send_put_request(
     return request_result(put(url=url, data=data, headers=headers))
 
 
-def request_result(resp):
+def request_result(resp: requests.Response) -> RequestResult:
     if resp.status_code >= 400:
         return RequestResult(
             status_code=resp.status_code,
@@ -143,7 +156,9 @@ def log_warnings_and_errors_if_any(
     )
     logger.debug(
         f"{process_desc} result",
-        extra=dict(extra_log_attributes=dict(result=sending_result)),
+        extra=dict(
+            extra_log_attributes=dict(result=_sanitize_request_result(sending_result))
+        ),
     )
     if sending_result.warnings:
         number_warnings = len(sending_result.warnings)
@@ -157,3 +172,27 @@ def log_warnings_and_errors_if_any(
         logger.error(f"{process_desc} failed: {sending_result.error.description}")
         if fail_on_error:
             exit(1)
+
+
+def _sanitize_request_result(result: RequestResult):
+    if not hasattr(result, "text"):
+        return result
+
+    try:
+        text_as_dict = json.loads(result.text)
+        token = text_as_dict.get("repository").get("yaml").get("codecov").get("token")
+        if token:
+            sanitized_token = str(token)[:1] + 18 * "*"
+            text_as_dict["repository"]["yaml"]["codecov"]["token"] = sanitized_token
+            sanitized_text = json.dumps(text_as_dict)
+
+            return RequestResult(
+                status_code=result.status_code,
+                error=result.error,
+                warnings=result.warnings,
+                text=sanitized_text,
+            )
+    except (AttributeError, json.JSONDecodeError):
+        pass
+
+    return result

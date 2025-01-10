@@ -2,10 +2,10 @@ import logging
 import os
 import typing
 
-from codecov_cli.helpers.config import CODECOV_API_URL
-from codecov_cli.helpers.encoder import decode_slug, encode_slug
+from codecov_cli.helpers.config import CODECOV_INGEST_URL
+from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.helpers.request import (
-    get_token_header_or_fail,
+    get_token_header,
     log_warnings_and_errors_if_any,
     send_post_request,
 )
@@ -19,10 +19,11 @@ def create_commit_logic(
     pr: typing.Optional[str],
     branch: typing.Optional[str],
     slug: typing.Optional[str],
-    token: str,
+    token: typing.Optional[str],
     service: typing.Optional[str],
     enterprise_url: typing.Optional[str] = None,
     fail_on_error: bool = False,
+    args: dict = None,
 ):
     encoded_slug = encode_slug(slug)
     sending_result = send_commit_data(
@@ -34,6 +35,7 @@ def create_commit_logic(
         token=token,
         service=service,
         enterprise_url=enterprise_url,
+        args=args,
     )
 
     log_warnings_and_errors_if_any(sending_result, "Commit creating", fail_on_error)
@@ -41,25 +43,44 @@ def create_commit_logic(
 
 
 def send_commit_data(
-    commit_sha, parent_sha, pr, branch, slug, token, service, enterprise_url
+    commit_sha,
+    parent_sha,
+    pr,
+    branch,
+    slug,
+    token,
+    service,
+    enterprise_url,
+    args,
 ):
-    # this is how the CLI receives the username of the user to whom the fork belongs
-    # to and the branch name from the action
-    tokenless = os.environ.get("TOKENLESS")
-    if tokenless:
-        headers = None  # type: ignore
-        branch = tokenless  # type: ignore
-        logger.info("The PR is happening in a forked repo. Using tokenless upload.")
+    # Old versions of the GHA use this env var instead of the regular branch
+    # argument to provide an unprotected branch name
+    if tokenless := os.environ.get("TOKENLESS"):
+        branch = tokenless
+
+    if branch and ":" in branch:
+        logger.info(f"Creating a commit for an unprotected branch: {branch}")
+    elif token is None:
+        logger.warning(
+            f"Branch `{branch}` is protected but no token was provided\nFor information on Codecov upload tokens, see https://docs.codecov.com/docs/codecov-tokens"
+        )
     else:
-        headers = get_token_header_or_fail(token)
+        logger.info(f"Using token to create a commit for protected branch `{branch}`")
+
+    headers = get_token_header(token)
 
     data = {
+        "branch": branch,
+        "cli_args": args,
         "commitid": commit_sha,
         "parent_commit_id": parent_sha,
         "pullid": pr,
-        "branch": branch,
     }
 
-    upload_url = enterprise_url or CODECOV_API_URL
+    upload_url = enterprise_url or CODECOV_INGEST_URL
     url = f"{upload_url}/upload/{service}/{slug}/commits"
-    return send_post_request(url=url, data=data, headers=headers)
+    return send_post_request(
+        url=url,
+        data=data,
+        headers=headers,
+    )

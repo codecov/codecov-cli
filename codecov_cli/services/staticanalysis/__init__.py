@@ -33,6 +33,7 @@ async def run_analysis_entrypoint(
     should_force: bool,
     folders_to_exclude: typing.List[Path],
     enterprise_url: typing.Optional[str],
+    args: dict,
 ):
     ff = select_file_finder(config)
     files = list(ff.find_files(folder, pattern, folders_to_exclude))
@@ -110,7 +111,7 @@ async def run_analysis_entrypoint(
         failed_uploads = []
         with click.progressbar(
             length=len(files_that_need_upload),
-            label=f"Upload info to storage",
+            label="Upload info to storage",
         ) as bar:
             # It's better to have less files competing over CPU time when uploading
             # Especially if we might have large files

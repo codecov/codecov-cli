@@ -15,13 +15,13 @@ def test_load_config(mocker):
 def test_load_config_doesnt_exist(mocker):
     path = pathlib.Path("doesnt/exist")
     result = load_cli_config(path)
-    assert result == None
+    assert result is None
 
 
 def test_load_config_not_file(mocker):
     path = pathlib.Path("samples/")
     result = load_cli_config(path)
-    assert result == None
+    assert result is None
 
 
 def test_find_codecov_yaml(mocker):

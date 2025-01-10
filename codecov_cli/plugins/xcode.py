@@ -7,10 +7,13 @@ import subprocess
 import typing
 from fnmatch import translate
 
+from opentelemetry import trace
+
 from codecov_cli.helpers.folder_searcher import globs_to_regex, search_files
 from codecov_cli.plugins.types import PreparationPluginReturn
 
 logger = logging.getLogger("codecovcli")
+tracer = trace.get_tracer(__name__)
 
 
 class XcodePlugin(object):
@@ -28,6 +31,7 @@ class XcodePlugin(object):
         # if empty the plugin will build reports for every xcode project it finds
         self.app_name = app_name or ""
 
+    @tracer.start_as_current_span("xcode")
     def run_preparation(self, collector) -> PreparationPluginReturn:
         logger.debug("Running xcode plugin...")
 

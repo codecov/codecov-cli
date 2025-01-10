@@ -172,7 +172,7 @@ class PytestStandardRunner(LabelAnalysisRunnerInterface):
         logger.info(
             "Running tests. (run in verbose mode to get list of tests executed)"
         )
-        logger.info(f"  pytest options: \"{' '.join(default_options)}\"")
+        logger.info(f'  pytest options: "{" ".join(default_options)}"')
         logger.info(f"  executed tests: {len(tests_to_run)}")
         logger.debug(
             "List of tests executed",
@@ -180,5 +180,5 @@ class PytestStandardRunner(LabelAnalysisRunnerInterface):
         )
         output = self._execute_pytest(command_array, capture_output=False)
         logger.info(f"Finished running {len(tests_to_run)} tests successfully")
-        logger.info(f"  pytest options: \"{' '.join(default_options)}\"")
+        logger.info(f'  pytest options: "{" ".join(default_options)}"')
         logger.debug(output)

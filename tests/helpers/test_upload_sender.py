@@ -2,6 +2,7 @@ import json
 import re
 from pathlib import Path
 
+from copy import deepcopy
 import pytest
 import responses
 from responses import matchers
@@ -9,7 +10,11 @@ from responses import matchers
 from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.services.upload.upload_sender import UploadSender
-from codecov_cli.types import UploadCollectionResult, UploadCollectionResultFileFixer
+from codecov_cli.types import (
+    UploadCollectionResult,
+    UploadCollectionResultFileFixer,
+    UploadCollectionResultFile,
+)
 from tests.data import reports_examples
 from codecov_cli.helpers.upload_type import ReportType
 
@@ -56,6 +61,7 @@ request_data = {
     "job_code": "job_code",
     "name": "name",
     "version": codecov_cli_version,
+    "file_not_found": False,
 }
 
 
@@ -106,6 +112,18 @@ def mocked_test_results_endpoint(mocked_responses):
         json={
             "raw_upload_location": "https://puturl.com",
         },
+    )
+    mocked_responses.add(resp)
+    yield resp
+
+
+@pytest.fixture
+def mocked_test_results_endpoint_file_not_found(mocked_responses):
+    resp = responses.Response(
+        responses.POST,
+        "https://ingest.codecov.io/upload/test_results/v1",
+        status=200,
+        json={},
     )
     mocked_responses.add(resp)
     yield resp
@@ -240,7 +258,11 @@ class TestUploadSender(object):
         )  # test dict is a subset of the other
 
     def test_upload_sender_post_called_with_right_parameters_test_results(
-        self, mocked_responses, mocked_test_results_endpoint, mocked_storage_server
+        self,
+        mocked_responses,
+        mocked_test_results_endpoint,
+        mocked_storage_server,
+        tmp_path,
     ):
         headers = {"Authorization": f"token {random_token}"}
 
@@ -249,8 +271,15 @@ class TestUploadSender(object):
             matchers.header_matcher(headers),
         ]
 
+        ta_upload_collection = deepcopy(upload_collection)
+
+        test_path = tmp_path / "test_results.xml"
+        test_path.write_bytes(b"test_data")
+
+        ta_upload_collection.files = [UploadCollectionResultFile(test_path)]
+
         sending_result = UploadSender().send_upload_data(
-            upload_collection,
+            ta_upload_collection,
             random_sha,
             random_token,
             **test_results_named_upload_data,
@@ -271,6 +300,41 @@ class TestUploadSender(object):
         put_req_made = mocked_responses.calls[1].request
         assert put_req_made.url == "https://puturl.com/"
         assert "test_results_files" in put_req_made.body.decode("utf-8")
+
+    def test_upload_sender_post_called_with_right_parameters_test_results_file_not_found(
+        self,
+        mocked_responses,
+        mocked_test_results_endpoint_file_not_found,
+        tmp_path,
+    ):
+        headers = {"Authorization": f"token {random_token}"}
+
+        req_data = deepcopy(request_data)
+        req_data["file_not_found"] = True
+
+        mocked_legacy_upload_endpoint.match = [
+            matchers.json_params_matcher(req_data),
+            matchers.header_matcher(headers),
+        ]
+
+        sending_result = UploadSender().send_upload_data(
+            upload_collection,
+            random_sha,
+            random_token,
+            **test_results_named_upload_data,
+        )
+        assert sending_result.error is None
+        assert sending_result.warnings == []
+
+        assert len(mocked_responses.calls) == 1
+
+        post_req_made = mocked_responses.calls[0].request
+        response = json.loads(mocked_responses.calls[0].response.text)
+        assert response.get("raw_upload_location") is None
+        assert post_req_made.url == "https://ingest.codecov.io/upload/test_results/v1"
+        assert (
+            post_req_made.headers.items() >= headers.items()
+        )  # test dict is a subset of the other
 
     def test_upload_sender_post_called_with_right_parameters_tokenless(
         self,

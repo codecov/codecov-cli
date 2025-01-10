@@ -56,6 +56,10 @@ class UploadSender(object):
 
         with sentry_sdk.start_span(name="upload_sender"):
             with sentry_sdk.start_span(name="upload_sender_preparation"):
+                file_not_found = False
+                if report_type == ReportType.TEST_RESULTS and not upload_data.files:
+                    file_not_found = True
+
                 data = {
                     "ci_service": ci_service,
                     "ci_url": build_url,
@@ -65,7 +69,9 @@ class UploadSender(object):
                     "job_code": job_code,
                     "name": name,
                     "version": codecov_cli_version,
+                    "file_not_found": file_not_found,
                 }
+
                 if upload_coverage:
                     data["branch"] = branch
                     data["code"] = report_code
@@ -98,6 +104,13 @@ class UploadSender(object):
                     data=data,
                     headers=headers,
                 )
+
+                if file_not_found:
+                    logger.info(
+                        "No test results reports found. Triggering notifications without uploading."
+                    )
+                    return resp_from_codecov
+
                 if resp_from_codecov.status_code >= 400:
                     return resp_from_codecov
                 resp_json_obj = json.loads(resp_from_codecov.text)
@@ -200,6 +213,7 @@ class UploadSender(object):
         commit_sha,
         report_code,
         upload_coverage=False,
+        file_not_found=False,
     ):
         if report_type == ReportType.COVERAGE:
             base_url = f"{upload_url}/upload/{git_service}/{encoded_slug}"
@@ -212,6 +226,7 @@ class UploadSender(object):
             data["branch"] = branch
             data["commit"] = commit_sha
             data["service"] = git_service
+            data["file_not_found"] = file_not_found
             url = f"{upload_url}/upload/test_results/v1"
 
         return url, data

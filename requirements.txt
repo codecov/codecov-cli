@@ -78,7 +78,7 @@ urllib3==2.0.6
     #   requests
     #   responses
     #   sentry-sdk
-wrapt==1.16.0
+wrapt==1.17.1
     # via
     #   codecov-cli (setup.py)
     #   deprecated

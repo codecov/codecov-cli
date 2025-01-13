@@ -27,7 +27,7 @@ setup(
         "test-results-parser==0.5.*",
         "regex",
         "sentry-sdk[opentelemetry]",
-        "wrapt==1.16.*",
+        "wrapt>=1.17.1",
     ],
     entry_points={
         "console_scripts": [

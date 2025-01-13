@@ -1,3 +1,5 @@
+---
+# yamllint disable rule:line-length
 # This workflow will install Python dependencies, run tests and lint with a variety of Python versions
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
@@ -20,6 +22,25 @@ jobs:
         run: |
           make lint
 
+  click-man:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python -m pip install -e .
+          pip install -r tests/requirements.txt
+      - name: Click-man
+        run: |
+          click-man codecovcli
 
   codecov-startup:
     runs-on: ubuntu-latest
@@ -54,34 +75,34 @@ jobs:
           - python-version: "3.10"
           - python-version: "3.9"
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
-        fetch-depth: 2
-    - name: Set up Python ${{matrix.python-version}}
-      uses: actions/setup-python@v5
-      with:
-        python-version: "${{matrix.python-version}}"
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        python -m pip install -e .
-        pip install -r tests/requirements.txt
-    - name: Test with pytest
-      run: |
-        pytest --cov --junitxml=${{matrix.python-version}}junit.xml
-    - name: Dogfooding codecov-cli
-      if: ${{ !github.event.pull_request.head.repo.fork && github.repository_owner == 'codecov' }}
-      run: |
-        codecovcli -v do-upload --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
-        codecovcli do-upload --report-type test_results --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
-    - name: Upload artifacts for test-results-processing
-      if: ${{ !cancelled() }}
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{matrix.python-version}}junit.xml
-        path: ${{matrix.python-version}}junit.xml
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 2
+      - name: Set up Python ${{matrix.python-version}}
+        uses: actions/setup-python@v5
+        with:
+          python-version: "${{matrix.python-version}}"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python -m pip install -e .
+          pip install -r tests/requirements.txt
+      - name: Test with pytest
+        run: |
+          pytest --cov --junitxml=${{matrix.python-version}}junit.xml
+      - name: Dogfooding codecov-cli
+        if: ${{ !github.event.pull_request.head.repo.fork && github.repository_owner == 'codecov' }}
+        run: |
+          codecovcli -v do-upload --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
+          codecovcli do-upload --report-type test_results --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
+      - name: Upload artifacts for test-results-processing
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{matrix.python-version}}junit.xml
+          path: ${{matrix.python-version}}junit.xml
 
   static-analysis:
     runs-on: ubuntu-latest

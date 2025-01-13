@@ -22,7 +22,7 @@ jobs:
         run: |
           make lint
 
-  click-man:
+  detect-command-change:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -37,10 +37,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           python -m pip install -e .
-          pip install -r tests/requirements.txt
-      - name: Click-man
+      - name: Run command_dump
         run: |
-          click-man codecovcli
+          python command_dump.py
+      - name: Detect changes
+        run: |
+          if [ -n "$(git diff --raw)" ]; then
+            echo "Please run `python command_dump.py` before submitting, or install the hooks"
+            exit 1
+          fi
 
   codecov-startup:
     runs-on: ubuntu-latest

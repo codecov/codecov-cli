@@ -36,9 +36,11 @@ jobs:
           cd dist
           ls -alrt
           ls | grep *.tar.gz
+          ls | grep *.tar.gz | xargs -I x echo "${x//codecov-cli/codecov_cli}"
           mv codecov-cli-9.1.1.tar.gz codecov_cli-9.1.1.tar.gz
           ls -alrt
           ls | grep *.tar.gz
+          ls | grep *.tar.gz | xargs -I x echo "${x//codecov-cli/codecov_cli}"
           ls | grep *.tar.gz | xargs -I x mv -- x "${x//codecov-cli/codecov_cli}"
           cd ..
       - name: Publish package to PyPi

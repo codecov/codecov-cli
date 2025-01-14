@@ -42,8 +42,9 @@ jobs:
           python command_dump.py
       - name: Detect changes
         run: |
-          if [ -n "$(git diff --raw)" ]; then
+          if [ -n "$(git diff codecovcli_commands)" ]; then
             echo "Please run `python command_dump.py` before submitting, or install the hooks"
+            echo "$(git diff codecovcli_commands)"
             exit 1
           fi
 

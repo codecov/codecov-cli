@@ -6,6 +6,7 @@ Options:
   -u, --enterprise-url, --url TEXT
                                   Change the upload host (Enterprise use)
   -v, --verbose                   Use verbose logging
+  --disable-telem                 Disable sending telemetry data to Codecov
   --version                       Show the version and exit.
   --help                          Show this message and exit.
 

@@ -35,8 +35,8 @@ jobs:
           python setup.py bdist_wheel --plat-name=win_amd64
           cd dist
           newfilename=$(ls | grep *.tar.gz | sed 's/codecov-cli/codecov_cli/')
-          echo $newfilename
           ls | grep *.tar.gz | xargs -I x mv -- x "$newfilename"
+          ls -al
           cd ..
       - name: Publish package to PyPi
         if: inputs.publish == true

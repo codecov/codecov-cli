@@ -34,14 +34,9 @@ jobs:
           python setup.py bdist_wheel --plat-name=macosx-12.6-universal2
           python setup.py bdist_wheel --plat-name=win_amd64
           cd dist
-          ls -alrt
-          ls | grep *.tar.gz
-          ls | grep *.tar.gz | xargs -I x echo "${x//codecov-cli/codecov_cli}"
-          mv codecov-cli-9.1.1.tar.gz codecov_cli-9.1.1.tar.gz
-          ls -alrt
-          ls | grep *.tar.gz
-          ls | grep *.tar.gz | xargs -I x echo "${x//codecov-cli/codecov_cli}"
-          ls | grep *.tar.gz | xargs -I x mv -- x "${x//codecov-cli/codecov_cli}"
+          newfilename=$(ls | grep *.tar.gz | sed 's/codecov-cli/codecov_cli/')
+          echo $newfilename
+          ls | grep *.tar.gz | xargs -I x mv -- x "$newfilename"
           cd ..
       - name: Publish package to PyPi
         if: inputs.publish == true

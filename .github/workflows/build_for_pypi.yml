@@ -35,6 +35,7 @@ jobs:
           python setup.py bdist_wheel --plat-name=win_amd64
           cd dist
           ls -al
+          ls | grep *.tar.gz
           ls | grep *.tar.gz | xargs -Ix mv -- x "${x//codecov-cli/codecov_cli}"
           cd ..
       - name: Publish package to PyPi

@@ -34,6 +34,7 @@ jobs:
           python setup.py bdist_wheel --plat-name=macosx-12.6-universal2
           python setup.py bdist_wheel --plat-name=win_amd64
       - name: Move src file to match PEP625
+        run: |
           cd dist
           ls | grep *.tar.gz | xargs -I x mv -- x "$(ls | grep *.tar.gz | sed 's/codecov-cli/codecov_cli/')"
           ls -al

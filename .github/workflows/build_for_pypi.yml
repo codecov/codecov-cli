@@ -34,7 +34,7 @@ jobs:
           python setup.py bdist_wheel --plat-name=macosx-12.6-universal2
           python setup.py bdist_wheel --plat-name=win_amd64
           cd dist
-          ls -al
+          ls -alrt
           ls | grep *.tar.gz
           ls | grep *.tar.gz | xargs -Ix mv -- x "${x//codecov-cli/codecov_cli}"
           cd ..

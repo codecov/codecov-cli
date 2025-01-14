@@ -19,7 +19,7 @@ jobs:
           - os: macos-13
             TARGET: macos
             CMD_REQS: >
-              mkdir -p pip-packages && cd pip-packages && pip wheel --no-cache-dir --no-binary tree_sitter,ijson,charset_normalizer,PyYAML .. && cd .. &&
+              mkdir -p pip-packages && cd pip-packages && pip download wrapt --platform=universal2 --only-binary=:all: && pip install $(ls | grep wrapt)  && pip wheel --no-cache-dir --no-binary tree_sitter,ijson,charset_normalizer,PyYAML .. && cd .. &&
               pip install --no-deps --no-index --find-links=pip-packages pip-packages/*
             CMD_BUILD: >
               STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&

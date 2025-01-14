@@ -33,6 +33,7 @@ jobs:
           python setup.py sdist bdist_wheel --plat-name=manylinux2014_x86_64
           python setup.py bdist_wheel --plat-name=macosx-12.6-x86_64
           python setup.py bdist_wheel --plat-name=win_amd64
+          cd dist && ls -al && cd ..
       - name: Publish package to PyPi
         if: inputs.publish == true
         uses: pypa/gh-action-pypi-publish@release/v1

@@ -2,12 +2,15 @@ import logging
 import typing
 from dataclasses import dataclass
 
+from opentelemetry import trace
+
 from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.helpers.config import LEGACY_CODECOV_API_URL
 from codecov_cli.helpers.request import send_post_request, send_put_request
 from codecov_cli.types import UploadCollectionResult, UploadCollectionResultFile
 
 logger = logging.getLogger("codecovcli")
+tracer = trace.get_tracer(__name__)
 
 
 @dataclass
@@ -32,6 +35,7 @@ class UploadSendingResult(object):
 
 
 class LegacyUploadSender(object):
+    @tracer.start_as_current_span("upload_legacy")
     def send_upload_data(
         self,
         upload_data: UploadCollectionResult,

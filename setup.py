@@ -26,13 +26,15 @@ setup(
         "tree-sitter==0.20.*",
         "test-results-parser==0.5.*",
         "regex",
+        "sentry-sdk[opentelemetry]",
+        "wrapt>=1.17.2",
     ],
     entry_points={
         "console_scripts": [
             "codecovcli = codecov_cli.main:run",
         ],
     },
-    python_requires=">=3.8",
+    python_requires=">=3.9",
     ext_modules=[
         Extension(
             "staticcodecov_languages",

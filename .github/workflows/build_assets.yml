@@ -23,10 +23,8 @@ jobs:
               pip install --no-deps --no-index --find-links=pip-packages pip-packages/*
             CMD_BUILD: >
               STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
-              pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:. --copy-metadata codecov-cli --hidden-import staticcodecov_languages --target-arch arm64 -F codecov_cli/main.py &&
-              mv dist/main dist/codecovcli_macos_arm64 &&
-              pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:. --copy-metadata codecov-cli --hidden-import staticcodecov_languages --target-arch x86_64 -F codecov_cli/main.py &&
-              mv dist/main dist/codecovcli_macos_x86_64 &&
+              pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:. --copy-metadata codecov-cli --hidden-import staticcodecov_languages --target-arch universal2 -F codecov_cli/main.py &&
+              mv dist/main dist/codecovcli_macos &&
               lipo -archs dist/codecovcli_macos | grep 'x86_64 arm64' &&
               cd dist && ls -al && cd ..
             OUT_FILE_NAME: codecovcli_macos

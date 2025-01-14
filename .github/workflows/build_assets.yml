@@ -16,7 +16,7 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          - os: macos-latest
+          - os: macos-13
             TARGET: macos
             CMD_REQS: >
               mkdir -p pip-packages && cd pip-packages && pip wheel --no-cache-dir --no-binary tree_sitter,ijson,charset_normalizer,PyYAML .. && cd .. &&

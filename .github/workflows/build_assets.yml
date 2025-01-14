@@ -19,9 +19,9 @@ jobs:
         include:
           - os: macos-latest
             TARGET: macos
+            # currently, wrapt pulls the arm64 version instead of the universal one, so the below is a hack
             CMD_REQS: >
               mkdir -p pip-packages && cd pip-packages && pip wheel --no-cache-dir --no-binary tree_sitter,ijson,charset_normalizer,PyYAML .. &&
-              # currently, wrapt pulls the arm64 version instead of the universal one, so the below is a hack
               rm $(ls | grep wrapt) && pip download wrapt --platform=universal2 --only-binary=:all: && pip install $(ls | grep wrapt) --force-reinstall && cd .. &&
               pip install --no-deps --no-index --find-links=pip-packages pip-packages/*
             CMD_BUILD: >

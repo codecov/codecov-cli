@@ -5,10 +5,12 @@ from decimal import Decimal
 from typing import Any, List
 
 import ijson
+from opentelemetry import trace
 
 from codecov_cli.plugins.types import PreparationPluginReturn
 
 logger = logging.getLogger("codecovcli")
+tracer = trace.get_tracer(__name__)
 
 
 class Encoder(json.JSONEncoder):
@@ -47,6 +49,7 @@ class CompressPycoverageContexts(object):
             str(self.file_to_compress).replace(".json", "") + ".codecov.json"
         )
 
+    @tracer.start_as_current_span("compress_pycoverage")
     def run_preparation(self, collector) -> PreparationPluginReturn:
         if not self.file_to_compress.exists():
             logger.warning(
@@ -120,7 +123,7 @@ class CompressPycoverageContexts(object):
         # Save the inverted index of labels table in the report
         # So when we are processing the result we have int -> label
         fd_out.write(
-            f'"labels_table": {json.dumps({ value: key for key, value in labels_table.items() })}'
+            f'"labels_table": {json.dumps({value: key for key, value in labels_table.items()})}'
         )
 
     def _copy_file_details(self, file_name, file_details, fd_out) -> None:

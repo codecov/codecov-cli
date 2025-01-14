@@ -58,7 +58,7 @@ def _load_plugin_from_yaml(plugin_dict: typing.Dict):
 
     except TypeError:
         click.secho(
-            f"Unable to instantiate {class_obj} with provided parameters { plugin_dict.get('params', '') }",
+            f"Unable to instantiate {class_obj} with provided parameters {plugin_dict.get('params', '')}",
             err=True,
         )
         return NoopPlugin()

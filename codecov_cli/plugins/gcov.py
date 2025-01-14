@@ -5,10 +5,13 @@ import shutil
 import subprocess
 import typing
 
+from opentelemetry import trace
+
 from codecov_cli.helpers.folder_searcher import globs_to_regex, search_files
 from codecov_cli.plugins.types import PreparationPluginReturn
 
 logger = logging.getLogger("codecovcli")
+tracer = trace.get_tracer(__name__)
 
 
 class GcovPlugin(object):
@@ -28,6 +31,7 @@ class GcovPlugin(object):
         self.patterns_to_include = patterns_to_include or []
         self.project_root = project_root or pathlib.Path(os.getcwd())
 
+    @tracer.start_as_current_span("gcov")
     def run_preparation(self, collector) -> PreparationPluginReturn:
         logger.debug(
             f"Running {self.executable} plugin...",

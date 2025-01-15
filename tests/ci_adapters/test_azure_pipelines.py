@@ -47,7 +47,7 @@ class TestAzurePipelines(object):
             (
                 {
                     AzurePipelinesEnvEnum.BUILD_SOURCEVERSION: "123456789000111",
-                    AzurePipelinesEnvEnum.SYSTEM_PULLREQUEST_SOURCECOMMITID: "111000987654321"
+                    AzurePipelinesEnvEnum.SYSTEM_PULLREQUEST_SOURCECOMMITID: "111000987654321",
                 },
                 "111000987654321",
             ),

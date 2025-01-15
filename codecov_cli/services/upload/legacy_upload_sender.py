@@ -2,12 +2,15 @@ import logging
 import typing
 from dataclasses import dataclass
 
+from opentelemetry import trace
+
 from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.helpers.config import LEGACY_CODECOV_API_URL
 from codecov_cli.helpers.request import send_post_request, send_put_request
 from codecov_cli.types import UploadCollectionResult, UploadCollectionResultFile
 
 logger = logging.getLogger("codecovcli")
+tracer = trace.get_tracer(__name__)
 
 
 @dataclass
@@ -32,14 +35,13 @@ class UploadSendingResult(object):
 
 
 class LegacyUploadSender(object):
+    @tracer.start_as_current_span("upload_legacy")
     def send_upload_data(
         self,
         upload_data: UploadCollectionResult,
         commit_sha: str,
         token: str,
         env_vars: typing.Dict[str, str],
-        report_code: str = None,
-        upload_file_type: str = None,
         name: typing.Optional[str] = None,
         branch: typing.Optional[str] = None,
         slug: typing.Optional[str] = None,
@@ -49,8 +51,9 @@ class LegacyUploadSender(object):
         job_code: typing.Optional[str] = None,
         flags: typing.List[str] = None,
         ci_service: typing.Optional[str] = None,
-        git_service: typing.Optional[str] = None,
         enterprise_url: typing.Optional[str] = None,
+        args: dict = None,
+        **kwargs,
     ) -> UploadSendingResult:
         params = {
             "package": f"codecov-cli/{codecov_cli_version}",
@@ -72,9 +75,13 @@ class LegacyUploadSender(object):
             logger.warning("Token is empty.")
             headers = {"X-Upload-Token": ""}
 
+        data = {
+            "cli_args": args,
+        }
+
         upload_url = enterprise_url or LEGACY_CODECOV_API_URL
         resp = send_post_request(
-            f"{upload_url}/upload/v4", headers=headers, params=params
+            f"{upload_url}/upload/v4", data=data, headers=headers, params=params
         )
         if resp.status_code >= 400:
             return resp

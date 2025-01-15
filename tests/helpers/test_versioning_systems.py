@@ -128,5 +128,5 @@ class TestGitVersioningSystem(object):
         )
 
         vs = GitVersioningSystem()
-        with pytest.raises(ValueError) as ex:
+        with pytest.raises(ValueError):
             vs.list_relevant_files()

@@ -9,6 +9,7 @@ import requests
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
 from codecov_cli.helpers import request
+from codecov_cli.helpers.args import get_cli_args
 from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.helpers.validators import validate_commit_sha
 from codecov_cli.runners import get_runner
@@ -16,6 +17,7 @@ from codecov_cli.runners.types import (
     LabelAnalysisRequestResult,
     LabelAnalysisRunnerInterface,
 )
+from codecov_cli.types import CommandContext
 
 logger = logging.getLogger("codecovcli")
 
@@ -77,7 +79,7 @@ logger = logging.getLogger("codecovcli")
 )
 @click.pass_context
 def label_analysis(
-    ctx: click.Context,
+    ctx: CommandContext,
     token: str,
     head_commit_sha: str,
     base_commit_sha: str,
@@ -88,18 +90,11 @@ def label_analysis(
     runner_params: List[str],
 ):
     enterprise_url = ctx.obj.get("enterprise_url")
+    args = get_cli_args(ctx)
     logger.debug(
         "Starting label analysis",
         extra=dict(
-            extra_log_attributes=dict(
-                head_commit_sha=head_commit_sha,
-                base_commit_sha=base_commit_sha,
-                token=token,
-                runner_name=runner_name,
-                enterprise_url=enterprise_url,
-                max_wait_time=max_wait_time,
-                dry_run=dry_run,
-            )
+            extra_log_attributes=args,
         ),
     )
     if head_commit_sha == base_commit_sha:
@@ -395,12 +390,12 @@ def _dry_run_list_output(
         logger.warning(f"label-analysis didn't run correctly. Error: {fallback_reason}")
 
     to_run_line = " ".join(
-        sorted(map(lambda l: f"'{l}'", runner_options))
-        + sorted(map(lambda l: f"'{l}'", labels_to_run))
+        sorted(map(lambda option: f"'{option}'", runner_options))
+        + sorted(map(lambda label: f"'{label}'", labels_to_run))
     )
     to_skip_line = " ".join(
-        sorted(map(lambda l: f"'{l}'", runner_options))
-        + sorted(map(lambda l: f"'{l}'", labels_to_skip))
+        sorted(map(lambda option: f"'{option}'", runner_options))
+        + sorted(map(lambda label: f"'{label}'", labels_to_skip))
     )
     # ⚠️ DON'T use logger
     # logger goes to stderr, we want it in stdout

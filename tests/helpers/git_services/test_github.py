@@ -71,4 +71,4 @@ def test_get_pull_request_404(mocker):
     )
     slug = "codecov/codecov-cli"
     response = Github().get_pull_request(slug, 1)
-    assert response == None
+    assert response is None

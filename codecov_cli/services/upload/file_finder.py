@@ -3,10 +3,14 @@ import os
 from pathlib import Path
 from typing import Iterable, List, Optional, Pattern
 
+from opentelemetry import trace
+
 from codecov_cli.helpers.folder_searcher import globs_to_regex, search_files
 from codecov_cli.types import UploadCollectionResultFile
 
 logger = logging.getLogger("codecovcli")
+tracer = trace.get_tracer(__name__)
+
 
 coverage_files_patterns = [
     "*.clover",
@@ -198,6 +202,7 @@ class FileFinder(object):
         self.disable_search = disable_search
         self.report_type = report_type
 
+    @tracer.start_as_current_span("find_files")
     def find_files(self) -> List[UploadCollectionResultFile]:
         if self.report_type == "coverage":
             files_excluded_patterns = coverage_files_excluded_patterns

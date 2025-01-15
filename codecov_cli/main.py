@@ -5,6 +5,7 @@ import typing
 import click
 
 from codecov_cli import __version__
+from codecov_cli.opentelemetry import init_telem
 from codecov_cli.commands.base_picking import pr_base_picking
 from codecov_cli.commands.commit import create_commit
 from codecov_cli.commands.create_report_result import create_report_results
@@ -43,6 +44,9 @@ logger = logging.getLogger("codecovcli")
     "--enterprise-url", "--url", "-u", help="Change the upload host (Enterprise use)"
 )
 @click.option("-v", "--verbose", "verbose", help="Use verbose logging", is_flag=True)
+@click.option(
+    "--disable-telem", help="Disable sending telemetry data to Codecov", is_flag=True
+)
 @click.pass_context
 @click.version_option(__version__, prog_name="codecovcli")
 def cli(
@@ -51,6 +55,7 @@ def cli(
     codecov_yml_path: pathlib.Path,
     enterprise_url: str,
     verbose: bool = False,
+    disable_telem: bool = False,
 ):
     ctx.obj["cli_args"] = ctx.params
     ctx.obj["cli_args"]["version"] = f"cli-{__version__}"
@@ -64,6 +69,9 @@ def cli(
     elif (token := ctx.obj["codecov_yaml"].get("codecov", {}).get("token")) is not None:
         ctx.default_map = {ctx.invoked_subcommand: {"token": token}}
     ctx.obj["enterprise_url"] = enterprise_url
+
+    if not disable_telem:
+        init_telem(__version__, enterprise_url)
 
 
 cli.add_command(do_upload)

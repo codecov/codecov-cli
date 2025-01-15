@@ -57,7 +57,7 @@ pyyaml==6.0.1
     # via codecov-cli (setup.py)
 regex==2023.12.25
     # via codecov-cli (setup.py)
-requests==2.31.0
+requests==2.32.2
     # via responses
 responses==0.21.0
     # via codecov-cli (setup.py)

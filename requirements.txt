@@ -73,7 +73,7 @@ tree-sitter==0.20.2
     # via codecov-cli (setup.py)
 typing-extensions==4.12.2
     # via opentelemetry-sdk
-urllib3==2.0.6
+urllib3==2.2.2
     # via
     #   requests
     #   responses

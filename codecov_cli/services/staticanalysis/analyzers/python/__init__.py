@@ -44,7 +44,6 @@ _wildcard_import_query_str = """
 
 
 class PythonAnalyzer(BaseAnalyzer):
-
     condition_statements = [
         "if_statement",
         "while_statement",

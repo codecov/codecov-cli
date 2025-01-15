@@ -17,12 +17,17 @@ class NoopPlugin(object):
         pass
 
 
-def select_preparation_plugins(cli_config: typing.Dict, plugin_names: typing.List[str]):
-    plugins = [_get_plugin(cli_config, p) for p in plugin_names]
+def select_preparation_plugins(
+    cli_config: typing.Dict, plugin_names: typing.List[str], plugin_config: typing.Dict
+):
+    plugins = [_get_plugin(cli_config, p, plugin_config) for p in plugin_names]
     logger.debug(
         "Selected preparation plugins",
         extra=dict(
-            extra_log_attributes=dict(selected_plugins=list(map(type, plugins)))
+            extra_log_attributes=dict(
+                selected_plugins=list(map(type, plugins)),
+                cli_config=cli_config,
+            )
         ),
     )
     return plugins
@@ -53,22 +58,31 @@ def _load_plugin_from_yaml(plugin_dict: typing.Dict):
 
     except TypeError:
         click.secho(
-            f"Unable to instantiate {class_obj} with provided parameters { plugin_dict.get('params', '') }",
+            f"Unable to instantiate {class_obj} with provided parameters {plugin_dict.get('params', '')}",
             err=True,
         )
         return NoopPlugin()
 
 
-def _get_plugin(cli_config, plugin_name):
+def _get_plugin(cli_config, plugin_name, plugin_config):
     if plugin_name == "noop":
         return NoopPlugin()
     if plugin_name == "gcov":
-        return GcovPlugin()
+        return GcovPlugin(
+            plugin_config.get("project_root", None),
+            plugin_config.get("folders_to_ignore", None),
+            plugin_config.get("gcov_executable", "gcov"),
+            plugin_config.get("gcov_include", None),
+            plugin_config.get("gcov_ignore", None),
+            plugin_config.get("gcov_args", None),
+        )
     if plugin_name == "pycoverage":
         config = cli_config.get("plugins", {}).get("pycoverage", {})
         return Pycoverage(config)
     if plugin_name == "xcode":
-        return XcodePlugin()
+        return XcodePlugin(
+            plugin_config.get("swift_project", None),
+        )
     if plugin_name == "compress-pycoverage":
         config = cli_config.get("plugins", {}).get("compress-pycoverage", {})
         return CompressPycoverageContexts(config)

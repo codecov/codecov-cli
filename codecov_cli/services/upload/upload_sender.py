@@ -5,8 +5,10 @@ import typing
 import zlib
 from typing import Any, Dict
 
+from opentelemetry import trace
+
 from codecov_cli import __version__ as codecov_cli_version
-from codecov_cli.helpers.config import CODECOV_API_URL
+from codecov_cli.helpers.config import CODECOV_INGEST_URL
 from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.helpers.request import (
     get_token_header,
@@ -20,6 +22,7 @@ from codecov_cli.types import (
 )
 
 logger = logging.getLogger("codecovcli")
+tracer = trace.get_tracer(__name__)
 
 
 class UploadSender(object):
@@ -27,7 +30,7 @@ class UploadSender(object):
         self,
         upload_data: UploadCollectionResult,
         commit_sha: str,
-        token: str,
+        token: typing.Optional[str],
         env_vars: typing.Dict[str, str],
         report_code: str,
         upload_file_type: str = "coverage",
@@ -42,55 +45,79 @@ class UploadSender(object):
         ci_service: typing.Optional[str] = None,
         git_service: typing.Optional[str] = None,
         enterprise_url: typing.Optional[str] = None,
+        parent_sha: typing.Optional[str] = None,
+        upload_coverage: bool = False,
+        args: dict = None,
     ) -> RequestResult:
-        data = {
-            "ci_url": build_url,
-            "flags": flags,
-            "env": env_vars,
-            "name": name,
-            "job_code": job_code,
-            "version": codecov_cli_version,
-            "ci_service": ci_service,
-        }
-        headers = get_token_header(token)
-        encoded_slug = encode_slug(slug)
-        upload_url = enterprise_url or CODECOV_API_URL
-        url, data = self.get_url_and_possibly_update_data(
-            data,
-            upload_file_type,
-            upload_url,
-            git_service,
-            branch,
-            encoded_slug,
-            commit_sha,
-            report_code,
-        )
-        # Data that goes to storage
-        reports_payload = self._generate_payload(
-            upload_data, env_vars, upload_file_type
-        )
+        with tracer.start_as_current_span("upload_sender") as span:
+            with tracer.start_as_current_span("upload_sender_preparation"):
+                data = {
+                    "ci_service": ci_service,
+                    "ci_url": build_url,
+                    "cli_args": args,
+                    "env": env_vars,
+                    "flags": flags,
+                    "job_code": job_code,
+                    "name": name,
+                    "version": codecov_cli_version,
+                }
+                if upload_coverage:
+                    data["branch"] = branch
+                    data["code"] = report_code
+                    data["commitid"] = commit_sha
+                    data["parent_commit_id"] = parent_sha
+                    data["pullid"] = pull_request_number
+                headers = get_token_header(token)
+                encoded_slug = encode_slug(slug)
+                upload_url = enterprise_url or CODECOV_INGEST_URL
+                url, data = self.get_url_and_possibly_update_data(
+                    data,
+                    upload_file_type,
+                    upload_url,
+                    git_service,
+                    branch,
+                    encoded_slug,
+                    commit_sha,
+                    report_code,
+                    upload_coverage,
+                )
+                # Data that goes to storage
+                reports_payload = self._generate_payload(
+                    upload_data, env_vars, upload_file_type
+                )
 
-        logger.debug("Sending upload request to Codecov")
-        resp_from_codecov = send_post_request(
-            url=url,
-            data=data,
-            headers=headers,
-        )
-        if resp_from_codecov.status_code >= 400:
-            return resp_from_codecov
-        resp_json_obj = json.loads(resp_from_codecov.text)
-        if resp_json_obj.get("url"):
-            logger.info(
-                f"Your upload is now processing. When finished, results will be available at: {resp_json_obj.get('url')}"
+            span.set_attributes(
+                {
+                    "commit_sha": commit_sha,
+                    "slug": slug,
+                }
             )
-        logger.debug(
-            "Upload request to Codecov complete.",
-            extra=dict(extra_log_attributes=dict(response=resp_json_obj)),
-        )
-        put_url = resp_json_obj["raw_upload_location"]
-        logger.debug("Sending upload to storage")
-        resp_from_storage = send_put_request(put_url, data=reports_payload)
-        return resp_from_storage
+
+            with tracer.start_as_current_span("upload_sender_storage_request"):
+                logger.debug("Sending upload request to Codecov")
+                resp_from_codecov = send_post_request(
+                    url=url,
+                    data=data,
+                    headers=headers,
+                )
+                if resp_from_codecov.status_code >= 400:
+                    return resp_from_codecov
+                resp_json_obj = json.loads(resp_from_codecov.text)
+                if resp_json_obj.get("url"):
+                    logger.info(
+                        f"Your upload is now processing. When finished, results will be available at: {resp_json_obj.get('url')}"
+                    )
+                logger.debug(
+                    "Upload request to Codecov complete.",
+                    extra=dict(extra_log_attributes=dict(response=resp_json_obj)),
+                )
+                put_url = resp_json_obj["raw_upload_location"]
+
+            with tracer.start_as_current_span("upload_sender_storage"):
+                logger.debug("Sending upload to storage")
+                resp_from_storage = send_put_request(put_url, data=reports_payload)
+
+            return resp_from_storage
 
     def _generate_payload(
         self,
@@ -174,9 +201,14 @@ class UploadSender(object):
         encoded_slug,
         commit_sha,
         report_code,
+        upload_coverage=False,
     ):
         if report_type == "coverage":
-            url = f"{upload_url}/upload/{git_service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/uploads"
+            base_url = f"{upload_url}/upload/{git_service}/{encoded_slug}"
+            if upload_coverage:
+                url = f"{base_url}/upload-coverage"
+            else:
+                url = f"{base_url}/commits/{commit_sha}/reports/{report_code}/uploads"
         elif report_type == "test_results":
             data["slug"] = encoded_slug
             data["branch"] = branch

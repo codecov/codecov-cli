@@ -2,7 +2,6 @@
 
 # Avoid parsing and removing indentation from multiline strings by defining them in the top level of this file
 
-
 coverage_file_section_simple = b"""# path=flagtwo.coverage.xml
 <?xml version="1.0" ?>
 <coverage branch-rate="0" branches-covered="0" branches-valid="0" complexity="0" line-rate="0.6" lines-covered="30" lines-valid="50" timestamp="1600652028856" version="4.5.4">

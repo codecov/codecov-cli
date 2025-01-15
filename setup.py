@@ -10,7 +10,7 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="codecov-cli",
-    version="0.7.4",
+    version="9.1.1",
     packages=find_packages(exclude=["contrib", "docs", "tests*"]),
     description="Codecov Command Line Interface",
     long_description=long_description,
@@ -19,20 +19,22 @@ setup(
     author_email="support@codecov.io",
     install_requires=[
         "click==8.*",
-        "httpx==0.23.*",
+        "httpx==0.27.*",
         "ijson==3.*",
         "pyyaml==6.*",
         "responses==0.21.*",
         "tree-sitter==0.20.*",
-        "test-results-parser==0.1.*",
+        "test-results-parser==0.5.*",
         "regex",
+        "sentry-sdk[opentelemetry]",
+        "wrapt>=1.17.2",
     ],
     entry_points={
         "console_scripts": [
             "codecovcli = codecov_cli.main:run",
         ],
     },
-    python_requires=">=3.8",
+    python_requires=">=3.9",
     ext_modules=[
         Extension(
             "staticcodecov_languages",

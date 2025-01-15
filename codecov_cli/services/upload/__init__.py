@@ -24,7 +24,9 @@ def do_upload_logic(
     cli_config: typing.Dict,
     versioning_system: VersioningSystemInterface,
     ci_adapter: CIAdapterBase,
+    upload_coverage: bool = False,
     *,
+    args: dict = None,
     branch: typing.Optional[str],
     build_code: typing.Optional[str],
     build_url: typing.Optional[str],
@@ -39,6 +41,10 @@ def do_upload_logic(
     files_search_explicitly_listed_files: typing.List[Path],
     files_search_root_folder: Path,
     flags: typing.List[str],
+    gcov_args: typing.Optional[str],
+    gcov_executable: typing.Optional[str],
+    gcov_ignore: typing.Optional[str],
+    gcov_include: typing.Optional[str],
     git_service: typing.Optional[str],
     handle_no_reports_found: bool = False,
     job_code: typing.Optional[str],
@@ -46,16 +52,29 @@ def do_upload_logic(
     network_filter: typing.Optional[str],
     network_prefix: typing.Optional[str],
     network_root_folder: Path,
+    parent_sha: typing.Optional[str] = None,
     plugin_names: typing.List[str],
     pull_request_number: typing.Optional[str],
     report_code: str,
     slug: typing.Optional[str],
-    token: str,
+    swift_project: typing.Optional[str],
+    token: typing.Optional[str],
     upload_file_type: str = "coverage",
     use_legacy_uploader: bool = False,
 ):
+    plugin_config = {
+        "folders_to_ignore": files_search_exclude_folders,
+        "gcov_args": gcov_args,
+        "gcov_executable": gcov_executable,
+        "gcov_ignore": gcov_ignore,
+        "gcov_include": gcov_include,
+        "project_root": files_search_root_folder,
+        "swift_project": swift_project,
+    }
     if upload_file_type == "coverage":
-        preparation_plugins = select_preparation_plugins(cli_config, plugin_names)
+        preparation_plugins = select_preparation_plugins(
+            cli_config, plugin_names, plugin_config
+        )
     elif upload_file_type == "test_results":
         preparation_plugins = []
     file_selector = select_file_finder(
@@ -72,7 +91,11 @@ def do_upload_logic(
         network_root_folder=network_root_folder,
     )
     collector = UploadCollector(
-        preparation_plugins, network_finder, file_selector, disable_file_fixes
+        preparation_plugins,
+        network_finder,
+        file_selector,
+        disable_file_fixes,
+        plugin_config,
     )
     try:
         upload_data = collector.generate_upload_data(upload_file_type)
@@ -110,23 +133,26 @@ def do_upload_logic(
 
     if not dry_run:
         sending_result = sender.send_upload_data(
-            upload_data,
-            commit_sha,
-            token,
-            env_vars,
-            report_code,
-            upload_file_type,
-            name,
-            branch,
-            slug,
-            pull_request_number,
-            build_code,
-            build_url,
-            job_code,
-            flags,
-            ci_service,
-            git_service,
-            enterprise_url,
+            upload_data=upload_data,
+            commit_sha=commit_sha,
+            token=token,
+            env_vars=env_vars,
+            report_code=report_code,
+            upload_file_type=upload_file_type,
+            name=name,
+            branch=branch,
+            slug=slug,
+            pull_request_number=pull_request_number,
+            build_code=build_code,
+            build_url=build_url,
+            job_code=job_code,
+            flags=flags,
+            ci_service=ci_service,
+            git_service=git_service,
+            enterprise_url=enterprise_url,
+            parent_sha=parent_sha,
+            upload_coverage=upload_coverage,
+            args=args,
         )
     else:
         logger.info("dry-run option activated. NOT sending data to Codecov.")

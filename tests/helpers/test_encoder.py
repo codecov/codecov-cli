@@ -21,7 +21,7 @@ from codecov_cli.helpers.encoder import (
     ],
 )
 def test_encode_invalid_slug(slug):
-    with pytest.raises(ValueError) as ex:
+    with pytest.raises(ValueError):
         encode_slug(slug)
 
 
@@ -77,7 +77,7 @@ def test_valid_slug():
 )
 def test_invalid_encoded_slug(slug):
     assert slug_encoded_incorrectly(slug)
-    with pytest.raises(ValueError) as ex:
+    with pytest.raises(ValueError):
         decode_slug(slug)
 
 

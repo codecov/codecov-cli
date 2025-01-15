@@ -53,6 +53,6 @@ def test_analyse_file_no_analyzer(mock_get_analyzer, mock_open):
     mock_open.return_value.__enter__.return_value.read.return_value = fake_contents
     config = {}
     res = analyze_file(config, file_name)
-    assert res == None
+    assert res is None
     mock_open.assert_called_with("filepath", "rb")
     mock_get_analyzer.assert_called_with(file_name, fake_contents)

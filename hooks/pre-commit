@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+set -e
+
+python command_dump.py
+git add codecovcli_commands

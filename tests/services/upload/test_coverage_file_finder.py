@@ -220,12 +220,16 @@ class TestCoverageFileFinderUserInput:
         for file in coverage_files:
             file.touch()
 
-        coverage_file_finder.explicitly_listed_files = [project_root.parent / "coverage.xml"]
+        coverage_file_finder.explicitly_listed_files = [
+            project_root.parent / "coverage.xml"
+        ]
 
         result = sorted(
             [file.get_filename() for file in coverage_file_finder.find_files()]
         )
-        expected = [UploadCollectionResultFile(Path(f"{project_root.parent}/coverage.xml"))]
+        expected = [
+            UploadCollectionResultFile(Path(f"{project_root.parent}/coverage.xml"))
+        ]
         expected_paths = sorted([file.get_filename() for file in expected])
         assert result == expected_paths
 
@@ -353,7 +357,6 @@ class TestCoverageFileFinderUserInput:
     def test_find_coverage_files_with_user_specified_files_in_default_ignored_folder(
         self, coverage_file_finder_fixture
     ):
-
         (
             project_root,
             coverage_file_finder,

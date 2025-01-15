@@ -6,11 +6,14 @@ import subprocess
 import typing
 from glob import iglob
 
+from opentelemetry import trace
+
 from codecov_cli.helpers.folder_searcher import globs_to_regex, search_files
 from codecov_cli.plugins.types import PreparationPluginReturn
 
 coverage_files_regex = globs_to_regex([".coverage", ".coverage.*"])
 logger = logging.getLogger("codecovcli")
+tracer = trace.get_tracer(__name__)
 
 
 class PycoverageConfig(dict):
@@ -53,8 +56,8 @@ class Pycoverage(object):
     def __init__(self, config: dict):
         self.config = PycoverageConfig(config)
 
+    @tracer.start_as_current_span("pycoverage")
     def run_preparation(self, collector) -> PreparationPluginReturn:
-
         if shutil.which("coverage") is None:
             logger.warning("coverage.py is not installed or can't be found.")
             return
@@ -69,7 +72,8 @@ class Pycoverage(object):
         if self.config.report_type == "json":
             return self._generate_JSON_report(coverage_dir)
         return PreparationPluginReturn(
-            success=False, messages=[f"report type {self.config.report_type} unknown"]
+            success=False,
+            messages=[f"report type {self.config.report_type} unknown"],
         )
 
     def _get_path_to_coverage(self) -> pathlib.Path:

@@ -6,8 +6,10 @@ import typing
 import click
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
+from codecov_cli.helpers.args import get_cli_args
 from codecov_cli.helpers.options import global_options
 from codecov_cli.services.upload import do_upload_logic
+from codecov_cli.types import CommandContext
 
 logger = logging.getLogger("codecovcli")
 
@@ -160,7 +162,7 @@ _global_upload_options = [
         "--handle-no-reports-found",
         "handle_no_reports_found",
         is_flag=True,
-        help="Raise no excpetions when no coverage reports found.",
+        help="Raise no exceptions when no coverage reports found.",
     ),
     click.option(
         "--report-type",
@@ -176,6 +178,26 @@ _global_upload_options = [
         "--network-prefix",
         help="Specify a prefix on files listed in the network section of the Codecov report. Useful to help resolve path fixing",
     ),
+    click.option(
+        "--gcov-args",
+        help="Extra arguments to pass to gcov",
+    ),
+    click.option(
+        "--gcov-ignore",
+        help="Paths to ignore during gcov gathering",
+    ),
+    click.option(
+        "--gcov-include",
+        help="Paths to include during gcov gathering",
+    ),
+    click.option(
+        "--gcov-executable",
+        help="gcov executable to run. Defaults to 'gcov'",
+    ),
+    click.option(
+        "--swift-project",
+        help="Specify the swift project",
+    ),
 ]
 
 
@@ -190,7 +212,7 @@ def global_upload_options(func):
 @global_options
 @click.pass_context
 def do_upload(
-    ctx: click.Context,
+    ctx: CommandContext,
     commit_sha: str,
     report_code: str,
     branch: typing.Optional[str],
@@ -205,6 +227,10 @@ def do_upload(
     files_search_explicitly_listed_files: typing.List[pathlib.Path],
     files_search_root_folder: pathlib.Path,
     flags: typing.List[str],
+    gcov_args: typing.Optional[str],
+    gcov_executable: typing.Optional[str],
+    gcov_ignore: typing.Optional[str],
+    gcov_include: typing.Optional[str],
     git_service: typing.Optional[str],
     handle_no_reports_found: bool,
     job_code: typing.Optional[str],
@@ -216,6 +242,7 @@ def do_upload(
     pull_request_number: typing.Optional[str],
     report_type: str,
     slug: typing.Optional[str],
+    swift_project: typing.Optional[str],
     token: typing.Optional[str],
     use_legacy_uploader: bool,
 ):
@@ -224,36 +251,11 @@ def do_upload(
     cli_config = codecov_yaml.get("cli", {})
     ci_adapter = ctx.obj.get("ci_adapter")
     enterprise_url = ctx.obj.get("enterprise_url")
+    args = get_cli_args(ctx)
     logger.debug(
         "Starting upload processing",
         extra=dict(
-            extra_log_attributes=dict(
-                branch=branch,
-                build_code=build_code,
-                build_url=build_url,
-                commit_sha=commit_sha,
-                disable_file_fixes=disable_file_fixes,
-                disable_search=disable_search,
-                enterprise_url=enterprise_url,
-                env_vars=env_vars,
-                files_search_exclude_folders=files_search_exclude_folders,
-                files_search_explicitly_listed_files=files_search_explicitly_listed_files,
-                files_search_root_folder=files_search_root_folder,
-                flags=flags,
-                git_service=git_service,
-                handle_no_reports_found=handle_no_reports_found,
-                job_code=job_code,
-                name=name,
-                network_filter=network_filter,
-                network_prefix=network_prefix,
-                network_root_folder=network_root_folder,
-                plugin_names=plugin_names,
-                pull_request_number=pull_request_number,
-                report_code=report_code,
-                slug=slug,
-                token=token,
-                upload_file_type=report_type,
-            )
+            extra_log_attributes=args,
         ),
     )
     do_upload_logic(
@@ -274,6 +276,10 @@ def do_upload(
         files_search_explicitly_listed_files=list(files_search_explicitly_listed_files),
         files_search_root_folder=files_search_root_folder,
         flags=flags,
+        gcov_args=gcov_args,
+        gcov_executable=gcov_executable,
+        gcov_ignore=gcov_ignore,
+        gcov_include=gcov_include,
         git_service=git_service,
         handle_no_reports_found=handle_no_reports_found,
         job_code=job_code,
@@ -285,7 +291,9 @@ def do_upload(
         pull_request_number=pull_request_number,
         report_code=report_code,
         slug=slug,
+        swift_project=swift_project,
         token=token,
         upload_file_type=report_type,
         use_legacy_uploader=use_legacy_uploader,
+        args=args,
     )

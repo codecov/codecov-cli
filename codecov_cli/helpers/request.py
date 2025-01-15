@@ -52,8 +52,7 @@ def backoff_time(curr_retry):
     return 2 ** (curr_retry - 1)
 
 
-class RetryException(Exception):
-    ...
+class RetryException(Exception): ...
 
 
 def retry_request(func):
@@ -73,7 +72,7 @@ def retry_request(func):
                 requests.exceptions.ConnectionError,
                 requests.exceptions.Timeout,
                 RetryException,
-            ) as exp:
+            ):
                 logger.warning(
                     "Request failed. Retrying",
                     extra=dict(extra_log_attributes=dict(retry=retry)),
@@ -95,7 +94,17 @@ def send_post_request(
     return request_result(post(url=url, data=data, headers=headers, params=params))
 
 
-def get_token_header_or_fail(token: str) -> dict:
+@retry_request
+def send_get_request(
+    url: str, headers: dict = None, params: dict = None
+) -> RequestResult:
+    return request_result(get(url=url, headers=headers, params=params))
+
+
+def get_token_header_or_fail(token: Optional[str]) -> dict:
+    """
+    Rejects requests with no Authorization token. Prevents tokenless uploads.
+    """
     if token is None:
         raise click.ClickException(
             "Codecov token not found. Please provide Codecov token with -t flag."
@@ -103,7 +112,10 @@ def get_token_header_or_fail(token: str) -> dict:
     return {"Authorization": f"token {token}"}
 
 
-def get_token_header(token: str) -> Optional[dict]:
+def get_token_header(token: Optional[str]) -> Optional[dict]:
+    """
+    Allows requests with no Authorization token.
+    """
     if token is None:
         return None
     return {"Authorization": f"token {token}"}
@@ -118,7 +130,7 @@ def send_put_request(
     return request_result(put(url=url, data=data, headers=headers))
 
 
-def request_result(resp):
+def request_result(resp: requests.Response) -> RequestResult:
     if resp.status_code >= 400:
         return RequestResult(
             status_code=resp.status_code,

@@ -7,6 +7,7 @@ from collections import namedtuple
 from fnmatch import fnmatch
 
 import click
+from opentelemetry import trace
 
 from codecov_cli.services.upload.file_finder import FileFinder
 from codecov_cli.services.upload.network_finder import NetworkFinder
@@ -17,6 +18,7 @@ from codecov_cli.types import (
 )
 
 logger = logging.getLogger("codecovcli")
+tracer = trace.get_tracer(__name__)
 
 fix_patterns_to_apply = namedtuple(
     "fix_patterns_to_apply", ["without_reason", "with_reason", "eof"]
@@ -29,12 +31,14 @@ class UploadCollector(object):
         preparation_plugins: typing.List[PreparationPluginInterface],
         network_finder: NetworkFinder,
         file_finder: FileFinder,
+        plugin_config: dict,
         disable_file_fixes: bool = False,
     ):
         self.preparation_plugins = preparation_plugins
         self.network_finder = network_finder
         self.file_finder = file_finder
         self.disable_file_fixes = disable_file_fixes
+        self.plugin_config = plugin_config
 
     def _produce_file_fixes(
         self, files: typing.List[str]
@@ -139,20 +143,22 @@ class UploadCollector(object):
                     reason=err.reason,
                 ),
             )
-        except IsADirectoryError as err:
+        except IsADirectoryError:
             logger.info(f"Skipping {filename}, found a directory not a file")
 
         return UploadCollectionResultFileFixer(
             path, fixed_lines_without_reason, fixed_lines_with_reason, eof
         )
 
+    @tracer.start_as_current_span("upload_collector")
     def generate_upload_data(self, report_type="coverage") -> UploadCollectionResult:
         for prep in self.preparation_plugins:
             logger.debug(f"Running preparation plugin: {type(prep)}")
             prep.run_preparation(self)
         logger.debug("Collecting relevant files")
-        network = self.network_finder.find_files()
-        report_files = self.file_finder.find_files()
+        with tracer.start_as_current_span("file_collector"):
+            network = self.network_finder.find_files()
+            report_files = self.file_finder.find_files()
         logger.info(f"Found {len(report_files)} {report_type} files to report")
         if not report_files:
             if report_type == "test_results":

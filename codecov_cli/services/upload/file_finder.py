@@ -122,6 +122,7 @@ coverage_files_excluded_patterns = [
     "*.yaml",
     "*/classycle/report.xml",
     "*codecov.yml",
+    "codecov.yaml",
     "*~",
     ".*coveragerc",
     ".coverage*",

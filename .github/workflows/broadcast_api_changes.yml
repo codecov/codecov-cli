@@ -19,3 +19,5 @@ jobs:
       - name: Open issue on wrapper
         run: |
           gh issue create -R codecov/wrapper -t 'New change on CLI' -b $(gh pr diff codecovcli_commands)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

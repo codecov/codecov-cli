@@ -70,6 +70,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: inputs.release == false
         with:
+          name: ${{ matrix.OUT_FILE_NAME }}
           path: ./dist/${{ matrix.OUT_FILE_NAME }}
       - name: Upload Release Asset
         if: inputs.release == true

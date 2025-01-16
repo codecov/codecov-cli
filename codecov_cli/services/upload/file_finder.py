@@ -191,7 +191,7 @@ class FileFinder(object):
     def __init__(
         self,
         search_root: Optional[Path] = None,
-        folders_to_ignore: Optional[List[str]] = None,
+        folders_to_ignore: Optional[List[Path]] = None,
         explicitly_listed_files: Optional[List[Path]] = None,
         disable_search: bool = False,
         report_type: str = "coverage",
@@ -221,7 +221,7 @@ class FileFinder(object):
             assert regex_patterns_to_include  # this is never `None`
             files_paths = search_files(
                 self.search_root,
-                default_folders_to_ignore + self.folders_to_ignore,
+                default_folders_to_ignore + [str(folder) for folder in self.folders_to_ignore],
                 filename_include_regex=regex_patterns_to_include,
                 filename_exclude_regex=regex_patterns_to_exclude,
             )

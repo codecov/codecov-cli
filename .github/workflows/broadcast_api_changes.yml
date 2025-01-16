@@ -20,6 +20,7 @@ jobs:
         uses: dev-hanz-ops/install-gh-cli-action@v0.1.0
       - name: Open issue on wrapper
         run: |
-          gh issue create -R codecov/wrapper -t 'New change on CLI' -b "$(gh pr diff)"
+          gh issue create -R codecov/wrapper -t 'New change on CLI' -b "$(gh pr diff $BRANCH)"
         env:
+          BRANCH: ${{ github.head_ref }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

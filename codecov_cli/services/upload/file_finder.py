@@ -226,11 +226,15 @@ class FileFinder(object):
                 filename_exclude_regex=regex_patterns_to_exclude,
             )
         result_files = [UploadCollectionResultFile(path) for path in files_paths]
-        user_result_files = [
-            UploadCollectionResultFile(path)
-            for path in user_files_paths
-            if user_files_paths
-        ]
+
+        user_result_files = []
+        for path in user_files_paths:
+            if os.path.isfile(path):
+                user_result_files.append(UploadCollectionResultFile(path))
+            else:
+                logger.warning(
+                    f"File \"{path}\" could not be found or does not exist. Please enter in the full path or from the search root \"{self.search_root}\"",
+                )
 
         return list(set(result_files + user_result_files))
 

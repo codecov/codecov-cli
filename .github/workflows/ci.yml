@@ -40,7 +40,7 @@ jobs:
       - name: Run command_dump
         run: |
           python command_dump.py
-      - name: Detect changes
+      - name: Detect changes on commit
         run: |
           if [ -n "$(git diff codecovcli_commands)" ]; then
             echo "Please run `python command_dump.py` before submitting, or install the hooks"

@@ -1,0 +1,29 @@
+---
+# yamllint disable rule:line-length
+
+name: Broadcast API changes
+
+on:
+  push:
+    branches: ['main']
+    paths: ['codecovcli_commands']
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install GitHub CLI
+        uses: dev-hanz-ops/install-gh-cli-action@v0.1.0
+
+      - name: Open issue on wrapper
+        run: |
+          gh issue create -R codecov/wrapper -t 'New change on CLI' -b "$(gh pr diff $BRANCH)"
+        env:
+          BRANCH: ${{ github.head_ref }}
+          GH_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}

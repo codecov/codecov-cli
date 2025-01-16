@@ -1,0 +1,21 @@
+---
+# yamllint disable rule:line-length
+
+on:
+  push:
+    branches: ['main']
+    paths: ['codecovcli_commands']
+  pull_request:
+    paths: ['codecovcli_commands']
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install GitHub CLI
+        uses: dev-hanz-ops/install-gh-cli-action@v0.1.0
+      - name: Open issue on wrapper
+        run: |
+          gh issue create -R codecov/wrapper -t 'New change on CLI' -b $(gh pr diff codecovcli_commands)

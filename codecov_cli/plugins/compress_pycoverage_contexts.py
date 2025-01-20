@@ -5,12 +5,11 @@ from decimal import Decimal
 from typing import Any, List
 
 import ijson
-from opentelemetry import trace
+import sentry_sdk
 
 from codecov_cli.plugins.types import PreparationPluginReturn
 
 logger = logging.getLogger("codecovcli")
-tracer = trace.get_tracer(__name__)
 
 
 class Encoder(json.JSONEncoder):
@@ -49,42 +48,42 @@ class CompressPycoverageContexts(object):
             str(self.file_to_compress).replace(".json", "") + ".codecov.json"
         )
 
-    @tracer.start_as_current_span("compress_pycoverage")
     def run_preparation(self, collector) -> PreparationPluginReturn:
-        if not self.file_to_compress.exists():
-            logger.warning(
-                f"File to compress {self.file_to_compress} not found. Aborting"
-            )
-            return PreparationPluginReturn(
-                success=False,
-                messages=[f"File to compress {self.file_to_compress} not found."],
-            )
-        if not self.file_to_compress.is_file():
-            logger.warning(
-                f"File to compress {self.file_to_compress} is not a file. Aborting"
-            )
-            return PreparationPluginReturn(
-                success=False,
-                messages=[f"File to compress {self.file_to_compress} is not a file."],
-            )
-        # Create in and out streams
-        fd_in = open(self.file_to_compress, "rb")
-        fd_out = open(self.file_to_write, "w")
-        # Compress the file
-        fd_out.write("{")
-        self._copy_meta(fd_in, fd_out)
-        files_in_report = ijson.kvitems(fd_in, "files")
-        self._compress_files(files_in_report, fd_out)
-        fd_out.write("}")
-        # Close streams
-        fd_in.close()
-        fd_out.close()
-        logger.info(f"Compressed report written to {self.file_to_write}")
-        # Delete original file if needed
-        if self.config.delete_uncompressed:
-            logger.info(f"Deleting file {self.file_to_compress}")
-            self.file_to_compress.unlink()
-        return PreparationPluginReturn(success=True, messages=[])
+        with sentry_sdk.start_span(name="compress_pycoverage"):
+            if not self.file_to_compress.exists():
+                logger.warning(
+                    f"File to compress {self.file_to_compress} not found. Aborting"
+                )
+                return PreparationPluginReturn(
+                    success=False,
+                    messages=[f"File to compress {self.file_to_compress} not found."],
+                )
+            if not self.file_to_compress.is_file():
+                logger.warning(
+                    f"File to compress {self.file_to_compress} is not a file. Aborting"
+                )
+                return PreparationPluginReturn(
+                    success=False,
+                    messages=[f"File to compress {self.file_to_compress} is not a file."],
+                )
+            # Create in and out streams
+            fd_in = open(self.file_to_compress, "rb")
+            fd_out = open(self.file_to_write, "w")
+            # Compress the file
+            fd_out.write("{")
+            self._copy_meta(fd_in, fd_out)
+            files_in_report = ijson.kvitems(fd_in, "files")
+            self._compress_files(files_in_report, fd_out)
+            fd_out.write("}")
+            # Close streams
+            fd_in.close()
+            fd_out.close()
+            logger.info(f"Compressed report written to {self.file_to_write}")
+            # Delete original file if needed
+            if self.config.delete_uncompressed:
+                logger.info(f"Deleting file {self.file_to_compress}")
+                self.file_to_compress.unlink()
+            return PreparationPluginReturn(success=True, messages=[])
 
     def _compress_files(self, files_in_report, fd_out) -> None:
         """

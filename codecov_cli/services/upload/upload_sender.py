@@ -5,7 +5,7 @@ import typing
 import zlib
 from typing import Any, Dict
 
-from opentelemetry import trace
+import sentry_sdk
 
 from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.helpers.config import CODECOV_INGEST_URL
@@ -22,7 +22,6 @@ from codecov_cli.types import (
 )
 
 logger = logging.getLogger("codecovcli")
-tracer = trace.get_tracer(__name__)
 
 
 class UploadSender(object):
@@ -49,8 +48,12 @@ class UploadSender(object):
         upload_coverage: bool = False,
         args: dict = None,
     ) -> RequestResult:
-        with tracer.start_as_current_span("upload_sender") as span:
-            with tracer.start_as_current_span("upload_sender_preparation"):
+        current_transaction = sentry_sdk.get_current_scope().transaction
+        current_transaction.set_data("commit_sha", commit_sha)
+        current_transaction.set_data("slug", slug)
+
+        with sentry_sdk.start_span(name="upload_sender"):
+            with sentry_sdk.start_span(name="upload_sender_preparation"):
                 data = {
                     "ci_service": ci_service,
                     "ci_url": build_url,
@@ -86,14 +89,7 @@ class UploadSender(object):
                     upload_data, env_vars, upload_file_type
                 )
 
-            span.set_attributes(
-                {
-                    "commit_sha": commit_sha,
-                    "slug": slug,
-                }
-            )
-
-            with tracer.start_as_current_span("upload_sender_storage_request"):
+            with sentry_sdk.start_span(name="upload_sender_storage_request"):
                 logger.debug("Sending upload request to Codecov")
                 resp_from_codecov = send_post_request(
                     url=url,
@@ -113,7 +109,7 @@ class UploadSender(object):
                 )
                 put_url = resp_json_obj["raw_upload_location"]
 
-            with tracer.start_as_current_span("upload_sender_storage"):
+            with sentry_sdk.start_span(name="upload_sender_storage"):
                 logger.debug("Sending upload to storage")
                 resp_from_storage = send_put_request(put_url, data=reports_payload)
 

@@ -26,7 +26,7 @@ setup(
         "tree-sitter==0.20.*",
         "test-results-parser==0.5.*",
         "regex",
-        "sentry-sdk[opentelemetry]",
+        "sentry-sdk>=2.20.0",
         "wrapt>=1.17.2",
     ],
     entry_points={

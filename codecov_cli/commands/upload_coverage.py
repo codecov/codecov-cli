@@ -3,7 +3,7 @@ import pathlib
 import typing
 
 import click
-from opentelemetry import trace
+import sentry_sdk
 
 from codecov_cli.commands.commit import create_commit
 from codecov_cli.commands.report import create_report
@@ -15,7 +15,6 @@ from codecov_cli.services.upload_coverage import upload_coverage_logic
 from codecov_cli.types import CommandContext
 
 logger = logging.getLogger("codecovcli")
-tracer = trace.get_tracer(__name__)
 
 
 # These options are the combined options of commit, report and upload commands
@@ -63,118 +62,119 @@ def upload_coverage(
     token: typing.Optional[str],
     use_legacy_uploader: bool,
 ):
-    with tracer.start_as_current_span("upload_coverage"):
-        args = get_cli_args(ctx)
-        logger.debug(
-            "Starting upload coverage",
-            extra=dict(
-                extra_log_attributes=args,
-            ),
-        )
-
-        if not use_legacy_uploader and report_type == "coverage":
-            versioning_system = ctx.obj["versioning_system"]
-            codecov_yaml = ctx.obj["codecov_yaml"] or {}
-            cli_config = codecov_yaml.get("cli", {})
-            ci_adapter = ctx.obj.get("ci_adapter")
-            enterprise_url = ctx.obj.get("enterprise_url")
+    with sentry_sdk.start_transaction(op="task", name="Upload Coverage"):
+        with sentry_sdk.start_span(name="upload_coverage"):
             args = get_cli_args(ctx)
-            ctx.invoke(
-                upload_coverage_logic,
-                cli_config,
-                versioning_system,
-                ci_adapter,
-                branch=branch,
-                build_code=build_code,
-                build_url=build_url,
-                commit_sha=commit_sha,
-                disable_file_fixes=disable_file_fixes,
-                disable_search=disable_search,
-                dry_run=dry_run,
-                enterprise_url=enterprise_url,
-                env_vars=env_vars,
-                fail_on_error=fail_on_error,
-                files_search_exclude_folders=files_search_exclude_folders,
-                files_search_explicitly_listed_files=files_search_explicitly_listed_files,
-                files_search_root_folder=files_search_root_folder,
-                flags=flags,
-                gcov_args=gcov_args,
-                gcov_executable=gcov_executable,
-                gcov_ignore=gcov_ignore,
-                gcov_include=gcov_include,
-                git_service=git_service,
-                handle_no_reports_found=handle_no_reports_found,
-                job_code=job_code,
-                name=name,
-                network_filter=network_filter,
-                network_prefix=network_prefix,
-                network_root_folder=network_root_folder,
-                parent_sha=parent_sha,
-                plugin_names=plugin_names,
-                pull_request_number=pull_request_number,
-                report_code=report_code,
-                slug=slug,
-                swift_project=swift_project,
-                token=token,
-                upload_file_type=report_type,
-                use_legacy_uploader=use_legacy_uploader,
-                args=args,
+            logger.debug(
+                "Starting upload coverage",
+                extra=dict(
+                    extra_log_attributes=args,
+                ),
             )
-        else:
-            ctx.invoke(
-                create_commit,
-                commit_sha=commit_sha,
-                parent_sha=parent_sha,
-                pull_request_number=pull_request_number,
-                branch=branch,
-                slug=slug,
-                token=token,
-                git_service=git_service,
-                fail_on_error=True,
-            )
-            if report_type == "coverage":
+
+            if not use_legacy_uploader and report_type == "coverage":
+                versioning_system = ctx.obj["versioning_system"]
+                codecov_yaml = ctx.obj["codecov_yaml"] or {}
+                cli_config = codecov_yaml.get("cli", {})
+                ci_adapter = ctx.obj.get("ci_adapter")
+                enterprise_url = ctx.obj.get("enterprise_url")
+                args = get_cli_args(ctx)
                 ctx.invoke(
-                    create_report,
-                    token=token,
-                    code=report_code,
-                    fail_on_error=True,
+                    upload_coverage_logic,
+                    cli_config,
+                    versioning_system,
+                    ci_adapter,
+                    branch=branch,
+                    build_code=build_code,
+                    build_url=build_url,
                     commit_sha=commit_sha,
-                    slug=slug,
+                    disable_file_fixes=disable_file_fixes,
+                    disable_search=disable_search,
+                    dry_run=dry_run,
+                    enterprise_url=enterprise_url,
+                    env_vars=env_vars,
+                    fail_on_error=fail_on_error,
+                    files_search_exclude_folders=files_search_exclude_folders,
+                    files_search_explicitly_listed_files=files_search_explicitly_listed_files,
+                    files_search_root_folder=files_search_root_folder,
+                    flags=flags,
+                    gcov_args=gcov_args,
+                    gcov_executable=gcov_executable,
+                    gcov_ignore=gcov_ignore,
+                    gcov_include=gcov_include,
                     git_service=git_service,
+                    handle_no_reports_found=handle_no_reports_found,
+                    job_code=job_code,
+                    name=name,
+                    network_filter=network_filter,
+                    network_prefix=network_prefix,
+                    network_root_folder=network_root_folder,
+                    parent_sha=parent_sha,
+                    plugin_names=plugin_names,
+                    pull_request_number=pull_request_number,
+                    report_code=report_code,
+                    slug=slug,
+                    swift_project=swift_project,
+                    token=token,
+                    upload_file_type=report_type,
+                    use_legacy_uploader=use_legacy_uploader,
+                    args=args,
                 )
-            ctx.invoke(
-                do_upload,
-                branch=branch,
-                build_code=build_code,
-                build_url=build_url,
-                commit_sha=commit_sha,
-                disable_file_fixes=disable_file_fixes,
-                disable_search=disable_search,
-                dry_run=dry_run,
-                env_vars=env_vars,
-                fail_on_error=fail_on_error,
-                files_search_exclude_folders=files_search_exclude_folders,
-                files_search_explicitly_listed_files=files_search_explicitly_listed_files,
-                files_search_root_folder=files_search_root_folder,
-                flags=flags,
-                gcov_args=gcov_args,
-                gcov_executable=gcov_executable,
-                gcov_ignore=gcov_ignore,
-                gcov_include=gcov_include,
-                git_service=git_service,
-                handle_no_reports_found=handle_no_reports_found,
-                job_code=job_code,
-                name=name,
-                network_filter=network_filter,
-                network_prefix=network_prefix,
-                network_root_folder=network_root_folder,
-                plugin_names=plugin_names,
-                pull_request_number=pull_request_number,
-                report_code=report_code,
-                report_type=report_type,
-                slug=slug,
-                swift_project=swift_project,
-                token=token,
-                use_legacy_uploader=use_legacy_uploader,
-            )
+            else:
+                ctx.invoke(
+                    create_commit,
+                    commit_sha=commit_sha,
+                    parent_sha=parent_sha,
+                    pull_request_number=pull_request_number,
+                    branch=branch,
+                    slug=slug,
+                    token=token,
+                    git_service=git_service,
+                    fail_on_error=True,
+                )
+                if report_type == "coverage":
+                    ctx.invoke(
+                        create_report,
+                        token=token,
+                        code=report_code,
+                        fail_on_error=True,
+                        commit_sha=commit_sha,
+                        slug=slug,
+                        git_service=git_service,
+                    )
+                ctx.invoke(
+                    do_upload,
+                    branch=branch,
+                    build_code=build_code,
+                    build_url=build_url,
+                    commit_sha=commit_sha,
+                    disable_file_fixes=disable_file_fixes,
+                    disable_search=disable_search,
+                    dry_run=dry_run,
+                    env_vars=env_vars,
+                    fail_on_error=fail_on_error,
+                    files_search_exclude_folders=files_search_exclude_folders,
+                    files_search_explicitly_listed_files=files_search_explicitly_listed_files,
+                    files_search_root_folder=files_search_root_folder,
+                    flags=flags,
+                    gcov_args=gcov_args,
+                    gcov_executable=gcov_executable,
+                    gcov_ignore=gcov_ignore,
+                    gcov_include=gcov_include,
+                    git_service=git_service,
+                    handle_no_reports_found=handle_no_reports_found,
+                    job_code=job_code,
+                    name=name,
+                    network_filter=network_filter,
+                    network_prefix=network_prefix,
+                    network_root_folder=network_root_folder,
+                    plugin_names=plugin_names,
+                    pull_request_number=pull_request_number,
+                    report_code=report_code,
+                    report_type=report_type,
+                    slug=slug,
+                    swift_project=swift_project,
+                    token=token,
+                    use_legacy_uploader=use_legacy_uploader,
+                )
     close_telem()

@@ -30,7 +30,7 @@ jobs:
       - name: Update version and push
         id: make-commit
         run: |
-          sed -i 's/version="[0-9]\.[0-9]\.[0-9]"/version="${{ github.event.inputs.versionName }}"/g' setup.py
+          sed -i 's/version="[0-9]+\.[0-9]+\.[0-9]+"/version="${{ github.event.inputs.versionName }}"/g' setup.py
           git add setup.py
           git commit -S --message "Prepare release ${{ github.event.inputs.versionName }}"
           echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"

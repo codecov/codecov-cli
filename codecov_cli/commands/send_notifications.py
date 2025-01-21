@@ -2,6 +2,7 @@ import logging
 import typing
 
 import click
+import sentry_sdk
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
 from codecov_cli.helpers.args import get_cli_args
@@ -24,20 +25,22 @@ def send_notifications(
     git_service: typing.Optional[str],
     fail_on_error: bool,
 ):
-    enterprise_url = ctx.obj.get("enterprise_url")
-    args = get_cli_args(ctx)
-    logger.debug(
-        "Sending notifications process has started",
-        extra=dict(
-            extra_log_attributes=args,
-        ),
-    )
-    return upload_completion_logic(
-        commit_sha,
-        slug,
-        token,
-        git_service,
-        enterprise_url,
-        fail_on_error,
-        args,
-    )
+    with sentry_sdk.start_transaction(op="task", name="Send Notifications"):
+        with sentry_sdk.start_span(name="send_notifications"):
+            enterprise_url = ctx.obj.get("enterprise_url")
+            args = get_cli_args(ctx)
+            logger.debug(
+                "Sending notifications process has started",
+                extra=dict(
+                    extra_log_attributes=args,
+                ),
+            )
+            return upload_completion_logic(
+                commit_sha,
+                slug,
+                token,
+                git_service,
+                enterprise_url,
+                fail_on_error,
+                args,
+            )

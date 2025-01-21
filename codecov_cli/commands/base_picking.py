@@ -2,6 +2,7 @@ import logging
 import typing
 
 import click
+import sentry_sdk
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
 from codecov_cli.helpers.args import get_cli_args
@@ -54,19 +55,21 @@ def pr_base_picking(
     token: typing.Optional[str],
     service: typing.Optional[str],
 ):
-    enterprise_url = ctx.obj.get("enterprise_url")
-    args = get_cli_args(ctx)
-    logger.debug(
-        "Starting base picking process",
-        extra=dict(
-            extra_log_attributes=args,
-        ),
-    )
+    with sentry_sdk.start_transaction(op="task", name="Base Picking"):
+        with sentry_sdk.start_span(name="base_picking"):
+            enterprise_url = ctx.obj.get("enterprise_url")
+            args = get_cli_args(ctx)
+            logger.debug(
+                "Starting base picking process",
+                extra=dict(
+                    extra_log_attributes=args,
+                ),
+            )
 
-    if slug_without_subgroups_is_invalid(slug):
-        logger.error(
-            "Slug is invalid. Slug should be in the form of owner_username/repo_name"
-        )
-        return
+            if slug_without_subgroups_is_invalid(slug):
+                logger.error(
+                    "Slug is invalid. Slug should be in the form of owner_username/repo_name"
+                )
+                return
 
-    base_picking_logic(base_sha, pr, slug, token, service, enterprise_url, args)
+            base_picking_logic(base_sha, pr, slug, token, service, enterprise_url, args)

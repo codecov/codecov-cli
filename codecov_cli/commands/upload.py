@@ -4,6 +4,7 @@ import pathlib
 import typing
 
 import click
+import sentry_sdk
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
 from codecov_cli.helpers.args import get_cli_args
@@ -246,54 +247,56 @@ def do_upload(
     token: typing.Optional[str],
     use_legacy_uploader: bool,
 ):
-    versioning_system = ctx.obj["versioning_system"]
-    codecov_yaml = ctx.obj["codecov_yaml"] or {}
-    cli_config = codecov_yaml.get("cli", {})
-    ci_adapter = ctx.obj.get("ci_adapter")
-    enterprise_url = ctx.obj.get("enterprise_url")
-    args = get_cli_args(ctx)
-    logger.debug(
-        "Starting upload processing",
-        extra=dict(
-            extra_log_attributes=args,
-        ),
-    )
-    do_upload_logic(
-        cli_config,
-        versioning_system,
-        ci_adapter,
-        branch=branch,
-        build_code=build_code,
-        build_url=build_url,
-        commit_sha=commit_sha,
-        disable_file_fixes=disable_file_fixes,
-        disable_search=disable_search,
-        dry_run=dry_run,
-        enterprise_url=enterprise_url,
-        env_vars=env_vars,
-        fail_on_error=fail_on_error,
-        files_search_exclude_folders=list(files_search_exclude_folders),
-        files_search_explicitly_listed_files=list(files_search_explicitly_listed_files),
-        files_search_root_folder=files_search_root_folder,
-        flags=flags,
-        gcov_args=gcov_args,
-        gcov_executable=gcov_executable,
-        gcov_ignore=gcov_ignore,
-        gcov_include=gcov_include,
-        git_service=git_service,
-        handle_no_reports_found=handle_no_reports_found,
-        job_code=job_code,
-        name=name,
-        network_filter=network_filter,
-        network_prefix=network_prefix,
-        network_root_folder=network_root_folder,
-        plugin_names=plugin_names,
-        pull_request_number=pull_request_number,
-        report_code=report_code,
-        slug=slug,
-        swift_project=swift_project,
-        token=token,
-        upload_file_type=report_type,
-        use_legacy_uploader=use_legacy_uploader,
-        args=args,
-    )
+    with sentry_sdk.start_transaction(op="task", name="Do Upload"):
+        with sentry_sdk.start_span(name="do_upload"):
+            versioning_system = ctx.obj["versioning_system"]
+            codecov_yaml = ctx.obj["codecov_yaml"] or {}
+            cli_config = codecov_yaml.get("cli", {})
+            ci_adapter = ctx.obj.get("ci_adapter")
+            enterprise_url = ctx.obj.get("enterprise_url")
+            args = get_cli_args(ctx)
+            logger.debug(
+                "Starting upload processing",
+                extra=dict(
+                    extra_log_attributes=args,
+                ),
+            )
+            do_upload_logic(
+                cli_config,
+                versioning_system,
+                ci_adapter,
+                branch=branch,
+                build_code=build_code,
+                build_url=build_url,
+                commit_sha=commit_sha,
+                disable_file_fixes=disable_file_fixes,
+                disable_search=disable_search,
+                dry_run=dry_run,
+                enterprise_url=enterprise_url,
+                env_vars=env_vars,
+                fail_on_error=fail_on_error,
+                files_search_exclude_folders=list(files_search_exclude_folders),
+                files_search_explicitly_listed_files=list(files_search_explicitly_listed_files),
+                files_search_root_folder=files_search_root_folder,
+                flags=flags,
+                gcov_args=gcov_args,
+                gcov_executable=gcov_executable,
+                gcov_ignore=gcov_ignore,
+                gcov_include=gcov_include,
+                git_service=git_service,
+                handle_no_reports_found=handle_no_reports_found,
+                job_code=job_code,
+                name=name,
+                network_filter=network_filter,
+                network_prefix=network_prefix,
+                network_root_folder=network_root_folder,
+                plugin_names=plugin_names,
+                pull_request_number=pull_request_number,
+                report_code=report_code,
+                slug=slug,
+                swift_project=swift_project,
+                token=token,
+                upload_file_type=report_type,
+                use_legacy_uploader=use_legacy_uploader,
+                args=args,
+            )

@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 import click
+import sentry_sdk
 from test_results_parser import (
     Outcome,
     ParserError,
@@ -99,29 +100,31 @@ def process_test_results(
     disable_search=None,
     github_token=None,
 ):
-    file_finder = select_file_finder(
-        dir, exclude_folders, files, disable_search, report_type="test_results"
-    )
+    with sentry_sdk.start_transaction(op="task", name="Process Test Results"):
+        with sentry_sdk.start_span(name="process_test_results"):
+            file_finder = select_file_finder(
+                dir, exclude_folders, files, disable_search, report_type="test_results"
+            )
 
-    upload_collection_results: List[UploadCollectionResultFile] = (
-        file_finder.find_files()
-    )
-    if len(upload_collection_results) == 0:
-        raise click.ClickException(
-            "No JUnit XML files were found. Make sure to specify them using the --file option."
-        )
+            upload_collection_results: List[UploadCollectionResultFile] = (
+                file_finder.find_files()
+            )
+            if len(upload_collection_results) == 0:
+                raise click.ClickException(
+                    "No JUnit XML files were found. Make sure to specify them using the --file option."
+                )
 
-    payload: TestResultsNotificationPayload = generate_message_payload(
-        upload_collection_results
-    )
+            payload: TestResultsNotificationPayload = generate_message_payload(
+                upload_collection_results
+            )
 
-    message: str = f"{build_message(payload)} {CODECOV_SEARCH_MARKER}"
+            message: str = f"{build_message(payload)} {CODECOV_SEARCH_MARKER}"
 
-    args: Dict[str, str] = get_cli_args(ctx)
+            args: Dict[str, str] = get_cli_args(ctx)
 
-    maybe_write_to_github_action(message, github_token, args)
+            maybe_write_to_github_action(message, github_token, args)
 
-    click.echo(message)
+            click.echo(message)
 
 
 def maybe_write_to_github_action(

@@ -7,13 +7,12 @@ import subprocess
 import typing
 from fnmatch import translate
 
-from opentelemetry import trace
+import sentry_sdk
 
 from codecov_cli.helpers.folder_searcher import globs_to_regex, search_files
 from codecov_cli.plugins.types import PreparationPluginReturn
 
 logger = logging.getLogger("codecovcli")
-tracer = trace.get_tracer(__name__)
 
 
 class XcodePlugin(object):
@@ -31,39 +30,39 @@ class XcodePlugin(object):
         # if empty the plugin will build reports for every xcode project it finds
         self.app_name = app_name or ""
 
-    @tracer.start_as_current_span("xcode")
     def run_preparation(self, collector) -> PreparationPluginReturn:
-        logger.debug("Running xcode plugin...")
+        with sentry_sdk.start_span(name="xcode"):
+            logger.debug("Running xcode plugin...")
 
-        if shutil.which("xcrun") is None:
-            logger.warning("xcrun is not installed or can't be found.")
-            return
+            if shutil.which("xcrun") is None:
+                logger.warning("xcrun is not installed or can't be found.")
+                return
 
-        logger.debug(f"DerivedData folder: {self.derived_data_folder}")
+            logger.debug(f"DerivedData folder: {self.derived_data_folder}")
 
-        filename_include_regex = globs_to_regex(["*.profdata"])
+            filename_include_regex = globs_to_regex(["*.profdata"])
 
-        matched_paths = [
-            str(path)
-            for path in search_files(
-                folder_to_search=self.derived_data_folder,
-                folders_to_ignore=[],
-                filename_include_regex=filename_include_regex,
+            matched_paths = [
+                str(path)
+                for path in search_files(
+                    folder_to_search=self.derived_data_folder,
+                    folders_to_ignore=[],
+                    filename_include_regex=filename_include_regex,
+                )
+            ]
+            if not matched_paths:
+                logger.warning("No swift data found.")
+                return
+
+            logger.info(
+                "Running swift coverage on the following list of files:",
+                extra=dict(extra_log_attributes=dict(matched_paths=matched_paths)),
             )
-        ]
-        if not matched_paths:
-            logger.warning("No swift data found.")
-            return
 
-        logger.info(
-            "Running swift coverage on the following list of files:",
-            extra=dict(extra_log_attributes=dict(matched_paths=matched_paths)),
-        )
+            for path in matched_paths:
+                self.swiftcov(path, self.app_name)
 
-        for path in matched_paths:
-            self.swiftcov(path, self.app_name)
-
-        return PreparationPluginReturn(success=True, messages="")
+            return PreparationPluginReturn(success=True, messages="")
 
     def swiftcov(self, path, app_name: str):
         directory = os.path.dirname(path)

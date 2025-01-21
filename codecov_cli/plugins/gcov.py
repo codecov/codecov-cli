@@ -5,13 +5,12 @@ import shutil
 import subprocess
 import typing
 
-from opentelemetry import trace
+import sentry_sdk
 
 from codecov_cli.helpers.folder_searcher import globs_to_regex, search_files
 from codecov_cli.plugins.types import PreparationPluginReturn
 
 logger = logging.getLogger("codecovcli")
-tracer = trace.get_tracer(__name__)
 
 
 class GcovPlugin(object):
@@ -31,40 +30,40 @@ class GcovPlugin(object):
         self.patterns_to_include = patterns_to_include or []
         self.project_root = project_root or pathlib.Path(os.getcwd())
 
-    @tracer.start_as_current_span("gcov")
     def run_preparation(self, collector) -> PreparationPluginReturn:
-        logger.debug(
-            f"Running {self.executable} plugin...",
-        )
-
-        if shutil.which(self.executable) is None:
-            logger.warning(f"{self.executable} is not installed or can't be found.")
-            return
-
-        filename_include_regex = globs_to_regex(["*.gcno", *self.patterns_to_include])
-        filename_exclude_regex = globs_to_regex(self.patterns_to_ignore)
-
-        matched_paths = [
-            str(path)
-            for path in search_files(
-                self.project_root,
-                self.folders_to_ignore,
-                filename_include_regex=filename_include_regex,
-                filename_exclude_regex=filename_exclude_regex,
+        with sentry_sdk.start_span(name="gcov"):
+            logger.debug(
+                f"Running {self.executable} plugin...",
             )
-        ]
 
-        if not matched_paths:
-            logger.warning(f"No {self.executable} data found.")
-            return
+            if shutil.which(self.executable) is None:
+                logger.warning(f"{self.executable} is not installed or can't be found.")
+                return
 
-        logger.warning(f"Running {self.executable} on the following list of files:")
-        for path in matched_paths:
-            logger.warning(path)
+            filename_include_regex = globs_to_regex(["*.gcno", *self.patterns_to_include])
+            filename_exclude_regex = globs_to_regex(self.patterns_to_ignore)
 
-        s = subprocess.run(
-            [self.executable, "-pb", *self.extra_arguments, *matched_paths],
-            cwd=self.project_root,
-            capture_output=True,
-        )
-        return PreparationPluginReturn(success=True, messages=[s.stdout])
+            matched_paths = [
+                str(path)
+                for path in search_files(
+                    self.project_root,
+                    self.folders_to_ignore,
+                    filename_include_regex=filename_include_regex,
+                    filename_exclude_regex=filename_exclude_regex,
+                )
+            ]
+
+            if not matched_paths:
+                logger.warning(f"No {self.executable} data found.")
+                return
+
+            logger.warning(f"Running {self.executable} on the following list of files:")
+            for path in matched_paths:
+                logger.warning(path)
+
+            s = subprocess.run(
+                [self.executable, "-pb", *self.extra_arguments, *matched_paths],
+                cwd=self.project_root,
+                capture_output=True,
+            )
+            return PreparationPluginReturn(success=True, messages=[s.stdout])

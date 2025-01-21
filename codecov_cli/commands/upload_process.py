@@ -3,6 +3,7 @@ import pathlib
 import typing
 
 import click
+import sentry_sdk
 
 from codecov_cli.commands.commit import create_commit
 from codecov_cli.commands.report import create_report
@@ -59,67 +60,69 @@ def upload_process(
     token: typing.Optional[str],
     use_legacy_uploader: bool,
 ):
-    args = get_cli_args(ctx)
-    logger.debug(
-        "Starting upload process",
-        extra=dict(
-            extra_log_attributes=args,
-        ),
-    )
+    with sentry_sdk.start_transaction(op="task", name="Upload Process"):
+        with sentry_sdk.start_span(name="upload_process"):
+            args = get_cli_args(ctx)
+            logger.debug(
+                "Starting upload process",
+                extra=dict(
+                    extra_log_attributes=args,
+                ),
+            )
 
-    ctx.invoke(
-        create_commit,
-        commit_sha=commit_sha,
-        parent_sha=parent_sha,
-        pull_request_number=pull_request_number,
-        branch=branch,
-        slug=slug,
-        token=token,
-        git_service=git_service,
-        fail_on_error=True,
-    )
-    if report_type == "coverage":
-        ctx.invoke(
-            create_report,
-            token=token,
-            code=report_code,
-            fail_on_error=True,
-            commit_sha=commit_sha,
-            slug=slug,
-            git_service=git_service,
-        )
-    ctx.invoke(
-        do_upload,
-        branch=branch,
-        build_code=build_code,
-        build_url=build_url,
-        commit_sha=commit_sha,
-        disable_file_fixes=disable_file_fixes,
-        disable_search=disable_search,
-        dry_run=dry_run,
-        env_vars=env_vars,
-        fail_on_error=fail_on_error,
-        files_search_exclude_folders=files_search_exclude_folders,
-        files_search_explicitly_listed_files=files_search_explicitly_listed_files,
-        files_search_root_folder=files_search_root_folder,
-        flags=flags,
-        gcov_args=gcov_args,
-        gcov_executable=gcov_executable,
-        gcov_ignore=gcov_ignore,
-        gcov_include=gcov_include,
-        git_service=git_service,
-        handle_no_reports_found=handle_no_reports_found,
-        job_code=job_code,
-        name=name,
-        network_filter=network_filter,
-        network_prefix=network_prefix,
-        network_root_folder=network_root_folder,
-        plugin_names=plugin_names,
-        pull_request_number=pull_request_number,
-        report_code=report_code,
-        report_type=report_type,
-        slug=slug,
-        swift_project=swift_project,
-        token=token,
-        use_legacy_uploader=use_legacy_uploader,
-    )
+            ctx.invoke(
+                create_commit,
+                commit_sha=commit_sha,
+                parent_sha=parent_sha,
+                pull_request_number=pull_request_number,
+                branch=branch,
+                slug=slug,
+                token=token,
+                git_service=git_service,
+                fail_on_error=True,
+            )
+            if report_type == "coverage":
+                ctx.invoke(
+                    create_report,
+                    token=token,
+                    code=report_code,
+                    fail_on_error=True,
+                    commit_sha=commit_sha,
+                    slug=slug,
+                    git_service=git_service,
+                )
+            ctx.invoke(
+                do_upload,
+                branch=branch,
+                build_code=build_code,
+                build_url=build_url,
+                commit_sha=commit_sha,
+                disable_file_fixes=disable_file_fixes,
+                disable_search=disable_search,
+                dry_run=dry_run,
+                env_vars=env_vars,
+                fail_on_error=fail_on_error,
+                files_search_exclude_folders=files_search_exclude_folders,
+                files_search_explicitly_listed_files=files_search_explicitly_listed_files,
+                files_search_root_folder=files_search_root_folder,
+                flags=flags,
+                gcov_args=gcov_args,
+                gcov_executable=gcov_executable,
+                gcov_ignore=gcov_ignore,
+                gcov_include=gcov_include,
+                git_service=git_service,
+                handle_no_reports_found=handle_no_reports_found,
+                job_code=job_code,
+                name=name,
+                network_filter=network_filter,
+                network_prefix=network_prefix,
+                network_root_folder=network_root_folder,
+                plugin_names=plugin_names,
+                pull_request_number=pull_request_number,
+                report_code=report_code,
+                report_type=report_type,
+                slug=slug,
+                swift_project=swift_project,
+                token=token,
+                use_legacy_uploader=use_legacy_uploader,
+            )

@@ -4,6 +4,7 @@ import pathlib
 import typing
 
 import click
+import sentry_sdk
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
 from codecov_cli.helpers.args import get_cli_args
@@ -59,25 +60,27 @@ def static_analysis(
     force,
     folders_to_exclude: typing.List[pathlib.Path],
 ):
-    enterprise_url = ctx.obj.get("enterprise_url")
-    args = get_cli_args(ctx)
-    logger.debug(
-        "Starting Static Analysis processing",
-        extra=dict(
-            extra_log_attributes=args,
-        ),
-    )
-    return asyncio.run(
-        run_analysis_entrypoint(
-            ctx.obj["codecov_yaml"],
-            foldertosearch,
-            numberprocesses,
-            pattern,
-            commit,
-            token,
-            force,
-            list(folders_to_exclude),
-            enterprise_url,
-            args,
-        )
-    )
+    with sentry_sdk.start_transaction(op="task", name="Static Analysis"):
+        with sentry_sdk.start_span(name="static_analysis"):
+            enterprise_url = ctx.obj.get("enterprise_url")
+            args = get_cli_args(ctx)
+            logger.debug(
+                "Starting Static Analysis processing",
+                extra=dict(
+                    extra_log_attributes=args,
+                ),
+            )
+            return asyncio.run(
+                run_analysis_entrypoint(
+                    ctx.obj["codecov_yaml"],
+                    foldertosearch,
+                    numberprocesses,
+                    pattern,
+                    commit,
+                    token,
+                    force,
+                    list(folders_to_exclude),
+                    enterprise_url,
+                    args,
+                )
+            )

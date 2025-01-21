@@ -69,9 +69,9 @@ def cli(
     elif (token := ctx.obj["codecov_yaml"].get("codecov", {}).get("token")) is not None:
         ctx.default_map = {ctx.invoked_subcommand: {"token": token}}
     ctx.obj["enterprise_url"] = enterprise_url
+    ctx.obj["disable_telem"] = disable_telem
 
-    if not disable_telem:
-        init_telem(__version__, enterprise_url)
+    init_telem(ctx.obj)
 
 
 cli.add_command(do_upload)

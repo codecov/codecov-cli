@@ -49,8 +49,9 @@ class UploadSender(object):
         args: dict = None,
     ) -> RequestResult:
         current_transaction = sentry_sdk.get_current_scope().transaction
-        current_transaction.set_data("commit_sha", commit_sha)
-        current_transaction.set_data("slug", slug)
+        if current_transaction:
+            current_transaction.set_data("commit_sha", commit_sha)
+            current_transaction.set_data("slug", slug)
 
         with sentry_sdk.start_span(name="upload_sender"):
             with sentry_sdk.start_span(name="upload_sender_preparation"):

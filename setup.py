@@ -10,7 +10,7 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="codecov-cli",
-    version="9.1.1",
+    version="10.0.1",
     packages=find_packages(exclude=["contrib", "docs", "tests*"]),
     description="Codecov Command Line Interface",
     long_description=long_description,
@@ -26,7 +26,7 @@ setup(
         "tree-sitter==0.20.*",
         "test-results-parser==0.5.*",
         "regex",
-        "sentry-sdk[opentelemetry]",
+        "sentry-sdk>=2.20.0",
         "wrapt>=1.17.2",
     ],
     entry_points={

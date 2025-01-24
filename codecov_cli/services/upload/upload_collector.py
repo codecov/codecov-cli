@@ -7,7 +7,7 @@ from collections import namedtuple
 from fnmatch import fnmatch
 
 import click
-from opentelemetry import trace
+import sentry_sdk
 
 from codecov_cli.services.upload.file_finder import FileFinder
 from codecov_cli.services.upload.network_finder import NetworkFinder
@@ -18,7 +18,6 @@ from codecov_cli.types import (
 )
 
 logger = logging.getLogger("codecovcli")
-tracer = trace.get_tracer(__name__)
 
 fix_patterns_to_apply = namedtuple(
     "fix_patterns_to_apply", ["without_reason", "with_reason", "eof"]
@@ -150,35 +149,35 @@ class UploadCollector(object):
             path, fixed_lines_without_reason, fixed_lines_with_reason, eof
         )
 
-    @tracer.start_as_current_span("upload_collector")
     def generate_upload_data(self, report_type="coverage") -> UploadCollectionResult:
-        for prep in self.preparation_plugins:
-            logger.debug(f"Running preparation plugin: {type(prep)}")
-            prep.run_preparation(self)
-        logger.debug("Collecting relevant files")
-        with tracer.start_as_current_span("file_collector"):
-            network = self.network_finder.find_files()
-            report_files = self.file_finder.find_files()
-        logger.info(f"Found {len(report_files)} {report_type} files to report")
-        if not report_files:
-            if report_type == "test_results":
-                error_message = "No JUnit XML reports found. Please review our documentation (https://docs.codecov.com/docs/test-result-ingestion-beta) to generate and upload the file."
-            else:
-                error_message = "No coverage reports found. Please make sure you're generating reports successfully."
-            raise click.ClickException(
-                click.style(
-                    error_message,
-                    fg="red",
+        with sentry_sdk.start_span(name="upload_collector"):
+            for prep in self.preparation_plugins:
+                logger.debug(f"Running preparation plugin: {type(prep)}")
+                prep.run_preparation(self)
+            logger.debug("Collecting relevant files")
+            with sentry_sdk.start_span(name="file_collector"):
+                network = self.network_finder.find_files()
+                report_files = self.file_finder.find_files()
+            logger.info(f"Found {len(report_files)} {report_type} files to report")
+            if not report_files:
+                if report_type == "test_results":
+                    error_message = "No JUnit XML reports found. Please review our documentation (https://docs.codecov.com/docs/test-result-ingestion-beta) to generate and upload the file."
+                else:
+                    error_message = "No coverage reports found. Please make sure you're generating reports successfully."
+                raise click.ClickException(
+                    click.style(
+                        error_message,
+                        fg="red",
+                    )
                 )
+            for file in report_files:
+                logger.info(f"> {file}")
+            return UploadCollectionResult(
+                network=network,
+                files=report_files,
+                file_fixes=(
+                    self._produce_file_fixes(self.network_finder.find_files(True))
+                    if report_type == "coverage"
+                    else []
+                ),
             )
-        for file in report_files:
-            logger.info(f"> {file}")
-        return UploadCollectionResult(
-            network=network,
-            files=report_files,
-            file_fixes=(
-                self._produce_file_fixes(self.network_finder.find_files(True))
-                if report_type == "coverage"
-                else []
-            ),
-        )

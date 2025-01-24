@@ -3,13 +3,12 @@ import os
 from pathlib import Path
 from typing import Iterable, List, Optional, Pattern
 
-from opentelemetry import trace
+import sentry_sdk
 
 from codecov_cli.helpers.folder_searcher import globs_to_regex, search_files
 from codecov_cli.types import UploadCollectionResultFile
 
 logger = logging.getLogger("codecovcli")
-tracer = trace.get_tracer(__name__)
 
 
 coverage_files_patterns = [
@@ -122,6 +121,7 @@ coverage_files_excluded_patterns = [
     "*.yaml",
     "*/classycle/report.xml",
     "*codecov.yml",
+    "codecov.yaml",
     "*~",
     ".*coveragerc",
     ".coverage*",
@@ -190,7 +190,7 @@ class FileFinder(object):
     def __init__(
         self,
         search_root: Optional[Path] = None,
-        folders_to_ignore: Optional[List[str]] = None,
+        folders_to_ignore: Optional[List[Path]] = None,
         explicitly_listed_files: Optional[List[Path]] = None,
         disable_search: bool = False,
         report_type: str = "coverage",
@@ -201,37 +201,41 @@ class FileFinder(object):
         self.disable_search = disable_search
         self.report_type = report_type
 
-    @tracer.start_as_current_span("find_files")
     def find_files(self) -> List[UploadCollectionResultFile]:
-        if self.report_type == "coverage":
-            files_excluded_patterns = coverage_files_excluded_patterns
-            files_patterns = coverage_files_patterns
-        elif self.report_type == "test_results":
-            files_excluded_patterns = test_results_files_excluded_patterns
-            files_patterns = test_results_files_patterns
-        regex_patterns_to_exclude = globs_to_regex(files_excluded_patterns)
-        assert regex_patterns_to_exclude  # this is never `None`
-        files_paths: Iterable[Path] = []
-        user_files_paths = []
-        if self.explicitly_listed_files:
-            user_files_paths = self.get_user_specified_files(regex_patterns_to_exclude)
-        if not self.disable_search:
-            regex_patterns_to_include = globs_to_regex(files_patterns)
-            assert regex_patterns_to_include  # this is never `None`
-            files_paths = search_files(
-                self.search_root,
-                default_folders_to_ignore + self.folders_to_ignore,
-                filename_include_regex=regex_patterns_to_include,
-                filename_exclude_regex=regex_patterns_to_exclude,
-            )
-        result_files = [UploadCollectionResultFile(path) for path in files_paths]
-        user_result_files = [
-            UploadCollectionResultFile(path)
-            for path in user_files_paths
-            if user_files_paths
-        ]
+        with sentry_sdk.start_span(name="find_files"):
+            if self.report_type == "coverage":
+                files_excluded_patterns = coverage_files_excluded_patterns
+                files_patterns = coverage_files_patterns
+            elif self.report_type == "test_results":
+                files_excluded_patterns = test_results_files_excluded_patterns
+                files_patterns = test_results_files_patterns
+            regex_patterns_to_exclude = globs_to_regex(files_excluded_patterns)
+            assert regex_patterns_to_exclude  # this is never `None`
+            files_paths: Iterable[Path] = []
+            user_files_paths = []
+            if self.explicitly_listed_files:
+                user_files_paths = self.get_user_specified_files(regex_patterns_to_exclude)
+            if not self.disable_search:
+                regex_patterns_to_include = globs_to_regex(files_patterns)
+                assert regex_patterns_to_include  # this is never `None`
+                files_paths = search_files(
+                    self.search_root,
+                    default_folders_to_ignore + [str(folder) for folder in self.folders_to_ignore],
+                    filename_include_regex=regex_patterns_to_include,
+                    filename_exclude_regex=regex_patterns_to_exclude,
+                )
+            result_files = [UploadCollectionResultFile(path) for path in files_paths]
 
-        return list(set(result_files + user_result_files))
+            user_result_files = []
+            for path in user_files_paths:
+                if os.path.isfile(path):
+                    user_result_files.append(UploadCollectionResultFile(path))
+                else:
+                    logger.warning(
+                        f"File \"{path}\" could not be found or does not exist. Please enter in the full path or from the search root \"{self.search_root}\"",
+                    )
+
+            return list(set(result_files + user_result_files))
 
     def get_user_specified_files(self, regex_patterns_to_exclude: Pattern):
         user_filenames_to_include = []

@@ -98,6 +98,8 @@ jobs:
       - name: Test with pytest
         run: |
           pytest --cov --junitxml=${{matrix.python-version}}junit.xml
+        env:
+          CODECOV_ENV: test
       - name: Dogfooding codecov-cli
         if: ${{ !github.event.pull_request.head.repo.fork && github.repository_owner == 'codecov' }}
         run: |

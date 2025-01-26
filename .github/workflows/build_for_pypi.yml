@@ -31,7 +31,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: python-package-distributions
-          path: dist/
+          path: wheelhouse/
 
   build_src_for_pypi:
     runs-on: ubuntu-latest

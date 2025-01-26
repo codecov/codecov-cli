@@ -30,7 +30,7 @@ jobs:
       - name: Store the distribution packages
         uses: actions/upload-artifact@v4
         with:
-          name: python-package-distributions
+          name: python-package-distributions-$${{ matrix.os }}
           path: wheelhouse/
 
   build_src_for_pypi:

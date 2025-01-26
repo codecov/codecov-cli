@@ -70,15 +70,15 @@ jobs:
         with:
           name: python-package-distributions
           path: dist/
+      - name: Display all files in dist/
+        run: |
+          ls -al dist/
       - name: Sign the dists with Sigstore
         uses: sigstore/gh-action-sigstore-python@v3.0.0
         with:
           inputs: >-
             ./dist/*.tar.gz
             ./dist/*.whl
-      - name: Display all files in dist/
-        run: |
-          ls -al dist/
       - name: Publish package to PyPi
         if: inputs.publish == true
         uses: pypa/gh-action-pypi-publish@release/v1

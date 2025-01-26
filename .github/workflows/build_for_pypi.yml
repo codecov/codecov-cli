@@ -45,7 +45,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install deps
-        run:
+        run: |
           pip install -r requirements.txt
           pip install build
       - name: Build src dist

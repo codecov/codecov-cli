@@ -59,7 +59,7 @@ jobs:
 
   publish_to_pypi:
     needs:
-      - build_for_pypi
+      - build_dist_for_pypi
       - build_src_for_pypi
     permissions:
       id-token: write  # This is required for requesting the JWT

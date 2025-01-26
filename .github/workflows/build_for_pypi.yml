@@ -67,9 +67,9 @@ jobs:
     steps:
       - name: Download all the dists
         uses: actions/download-artifact@v4
-      - name: Display all files in dist/
+      - name: Display all files
         run: |
-          ls -al dist/
+          ls -al
       - name: Sign the dists with Sigstore
         uses: sigstore/gh-action-sigstore-python@v3.0.0
         with:

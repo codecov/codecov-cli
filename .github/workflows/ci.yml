@@ -78,6 +78,7 @@ jobs:
           submodules: true
       - name: Install dependencies
         run: |
+          curl https://sh.rustup.rs -sSf | sh
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           python -m pip install -e .

@@ -6,7 +6,7 @@
 #
 anyio==4.8.0
     # via httpx
-certifi==2024.12.14
+certifi==2025.1.31
     # via
     #   httpcore
     #   httpx
@@ -29,8 +29,8 @@ idna==3.10
     #   requests
 ijson==3.3.0
     # via codecov-cli (pyproject.toml)
-packaging==24.2
-    # via setuptools-scm
+pathspec==0.12.1
+    # via codecov-cli (pyproject.toml)
 pyyaml==6.0.2
     # via codecov-cli (pyproject.toml)
 regex==2024.11.6
@@ -41,8 +41,6 @@ responses==0.21.0
     # via codecov-cli (pyproject.toml)
 sentry-sdk==2.20.0
     # via codecov-cli (pyproject.toml)
-setuptools-scm==8.1.0
-    # via codecov-cli (pyproject.toml::build-system.requires)
 sniffio==1.3.1
     # via
     #   anyio

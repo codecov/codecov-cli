@@ -69,6 +69,22 @@ jobs:
         run: |
           codecovcli create-report -t ${{ secrets.CODECOV_TOKEN }} --git-service github
 
+  build-test-upload-container:
+    runs-on: ubuntu-latest
+    container: python:latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Dogfooding codecov-cli
+        if: ${{ !github.event.pull_request.head.repo.fork && github.repository_owner == 'codecov' }}
+        run: |
+          codecovcli -v upload-coverage --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}-container
+          codecovcli upload-coverage --report-type test_results --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}-container
+      - name: Try git
+        run: |
+          git -C . ls-files
+
   build-test-upload:
     runs-on: ubuntu-latest
     strategy:
@@ -103,8 +119,8 @@ jobs:
       - name: Dogfooding codecov-cli
         if: ${{ !github.event.pull_request.head.repo.fork && github.repository_owner == 'codecov' }}
         run: |
-          codecovcli -v do-upload --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
-          codecovcli do-upload --report-type test_results --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
+          codecovcli -v upload-coverage --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
+          codecovcli upload-coverage --report-type test_results --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
       - name: Upload artifacts for test-results-processing
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
@@ -160,11 +176,13 @@ jobs:
           codecovcli label-analysis --token ${{ secrets.STATIC_TOKEN }} --base-sha=$BASE_SHA --max-wait-time=120
       - name: Upload smart-labels
         run: |
-          codecovcli --codecov-yml-path=codecov.yml do-upload --plugin pycoverage --plugin compress-pycoverage --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --flag smart-labels
+          codecovcli --codecov-yml-path=codecov.yml upload-coverage --plugin pycoverage --plugin compress-pycoverage --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --flag smart-labels
 
   process-test-results:
     if: ${{ always() }}
-    needs: build-test-upload
+    needs:
+      - build-test-upload
+      - build-test-upload-container
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

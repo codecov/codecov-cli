@@ -29,8 +29,6 @@ idna==3.10
     #   requests
 ijson==3.3.0
     # via codecov-cli (pyproject.toml)
-pathspec==0.12.1
-    # via codecov-cli (pyproject.toml)
 pyyaml==6.0.2
     # via codecov-cli (pyproject.toml)
 regex==2024.11.6

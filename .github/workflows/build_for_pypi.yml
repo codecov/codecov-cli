@@ -27,7 +27,8 @@ jobs:
           python-version: "3.11"
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.22.0
-
+        env:
+          CIBW_SKIP: pp39
       - name: Publish package to PyPi
         if: inputs.publish == true
         uses: pypa/gh-action-pypi-publish@release/v1

@@ -9,10 +9,7 @@ on:
         description: "Publish to PyPi"
 
 jobs:
-  build_for_pypi:
-    permissions:
-      id-token: write  # This is required for requesting the JWT
-      contents: read   # This is required for actions/checkout
+  build_dist_for_pypi:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -20,6 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          persist-credentials: false
           submodules: true
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
@@ -29,6 +27,58 @@ jobs:
         uses: pypa/cibuildwheel@v2.22.0
         env:
           CIBW_SKIP: pp*
+      - name: Store the distribution packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+  build_src_for_pypi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          submodules: true
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run:
+          pip install -r requirements.txt
+          pip install build
+      - name: Build src dist
+        run: |
+          python -m build --sdist
+      - name: Store the distribution packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+  publish_to_pypi:
+    needs:
+      - build_for_pypi
+      - build_src_for_pypi
+    permissions:
+      id-token: write  # This is required for requesting the JWT
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all the dists
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+      - name: Sign the dists with Sigstore
+        uses: sigstore/gh-action-sigstore-python@v3.0.0
+        with:
+          inputs: >-
+            ./dist/*.tar.gz
+            ./dist/*.whl
+      - name: Display all files in dist/
+        run: |
+          ls -al dist/
       - name: Publish package to PyPi
         if: inputs.publish == true
         uses: pypa/gh-action-pypi-publish@release/v1

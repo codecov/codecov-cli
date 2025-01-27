@@ -5,6 +5,8 @@ build-backend = "setuptools.build_meta"
 [project]
 authors = [
     {name = "Tom Hu", email = "thomas.hu@sentry.io"},
+]
+maintainers = [
     {name = "Codecov Support", email = "support@codecov.io"},
 ]
 description = "Codecov Command Line Interface"

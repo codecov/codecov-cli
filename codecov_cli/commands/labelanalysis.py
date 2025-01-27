@@ -146,7 +146,6 @@ def label_analysis(
             payload["requested_labels"] = requested_labels
 
             if eid:
-                print(eid)
                 # Initial request with no labels was successful
                 # Now we PATCH the labels in
                 patch_url = f"{upload_url}/labels/labels-analysis/{eid}"

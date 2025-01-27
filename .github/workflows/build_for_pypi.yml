@@ -28,7 +28,7 @@ jobs:
       - name: Store the distribution packages
         uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          name: cibw-wheels-${{ matrix.os }}
           path: ./wheelhouse/*.whl
 
   build_src_for_pypi:
@@ -57,7 +57,7 @@ jobs:
       - name: Store the distribution packages
         uses: actions/upload-artifact@v4
         with:
-          name: codecov_cli-${{ steps.version.outputs.version }}.tar.gz
+          name: cibw-sdist
           path: dist/
 
   publish_to_pypi:

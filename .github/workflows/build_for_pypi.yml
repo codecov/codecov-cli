@@ -5,6 +5,10 @@ on:
   pull_request:
     branches:
       - main
+  push:
+    # Pattern matched against refs/tags
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   build_dist_for_pypi:

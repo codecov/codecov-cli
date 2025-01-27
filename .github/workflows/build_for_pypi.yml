@@ -52,7 +52,8 @@ jobs:
       - name: Get version
         id: version
         run: |
-          echo "version=$(python -c 'import importlib.metadata; print(importlib.metadata.version(\'codecov-cli\'))')" >> "$GITHUB_OUTPUT"
+          version=$(python -c 'import importlib.metadata; print(importlib.metadata.version("codecov-cli"))')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
       - name: Store the distribution packages
         uses: actions/upload-artifact@v4
         with:

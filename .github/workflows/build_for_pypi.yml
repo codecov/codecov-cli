@@ -53,6 +53,8 @@ jobs:
       - name: Build src dist
         run: |
           python -m build --sdist
+        env:
+          PIP_CONSTRAINT: requirements.txt
       - name: Get version
         id: version
         run: |

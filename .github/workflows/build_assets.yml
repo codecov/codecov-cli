@@ -69,12 +69,12 @@ jobs:
         run: ${{matrix.CMD_BUILD}}
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4
-        if: startsWith(github.ref, 'refs/tags/')
+        if: github.ref_type == 'tag'
         with:
           name: ${{ matrix.OUT_FILE_NAME }}
           path: ./dist/${{ matrix.OUT_FILE_NAME }}
       - name: Upload Release Asset
-        if: startsWith(github.ref, 'refs/tags/')
+        if: github.ref_type == 'tag'
         id: upload-release-asset
         uses: svenstaro/upload-release-action@v2
         with:
@@ -119,12 +119,12 @@ jobs:
           ./scripts/build_${{ matrix.distro_name }}_arm.sh ${{ matrix.distro_name }}_${{ matrix.arch }}
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4
-      if: startsWith(github.ref, 'refs/tags/')
+      if: github.ref_type == 'tag'
       with:
         name: codecovcli_${{ matrix.distro_name }}_${{ matrix.arch }}
         path: ./dist/codecovcli_${{ matrix.distro_name }}_${{ matrix.arch }}
     - name: Upload Release Asset
-      if: startsWith(github.ref, 'refs/tags/')
+      if: github.ref_type == 'tag'
       id: upload-release-asset
       uses: svenstaro/upload-release-action@v2
       with:

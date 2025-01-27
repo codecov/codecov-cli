@@ -84,7 +84,7 @@ jobs:
             ./**/*.tar.gz
             ./**/*.whl
       - name: Publish package to PyPi
-        if: startsWith(github.ref, 'refs/tags/')
+        if: github.ref_type == 'tag'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           attestations: false

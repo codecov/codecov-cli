@@ -1,3 +1,4 @@
+---
 name: Build and Optionally Publish to PyPi
 
 on:
@@ -27,8 +28,8 @@ jobs:
       - name: Store the distribution packages
         uses: actions/upload-artifact@v4
         with:
-          name: python-package-distributions-$${{ matrix.os }}
-          path: wheelhouse/
+          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
 
   build_src_for_pypi:
     runs-on: ubuntu-latest
@@ -48,10 +49,14 @@ jobs:
       - name: Build src dist
         run: |
           python -m build --sdist
+      - name: Get version
+        id: version
+        run: |
+          echo "version=$(python -c 'import importlib.metadata; print(importlib.metadata.version(\'codecov-cli\'))')" >> "$GITHUB_OUTPUT"
       - name: Store the distribution packages
         uses: actions/upload-artifact@v4
         with:
-          name: python-package-distributions
+          name: codecov_cli-${{ steps.version.outputs.version }}.tar.gz
           path: dist/
 
   publish_to_pypi:
@@ -71,8 +76,8 @@ jobs:
         uses: sigstore/gh-action-sigstore-python@v3.0.0
         with:
           inputs: >-
-            ./dist/*.tar.gz
-            ./dist/*.whl
+            ./**/*.tar.gz
+            ./**/*.whl
       - name: Publish package to PyPi
         if: startsWith(github.ref, 'refs/tags/')
         uses: pypa/gh-action-pypi-publish@release/v1

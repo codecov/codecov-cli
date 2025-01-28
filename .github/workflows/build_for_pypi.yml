@@ -30,7 +30,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cibw-sdist
-          path: dist/
+          path: ./**/*.tar.gz
 
   build_dist_for_pypi:
     needs:
@@ -71,11 +71,11 @@ jobs:
       - name: Download source
         uses: actions/download-artifact@v4
         with:
-          pattern: .tar.gz
+          pattern: ./**/*.tar.gz
       - name: Download all wheels
         uses: actions/download-artifact@v4
         with:
-          pattern: .whl
+          pattern: ./**/*.whl
       - name: Publish package to PyPi
         if: github.ref_type == 'tag'
         uses: pypa/gh-action-pypi-publish@release/v1

@@ -49,12 +49,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: cibw-sdist
+      - name: ls
+        run: ls -al
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.22.0
         with:
           package-dir: dist/
-      - name: ls
-        run: ls -al
       - name: Store the distribution packages
         uses: actions/upload-artifact@v4
         with:

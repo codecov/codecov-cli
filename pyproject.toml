@@ -10,7 +10,6 @@ maintainers = [
     {name = "Codecov Support", email = "support@codecov.io"},
 ]
 description = "Codecov Command Line Interface"
-dynamic = ["version"]
 dependencies = [
     "click==8.*",
     "httpx==0.27.*",

@@ -49,10 +49,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: cibw-sdist
+      - name: Get sdist filename
+        id: get-sdist
+        run: |
+          echo "sdist_filename=$(ls dist/)" >> $GITHUB_OUTPUT
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.22.0
         with:
-          package-dir: dist/codecov*.tar.gz
+          package-dir: dist/${{ get-dist.outputs.sdist_filename }}
       - name: Store the distribution packages
         uses: actions/upload-artifact@v4
         with:

@@ -56,7 +56,7 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.22.0
         with:
-          package-dir: dist/${{ get-dist.outputs.sdist_filename }}
+          package-dir: dist/${{ steps.get-sdist.outputs.sdist_filename }}
       - name: Store the distribution packages
         uses: actions/upload-artifact@v4
         with:

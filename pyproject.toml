@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=64", "setuptools_scm>=8"]
+requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -27,6 +27,7 @@ license = {file = "LICENSE"}
 name = "codecov-cli"
 readme = "README.md"
 requires-python = ">= 3.9"
+version = "10.0.1"
 
 [project.scripts]
 codecov = "codecov_cli.main:run"
@@ -35,5 +36,8 @@ codecovcli = "codecov_cli.main:run"
 [tool.setuptools]
 packages = ["codecov_cli"]
 
-[tool.setuptools_scm]
-version_file = "codecov_cli/_version.py"
+[tool.cibuildwheel]
+skip = "pp*"
+
+[tool.cibuildwheel.config-settings]
+pure-python = "false"

@@ -11,30 +11,6 @@ on:
       - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
-  build_dist_for_pypi:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-13, macos-latest]
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-          submodules: true
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.22.0
-        env:
-          CIBW_SKIP: pp*
-      - name: Store the distribution packages
-        uses: actions/upload-artifact@v4
-        with:
-          name: cibw-wheels-${{ matrix.os }}
-          path: ./wheelhouse/*.whl
-
   build_src_for_pypi:
     runs-on: ubuntu-latest
     steps:
@@ -42,52 +18,66 @@ jobs:
         with:
           persist-credentials: false
           submodules: true
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
-      - name: Install deps
+      - name: Install dependencies
         run: |
-          pip install -r requirements.txt
           pip install build
       - name: Build src dist
         run: |
           python -m build --sdist
         env:
           PIP_CONSTRAINT: requirements.txt
-      - name: Get version
-        id: version
-        run: |
-          version=$(python -c 'import importlib.metadata; print(importlib.metadata.version("codecov-cli"))')
-          echo "version=$version" >> "$GITHUB_OUTPUT"
       - name: Store the distribution packages
         uses: actions/upload-artifact@v4
         with:
           name: cibw-sdist
           path: dist/
 
+  build_dist_for_pypi:
+    needs:
+      - build_src_for_pypi
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - macos-13
+          - macos-latest
+          - ubuntu-24.04-arm
+          - ubuntu-latest
+          - windows-latest
+    steps:
+      - name: Download the sdist
+        uses: actions/download-artifact@v4
+        with:
+          name: cibw-sdist
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.22.0
+        with:
+          package-dir: dists/codecov*.tar.gz
+      - name: Store the distribution packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: cibw-wheels-${{ matrix.os }}
+          path: ./wheelhouse/*.whl
+
+
   publish_to_pypi:
     needs:
       - build_dist_for_pypi
       - build_src_for_pypi
     permissions:
-      id-token: write  # This is required for requesting the JWT
+      id-token: write  # This is required for OIDC
     runs-on: ubuntu-latest
     steps:
-      - name: Download all the dists
+      - name: Download source
         uses: actions/download-artifact@v4
-      - name: Display all files
-        run: |
-          ls -d ./*/*
-      - name: Sign the dists with Sigstore
-        uses: sigstore/gh-action-sigstore-python@v3.0.0
         with:
-          inputs: >-
-            ./**/*.tar.gz
-            ./**/*.whl
+          pattern: *.tar.gz
+      - name: Download all wheels
+        uses: actions/download-artifact@v4
+        with:
+          pattern: *.whl
       - name: Publish package to PyPi
         if: github.ref_type == 'tag'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          attestations: false
           verbose: true

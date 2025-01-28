@@ -71,11 +71,11 @@ jobs:
       - name: Download source
         uses: actions/download-artifact@v4
         with:
-          pattern: *.tar.gz
+          pattern: .tar.gz
       - name: Download all wheels
         uses: actions/download-artifact@v4
         with:
-          pattern: *.whl
+          pattern: .whl
       - name: Publish package to PyPi
         if: github.ref_type == 'tag'
         uses: pypa/gh-action-pypi-publish@release/v1

@@ -52,7 +52,8 @@ jobs:
       - name: Get sdist filename
         id: get-sdist
         run: |
-          echo "sdist_filename=$(ls dist/)" >> $GITHUB_OUTPUT
+          echo "sdist_filename=$(ls dist/)" >> "${GITHUB_OUTPUT}"
+        shell: bash
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.22.0
         with:
@@ -72,14 +73,10 @@ jobs:
       id-token: write  # This is required for OIDC
     runs-on: ubuntu-latest
     steps:
-      - name: Download source
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: ./**/*.tar.gz
-      - name: Download all wheels
-        uses: actions/download-artifact@v4
-        with:
-          pattern: ./**/*.whl
+          pattern: cibw-*
       - name: Publish package to PyPi
         if: github.ref_type == 'tag'
         uses: pypa/gh-action-pypi-publish@release/v1

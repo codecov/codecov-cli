@@ -36,9 +36,7 @@ codecovcli = "codecov_cli.main:run"
 packages = ["codecov_cli"]
 
 [tool.cibuildwheel]
-environment = {
-    "PIP_CONSTRAINT": "requirements.txt"
-}
+environment = {PIP_CONSTRAINT = "requirements.txt"}
 skip = "pp*"
 
 

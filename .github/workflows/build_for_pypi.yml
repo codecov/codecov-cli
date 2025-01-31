@@ -66,6 +66,7 @@ jobs:
 
 
   publish_to_pypi:
+    if: github.ref_type == 'tag'
     needs:
       - build_dist_for_pypi
       - build_src_for_pypi
@@ -78,7 +79,6 @@ jobs:
         with:
           pattern: cibw-*
       - name: Publish package to PyPi
-        if: github.ref_type == 'tag'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           verbose: true

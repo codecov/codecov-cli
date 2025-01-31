@@ -7,9 +7,11 @@ from codecov_cli import __version__
 
 
 def init_telem(ctx):
-    if ctx['disable_telem']:
+    if ctx["disable_telem"]:
         return
-    if ctx['enterprise_url']:  # dont run on dedicated cloud
+    if ctx["enterprise_url"]:  # dont run on dedicated cloud
+        return
+    if os.getenv("CODECOV_ENV", "production") == "test":
         return
 
     sentry_sdk.init(

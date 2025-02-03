@@ -101,6 +101,10 @@ The following tokens are suitable for uploading:
 
 # Usage 
 If the installation is successful, running `codecovcli --help` will output the available commands along with the different general options that can be used with them. 
+
+> [!IMPORTANT]  
+> For up-to-date command usage, please check the `codecovcli_commands` [file](https://github.com/codecov/codecov-cli/blob/main/codecovcli_commands)
+
 ```
 Usage: codecovcli [OPTIONS] COMMAND [ARGS]...
 ```

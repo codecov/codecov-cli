@@ -79,7 +79,7 @@ def retry_request(func):
                 )
                 sleep(backoff_time(retry))
                 retry += 1
-        raise Exception("Request failed after too many retries")
+        raise Exception(f"Request failed after too many retries. URL: {kwargs.get('url', args[0] if args else 'Unknown')}")
 
     return wrapper
 

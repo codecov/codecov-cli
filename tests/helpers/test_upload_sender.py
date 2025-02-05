@@ -366,7 +366,6 @@ class TestUploadSender(object):
         matcher = re.compile(
             rf"(warning.*((Response status code was {error_code})|(Request failed\. Retrying)).*(\n)?){{6}}"
         )
-
         assert matcher.match(capsys.readouterr().err) is not None
 
     def test_upload_sender_result_fail_put_400(

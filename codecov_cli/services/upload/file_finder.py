@@ -196,7 +196,7 @@ class FileFinder(object):
         report_type: str = "coverage",
     ):
         self.search_root = search_root or Path(os.getcwd())
-        self.folders_to_ignore = list(folders_to_ignore) or []
+        self.folders_to_ignore = list(folders_to_ignore) if folders_to_ignore else []
         self.explicitly_listed_files = explicitly_listed_files or None
         self.disable_search = disable_search
         self.report_type = report_type

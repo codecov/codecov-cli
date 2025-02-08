@@ -2,8 +2,9 @@ import functools
 import os
 import pathlib
 import re
-from fnmatch import translate
 from typing import Generator, List, Optional, Pattern
+
+from codecov_cli.helpers.glob import translate
 
 
 def _is_included(
@@ -99,5 +100,5 @@ def globs_to_regex(patterns: List[str]) -> Optional[Pattern]:
     if not patterns:
         return None
 
-    regex_str = ["(" + translate(pattern) + ")" for pattern in patterns]
-    return re.compile("|".join(regex_str))
+    regex_patterns = [translate(pattern, recursive=True, include_hidden=True) for pattern in patterns]
+    return re.compile("|".join(regex_patterns))

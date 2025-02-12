@@ -151,7 +151,7 @@ def test_request_retry_too_many_errors(mocker):
     )
     with pytest.raises(Exception) as exp:
         _ = send_post_request("my_url")
-    assert str(exp.value) == "Request failed after too many retries"
+    assert str(exp.value) == "Request failed after too many retries. URL: my_url"
 
 
 def test_user_agent(mocker):

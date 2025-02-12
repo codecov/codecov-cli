@@ -65,22 +65,6 @@ jobs:
           name: cibw-wheels-${{ matrix.os }}
           path: ./wheelhouse/*.whl
 
-  test_publish_to_pypi:
-    if: inputs.publish == false || true
-    needs:
-      - build_dist_for_pypi
-      - build_src_for_pypi
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          pattern: cibw-*
-          path: dist/
-      - name: Display artifacts
-        run: |
-          ls -alrt */*/*
-
   publish_to_pypi:
     needs:
       - build_dist_for_pypi

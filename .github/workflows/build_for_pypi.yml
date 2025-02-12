@@ -3,12 +3,13 @@ name: Build and Optionally Publish to PyPi
 
 on:
   pull_request:
-    branches:
-      - main
-  push:
-    # Pattern matched against refs/tags
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+    branches: main
+  workflow_call:
+    inputs:
+      publish:
+        type: boolean
+        default: false
+        description: "Publish to PyPi"
 
 jobs:
   build_src_for_pypi:
@@ -64,9 +65,24 @@ jobs:
           name: cibw-wheels-${{ matrix.os }}
           path: ./wheelhouse/*.whl
 
+  test_publish_to_pypi:
+    if: inputs.publish == false || true
+    needs:
+      - build_dist_for_pypi
+      - build_src_for_pypi
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: cibw-*
+      - name: Display artifacts
+        run: |
+          ls -alrt
+          ls -alrt dist/
 
   publish_to_pypi:
-    if: github.ref_type == 'tag'
+    if: inputs.publish == true || false
     needs:
       - build_dist_for_pypi
       - build_src_for_pypi

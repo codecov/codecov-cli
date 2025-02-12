@@ -1,9 +1,11 @@
-## This is a copy of the function of the same name in the python
-## standard library. The reason for its inclusion is that it has
-## been added in python3.13, but not earlier versions
-## https://github.com/python/cpython/blob/main/Lib/glob.py
-## https://github.com/python/cpython/blob/main/Lib/fnmatch.py
-## https://github.com/python/cpython/blob/main/Lib/functools.py
+"""
+This is a copy of the function of the same name in the python
+standard library. The reason for its inclusion is that it has
+been added in python3.13, but not earlier versions
+https://github.com/python/cpython/blob/main/Lib/glob.py
+https://github.com/python/cpython/blob/main/Lib/fnmatch.py
+https://github.com/python/cpython/blob/main/Lib/functools.py
+"""
 
 import os
 import re

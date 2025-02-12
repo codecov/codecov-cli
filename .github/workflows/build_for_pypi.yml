@@ -78,8 +78,7 @@ jobs:
           pattern: cibw-*
       - name: Display artifacts
         run: |
-          ls -alrt
-          ls -alrt dist/
+          ls -alrt */*
 
   publish_to_pypi:
     if: inputs.publish == true || false

@@ -21,6 +21,7 @@ from codecov_cli.helpers.request import (
     send_get_request,
     send_post_request,
 )
+from codecov_cli.helpers.upload_type import ReportType
 from codecov_cli.services.upload.file_finder import select_file_finder
 from codecov_cli.types import CommandContext, RequestResult, UploadCollectionResultFile
 
@@ -103,7 +104,11 @@ def process_test_results(
     with sentry_sdk.start_transaction(op="task", name="Process Test Results"):
         with sentry_sdk.start_span(name="process_test_results"):
             file_finder = select_file_finder(
-                dir, exclude_folders, files, disable_search, report_type="test_results"
+                dir,
+                exclude_folders,
+                files,
+                disable_search,
+                report_type=ReportType.TEST_RESULTS,
             )
 
             upload_collection_results: List[UploadCollectionResultFile] = (

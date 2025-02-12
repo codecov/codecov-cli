@@ -11,6 +11,7 @@ from codecov_cli.commands.upload import do_upload, global_upload_options
 from codecov_cli.helpers.args import get_cli_args
 from codecov_cli.helpers.options import global_options
 from codecov_cli.opentelemetry import close_telem
+from codecov_cli.helpers.upload_type import report_type_from_str, ReportType
 from codecov_cli.services.upload_coverage import upload_coverage_logic
 from codecov_cli.types import CommandContext
 
@@ -56,7 +57,7 @@ def upload_coverage(
     plugin_names: typing.List[str],
     pull_request_number: typing.Optional[str],
     report_code: str,
-    report_type: str,
+    report_type_str: str,
     slug: typing.Optional[str],
     swift_project: typing.Optional[str],
     token: typing.Optional[str],
@@ -72,7 +73,9 @@ def upload_coverage(
                 ),
             )
 
-            if not use_legacy_uploader and report_type == "coverage":
+            report_type = report_type_from_str(report_type_str)
+
+            if not use_legacy_uploader and report_type == ReportType.COVERAGE:
                 versioning_system = ctx.obj["versioning_system"]
                 codecov_yaml = ctx.obj["codecov_yaml"] or {}
                 cli_config = codecov_yaml.get("cli", {})
@@ -116,7 +119,7 @@ def upload_coverage(
                     slug=slug,
                     swift_project=swift_project,
                     token=token,
-                    upload_file_type=report_type,
+                    report_type=report_type,
                     use_legacy_uploader=use_legacy_uploader,
                     args=args,
                 )
@@ -132,7 +135,7 @@ def upload_coverage(
                     git_service=git_service,
                     fail_on_error=True,
                 )
-                if report_type == "coverage":
+                if report_type == ReportType.COVERAGE:
                     ctx.invoke(
                         create_report,
                         token=token,
@@ -171,7 +174,7 @@ def upload_coverage(
                     plugin_names=plugin_names,
                     pull_request_number=pull_request_number,
                     report_code=report_code,
-                    report_type=report_type,
+                    report_type_str=report_type_str,
                     slug=slug,
                     swift_project=swift_project,
                     token=token,

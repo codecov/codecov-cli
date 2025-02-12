@@ -8,6 +8,7 @@ from codecov_cli.fallbacks import FallbackFieldEnum
 from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
 from codecov_cli.helpers.request import log_warnings_and_errors_if_any
 from codecov_cli.helpers.versioning_systems import VersioningSystemInterface
+from codecov_cli.helpers.upload_type import ReportType
 from codecov_cli.plugins import select_preparation_plugins
 from codecov_cli.services.upload.file_finder import select_file_finder
 from codecov_cli.services.upload.legacy_upload_sender import LegacyUploadSender
@@ -59,7 +60,7 @@ def do_upload_logic(
     slug: typing.Optional[str],
     swift_project: typing.Optional[str],
     token: typing.Optional[str],
-    upload_file_type: str = "coverage",
+    report_type: ReportType = ReportType.COVERAGE,
     use_legacy_uploader: bool = False,
 ):
     plugin_config = {
@@ -71,18 +72,18 @@ def do_upload_logic(
         "project_root": files_search_root_folder,
         "swift_project": swift_project,
     }
-    if upload_file_type == "coverage":
+    if report_type == ReportType.COVERAGE:
         preparation_plugins = select_preparation_plugins(
             cli_config, plugin_names, plugin_config
         )
-    elif upload_file_type == "test_results":
+    elif report_type == ReportType.TEST_RESULTS:
         preparation_plugins = []
     file_selector = select_file_finder(
         files_search_root_folder,
         files_search_exclude_folders,
         files_search_explicitly_listed_files,
         disable_search,
-        upload_file_type,
+        report_type,
     )
     network_finder = select_network_finder(
         versioning_system,
@@ -98,7 +99,7 @@ def do_upload_logic(
         plugin_config,
     )
     try:
-        upload_data = collector.generate_upload_data(upload_file_type)
+        upload_data = collector.generate_upload_data(report_type)
     except click.ClickException as exp:
         if handle_no_reports_found:
             logger.info(
@@ -138,7 +139,7 @@ def do_upload_logic(
             token=token,
             env_vars=env_vars,
             report_code=report_code,
-            upload_file_type=upload_file_type,
+            report_type=report_type,
             name=name,
             branch=branch,
             slug=slug,

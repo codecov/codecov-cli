@@ -10,6 +10,7 @@ import sentry_sdk
 from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.helpers.config import CODECOV_INGEST_URL
 from codecov_cli.helpers.encoder import encode_slug
+from codecov_cli.helpers.upload_type import ReportType
 from codecov_cli.helpers.request import (
     get_token_header,
     send_post_request,
@@ -32,7 +33,7 @@ class UploadSender(object):
         token: typing.Optional[str],
         env_vars: typing.Dict[str, str],
         report_code: str,
-        upload_file_type: str = "coverage",
+        report_type: ReportType = ReportType.COVERAGE,
         name: typing.Optional[str] = None,
         branch: typing.Optional[str] = None,
         slug: typing.Optional[str] = None,
@@ -55,6 +56,10 @@ class UploadSender(object):
 
         with sentry_sdk.start_span(name="upload_sender"):
             with sentry_sdk.start_span(name="upload_sender_preparation"):
+                file_not_found = False
+                if report_type == ReportType.TEST_RESULTS and not upload_data.files:
+                    file_not_found = True
+
                 data = {
                     "ci_service": ci_service,
                     "ci_url": build_url,
@@ -64,7 +69,9 @@ class UploadSender(object):
                     "job_code": job_code,
                     "name": name,
                     "version": codecov_cli_version,
+                    "file_not_found": file_not_found,
                 }
+
                 if upload_coverage:
                     data["branch"] = branch
                     data["code"] = report_code
@@ -76,7 +83,7 @@ class UploadSender(object):
                 upload_url = enterprise_url or CODECOV_INGEST_URL
                 url, data = self.get_url_and_possibly_update_data(
                     data,
-                    upload_file_type,
+                    report_type,
                     upload_url,
                     git_service,
                     branch,
@@ -87,7 +94,7 @@ class UploadSender(object):
                 )
                 # Data that goes to storage
                 reports_payload = self._generate_payload(
-                    upload_data, env_vars, upload_file_type
+                    upload_data, env_vars, report_type
                 )
 
             with sentry_sdk.start_span(name="upload_sender_storage_request"):
@@ -97,6 +104,13 @@ class UploadSender(object):
                     data=data,
                     headers=headers,
                 )
+
+                if file_not_found:
+                    logger.info(
+                        "No test results reports found. Triggering notifications without uploading."
+                    )
+                    return resp_from_codecov
+
                 if resp_from_codecov.status_code >= 400:
                     return resp_from_codecov
                 resp_json_obj = json.loads(resp_from_codecov.text)
@@ -120,10 +134,10 @@ class UploadSender(object):
         self,
         upload_data: UploadCollectionResult,
         env_vars: typing.Dict[str, str],
-        upload_file_type="coverage",
+        report_type: ReportType = ReportType.COVERAGE,
     ) -> bytes:
         network_files = upload_data.network
-        if upload_file_type == "coverage":
+        if report_type == ReportType.COVERAGE:
             payload = {
                 "report_fixes": {
                     "format": "legacy",
@@ -133,7 +147,7 @@ class UploadSender(object):
                 "coverage_files": self._get_files(upload_data),
                 "metadata": {},
             }
-        elif upload_file_type == "test_results":
+        elif report_type == ReportType.TEST_RESULTS:
             payload = {
                 "test_results_files": self._get_files(upload_data),
             }
@@ -191,7 +205,7 @@ class UploadSender(object):
     def get_url_and_possibly_update_data(
         self,
         data,
-        report_type,
+        report_type: ReportType,
         upload_url,
         git_service,
         branch,
@@ -199,18 +213,20 @@ class UploadSender(object):
         commit_sha,
         report_code,
         upload_coverage=False,
+        file_not_found=False,
     ):
-        if report_type == "coverage":
+        if report_type == ReportType.COVERAGE:
             base_url = f"{upload_url}/upload/{git_service}/{encoded_slug}"
             if upload_coverage:
                 url = f"{base_url}/upload-coverage"
             else:
                 url = f"{base_url}/commits/{commit_sha}/reports/{report_code}/uploads"
-        elif report_type == "test_results":
+        elif report_type == ReportType.TEST_RESULTS:
             data["slug"] = encoded_slug
             data["branch"] = branch
             data["commit"] = commit_sha
             data["service"] = git_service
+            data["file_not_found"] = file_not_found
             url = f"{upload_url}/upload/test_results/v1"
 
         return url, data

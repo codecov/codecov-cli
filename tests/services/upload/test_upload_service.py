@@ -2,6 +2,7 @@ import click
 import pytest
 from click.testing import CliRunner
 
+from codecov_cli.helpers.upload_type import ReportType
 from codecov_cli.services.upload import (
     LegacyUploadSender,
     UploadCollector,
@@ -47,7 +48,7 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
             cli_config,
             versioning_system,
             ci_adapter,
-            upload_file_type="coverage",
+            report_type=ReportType.COVERAGE,
             commit_sha="commit_sha",
             report_code="report_code",
             build_code="build_code",
@@ -98,21 +99,23 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
             "swift_project": "App",
         },
     )
-    mock_select_file_finder.assert_called_with(None, None, None, False, "coverage")
+    mock_select_file_finder.assert_called_with(
+        None, None, None, False, ReportType.COVERAGE
+    )
     mock_select_network_finder.assert_called_with(
         versioning_system,
         network_filter=None,
         network_prefix=None,
         network_root_folder=None,
     )
-    mock_generate_upload_data.assert_called_with("coverage")
+    mock_generate_upload_data.assert_called_with(ReportType.COVERAGE)
     mock_send_upload_data.assert_called_with(
         upload_data=mock_generate_upload_data.return_value,
         commit_sha="commit_sha",
         token="token",
         env_vars=None,
         report_code="report_code",
-        upload_file_type="coverage",
+        report_type=ReportType.COVERAGE,
         name="name",
         branch="branch",
         slug="slug",
@@ -161,7 +164,7 @@ def test_do_upload_logic_happy_path(mocker):
             cli_config,
             versioning_system,
             ci_adapter,
-            upload_file_type="coverage",
+            report_type=ReportType.COVERAGE,
             commit_sha="commit_sha",
             report_code="report_code",
             build_code="build_code",
@@ -210,21 +213,23 @@ def test_do_upload_logic_happy_path(mocker):
             "swift_project": "App",
         },
     )
-    mock_select_file_finder.assert_called_with(None, None, None, False, "coverage")
+    mock_select_file_finder.assert_called_with(
+        None, None, None, False, ReportType.COVERAGE
+    )
     mock_select_network_finder.assert_called_with(
         versioning_system,
         network_filter=None,
         network_prefix=None,
         network_root_folder=None,
     )
-    mock_generate_upload_data.assert_called_with("coverage")
+    mock_generate_upload_data.assert_called_with(ReportType.COVERAGE)
     mock_send_upload_data.assert_called_with(
         upload_data=mock_generate_upload_data.return_value,
         commit_sha="commit_sha",
         token="token",
         env_vars=None,
         report_code="report_code",
-        upload_file_type="coverage",
+        report_type=ReportType.COVERAGE,
         name="name",
         branch="branch",
         slug="slug",
@@ -269,7 +274,7 @@ def test_do_upload_logic_dry_run(mocker):
             cli_config,
             versioning_system,
             ci_adapter,
-            upload_file_type="coverage",
+            report_type=ReportType.COVERAGE,
             commit_sha="commit_sha",
             report_code="report_code",
             build_code="build_code",
@@ -299,7 +304,9 @@ def test_do_upload_logic_dry_run(mocker):
             enterprise_url=None,
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
-    mock_select_file_finder.assert_called_with(None, None, None, False, "coverage")
+    mock_select_file_finder.assert_called_with(
+        None, None, None, False, ReportType.COVERAGE
+    )
     mock_select_network_finder.assert_called_with(
         versioning_system,
         network_filter=None,
@@ -379,7 +386,7 @@ def test_do_upload_logic_verbose(mocker, use_verbose_option):
             slug="slug",
             swift_project="App",
             token="token",
-            upload_file_type="coverage",
+            report_type=ReportType.COVERAGE,
             use_legacy_uploader=True,
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
@@ -434,7 +441,7 @@ def test_do_upload_no_cov_reports_found(mocker):
             cli_config,
             versioning_system,
             ci_adapter,
-            upload_file_type="coverage",
+            report_type=ReportType.COVERAGE,
             commit_sha="commit_sha",
             report_code="report_code",
             build_code="build_code",
@@ -489,14 +496,16 @@ def test_do_upload_no_cov_reports_found(mocker):
             "swift_project": "App",
         },
     )
-    mock_select_file_finder.assert_called_with(None, None, None, False, "coverage")
+    mock_select_file_finder.assert_called_with(
+        None, None, None, False, ReportType.COVERAGE
+    )
     mock_select_network_finder.assert_called_with(
         versioning_system,
         network_filter=None,
         network_prefix=None,
         network_root_folder=None,
     )
-    mock_generate_upload_data.assert_called_with("coverage")
+    mock_generate_upload_data.assert_called_with(ReportType.COVERAGE)
     mock_upload_completion_call.assert_called_with(
         commit_sha="commit_sha",
         slug="slug",
@@ -537,7 +546,7 @@ def test_do_upload_rase_no_cov_reports_found_error(mocker):
             cli_config,
             versioning_system,
             ci_adapter,
-            upload_file_type="coverage",
+            report_type=ReportType.COVERAGE,
             commit_sha="commit_sha",
             report_code="report_code",
             build_code="build_code",
@@ -583,14 +592,16 @@ def test_do_upload_rase_no_cov_reports_found_error(mocker):
             "swift_project": "App",
         },
     )
-    mock_select_file_finder.assert_called_with(None, None, None, False, "coverage")
+    mock_select_file_finder.assert_called_with(
+        None, None, None, False, ReportType.COVERAGE
+    )
     mock_select_network_finder.assert_called_with(
         versioning_system,
         network_filter=None,
         network_prefix=None,
         network_root_folder=None,
     )
-    mock_generate_upload_data.assert_called_with("coverage")
+    mock_generate_upload_data.assert_called_with(ReportType.COVERAGE)
 
 
 def test_do_upload_logic_happy_path_test_results(mocker):
@@ -651,7 +662,7 @@ def test_do_upload_logic_happy_path_test_results(mocker):
             slug="slug",
             swift_project="App",
             token="token",
-            upload_file_type="test_results",
+            report_type=ReportType.TEST_RESULTS,
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
@@ -662,21 +673,23 @@ def test_do_upload_logic_happy_path_test_results(mocker):
 
     assert res == UploadSender.send_upload_data.return_value
     mock_select_preparation_plugins.assert_not_called
-    mock_select_file_finder.assert_called_with(None, None, None, False, "test_results")
+    mock_select_file_finder.assert_called_with(
+        None, None, None, False, ReportType.TEST_RESULTS
+    )
     mock_select_network_finder.assert_called_with(
         versioning_system,
         network_filter="some_dir",
         network_prefix="hello/",
         network_root_folder="root/",
     )
-    mock_generate_upload_data.assert_called_with("test_results")
+    mock_generate_upload_data.assert_called_with(ReportType.TEST_RESULTS)
     mock_send_upload_data.assert_called_with(
         upload_data=mock_generate_upload_data.return_value,
         commit_sha="commit_sha",
         token="token",
         env_vars=None,
         report_code="report_code",
-        upload_file_type="test_results",
+        report_type=ReportType.TEST_RESULTS,
         name="name",
         branch="branch",
         slug="slug",

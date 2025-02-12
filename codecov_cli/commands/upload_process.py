@@ -10,6 +10,7 @@ from codecov_cli.commands.report import create_report
 from codecov_cli.commands.upload import do_upload, global_upload_options
 from codecov_cli.helpers.args import get_cli_args
 from codecov_cli.helpers.options import global_options
+from codecov_cli.helpers.upload_type import report_type_from_str, ReportType
 from codecov_cli.types import CommandContext
 
 logger = logging.getLogger("codecovcli")
@@ -54,7 +55,7 @@ def upload_process(
     plugin_names: typing.List[str],
     pull_request_number: typing.Optional[str],
     report_code: str,
-    report_type: str,
+    report_type_str: str,
     slug: typing.Optional[str],
     swift_project: typing.Optional[str],
     token: typing.Optional[str],
@@ -81,7 +82,9 @@ def upload_process(
                 git_service=git_service,
                 fail_on_error=True,
             )
-            if report_type == "coverage":
+
+            report_type = report_type_from_str(report_type_str)
+            if report_type == ReportType.COVERAGE:
                 ctx.invoke(
                     create_report,
                     token=token,
@@ -120,7 +123,7 @@ def upload_process(
                 plugin_names=plugin_names,
                 pull_request_number=pull_request_number,
                 report_code=report_code,
-                report_type=report_type,
+                report_type_str=report_type_str,
                 slug=slug,
                 swift_project=swift_project,
                 token=token,

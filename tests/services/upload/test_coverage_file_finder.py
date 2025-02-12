@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+from codecov_cli.helpers.upload_type import ReportType
 from codecov_cli.services.upload.file_finder import FileFinder
 from codecov_cli.types import UploadCollectionResultFile
 
@@ -145,12 +146,16 @@ class TestCoverageFileFinder(object):
         expected = {
             UploadCollectionResultFile((tmp_path / file)) for file in should_find
         }
-        actual = set(FileFinder(tmp_path, report_type="test_results").find_files())
+        actual = set(
+            FileFinder(tmp_path, report_type=ReportType.TEST_RESULTS).find_files()
+        )
         assert actual == expected
 
         extra = tmp_path / "sub" / "nosetests.junit.xml"
         extra.touch()
-        actual = set(FileFinder(tmp_path, report_type="test_results").find_files())
+        actual = set(
+            FileFinder(tmp_path, report_type=ReportType.TEST_RESULTS).find_files()
+        )
         assert actual - expected == {UploadCollectionResultFile(extra)}
 
 

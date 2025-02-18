@@ -86,9 +86,10 @@ jobs:
         run: |
           ls -alrt */*/*
           mv */*/* dist/
-          ls -alrt */*
-          find . -empty -type d -delete
-          mv */* dist/
+          mv -r dist/dist/* dist/
+          echo "Moved files"
+          ls -alrt */*/*
+          echo "Deleting empty directories"
           find . -empty -type d -delete
           ls -alrt */*
       - name: Publish package to PyPi

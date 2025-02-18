@@ -165,7 +165,7 @@ class UploadCollector(object):
             logger.info(
                 f"Found {len(report_files)} {report_type.value} files to report"
             )
-            logger.info(
+            logger.debug(
                 f"Found {len(network)} network files to report ({len(unfiltered_network)} without filtering)"
             )
             if not report_files:

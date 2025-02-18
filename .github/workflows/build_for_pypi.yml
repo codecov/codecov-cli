@@ -82,9 +82,11 @@ jobs:
         with:
           path: dist/
           pattern: cibw-*
-      - name: Display artifacts
+      - name: Display and move artifacts
         run: |
           ls -alrt */*/*
+          mv */*/* dist/
+          ls -alrt dist/
       - name: Publish package to PyPi
         uses: pypa/gh-action-pypi-publish@release/v1
         with:

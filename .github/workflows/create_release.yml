@@ -18,8 +18,13 @@ jobs:
       - id: get-release-vars
         name: Configure Release Vars
         run: |
-          echo release_version=v$(grep -E "version = \"[0-9]+\.[0-9]+\.[0-9]+\"" pyproject.toml | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+") >> "$GITHUB_OUTPUT"
-          echo previous_version=$(git tag --sort=-creatordate | head -n 2 | tail -n 1) >> "$GITHUB_OUTPUT"
+          release_version==v$(grep -E "version = \"[0-9]+\.[0-9]+\.[0-9]+\"" pyproject.toml | grep -Eo "[0-9]+\.[0-9]+\.[0-9]+")
+          previous_version=$(git tag --sort=-creatordate | head -n 2 | tail -n 1)
+          echo "release_version=$release_version"
+          echo "previous_version=$previous_version"
+
+          echo "release_version=$release_version" >> "$GITHUB_OUTPUT"
+          echo "previous_version=$previous_version" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
         env:

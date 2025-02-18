@@ -86,8 +86,9 @@ jobs:
         run: |
           ls -alrt */*/*
           mv */*/* dist/
-          mv */* dist/
           ls -alrt */*
+          find . -empty -type d -delete
+          mv */* dist/
           find . -empty -type d -delete
           ls -alrt */*
       - name: Publish package to PyPi

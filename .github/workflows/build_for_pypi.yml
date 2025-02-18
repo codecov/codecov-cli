@@ -86,6 +86,7 @@ jobs:
         run: |
           ls -alrt */*/*
           mv */*/* dist/
+          mv */* dist/
           ls -alrt */*
           find . -empty -type d -delete
           ls -alrt */*

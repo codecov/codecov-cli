@@ -160,9 +160,13 @@ class UploadCollector(object):
             logger.debug("Collecting relevant files")
             with sentry_sdk.start_span(name="file_collector"):
                 network = self.network_finder.find_files()
+                unfiltered_network = self.network_finder.find_files(True)
                 report_files = self.file_finder.find_files()
             logger.info(
                 f"Found {len(report_files)} {report_type.value} files to report"
+            )
+            logger.debug(
+                f"Found {len(network)} network files to report, ({len(unfiltered_network)} without filtering)"
             )
             if not report_files:
                 if report_type == ReportType.TEST_RESULTS:
@@ -187,7 +191,7 @@ class UploadCollector(object):
                 network=network,
                 files=report_files,
                 file_fixes=(
-                    self._produce_file_fixes(self.network_finder.find_files(True))
+                    self._produce_file_fixes(unfiltered_network)
                     if report_type == ReportType.COVERAGE
                     else []
                 ),

@@ -86,7 +86,7 @@ jobs:
         run: |
           ls -alrt */*/*
           mv */*/* dist/
-          ls -alrt
+          ls -alrt dist/
       - name: Publish package to PyPi
         uses: pypa/gh-action-pypi-publish@release/v1
         with:

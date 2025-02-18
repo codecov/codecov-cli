@@ -86,9 +86,9 @@ jobs:
         run: |
           ls -alrt */*/*
           mv */*/* dist/
-          mv dist/dist/* dist/
+          mv */*/*/* dist/
           echo "Moved files"
-          ls -alrt */*/*
+          ls -alrt */*
           echo "Deleting empty directories"
           find . -empty -type d -delete
           ls -alrt */*

@@ -86,7 +86,7 @@ jobs:
         run: |
           ls -alrt */*/*
           mv */*/* dist/
-          mv -r dist/dist/* dist/
+          mv dist/dist/* dist/
           echo "Moved files"
           ls -alrt */*/*
           echo "Deleting empty directories"

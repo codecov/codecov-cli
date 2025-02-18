@@ -32,6 +32,11 @@ version = "10.1.0"
 codecov = "codecov_cli.main:run"
 codecovcli = "codecov_cli.main:run"
 
+[tool.pytest.ini_options]
+env = [
+    "CODECOV_ENV=test",
+]
+
 [tool.setuptools]
 packages = ["codecov_cli"]
 

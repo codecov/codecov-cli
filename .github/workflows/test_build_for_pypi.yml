@@ -1,0 +1,28 @@
+---
+name: Build and Optionally Publish to PyPi
+
+on:
+  pull_request:
+    branches: main
+
+jobs:
+  build_src_for_pypi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          submodules: true
+      - name: Install dependencies
+        run: |
+          pip install build
+      - name: Build src dist
+        run: |
+          python -m build --sdist
+        env:
+          PIP_CONSTRAINT: requirements.txt
+      - name: Store the distribution packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: cibw-sdist
+          path: ./**/*.tar.gz

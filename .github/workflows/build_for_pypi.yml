@@ -1,9 +1,7 @@
 ---
-name: Build and Optionally Publish to PyPi
+name: Build for PyPi
 
 on:
-  pull_request:
-    branches: main
   workflow_call:
     inputs:
       publish:

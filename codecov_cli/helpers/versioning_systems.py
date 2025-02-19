@@ -6,21 +6,27 @@ from shutil import which
 
 from codecov_cli.fallbacks import FallbackFieldEnum
 from codecov_cli.helpers.git import parse_git_service, parse_slug
+from abc import ABC, abstractmethod
 
 logger = logging.getLogger("codecovcli")
 
 
-class VersioningSystemInterface(object):
+class VersioningSystemInterface(ABC):
     def __repr__(self) -> str:
         return str(type(self))
 
+    @abstractmethod
     def get_fallback_value(self, fallback_field: FallbackFieldEnum) -> t.Optional[str]:
         pass
 
+    @abstractmethod
     def get_network_root(self) -> t.Optional[Path]:
         pass
 
-    def list_relevant_files(self, directory: t.Optional[Path] = None) -> t.List[str]:
+    @abstractmethod
+    def list_relevant_files(
+        self, directory: t.Optional[Path] = None
+    ) -> t.Optional[t.List[str]]:
         pass
 
 
@@ -119,8 +125,8 @@ class GitVersioningSystem(VersioningSystemInterface):
             return Path(p.stdout.decode().rstrip())
         return None
 
-    def list_relevant_files(self, root_folder: t.Optional[Path] = None) -> t.List[str]:
-        dir_to_use = root_folder or self.get_network_root()
+    def list_relevant_files(self, directory: t.Optional[Path] = None) -> t.List[str]:
+        dir_to_use = directory or self.get_network_root()
         if dir_to_use is None:
             raise ValueError("Can't determine root folder")
 
@@ -145,3 +151,9 @@ class NoVersioningSystem(VersioningSystemInterface):
 
     def get_network_root(self):
         return Path.cwd()
+
+    def get_fallback_value(self, fallback_field: FallbackFieldEnum):
+        return None
+
+    def list_relevant_files(self, directory: t.Optional[Path] = None) -> t.List[str]:
+        return []

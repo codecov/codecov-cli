@@ -4,6 +4,7 @@ from codecov_cli.fallbacks import FallbackFieldEnum
 from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
 from codecov_cli.helpers.versioning_systems import VersioningSystemInterface
 from codecov_cli.runners.types import LabelAnalysisRunnerInterface
+from pathlib import Path
 
 
 class FakeProvider(CIAdapterBase):
@@ -72,6 +73,12 @@ class FakeVersioningSystem(VersioningSystemInterface):
 
     def get_fallback_value(self, fallback_field: FallbackFieldEnum) -> Optional[str]:
         return self.values_dict[fallback_field]
+
+    def get_network_root(self) -> Optional[Path]:
+        return None
+
+    def list_relevant_files(self, directory: Optional[Path] = None) -> List[str]:
+        return []
 
 
 class FakeRunner(LabelAnalysisRunnerInterface):

@@ -26,7 +26,7 @@ class NetworkFinder(object):
             if self.network_prefix:
                 files = [self.network_prefix + file for file in files]
 
-        return files
+        return files or []
 
 
 def select_network_finder(

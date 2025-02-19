@@ -1,8 +1,10 @@
 import logging
+import os
+from pathlib import Path
+from pathspec import PathSpec
+from shutil import which
 import subprocess
 import typing as t
-from pathlib import Path
-from shutil import which
 
 from codecov_cli.fallbacks import FallbackFieldEnum
 from codecov_cli.helpers.git import parse_git_service, parse_slug
@@ -145,3 +147,32 @@ class NoVersioningSystem(VersioningSystemInterface):
 
     def get_network_root(self):
         return Path.cwd()
+
+    def _get_gitignore(self, root: Path) -> PathSpec:
+        gitignore = root / ".gitignore"
+        default_ignore = [
+            '.git/',
+        ]
+        if not gitignore.is_file():
+            return PathSpec.from_lines("gitwildmatch", default_ignore)
+        else:
+            return PathSpec.from_lines("gitwildmatch", [*default_ignore, *gitignore.open()])
+
+    def list_relevant_files(self, root_folder: t.Optional[Path] = None) -> t.List[str]:
+        dir_to_use = root_folder or self.get_network_root()
+        if dir_to_use is None:
+            raise ValueError("Can't determine root folder")
+
+        all_files = set()
+        for dirpath, _, fnames in os.walk(root_folder):
+            for fname in fnames:
+                full_path = os.path.join(dirpath, fname)
+                all_files.add(full_path)
+
+        gitignore = self._get_gitignore(dir_to_use)
+        filtered_files = []
+        for file in all_files:
+            if not gitignore.match_file(Path(file)):
+                filtered_files.append(file)
+
+        return sorted(filtered_files)

@@ -65,34 +65,3 @@ jobs:
           name: cibw-wheels-${{ matrix.os }}
           path: ./wheelhouse/*.whl
 
-  publish_to_pypi:
-    if: inputs.publish == true || false
-    needs:
-      - build_dist_for_pypi
-      - build_src_for_pypi
-    permissions:
-      id-token: write  # This is required for OIDC
-    runs-on: ubuntu-latest
-    environment:
-      name: pypi
-      url: https://pypi.org/p/codecov-cli
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: dist/
-          pattern: cibw-*
-      - name: Display and move artifacts
-        run: |
-          ls -alrt */*/*
-          mv */*/*/* dist/
-          mv */*/* dist/
-          echo "Moved files"
-          ls -alrt */*
-          echo "Deleting empty directories"
-          find . -empty -type d -delete
-          ls -alrt */*
-      - name: Publish package to PyPi
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          verbose: true

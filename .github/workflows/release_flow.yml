@@ -26,7 +26,6 @@ jobs:
     secrets: inherit
 
   publish_to_pypi:
-    if: inputs.publish == true || false
     needs:
       - build_for_pypi
     permissions:

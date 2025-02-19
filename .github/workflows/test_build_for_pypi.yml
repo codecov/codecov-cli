@@ -1,5 +1,5 @@
 ---
-name: Build and Optionally Publish to PyPi
+name: Test Build and Optionally Publish to PyPi
 
 on:
   pull_request:
@@ -16,6 +16,9 @@ jobs:
       - name: Install dependencies
         run: |
           pip install build
+      - name: ls
+        run: |
+          ls */*/*
       - name: Build src dist
         run: |
           python -m build --sdist

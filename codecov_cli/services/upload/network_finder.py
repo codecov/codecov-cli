@@ -18,7 +18,7 @@ class NetworkFinder(object):
         self.network_root_folder = network_root_folder
 
     def find_files(self, ignore_filters=False) -> typing.List[str]:
-        files = self.versioning_system.list_relevant_files(self.network_root_folder)
+        files = self.versioning_system.list_relevant_files(self.network_root_folder) or []
 
         if files and not ignore_filters:
             if self.network_filter:
@@ -26,7 +26,7 @@ class NetworkFinder(object):
             if self.network_prefix:
                 files = [self.network_prefix + file for file in files]
 
-        return files or []
+        return files
 
 
 def select_network_finder(

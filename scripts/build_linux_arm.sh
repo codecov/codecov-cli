@@ -1,6 +1,6 @@
 #!/bin/sh
 apt install build-essential
-pip install -r requirements.txt
+pip install -r codecov_cli/requirements.txt
 pip install .
 python setup.py build
 STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'")

@@ -48,4 +48,4 @@ test-command = "codecovcli --help"
 pure-python = "false"
 
 [tool.cibuildwheel.environment]
-PIP_CONSTRAINT = "requirements.txt"
+PIP_CONSTRAINT = "codecov_cli/requirements.txt"

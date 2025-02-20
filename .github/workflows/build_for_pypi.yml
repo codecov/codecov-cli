@@ -1,17 +1,16 @@
 ---
-name: Build and Optionally Publish to PyPi
+name: Build for PyPi
 
 on:
-  pull_request:
-    branches: main
   workflow_call:
     inputs:
       publish:
         type: boolean
         default: false
-        description: "Publish to PyPi"
+        description: "Build for PyPi"
 
 jobs:
+
   build_src_for_pypi:
     runs-on: ubuntu-latest
     steps:
@@ -64,4 +63,3 @@ jobs:
         with:
           name: cibw-wheels-${{ matrix.os }}
           path: ./wheelhouse/*.whl
-

@@ -1,3 +1,7 @@
 include languages/treesitterjavascript/src/tree_sitter/parser.h
 include languages/treesitterpython/src/tree_sitter/parser.h
 include requirements.txt
+
+recursive-include codecov_cli *
+recursive-include tests *
+recursive-include samples *

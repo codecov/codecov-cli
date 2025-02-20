@@ -41,7 +41,8 @@ env = [
 packages = ["codecov_cli"]
 
 [tool.cibuildwheel]
-skip = "pp*"
+skip = ["pp*", "cp313-*"]
+test-command = "codecovcli --help"
 
 [tool.cibuildwheel.config-settings]
 pure-python = "false"

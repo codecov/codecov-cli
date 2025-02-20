@@ -41,7 +41,7 @@ env = [
 packages = ["codecov_cli"]
 
 [tool.cibuildwheel]
-before-test = "pip install -r tests/requirements.txt"
+before-test = "pip install -r tests/requirements.txt; ls -al"
 skip = "pp*"
 test-command = "pytest codecov-cli/tests"
 

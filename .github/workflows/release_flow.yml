@@ -51,6 +51,7 @@ jobs:
           find . -empty -type d -delete
           ls -alrt */*
       - name: Publish package to PyPi
+        if: false
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           verbose: true

@@ -52,6 +52,7 @@ before-test = [
     "cat $HOME/.cargo/env",
     ". $HOME/.cargo/env",
     ". \"$HOME/.cargo/env\"",
+    "exec bash",
 ]
 
 [tool.cibuildwheel.config-settings]

@@ -1,7 +1,10 @@
 from pathlib import Path
 from unittest.mock import patch
 
-from codecov_cli.helpers.versioning_systems import GitVersioningSystem
+from codecov_cli.helpers.versioning_systems import (
+    GitVersioningSystem,
+    NoVersioningSystem,
+)
 from codecov_cli.services.upload.file_finder import FileFinder
 from codecov_cli.services.upload.network_finder import NetworkFinder
 from codecov_cli.services.upload.upload_collector import UploadCollector
@@ -174,3 +177,30 @@ def test_generate_upload_data(tmp_path):
 
     for file in expected:
         assert file in res.files
+
+
+@patch("codecov_cli.services.upload.upload_collector.logger")
+@patch.object(GitVersioningSystem, "get_network_root", return_value=None)
+def test_generate_upload_data_with_none_network(
+    mock_get_network_root, mock_logger, tmp_path
+):
+    (tmp_path / "coverage.xml").touch()
+
+    file_finder = FileFinder(tmp_path)
+    network_finder = NetworkFinder(NoVersioningSystem(), None, None, None)
+
+    collector = UploadCollector([], network_finder, file_finder, {})
+
+    res = collector.generate_upload_data()
+
+    mock_logger.debug.assert_any_call("Collecting relevant files")
+    mock_logger.debug.assert_any_call(
+        "Found 0 network files to report, (0 without filtering)"
+    )
+
+    mock_logger.info.assert_any_call("Found 1 coverage files to report")
+    mock_logger.info.assert_any_call("> {}".format(tmp_path / "coverage.xml"))
+
+    assert res.network == []
+    assert len(res.files) == 1
+    assert len(res.file_fixes) == 0

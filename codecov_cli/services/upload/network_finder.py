@@ -20,7 +20,7 @@ class NetworkFinder(object):
     def find_files(self, ignore_filters=False) -> typing.List[str]:
         files = self.versioning_system.list_relevant_files(self.network_root_folder)
 
-        if not ignore_filters:
+        if files and not ignore_filters:
             if self.network_filter:
                 files = [file for file in files if file.startswith(self.network_filter)]
             if self.network_prefix:

@@ -195,7 +195,7 @@ def test_generate_upload_data_with_none_network(
 
     mock_logger.debug.assert_any_call("Collecting relevant files")
     mock_logger.debug.assert_any_call(
-        "Found None network files to report, (None without filtering)"
+        "Found 0 network files to report, (0 without filtering)"
     )
 
     mock_logger.info.assert_any_call("Found 1 coverage files to report")

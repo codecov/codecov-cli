@@ -6,6 +6,7 @@ Options:
   -u, --enterprise-url, --url TEXT
                                   Change the upload host (Enterprise use)
   -v, --verbose                   Use verbose logging
+  --disable-telem                 Disable sending telemetry data to Codecov
   --version                       Show the version and exit.
   --help                          Show this message and exit.
 
@@ -21,6 +22,7 @@ Commands:
   process-test-results
   send-notifications
   static-analysis
+  upload-coverage
   upload-process
 
 Usage: codecovcli create-commit [OPTIONS]
@@ -115,7 +117,7 @@ Options:
   -d, --dry-run                   Don't upload files to Codecov
   --legacy, --use-legacy-uploader
                                   Use the legacy upload endpoint
-  --handle-no-reports-found       Raise no excpetions when no coverage reports
+  --handle-no-reports-found       Raise no exceptions when no coverage reports
                                   found.
   --report-type [coverage|test_results]
                                   The type of the file to upload, coverage by
@@ -246,6 +248,79 @@ Options:
                              upload)  [required]
   -h, --help                 Show this message and exit.
 
+Usage: codecovcli upload-coverage [OPTIONS]
+
+Options:
+  -C, --sha, --commit-sha TEXT    Commit SHA (with 40 chars)  [required]
+  -Z, --fail-on-error             Exit with non-zero code in case of error
+  --git-service [github|gitlab|bitbucket|github_enterprise|gitlab_enterprise|bitbucket_server]
+  -t, --token TEXT                Codecov upload token
+  -r, --slug TEXT                 owner/repo slug used instead of the private
+                                  repo token in Self-hosted
+  --code, --report-code TEXT      The code of the report. If unsure, leave
+                                  default
+  --network-root-folder PATH      Root folder from which to consider paths on
+                                  the network section  [default: (Current
+                                  working directory)]
+  -s, --dir, --coverage-files-search-root-folder, --files-search-root-folder PATH
+                                  Folder where to search for coverage files
+                                  [default: (Current Working Directory)]
+  --exclude, --coverage-files-search-exclude-folder, --files-search-exclude-folder PATH
+                                  Folders to exclude from search
+  -f, --file, --coverage-files-search-direct-file, --files-search-direct-file PATH
+                                  Explicit files to upload. These will be
+                                  added to the coverage files found for
+                                  upload. If you wish to only upload the
+                                  specified files, please consider using
+                                  --disable-search to disable uploading other
+                                  files.
+  --disable-search                Disable search for coverage files. This is
+                                  helpful when specifying what files you want
+                                  to upload with the --file option.
+  --disable-file-fixes            Disable file fixes to ignore common lines
+                                  from coverage (e.g. blank lines or empty
+                                  brackets)
+  -b, --build, --build-code TEXT  Specify the build number manually
+  --build-url TEXT                The URL of the build where this is running
+  --job-code TEXT
+  -n, --name TEXT                 Custom defined name of the upload. Visible
+                                  in Codecov UI
+  -B, --branch TEXT               Branch to which this commit belongs to
+  -P, --pr, --pull-request-number TEXT
+                                  Specify the pull request number mannually.
+                                  Used to override pre-existing CI environment
+                                  variables
+  -e, --env, --env-var TEXT       Specify environment variables to be included
+                                  with this build.
+  -F, --flag TEXT                 Flag the upload to group coverage metrics.
+                                  Multiple flags allowed.
+  --plugin TEXT
+  -d, --dry-run                   Don't upload files to Codecov
+  --legacy, --use-legacy-uploader
+                                  Use the legacy upload endpoint
+  --handle-no-reports-found       Raise no exceptions when no coverage reports
+                                  found.
+  --report-type [coverage|test_results]
+                                  The type of the file to upload, coverage by
+                                  default. Possible values are: testing,
+                                  coverage.
+  --network-filter TEXT           Specify a filter on the files listed in the
+                                  network section of the Codecov report. This
+                                  will only add files whose path begin with
+                                  the specified filter. Useful for upload-
+                                  specific path fixing
+  --network-prefix TEXT           Specify a prefix on files listed in the
+                                  network section of the Codecov report.
+                                  Useful to help resolve path fixing
+  --gcov-args TEXT                Extra arguments to pass to gcov
+  --gcov-ignore TEXT              Paths to ignore during gcov gathering
+  --gcov-include TEXT             Paths to include during gcov gathering
+  --gcov-executable TEXT          gcov executable to run. Defaults to 'gcov'
+  --swift-project TEXT            Specify the swift project
+  --parent-sha TEXT               SHA (with 40 chars) of what should be the
+                                  parent of this commit
+  -h, --help                      Show this message and exit.
+
 Usage: codecovcli upload-process [OPTIONS]
 
 Options:
@@ -296,7 +371,7 @@ Options:
   -d, --dry-run                   Don't upload files to Codecov
   --legacy, --use-legacy-uploader
                                   Use the legacy upload endpoint
-  --handle-no-reports-found       Raise no excpetions when no coverage reports
+  --handle-no-reports-found       Raise no exceptions when no coverage reports
                                   found.
   --report-type [coverage|test_results]
                                   The type of the file to upload, coverage by

@@ -27,7 +27,7 @@ jobs:
         run: |
           python -m build --sdist
         env:
-          PIP_CONSTRAINT: requirements.txt
+          PIP_CONSTRAINT: codecov_cli/requirements.txt
       - name: Store the distribution packages
         uses: actions/upload-artifact@v4
         with:

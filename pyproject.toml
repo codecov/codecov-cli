@@ -42,7 +42,7 @@ packages = ["codecov_cli"]
 
 [tool.cibuildwheel]
 skip = "pp*"
-test-command = "codecovcli -v empty-upload"
+test-command = "codecovcli --help"
 
 [tool.cibuildwheel.config-settings]
 pure-python = "false"

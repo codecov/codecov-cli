@@ -4,3 +4,4 @@ include requirements.txt
 
 recursive-include codecov_cli *
 recursive-include tests *
+recursive-include samples *

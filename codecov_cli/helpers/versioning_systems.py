@@ -149,6 +149,9 @@ class NoVersioningSystem(VersioningSystemInterface):
     def is_available(cls):
         return True
 
+    def list_relevant_files(self, directory: t.Optional[Path] = None) -> t.List[str]:
+        return []
+
     def get_network_root(self):
         return Path.cwd()
 

@@ -299,7 +299,7 @@ git submodule update --init
 ```
 Then, install dependencies with
 ```
-pip install -r codecov_cli/requirements.txt
+pip install -r requirements.txt
 python -m pip install --editable .
 ```
 

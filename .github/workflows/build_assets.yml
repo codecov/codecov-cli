@@ -34,7 +34,7 @@ jobs:
           - os: ubuntu-20.04
             TARGET: ubuntu
             CMD_REQS: >
-              pip install -r codecov_cli/requirements.txt && pip install .
+              pip install -r requirements.txt && pip install .
             CMD_BUILD: >
               STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
               pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:. --copy-metadata codecov-cli --hidden-import staticcodecov_languages -F codecov_cli/main.py &&
@@ -44,7 +44,7 @@ jobs:
           - os: windows-latest
             TARGET: windows
             CMD_REQS: >
-              pip install -r codecov_cli/requirements.txt && pip install .
+              pip install -r requirements.txt && pip install .
             CMD_BUILD: >
               pyinstaller --add-binary "build\lib.win-amd64-cpython-311\staticcodecov_languages.cp311-win_amd64.pyd;." --copy-metadata codecov-cli --hidden-import staticcodecov_languages -F codecov_cli\main.py &&
               Copy-Item -Path ".\dist\main.exe" -Destination ".\dist\codecovcli_windows.exe"

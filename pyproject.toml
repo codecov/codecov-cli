@@ -46,7 +46,7 @@ test-command = "codecovcli --help"
 
 [[tool.cibuildwheel.overrides]]
 select = "cp313*"
-before-test = "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
+before-test = "curl https://sh.rustup.rs -sSf | sh -s -- -y"
 
 [tool.cibuildwheel.config-settings]
 pure-python = "false"

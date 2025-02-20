@@ -41,8 +41,12 @@ env = [
 packages = ["codecov_cli"]
 
 [tool.cibuildwheel]
-skip = ["pp*", "cp313-*"]
+skip = "pp*"
 test-command = "codecovcli --help"
+
+[[tool.cibuildwheel.overrides]]
+select = "cp313*"
+before-test = "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh"
 
 [tool.cibuildwheel.config-settings]
 pure-python = "false"

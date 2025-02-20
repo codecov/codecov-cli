@@ -43,7 +43,7 @@ packages = ["codecov_cli"]
 [tool.cibuildwheel]
 before-test = "pip install -r tests/requirements.txt"
 skip = "pp*"
-test-command = "pytest {package}"
+test-command = "pytest {project}"
 
 [tool.cibuildwheel.config-settings]
 pure-python = "false"

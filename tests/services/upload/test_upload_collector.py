@@ -167,7 +167,7 @@ def test_generate_upload_data(tmp_path):
 
     file_finder = FileFinder(tmp_path)
 
-    network_finder = NetworkFinder(GitVersioningSystem(), None, None, None)
+    network_finder = NetworkFinder(GitVersioningSystem(), False, None, None, None)
 
     collector = UploadCollector([], network_finder, file_finder, None)
 
@@ -187,7 +187,7 @@ def test_generate_upload_data_with_none_network(
     (tmp_path / "coverage.xml").touch()
 
     file_finder = FileFinder(tmp_path)
-    network_finder = NetworkFinder(NoVersioningSystem(), None, None, None)
+    network_finder = NetworkFinder(NoVersioningSystem(), False, None, None, None)
 
     collector = UploadCollector([], network_finder, file_finder, {})
 

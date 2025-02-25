@@ -32,6 +32,7 @@ def do_upload_logic(
     build_code: typing.Optional[str],
     build_url: typing.Optional[str],
     commit_sha: str,
+    toc_recurse_submodules: bool = False,
     disable_file_fixes: bool = False,
     disable_search: bool = False,
     dry_run: bool = False,
@@ -87,6 +88,7 @@ def do_upload_logic(
     )
     network_finder = select_network_finder(
         versioning_system,
+        toc_recurse_submodules=toc_recurse_submodules,
         network_filter=network_filter,
         network_prefix=network_prefix,
         network_root_folder=network_root_folder,

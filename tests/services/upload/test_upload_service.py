@@ -104,6 +104,7 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
     )
     mock_select_network_finder.assert_called_with(
         versioning_system,
+        toc_recurse_submodules=False,
         network_filter=None,
         network_prefix=None,
         network_root_folder=None,
@@ -218,6 +219,7 @@ def test_do_upload_logic_happy_path(mocker):
     )
     mock_select_network_finder.assert_called_with(
         versioning_system,
+        toc_recurse_submodules=False,
         network_filter=None,
         network_prefix=None,
         network_root_folder=None,
@@ -309,6 +311,7 @@ def test_do_upload_logic_dry_run(mocker):
     )
     mock_select_network_finder.assert_called_with(
         versioning_system,
+        toc_recurse_submodules=False,
         network_filter=None,
         network_prefix=None,
         network_root_folder=None,
@@ -501,6 +504,7 @@ def test_do_upload_no_cov_reports_found(mocker):
     )
     mock_select_network_finder.assert_called_with(
         versioning_system,
+        toc_recurse_submodules=False,
         network_filter=None,
         network_prefix=None,
         network_root_folder=None,
@@ -597,6 +601,7 @@ def test_do_upload_rase_no_cov_reports_found_error(mocker):
     )
     mock_select_network_finder.assert_called_with(
         versioning_system,
+        toc_recurse_submodules=False,
         network_filter=None,
         network_prefix=None,
         network_root_folder=None,
@@ -678,6 +683,7 @@ def test_do_upload_logic_happy_path_test_results(mocker):
     )
     mock_select_network_finder.assert_called_with(
         versioning_system,
+        toc_recurse_submodules=False,
         network_filter="some_dir",
         network_prefix="hello/",
         network_root_folder="root/",

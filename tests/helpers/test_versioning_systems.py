@@ -130,3 +130,14 @@ class TestGitVersioningSystem(object):
         vs = GitVersioningSystem()
         with pytest.raises(ValueError):
             vs.list_relevant_files()
+
+    def test_list_relevant_files_recurse_submodules(self, mocker, tmp_path):
+        subproc_run = mocker.patch(
+            "codecov_cli.helpers.versioning_systems.subprocess.run"
+        )
+        vs = GitVersioningSystem()
+        _ = vs.list_relevant_files(tmp_path, toc_recurse_submodules=True)
+        subproc_run.assert_called_with(
+            ["git", "-C", str(tmp_path), "ls-files", "--recurse-submodules"],
+            capture_output=True,
+        )

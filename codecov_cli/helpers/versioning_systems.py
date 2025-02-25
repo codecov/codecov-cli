@@ -25,7 +25,7 @@ class VersioningSystemInterface(ABC):
 
     @abstractmethod
     def list_relevant_files(
-        self, directory: t.Optional[Path] = None
+        self, directory: t.Optional[Path] = None, toc_recurse_submodules: bool = False
     ) -> t.Optional[t.List[str]]:
         pass
 
@@ -125,14 +125,17 @@ class GitVersioningSystem(VersioningSystemInterface):
             return Path(p.stdout.decode().rstrip())
         return None
 
-    def list_relevant_files(self, directory: t.Optional[Path] = None) -> t.List[str]:
+    def list_relevant_files(
+        self, directory: t.Optional[Path] = None, toc_recurse_submodules: bool = False
+    ) -> t.List[str]:
         dir_to_use = directory or self.get_network_root()
         if dir_to_use is None:
             raise ValueError("Can't determine root folder")
 
-        res = subprocess.run(
-            ["git", "-C", str(dir_to_use), "ls-files"], capture_output=True
-        )
+        cmd = ["git", "-C", str(dir_to_use), "ls-files"]
+        if toc_recurse_submodules:
+            cmd.append("--recurse-submodules")
+        res = subprocess.run(cmd, capture_output=True)
 
         return [
             (
@@ -155,5 +158,7 @@ class NoVersioningSystem(VersioningSystemInterface):
     def get_fallback_value(self, fallback_field: FallbackFieldEnum):
         return None
 
-    def list_relevant_files(self, directory: t.Optional[Path] = None) -> t.List[str]:
+    def list_relevant_files(
+        self, directory: t.Optional[Path] = None, toc_recurse_submodules: bool = False
+    ) -> t.List[str]:
         return []

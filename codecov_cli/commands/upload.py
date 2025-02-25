@@ -67,6 +67,12 @@ _global_upload_options = [
         default=[],
     ),
     click.option(
+        "--toc-recurse-submodules",
+        help="Whether to enumerate files inside of submodules for path-fixing purposes. Off by default.",
+        is_flag=True,
+        default=False,
+    ),
+    click.option(
         "--disable-search",
         help="Disable search for coverage files. This is helpful when specifying what files you want to upload with the --file option.",
         is_flag=True,
@@ -220,6 +226,7 @@ def do_upload(
     branch: typing.Optional[str],
     build_code: typing.Optional[str],
     build_url: typing.Optional[str],
+    toc_recurse_submodules: bool,
     disable_file_fixes: bool,
     disable_search: bool,
     dry_run: bool,
@@ -272,6 +279,7 @@ def do_upload(
                 build_code=build_code,
                 build_url=build_url,
                 commit_sha=commit_sha,
+                toc_recurse_submodules=toc_recurse_submodules,
                 disable_file_fixes=disable_file_fixes,
                 disable_search=disable_search,
                 dry_run=dry_run,

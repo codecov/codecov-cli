@@ -93,6 +93,9 @@ Options:
                                   specified files, please consider using
                                   --disable-search to disable uploading other
                                   files.
+  --toc-recurse-submodules        Whether to enumerate files inside of
+                                  submodules for path-fixing purposes. Off by
+                                  default.
   --disable-search                Disable search for coverage files. This is
                                   helpful when specifying what files you want
                                   to upload with the --file option.
@@ -274,6 +277,9 @@ Options:
                                   specified files, please consider using
                                   --disable-search to disable uploading other
                                   files.
+  --toc-recurse-submodules        Whether to enumerate files inside of
+                                  submodules for path-fixing purposes. Off by
+                                  default.
   --disable-search                Disable search for coverage files. This is
                                   helpful when specifying what files you want
                                   to upload with the --file option.
@@ -347,6 +353,9 @@ Options:
                                   specified files, please consider using
                                   --disable-search to disable uploading other
                                   files.
+  --toc-recurse-submodules        Whether to enumerate files inside of
+                                  submodules for path-fixing purposes. Off by
+                                  default.
   --disable-search                Disable search for coverage files. This is
                                   helpful when specifying what files you want
                                   to upload with the --file option.

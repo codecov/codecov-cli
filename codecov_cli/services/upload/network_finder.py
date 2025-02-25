@@ -8,17 +8,21 @@ class NetworkFinder(object):
     def __init__(
         self,
         versioning_system: VersioningSystemInterface,
+        recurse_submodules: bool,
         network_filter: typing.Optional[str],
         network_prefix: typing.Optional[str],
         network_root_folder: pathlib.Path,
     ):
         self.versioning_system = versioning_system
+        self.recurse_submodules = recurse_submodules
         self.network_filter = network_filter
         self.network_prefix = network_prefix
         self.network_root_folder = network_root_folder
 
     def find_files(self, ignore_filters=False) -> typing.List[str]:
-        files = self.versioning_system.list_relevant_files(self.network_root_folder)
+        files = self.versioning_system.list_relevant_files(
+            self.network_root_folder, self.recurse_submodules
+        )
 
         if files and not ignore_filters:
             if self.network_filter:
@@ -31,12 +35,14 @@ class NetworkFinder(object):
 
 def select_network_finder(
     versioning_system: VersioningSystemInterface,
+    recurse_submodules: bool,
     network_filter: typing.Optional[str],
     network_prefix: typing.Optional[str],
     network_root_folder: pathlib.Path,
 ):
     return NetworkFinder(
         versioning_system,
+        recurse_submodules,
         network_filter,
         network_prefix,
         network_root_folder,

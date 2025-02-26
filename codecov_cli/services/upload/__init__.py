@@ -56,6 +56,7 @@ def do_upload_logic(
     parent_sha: typing.Optional[str] = None,
     plugin_names: typing.List[str],
     pull_request_number: typing.Optional[str],
+    recurse_submodules: bool = False,
     report_code: str,
     slug: typing.Optional[str],
     swift_project: typing.Optional[str],
@@ -87,6 +88,7 @@ def do_upload_logic(
     )
     network_finder = select_network_finder(
         versioning_system,
+        recurse_submodules=recurse_submodules,
         network_filter=network_filter,
         network_prefix=network_prefix,
         network_root_folder=network_root_folder,

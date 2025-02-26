@@ -41,8 +41,26 @@ env = [
 packages = ["codecov_cli"]
 
 [tool.cibuildwheel]
-skip = ["pp*", "cp313-*"]
+skip = "pp*"
 test-command = "codecovcli --help"
+
+[[tool.cibuildwheel.overrides]]
+select = "cp313*"
+before-test = [
+    "curl https://sh.rustup.rs -sSf | sh -s -- -y",
+    ". \"$HOME/.cargo/env\"",
+    "echo \"Restarting the shell, this step takes awhile.\"",
+    "exec bash",
+]
+
+[[tool.cibuildwheel.overrides]]
+select = "cp313*win*"
+before-test = [
+    "curl https://sh.rustup.rs -sSf | sh -s -- -y",
+    "echo \"Restarting the shell, this step takes awhile.\"",
+    "exec bash",
+]
+%USERPROFILE%\.cargo\bin
 
 [tool.cibuildwheel.config-settings]
 pure-python = "false"

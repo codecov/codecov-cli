@@ -67,6 +67,12 @@ _global_upload_options = [
         default=[],
     ),
     click.option(
+        "--recurse-submodules",
+        help="Whether to enumerate files inside of submodules for path-fixing purposes. Off by default.",
+        is_flag=True,
+        default=False,
+    ),
+    click.option(
         "--disable-search",
         help="Disable search for coverage files. This is helpful when specifying what files you want to upload with the --file option.",
         is_flag=True,
@@ -242,6 +248,7 @@ def do_upload(
     network_root_folder: pathlib.Path,
     plugin_names: typing.List[str],
     pull_request_number: typing.Optional[str],
+    recurse_submodules: bool,
     report_type_str: str,
     slug: typing.Optional[str],
     swift_project: typing.Optional[str],
@@ -297,6 +304,7 @@ def do_upload(
                 network_root_folder=network_root_folder,
                 plugin_names=plugin_names,
                 pull_request_number=pull_request_number,
+                recurse_submodules=recurse_submodules,
                 report_code=report_code,
                 slug=slug,
                 swift_project=swift_project,

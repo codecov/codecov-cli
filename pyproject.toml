@@ -54,7 +54,7 @@ pure-python = "false"
 PIP_CONSTRAINT = "requirements.txt"
 
 [tool.cibuildwheel.environment.linux]
-PATH=$HOME/.cargo/bin:$PATH
+PATH = "$HOME/.cargo/bin:$PATH"
 
 [tool.cibuildwheel.windows]
 before-test = "rustup target add i686-pc-windows-msvc"

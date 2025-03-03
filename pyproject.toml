@@ -45,7 +45,7 @@ skip = "pp*"
 test-command = "codecovcli --help"
 
 [tool.cibuildwheel.linux]
-before-test = "curl -sSf https://sh.rustup.rs | sh -s -- -y"
+before-all = "curl -sSf https://sh.rustup.rs | sh -s -- -y"
 
 [tool.cibuildwheel.config-settings]
 pure-python = "false"
@@ -57,5 +57,5 @@ PIP_CONSTRAINT = "requirements.txt"
 PATH = "$HOME/.cargo/bin:$PATH"
 
 [tool.cibuildwheel.windows]
-before-test = "rustup target add i686-pc-windows-msvc"
+before-all = "rustup target add i686-pc-windows-msvc"
 

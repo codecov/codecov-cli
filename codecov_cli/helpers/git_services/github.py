@@ -24,9 +24,11 @@ class Github:
                     "ref": res["head"]["ref"],
                     # Through empiric test data it seems that the "repo" key in "head" is set to None
                     # If the PR is from the same repo (e.g. not from a fork)
-                    "slug": res["head"]["repo"]["full_name"]
-                    if res["head"]["repo"]
-                    else res["base"]["repo"]["full_name"],
+                    "slug": (
+                        res["head"]["repo"]["full_name"]
+                        if res["head"]["repo"]
+                        else res["base"]["repo"]["full_name"]
+                    ),
                 },
                 "base": {
                     "sha": res["base"]["sha"],

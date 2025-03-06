@@ -1,14 +1,18 @@
 import functools
+import logging
 import os
 import pathlib
 import re
-import typing
-from fnmatch import translate
+from typing import Generator, List, Optional, Pattern
+
+from codecov_cli.helpers.glob import translate
+
+logger = logging.getLogger("codecovcli")
 
 
 def _is_included(
-    filename_include_regex: typing.Pattern,
-    multipart_include_regex: typing.Optional[typing.Pattern],
+    filename_include_regex: Pattern,
+    multipart_include_regex: Optional[Pattern],
     path: pathlib.Path,
 ):
     return filename_include_regex.match(path.name) and (
@@ -18,8 +22,8 @@ def _is_included(
 
 
 def _is_excluded(
-    filename_exclude_regex: typing.Optional[typing.Pattern],
-    multipart_exclude_regex: typing.Optional[typing.Pattern],
+    filename_exclude_regex: Optional[Pattern],
+    multipart_exclude_regex: Optional[Pattern],
     path: pathlib.Path,
 ):
     return (
@@ -31,14 +35,14 @@ def _is_excluded(
 
 def search_files(
     folder_to_search: pathlib.Path,
-    folders_to_ignore: typing.List[str],
+    folders_to_ignore: List[str],
     *,
-    filename_include_regex: typing.Pattern,
-    filename_exclude_regex: typing.Optional[typing.Pattern] = None,
-    multipart_include_regex: typing.Optional[typing.Pattern] = None,
-    multipart_exclude_regex: typing.Optional[typing.Pattern] = None,
-    search_for_directories: bool = False
-) -> typing.Generator[pathlib.Path, None, None]:
+    filename_include_regex: Pattern,
+    filename_exclude_regex: Optional[Pattern] = None,
+    multipart_include_regex: Optional[Pattern] = None,
+    multipart_exclude_regex: Optional[Pattern] = None,
+    search_for_directories: bool = False,
+) -> Generator[pathlib.Path, None, None]:
     """ "
     Searches for files or directories in a given folder
 
@@ -58,7 +62,7 @@ def search_files(
     this_is_excluded = functools.partial(
         _is_excluded, filename_exclude_regex, multipart_exclude_regex
     )
-    for (dirpath, dirnames, filenames) in os.walk(folder_to_search):
+    for dirpath, dirnames, filenames in os.walk(folder_to_search):
         dirs_to_remove = set(d for d in dirnames if d in folders_to_ignore)
 
         if multipart_exclude_regex is not None:
@@ -85,7 +89,7 @@ def search_files(
                     yield file_path
 
 
-def globs_to_regex(patterns: typing.List[str]) -> typing.Optional[typing.Pattern]:
+def globs_to_regex(patterns: List[str]) -> Optional[Pattern]:
     """
     Converts a list of glob patterns to a combined ORed regex
 
@@ -99,5 +103,9 @@ def globs_to_regex(patterns: typing.List[str]) -> typing.Optional[typing.Pattern
     if not patterns:
         return None
 
-    regex_str = ["(" + translate(pattern) + ")" for pattern in patterns]
-    return re.compile("|".join(regex_str))
+    regex_patterns = []
+    for pattern in patterns:
+        regex_pattern = translate(pattern, recursive=True, include_hidden=True)
+        logger.debug(f"Translating `{pattern}` into `{regex_pattern}`")
+        regex_patterns.append(regex_pattern)
+    return re.compile("|".join(regex_patterns))

@@ -61,13 +61,16 @@ def parse_git_service(remote_repo_url: str):
     Possible cases we're considering:
     - https://github.com/codecov/codecov-cli.git returns github
     - git@github.com:codecov/codecov-cli.git returns github
+    - ssh://git@github.com/gitcodecov/codecov-cli returns github
+    - ssh://git@github.com:gitcodecov/codecov-cli returns github
     - https://user-name@bitbucket.org/namespace-codecov/first_repo.git returns bitbucket
     """
     services = [service.value for service in GitService]
     parsed_url = urlparse(remote_repo_url)
     service = None
 
-    if remote_repo_url.startswith("https://"):
+    scheme = parsed_url.scheme
+    if scheme in ("https", "ssh"):
         netloc = parsed_url.netloc
         if "@" in netloc:
             netloc = netloc.split("@", 1)[1]
@@ -92,22 +95,3 @@ def parse_git_service(remote_repo_url: str):
             extra=dict(remote_repo_url=remote_repo_url),
         )
         return None
-
-
-def is_fork_pr(pull_dict: PullDict) -> bool:
-    """
-    takes in dict: pull_dict
-    returns true if PR is made in a fork context, false if not.
-    """
-    return pull_dict and pull_dict["head"]["slug"] != pull_dict["base"]["slug"]
-
-
-def get_pull(service, slug, pr_num) -> Optional[PullDict]:
-    """
-    takes in str git service e.g. github, gitlab etc., slug in the owner/repo format, and the pull request number
-    returns the pull request info gotten from the git service provider if successful, None if not
-    """
-    git_service = get_git_service(service)
-    if git_service:
-        pull_dict = git_service.get_pull_request(slug, pr_num)
-        return pull_dict

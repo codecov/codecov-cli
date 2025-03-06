@@ -1,7 +1,10 @@
 from pathlib import Path
 from unittest.mock import patch
 
-from codecov_cli.helpers.versioning_systems import GitVersioningSystem
+from codecov_cli.helpers.versioning_systems import (
+    GitVersioningSystem,
+    NoVersioningSystem,
+)
 from codecov_cli.services.upload.file_finder import FileFinder
 from codecov_cli.services.upload.network_finder import NetworkFinder
 from codecov_cli.services.upload.upload_collector import UploadCollector
@@ -11,19 +14,19 @@ from codecov_cli.types import UploadCollectionResultFile
 def test_fix_kt_files():
     kt_file = Path("tests/data/files_to_fix_examples/sample.kt")
 
-    col = UploadCollector(None, None, None)
+    col = UploadCollector(None, None, None, None)
 
-    fixes = col._produce_file_fixes_for_network([str(kt_file)])
+    fixes = col._produce_file_fixes([kt_file])
 
     assert len(fixes) == 1
     fixes_for_kt_file = fixes[0]
 
-    assert fixes_for_kt_file.eof == 30
-    assert fixes_for_kt_file.fixed_lines_without_reason == set([1, 3, 7, 9, 12, 14])
+    assert fixes_for_kt_file.eof == 33
+    assert fixes_for_kt_file.fixed_lines_without_reason == set([1, 3, 7, 9, 12, 14, 18])
     assert fixes_for_kt_file.fixed_lines_with_reason == set(
         [
-            (17, "    /*\n"),
-            (22, "*/\n"),
+            (20, "    /*\n"),
+            (25, "*/\n"),
         ]
     )
 
@@ -31,9 +34,9 @@ def test_fix_kt_files():
 def test_fix_go_files():
     go_file = Path("tests/data/files_to_fix_examples/sample.go")
 
-    col = UploadCollector(None, None, None)
+    col = UploadCollector(None, None, None, None)
 
-    fixes = col._produce_file_fixes_for_network([str(go_file)])
+    fixes = col._produce_file_fixes([go_file])
 
     assert len(fixes) == 1
     fixes_for_go_file = fixes[0]
@@ -57,9 +60,9 @@ def test_fix_bad_encoding_files(mock_open):
     mock_open.side_effect = UnicodeDecodeError("", bytes(), 0, 0, "")
     go_file = Path("tests/data/files_to_fix_examples/bad_encoding.go")
 
-    col = UploadCollector(None, None, None)
+    col = UploadCollector(None, None, None, None)
 
-    fixes = col._produce_file_fixes_for_network([str(go_file)])
+    fixes = col._produce_file_fixes([go_file])
     assert len(fixes) == 1
     fixes_for_go_file = fixes[0]
     assert fixes_for_go_file.eof is None
@@ -70,9 +73,9 @@ def test_fix_bad_encoding_files(mock_open):
 def test_fix_php_files():
     php_file = Path("tests/data/files_to_fix_examples/sample.php")
 
-    col = UploadCollector(None, None, None)
+    col = UploadCollector(None, None, None, None)
 
-    fixes = col._produce_file_fixes_for_network([str(php_file)])
+    fixes = col._produce_file_fixes([php_file])
 
     assert len(fixes) == 1
     fixes_for_php_file = fixes[0]
@@ -85,9 +88,9 @@ def test_fix_php_files():
 def test_fix_for_cpp_swift_vala(tmp_path):
     cpp_file = Path("tests/data/files_to_fix_examples/sample.cpp")
 
-    col = UploadCollector(None, None, None)
+    col = UploadCollector(None, None, None, None)
 
-    fixes = col._produce_file_fixes_for_network([str(cpp_file)])
+    fixes = col._produce_file_fixes([cpp_file])
 
     assert len(fixes) == 1
     fixes_for_cpp_file = fixes[0]
@@ -107,9 +110,9 @@ def test_fix_for_cpp_swift_vala(tmp_path):
 def test_fix_when_disabled_fixes(tmp_path):
     cpp_file = Path("tests/data/files_to_fix_examples/sample.cpp")
 
-    col = UploadCollector(None, None, None, True)
+    col = UploadCollector(None, None, None, None, True)
 
-    fixes = col._produce_file_fixes_for_network([str(cpp_file)])
+    fixes = col._produce_file_fixes([cpp_file])
 
     assert len(fixes) == 0
     assert fixes == []
@@ -164,9 +167,9 @@ def test_generate_upload_data(tmp_path):
 
     file_finder = FileFinder(tmp_path)
 
-    network_finder = NetworkFinder(GitVersioningSystem())
+    network_finder = NetworkFinder(GitVersioningSystem(), False, None, None, None)
 
-    collector = UploadCollector([], network_finder, file_finder)
+    collector = UploadCollector([], network_finder, file_finder, None)
 
     res = collector.generate_upload_data()
 
@@ -174,3 +177,30 @@ def test_generate_upload_data(tmp_path):
 
     for file in expected:
         assert file in res.files
+
+
+@patch("codecov_cli.services.upload.upload_collector.logger")
+@patch.object(GitVersioningSystem, "get_network_root", return_value=None)
+def test_generate_upload_data_with_none_network(
+    mock_get_network_root, mock_logger, tmp_path
+):
+    (tmp_path / "coverage.xml").touch()
+
+    file_finder = FileFinder(tmp_path)
+    network_finder = NetworkFinder(NoVersioningSystem(), False, None, None, None)
+
+    collector = UploadCollector([], network_finder, file_finder, {})
+
+    res = collector.generate_upload_data()
+
+    mock_logger.debug.assert_any_call("Collecting relevant files")
+    mock_logger.debug.assert_any_call(
+        "Found 0 network files to report, (0 without filtering)"
+    )
+
+    mock_logger.info.assert_any_call("Found 1 coverage files to report")
+    mock_logger.info.assert_any_call("> {}".format(tmp_path / "coverage.xml"))
+
+    assert res.network == []
+    assert len(res.files) == 1
+    assert len(res.file_fixes) == 0

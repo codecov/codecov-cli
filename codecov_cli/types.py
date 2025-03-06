@@ -1,6 +1,22 @@
 import pathlib
-import typing
+import typing as t
 from dataclasses import dataclass
+
+import click
+
+from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
+from codecov_cli.helpers.versioning_systems import VersioningSystemInterface
+
+
+class ContextObject(t.TypedDict):
+    ci_adapter: t.Optional[CIAdapterBase]
+    versioning_system: t.Optional[VersioningSystemInterface]
+    codecov_yaml: t.Optional[dict]
+    enterprise_url: t.Optional[str]
+
+
+class CommandContext(click.Context):
+    obj: ContextObject
 
 
 class UploadCollectionResultFile(object):
@@ -31,17 +47,17 @@ class UploadCollectionResultFile(object):
 class UploadCollectionResultFileFixer(object):
     __slots__ = ["path", "fixed_lines_without_reason", "fixed_lines_with_reason", "eof"]
     path: pathlib.Path
-    fixed_lines_without_reason: typing.Set[int]
-    fixed_lines_with_reason: typing.Optional[typing.Set[typing.Tuple[int, str]]]
-    eof: typing.Optional[int]
+    fixed_lines_without_reason: t.Set[int]
+    fixed_lines_with_reason: t.Optional[t.Set[t.Tuple[int, str]]]
+    eof: t.Optional[int]
 
 
 @dataclass
 class UploadCollectionResult(object):
     __slots__ = ["network", "files", "file_fixes"]
-    network: typing.List[str]
-    files: typing.List[UploadCollectionResultFile]
-    file_fixes: typing.List[UploadCollectionResultFileFixer]
+    network: t.List[str]
+    files: t.List[UploadCollectionResultFile]
+    file_fixes: t.List[UploadCollectionResultFileFixer]
 
 
 class PreparationPluginInterface(object):
@@ -59,14 +75,14 @@ class RequestResultWarning(object):
 class RequestError(object):
     __slots__ = ("code", "params", "description")
     code: str
-    params: typing.Dict
+    params: t.Dict
     description: str
 
 
 @dataclass
 class RequestResult(object):
     __slots__ = ("error", "warnings", "status_code", "text")
-    error: typing.Optional[RequestError]
-    warnings: typing.List[RequestResultWarning]
+    error: t.Optional[RequestError]
+    warnings: t.List[RequestResultWarning]
     status_code: int
     text: str

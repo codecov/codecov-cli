@@ -9,7 +9,7 @@ from tests.test_helpers import parse_outstreams_into_log_lines
 
 def test_send_create_report_request_200(mocker):
     mocked_response = mocker.patch(
-        "codecov_cli.services.report.requests.post",
+        "codecov_cli.helpers.request.requests.post",
         return_value=mocker.MagicMock(status_code=200),
     )
     res = send_create_report_request(
@@ -20,29 +20,17 @@ def test_send_create_report_request_200(mocker):
         "owner::::repo",
         "enterprise_url",
         1,
+        None,
     )
     assert res.error is None
     assert res.warnings == []
     mocked_response.assert_called_once()
 
 
-def test_send_create_report_request_200_tokneless(mocker):
+def test_send_create_report_request_no_token(mocker):
     mocked_response = mocker.patch(
-        "codecov_cli.services.report.send_post_request",
-        return_value=RequestResult(
-            status_code=200,
-            error=None,
-            warnings=[],
-            text="mocked response",
-        ),
-    )
-
-    mocked_get_pull = mocker.patch(
-        "codecov_cli.services.report.get_pull",
-        return_value={
-            "head": {"slug": "user-forked/repo"},
-            "base": {"slug": "org/repo"},
-        },
+        "codecov_cli.helpers.request.requests.post",
+        return_value=mocker.MagicMock(status_code=200),
     )
     res = send_create_report_request(
         "commit_sha",
@@ -52,24 +40,20 @@ def test_send_create_report_request_200_tokneless(mocker):
         "owner::::repo",
         "enterprise_url",
         1,
+        None,
     )
     assert res.error is None
     assert res.warnings == []
-    mocked_response.assert_called_with(
-        url=f"enterprise_url/upload/github/owner::::repo/commits/commit_sha/reports",
-        headers={"X-Tokenless": "user-forked/repo", "X-Tokenless-PR": 1},
-        data={"code": "code"},
-    )
-    mocked_get_pull.assert_called()
+    mocked_response.assert_called_once()
 
 
 def test_send_create_report_request_403(mocker):
     mocked_response = mocker.patch(
-        "codecov_cli.services.report.requests.post",
+        "codecov_cli.helpers.request.requests.post",
         return_value=mocker.MagicMock(status_code=403, text="Permission denied"),
     )
     res = send_create_report_request(
-        "commit_sha", "code", "github", uuid.uuid4(), "owner::::repo", None, 1
+        "commit_sha", "code", "github", uuid.uuid4(), "owner::::repo", None, 1, None
     )
     assert res.error == RequestError(
         code="HTTP Error 403",
@@ -114,7 +98,7 @@ def test_create_report_command_with_warnings(mocker):
         text="",
     )
     mocked_send_request.assert_called_with(
-        "commit_sha", "code", "github", "token", "owner::::repo", None, 1
+        "commit_sha", "code", "github", "token", "owner::::repo", None, 1, None
     )
 
 
@@ -160,5 +144,12 @@ def test_create_report_command_with_error(mocker):
         warnings=[],
     )
     mock_send_report_data.assert_called_with(
-        "commit_sha", "code", "github", "token", "owner::::repo", "enterprise_url", 1
+        "commit_sha",
+        "code",
+        "github",
+        "token",
+        "owner::::repo",
+        "enterprise_url",
+        1,
+        None,
     )

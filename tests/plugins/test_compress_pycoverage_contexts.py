@@ -172,7 +172,7 @@ class TestCompressPycoverageContexts(object):
     def test_default_options(self):
         plugin = CompressPycoverageContexts()
         assert plugin.config.file_to_compress == pathlib.Path("coverage.json")
-        assert plugin.config.delete_uncompressed == True
+        assert plugin.config.delete_uncompressed
         assert plugin.file_to_compress == pathlib.Path("coverage.json")
         assert plugin.file_to_write == pathlib.Path("coverage.codecov.json")
 
@@ -183,7 +183,7 @@ class TestCompressPycoverageContexts(object):
         }
         plugin = CompressPycoverageContexts(config)
         assert plugin.config.file_to_compress == pathlib.Path("label.coverage.json")
-        assert plugin.config.delete_uncompressed == False
+        assert not plugin.config.delete_uncompressed
         assert plugin.file_to_compress == pathlib.Path("label.coverage.json")
         assert plugin.file_to_write == pathlib.Path("label.coverage.codecov.json")
 
@@ -192,7 +192,7 @@ class TestCompressPycoverageContexts(object):
         res = plugin.run_preparation(None)
         assert res == PreparationPluginReturn(
             success=False,
-            messages=[f"File to compress coverage.json not found."],
+            messages=["File to compress coverage.json not found."],
         )
 
     def test_run_preparation_fail_fast_path_not_file(self, tmp_path):

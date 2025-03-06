@@ -1,5 +1,8 @@
+packaging>=24.2  # to not conflict with setuptools-scm
+pyyaml>=6.0.2
 pre-commit
 pytest
-pytest-cov
-pytest-mock
 pytest-asyncio
+pytest-cov
+pytest-env
+pytest-mock

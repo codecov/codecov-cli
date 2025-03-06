@@ -1,34 +1,36 @@
 import logging
 import subprocess
-import typing
+import typing as t
 from pathlib import Path
 from shutil import which
 
 from codecov_cli.fallbacks import FallbackFieldEnum
 from codecov_cli.helpers.git import parse_git_service, parse_slug
+from abc import ABC, abstractmethod
 
 logger = logging.getLogger("codecovcli")
 
 
-class VersioningSystemInterface(object):
+class VersioningSystemInterface(ABC):
     def __repr__(self) -> str:
         return str(type(self))
 
-    def get_fallback_value(
-        self, fallback_field: FallbackFieldEnum
-    ) -> typing.Optional[str]:
+    @abstractmethod
+    def get_fallback_value(self, fallback_field: FallbackFieldEnum) -> t.Optional[str]:
         pass
 
-    def get_network_root(self) -> typing.Optional[Path]:
+    @abstractmethod
+    def get_network_root(self) -> t.Optional[Path]:
         pass
 
+    @abstractmethod
     def list_relevant_files(
-        self, directory: typing.Optional[Path] = None
-    ) -> typing.List[str]:
+        self, directory: t.Optional[Path] = None, recurse_submodules: bool = False
+    ) -> t.Optional[t.List[str]]:
         pass
 
 
-def get_versioning_system() -> VersioningSystemInterface:
+def get_versioning_system() -> t.Optional[VersioningSystemInterface]:
     for klass in [GitVersioningSystem, NoVersioningSystem]:
         if klass.is_available():
             logger.debug(f"versioning system found: {klass}")
@@ -38,10 +40,30 @@ def get_versioning_system() -> VersioningSystemInterface:
 class GitVersioningSystem(VersioningSystemInterface):
     @classmethod
     def is_available(cls):
-        return which("git") is not None
+        if which("git") is not None:
+            p = subprocess.run(
+                ["git", "rev-parse", "--show-toplevel"], capture_output=True
+            )
+            if p.stdout:
+                return True
+        return False
 
     def get_fallback_value(self, fallback_field: FallbackFieldEnum):
         if fallback_field == FallbackFieldEnum.commit_sha:
+            # here we will get the commit SHA of the latest commit
+            # that is NOT a merge commit
+            p = subprocess.run(
+                # List current commit parent's SHA
+                ["git", "rev-parse", "HEAD^@"],
+                capture_output=True,
+            )
+            parents_hash = p.stdout.decode().strip().splitlines()
+            if len(parents_hash) == 2:
+                # IFF the current commit is a merge commit it will have 2 parents
+                # We return the 2nd one - The commit that came from the branch merged into ours
+                return parents_hash[1]
+            # At this point we know the current commit is not a merge commit
+            # so we get it's SHA and return that
             p = subprocess.run(["git", "log", "-1", "--format=%H"], capture_output=True)
             if p.stdout:
                 return p.stdout.decode().strip()
@@ -56,7 +78,7 @@ class GitVersioningSystem(VersioningSystemInterface):
                 return branch_name if branch_name != "HEAD" else None
 
         if fallback_field == FallbackFieldEnum.slug:
-            # if there are multiple remotes, we will prioritize using the one called 'origin' if it exsits, else we will use the first one in 'git remote' list
+            # if there are multiple remotes, we will prioritize using the one called 'origin' if it exists, else we will use the first one in 'git remote' list
 
             p = subprocess.run(["git", "remote"], capture_output=True)
 
@@ -78,7 +100,7 @@ class GitVersioningSystem(VersioningSystemInterface):
             return parse_slug(remote_url)
 
         if fallback_field == FallbackFieldEnum.git_service:
-            # if there are multiple remotes, we will prioritize using the one called 'origin' if it exsits, else we will use the first one in 'git remote' list
+            # if there are multiple remotes, we will prioritize using the one called 'origin' if it exists, else we will use the first one in 'git remote' list
 
             p = subprocess.run(["git", "remote"], capture_output=True)
             if not p.stdout:
@@ -104,20 +126,23 @@ class GitVersioningSystem(VersioningSystemInterface):
         return None
 
     def list_relevant_files(
-        self, root_folder: typing.Optional[Path] = None
-    ) -> typing.List[str]:
-        dir_to_use = root_folder or self.get_network_root()
+        self, directory: t.Optional[Path] = None, recurse_submodules: bool = False
+    ) -> t.List[str]:
+        dir_to_use = directory or self.get_network_root()
         if dir_to_use is None:
             raise ValueError("Can't determine root folder")
 
-        res = subprocess.run(
-            ["git", "-C", str(dir_to_use), "ls-files"], capture_output=True
-        )
+        cmd = ["git", "-C", str(dir_to_use), "ls-files"]
+        if recurse_submodules:
+            cmd.append("--recurse-submodules")
+        res = subprocess.run(cmd, capture_output=True)
 
         return [
-            filename[1:-1]
-            if filename.startswith('"') and filename.endswith('"')
-            else filename
+            (
+                filename[1:-1]
+                if filename.startswith('"') and filename.endswith('"')
+                else filename
+            )
             for filename in res.stdout.decode("unicode_escape").strip().split("\n")
         ]
 
@@ -129,3 +154,11 @@ class NoVersioningSystem(VersioningSystemInterface):
 
     def get_network_root(self):
         return Path.cwd()
+
+    def get_fallback_value(self, fallback_field: FallbackFieldEnum):
+        return None
+
+    def list_relevant_files(
+        self, directory: t.Optional[Path] = None, recurse_submodules: bool = False
+    ) -> t.List[str]:
+        return []

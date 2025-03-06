@@ -1,12 +1,16 @@
 import logging
 import os
-import typing
 from pathlib import Path
+from typing import Iterable, List, Optional, Pattern
+
+import sentry_sdk
 
 from codecov_cli.helpers.folder_searcher import globs_to_regex, search_files
+from codecov_cli.helpers.upload_type import ReportType
 from codecov_cli.types import UploadCollectionResultFile
 
 logger = logging.getLogger("codecovcli")
+
 
 coverage_files_patterns = [
     "*.clover",
@@ -36,7 +40,10 @@ coverage_files_patterns = [
 ]
 
 test_results_files_patterns = [
-    "*junit*",
+    "*junit*.xml",
+    "*test*.xml",
+    # the actual JUnit (Java) prefixes the tests with "TEST-"
+    "*TEST-*.xml",
 ]
 
 coverage_files_excluded_patterns = [
@@ -111,8 +118,11 @@ coverage_files_excluded_patterns = [
     "*.whl",
     "*.xcconfig",
     "*.xcoverage.*",
+    "*.yml",
+    "*.yaml",
     "*/classycle/report.xml",
     "*codecov.yml",
+    "codecov.yaml",
     "*~",
     ".*coveragerc",
     ".coverage*",
@@ -180,50 +190,63 @@ default_folders_to_ignore = [
 class FileFinder(object):
     def __init__(
         self,
-        project_root: Path = None,
-        folders_to_ignore: typing.List[str] = None,
-        explicitly_listed_files: typing.List[Path] = None,
+        search_root: Optional[Path] = None,
+        folders_to_ignore: Optional[List[Path]] = None,
+        explicitly_listed_files: Optional[List[Path]] = None,
         disable_search: bool = False,
-        report_type: str = "coverage",
+        report_type: ReportType = ReportType.COVERAGE,
     ):
-        self.project_root = project_root or Path(os.getcwd())
-        self.folders_to_ignore = folders_to_ignore or []
+        self.search_root = search_root or Path(os.getcwd())
+        self.folders_to_ignore = list(folders_to_ignore) if folders_to_ignore else []
         self.explicitly_listed_files = explicitly_listed_files or None
         self.disable_search = disable_search
-        self.report_type = report_type
+        self.report_type: ReportType = report_type
 
-    def find_files(self) -> typing.List[UploadCollectionResultFile]:
-        if self.report_type == "coverage":
-            files_excluded_patterns = coverage_files_excluded_patterns
-            files_patterns = coverage_files_patterns
-        elif self.report_type == "test_results":
-            files_excluded_patterns = test_results_files_excluded_patterns
-            files_patterns = test_results_files_patterns
-        regex_patterns_to_exclude = globs_to_regex(files_excluded_patterns)
-        files_paths = []
-        user_files_paths = []
-        if self.explicitly_listed_files:
-            user_files_paths = self.get_user_specified_files(regex_patterns_to_exclude)
-        if not self.disable_search:
-            regex_patterns_to_include = globs_to_regex(files_patterns)
-            files_paths = search_files(
-                self.project_root,
-                default_folders_to_ignore + self.folders_to_ignore,
-                filename_include_regex=regex_patterns_to_include,
-                filename_exclude_regex=regex_patterns_to_exclude,
-            )
-        result_files = [
-            UploadCollectionResultFile(path) for path in files_paths if files_paths
-        ]
-        user_result_files = [
-            UploadCollectionResultFile(path)
-            for path in user_files_paths
-            if user_files_paths
-        ]
+    def find_files(self) -> List[UploadCollectionResultFile]:
+        with sentry_sdk.start_span(name="find_files"):
+            if self.report_type == ReportType.COVERAGE:
+                files_excluded_patterns = coverage_files_excluded_patterns
+                files_patterns = coverage_files_patterns
+            elif self.report_type == ReportType.TEST_RESULTS:
+                files_excluded_patterns = test_results_files_excluded_patterns
+                files_patterns = test_results_files_patterns
+            regex_patterns_to_exclude = globs_to_regex(files_excluded_patterns)
+            assert regex_patterns_to_exclude  # this is never `None`
+            files_paths: Iterable[Path] = []
+            user_files_paths = []
+            if self.explicitly_listed_files:
+                user_files_paths = self.get_user_specified_files(
+                    regex_patterns_to_exclude
+                )
+            if not self.disable_search:
+                regex_patterns_to_include = globs_to_regex(files_patterns)
+                assert regex_patterns_to_include  # this is never `None`
+                files_paths = search_files(
+                    self.search_root,
+                    default_folders_to_ignore
+                    + [str(folder) for folder in self.folders_to_ignore],
+                    filename_include_regex=regex_patterns_to_include,
+                    filename_exclude_regex=regex_patterns_to_exclude,
+                )
+            result_files = [UploadCollectionResultFile(path) for path in files_paths]
+            user_result_files = [
+                UploadCollectionResultFile(path)
+                for path in user_files_paths
+                if user_files_paths
+            ]
 
-        return list(set(result_files + user_result_files))
+            user_result_files = []
+            for path in user_files_paths:
+                if os.path.isfile(path):
+                    user_result_files.append(UploadCollectionResultFile(path))
+                else:
+                    logger.warning(
+                        f'File "{path}" could not be found or does not exist. Please enter in the full path or from the search root "{self.search_root}"',
+                    )
 
-    def get_user_specified_files(self, regex_patterns_to_exclude):
+            return list(set(result_files + user_result_files))
+
+    def get_user_specified_files(self, regex_patterns_to_exclude: Pattern):
         user_filenames_to_include = []
         files_excluded_but_user_includes = []
         for file in self.explicitly_listed_files:
@@ -232,7 +255,7 @@ class FileFinder(object):
                 files_excluded_but_user_includes.append(str(file))
         if files_excluded_but_user_includes:
             logger.warning(
-                "Some files being explicitly added are found in the list of excluded files for upload.",
+                "Some files being explicitly added are found in the list of excluded files for upload. We are still going to search for the explicitly added files.",
                 extra=dict(
                     extra_log_attributes=dict(files=files_excluded_but_user_includes)
                 ),
@@ -243,17 +266,21 @@ class FileFinder(object):
         )
         user_files_paths = list(
             search_files(
-                self.project_root,
-                default_folders_to_ignore + self.folders_to_ignore,
+                self.search_root,
+                self.folders_to_ignore,
                 filename_include_regex=regex_patterns_to_include,
-                filename_exclude_regex=regex_patterns_to_exclude,
                 multipart_include_regex=multipart_include_regex,
             )
         )
         not_found_files = []
+        user_files_paths_resolved = [path.resolve() for path in user_files_paths]
         for filepath in self.explicitly_listed_files:
-            if filepath.resolve() not in user_files_paths:
-                not_found_files.append(filepath)
+            if filepath.resolve() not in user_files_paths_resolved:
+                ## The file given might be linked or in a parent dir, check to see if it exists
+                if filepath.exists():
+                    user_files_paths.append(filepath)
+                else:
+                    not_found_files.append(filepath)
 
         if not_found_files:
             logger.warning(
@@ -269,7 +296,7 @@ def select_file_finder(
     folders_to_ignore,
     explicitly_listed_files,
     disable_search,
-    report_type="coverage",
+    report_type: ReportType = ReportType.COVERAGE,
 ):
     return FileFinder(
         root_folder_to_search,

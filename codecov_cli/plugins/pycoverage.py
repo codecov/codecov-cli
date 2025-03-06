@@ -6,6 +6,8 @@ import subprocess
 import typing
 from glob import iglob
 
+import sentry_sdk
+
 from codecov_cli.helpers.folder_searcher import globs_to_regex, search_files
 from codecov_cli.plugins.types import PreparationPluginReturn
 
@@ -54,23 +56,24 @@ class Pycoverage(object):
         self.config = PycoverageConfig(config)
 
     def run_preparation(self, collector) -> PreparationPluginReturn:
+        with sentry_sdk.start_span(name="pycoverage"):
+            if shutil.which("coverage") is None:
+                logger.warning("coverage.py is not installed or can't be found.")
+                return
 
-        if shutil.which("coverage") is None:
-            logger.warning("coverage.py is not installed or can't be found.")
-            return
-
-        path_to_coverage_data = self._get_path_to_coverage()
-        if path_to_coverage_data is None:
-            logger.warning("No coverage data found to transform")
-            return
-        coverage_dir = pathlib.Path(path_to_coverage_data).parent
-        if self.config.report_type == "xml":
-            return self._generate_XML_report(coverage_dir)
-        if self.config.report_type == "json":
-            return self._generate_JSON_report(coverage_dir)
-        return PreparationPluginReturn(
-            success=False, messages=[f"report type {self.config.report_type} unknown"]
-        )
+            path_to_coverage_data = self._get_path_to_coverage()
+            if path_to_coverage_data is None:
+                logger.warning("No coverage data found to transform")
+                return
+            coverage_dir = pathlib.Path(path_to_coverage_data).parent
+            if self.config.report_type == "xml":
+                return self._generate_XML_report(coverage_dir)
+            if self.config.report_type == "json":
+                return self._generate_JSON_report(coverage_dir)
+            return PreparationPluginReturn(
+                success=False,
+                messages=[f"report type {self.config.report_type} unknown"],
+            )
 
     def _get_path_to_coverage(self) -> pathlib.Path:
         if self.config.path_to_coverage_file:

@@ -11,7 +11,9 @@ def test_existing_commands():
         "get-report-results",
         "label-analysis",
         "pr-base-picking",
+        "process-test-results",
         "send-notifications",
         "static-analysis",
+        "upload-coverage",
         "upload-process",
     ]

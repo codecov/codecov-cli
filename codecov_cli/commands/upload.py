@@ -2,12 +2,15 @@ import logging
 import os
 import pathlib
 import typing
-
 import click
+import sentry_sdk
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
+from codecov_cli.helpers.args import get_cli_args
 from codecov_cli.helpers.options import global_options
 from codecov_cli.services.upload import do_upload_logic
+from codecov_cli.types import CommandContext
+from codecov_cli.helpers.upload_type import report_type_from_str, ReportType
 
 logger = logging.getLogger("codecovcli")
 
@@ -18,7 +21,9 @@ def _turn_env_vars_into_dict(ctx, params, value):
 
 _global_upload_options = [
     click.option(
+        "--code",
         "--report-code",
+        "report_code",
         help="The code of the report. If unsure, leave default",
         default="default",
     ),
@@ -62,8 +67,14 @@ _global_upload_options = [
         default=[],
     ),
     click.option(
+        "--recurse-submodules",
+        help="Whether to enumerate files inside of submodules for path-fixing purposes. Off by default.",
+        is_flag=True,
+        default=False,
+    ),
+    click.option(
         "--disable-search",
-        help="Disable search for coverage files. This is helpful when specifying what files you want to uload with the --file option.",
+        help="Disable search for coverage files. This is helpful when specifying what files you want to upload with the --file option.",
         is_flag=True,
         default=False,
     ),
@@ -98,6 +109,8 @@ _global_upload_options = [
         "-n",
         "--name",
         help="Custom defined name of the upload. Visible in Codecov UI",
+        cls=CodecovOption,
+        fallback_field=FallbackFieldEnum.build_code,
     ),
     click.option(
         "-B",
@@ -156,13 +169,42 @@ _global_upload_options = [
         "--handle-no-reports-found",
         "handle_no_reports_found",
         is_flag=True,
-        help="Raise no excpetions when no coverage reports found.",
+        help="Raise no exceptions when no coverage reports found.",
     ),
     click.option(
         "--report-type",
+        "report_type_str",
         help="The type of the file to upload, coverage by default. Possible values are: testing, coverage.",
         default="coverage",
         type=click.Choice(["coverage", "test_results"]),
+    ),
+    click.option(
+        "--network-filter",
+        help="Specify a filter on the files listed in the network section of the Codecov report. This will only add files whose path begin with the specified filter. Useful for upload-specific path fixing",
+    ),
+    click.option(
+        "--network-prefix",
+        help="Specify a prefix on files listed in the network section of the Codecov report. Useful to help resolve path fixing",
+    ),
+    click.option(
+        "--gcov-args",
+        help="Extra arguments to pass to gcov",
+    ),
+    click.option(
+        "--gcov-ignore",
+        help="Paths to ignore during gcov gathering",
+    ),
+    click.option(
+        "--gcov-include",
+        help="Paths to include during gcov gathering",
+    ),
+    click.option(
+        "--gcov-executable",
+        help="gcov executable to run. Defaults to 'gcov'",
+    ),
+    click.option(
+        "--swift-project",
+        help="Specify the swift project",
     ),
 ]
 
@@ -178,96 +220,96 @@ def global_upload_options(func):
 @global_options
 @click.pass_context
 def do_upload(
-    ctx: click.Context,
+    ctx: CommandContext,
     commit_sha: str,
     report_code: str,
+    branch: typing.Optional[str],
     build_code: typing.Optional[str],
     build_url: typing.Optional[str],
-    job_code: typing.Optional[str],
+    disable_file_fixes: bool,
+    disable_search: bool,
+    dry_run: bool,
     env_vars: typing.Dict[str, str],
-    flags: typing.List[str],
-    name: typing.Optional[str],
-    network_root_folder: pathlib.Path,
-    files_search_root_folder: pathlib.Path,
+    fail_on_error: bool,
     files_search_exclude_folders: typing.List[pathlib.Path],
     files_search_explicitly_listed_files: typing.List[pathlib.Path],
-    disable_search: bool,
-    disable_file_fixes: bool,
-    token: typing.Optional[str],
-    plugin_names: typing.List[str],
-    branch: typing.Optional[str],
-    slug: typing.Optional[str],
-    pull_request_number: typing.Optional[str],
-    use_legacy_uploader: bool,
-    fail_on_error: bool,
-    dry_run: bool,
+    files_search_root_folder: pathlib.Path,
+    flags: typing.List[str],
+    gcov_args: typing.Optional[str],
+    gcov_executable: typing.Optional[str],
+    gcov_ignore: typing.Optional[str],
+    gcov_include: typing.Optional[str],
     git_service: typing.Optional[str],
     handle_no_reports_found: bool,
-    report_type: str,
+    job_code: typing.Optional[str],
+    name: typing.Optional[str],
+    network_filter: typing.Optional[str],
+    network_prefix: typing.Optional[str],
+    network_root_folder: pathlib.Path,
+    plugin_names: typing.List[str],
+    pull_request_number: typing.Optional[str],
+    recurse_submodules: bool,
+    report_type_str: str,
+    slug: typing.Optional[str],
+    swift_project: typing.Optional[str],
+    token: typing.Optional[str],
+    use_legacy_uploader: bool,
 ):
-    versioning_system = ctx.obj["versioning_system"]
-    codecov_yaml = ctx.obj["codecov_yaml"] or {}
-    cli_config = codecov_yaml.get("cli", {})
-    ci_adapter = ctx.obj.get("ci_adapter")
-    enterprise_url = ctx.obj.get("enterprise_url")
-    logger.debug(
-        "Starting upload processing",
-        extra=dict(
-            extra_log_attributes=dict(
-                upload_file_type=report_type,
-                commit_sha=commit_sha,
-                report_code=report_code,
+    with sentry_sdk.start_transaction(op="task", name="Do Upload"):
+        with sentry_sdk.start_span(name="do_upload"):
+            versioning_system = ctx.obj["versioning_system"]
+            codecov_yaml = ctx.obj["codecov_yaml"] or {}
+            cli_config = codecov_yaml.get("cli", {})
+            ci_adapter = ctx.obj.get("ci_adapter")
+            enterprise_url = ctx.obj.get("enterprise_url")
+            args = get_cli_args(ctx)
+            logger.debug(
+                "Starting upload processing",
+                extra=dict(
+                    extra_log_attributes=args,
+                ),
+            )
+
+            report_type: ReportType = report_type_from_str(report_type_str)
+            do_upload_logic(
+                cli_config,
+                versioning_system,
+                ci_adapter,
+                branch=branch,
                 build_code=build_code,
                 build_url=build_url,
-                job_code=job_code,
-                env_vars=env_vars,
-                flags=flags,
-                name=name,
-                network_root_folder=network_root_folder,
-                files_search_root_folder=files_search_root_folder,
-                files_search_exclude_folders=files_search_exclude_folders,
-                files_search_explicitly_listed_files=files_search_explicitly_listed_files,
-                plugin_names=plugin_names,
-                token=token,
-                branch=branch,
-                slug=slug,
-                pull_request_number=pull_request_number,
-                git_service=git_service,
-                enterprise_url=enterprise_url,
-                disable_search=disable_search,
+                commit_sha=commit_sha,
                 disable_file_fixes=disable_file_fixes,
+                disable_search=disable_search,
+                dry_run=dry_run,
+                enterprise_url=enterprise_url,
+                env_vars=env_vars,
+                fail_on_error=fail_on_error,
+                files_search_exclude_folders=list(files_search_exclude_folders),
+                files_search_explicitly_listed_files=list(
+                    files_search_explicitly_listed_files
+                ),
+                files_search_root_folder=files_search_root_folder,
+                flags=flags,
+                gcov_args=gcov_args,
+                gcov_executable=gcov_executable,
+                gcov_ignore=gcov_ignore,
+                gcov_include=gcov_include,
+                git_service=git_service,
                 handle_no_reports_found=handle_no_reports_found,
+                job_code=job_code,
+                name=name,
+                network_filter=network_filter,
+                network_prefix=network_prefix,
+                network_root_folder=network_root_folder,
+                plugin_names=plugin_names,
+                pull_request_number=pull_request_number,
+                recurse_submodules=recurse_submodules,
+                report_code=report_code,
+                slug=slug,
+                swift_project=swift_project,
+                token=token,
+                report_type=report_type,
+                use_legacy_uploader=use_legacy_uploader,
+                args=args,
             )
-        ),
-    )
-    do_upload_logic(
-        cli_config,
-        versioning_system,
-        ci_adapter,
-        upload_file_type=report_type,
-        commit_sha=commit_sha,
-        report_code=report_code,
-        build_code=build_code,
-        build_url=build_url,
-        job_code=job_code,
-        env_vars=env_vars,
-        flags=flags,
-        name=name,
-        network_root_folder=network_root_folder,
-        files_search_root_folder=files_search_root_folder,
-        files_search_exclude_folders=list(files_search_exclude_folders),
-        files_search_explicitly_listed_files=list(files_search_explicitly_listed_files),
-        plugin_names=plugin_names,
-        token=token,
-        branch=branch,
-        slug=slug,
-        pull_request_number=pull_request_number,
-        use_legacy_uploader=use_legacy_uploader,
-        fail_on_error=fail_on_error,
-        dry_run=dry_run,
-        git_service=git_service,
-        enterprise_url=enterprise_url,
-        disable_search=disable_search,
-        handle_no_reports_found=handle_no_reports_found,
-        disable_file_fixes=disable_file_fixes,
-    )

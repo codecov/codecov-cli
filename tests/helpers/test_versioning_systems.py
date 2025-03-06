@@ -8,16 +8,27 @@ from codecov_cli.helpers.versioning_systems import GitVersioningSystem
 
 class TestGitVersioningSystem(object):
     @pytest.mark.parametrize(
-        "commit_sha,expected", [("", None), (b" random_sha  ", "random_sha")]
+        "runs_output,expected",
+        [
+            # No output for parents nor commit
+            ([b"", b""], None),
+            # No output for parents, commit has SHA
+            ([b"", b" random_sha"], "random_sha"),
+            # Commit is NOT a merge-commit
+            ([b" parent_sha", b" random_sha  "], "random_sha"),
+            # Commit IS a merge-commit
+            ([b" parent_sha0\nparent_sha1", b" random_sha"], "parent_sha1"),
+        ],
     )
-    def test_commit_sha(self, mocker, commit_sha, expected):
-        mocked_subprocess = MagicMock()
+    def test_commit_sha(self, mocker, runs_output, expected):
+        mocked_subprocess = [
+            MagicMock(**{"stdout": runs_output[0]}),
+            MagicMock(**{"stdout": runs_output[1]}),
+        ]
         mocker.patch(
             "codecov_cli.helpers.versioning_systems.subprocess.run",
-            return_value=mocked_subprocess,
+            side_effect=mocked_subprocess,
         )
-
-        mocked_subprocess.stdout = commit_sha
 
         assert (
             GitVersioningSystem().get_fallback_value(FallbackFieldEnum.commit_sha)
@@ -117,5 +128,16 @@ class TestGitVersioningSystem(object):
         )
 
         vs = GitVersioningSystem()
-        with pytest.raises(ValueError) as ex:
+        with pytest.raises(ValueError):
             vs.list_relevant_files()
+
+    def test_list_relevant_files_recurse_submodules(self, mocker, tmp_path):
+        subproc_run = mocker.patch(
+            "codecov_cli.helpers.versioning_systems.subprocess.run"
+        )
+        vs = GitVersioningSystem()
+        _ = vs.list_relevant_files(tmp_path, recurse_submodules=True)
+        subproc_run.assert_called_with(
+            ["git", "-C", str(tmp_path), "ls-files", "--recurse-submodules"],
+            capture_output=True,
+        )

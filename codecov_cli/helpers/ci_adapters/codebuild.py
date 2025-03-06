@@ -12,7 +12,7 @@ class AWSCodeBuildCIAdapter(CIAdapterBase):
     def _get_branch(self):
         branch = os.getenv("CODEBUILD_WEBHOOK_HEAD_REF")
         if branch:
-            return re.sub("^refs\/heads\/", "", branch)
+            return re.sub(r"^refs\/heads\/", "", branch)
         return None
 
     def _get_build_code(self):
@@ -27,10 +27,10 @@ class AWSCodeBuildCIAdapter(CIAdapterBase):
     def _get_slug(self):
         slug = os.getenv("CODEBUILD_SOURCE_REPO_URL")
         if slug:
-            slug = re.sub("^.*github.com\/", "", slug)
-            slug = re.sub("^.*gitlab.com\/", "", slug)
-            slug = re.sub("^.*bitbucket.com\/", "", slug)
-            return re.sub("\.git$", "", slug)
+            slug = re.sub(r"^.*github.com\/", "", slug)
+            slug = re.sub(r"^.*gitlab.com\/", "", slug)
+            slug = re.sub(r"^.*bitbucket.com\/", "", slug)
+            return re.sub(r"\.git$", "", slug)
         return None
 
     def _get_service(self):
@@ -39,7 +39,7 @@ class AWSCodeBuildCIAdapter(CIAdapterBase):
     def _get_pull_request_number(self):
         pr = os.getenv("CODEBUILD_SOURCE_VERSION")
         if pr and pr.startswith("pr/"):
-            return re.sub("^pr\/", "", pr)
+            return re.sub(r"^pr\/", "", pr)
         return None
 
     def _get_job_code(self):

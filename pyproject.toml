@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+authors = [
+    {name = "Tom Hu", email = "thomas.hu@sentry.io"},
+]
+maintainers = [
+    {name = "Codecov Support", email = "support@codecov.io"},
+]
+description = "Codecov Command Line Interface"
+dependencies = [
+    "click==8.*",
+    "httpx==0.27.*",
+    "ijson==3.*",
+    "pyyaml==6.*",
+    "regex",
+    "responses==0.21.*",
+    "sentry-sdk>=2.20.0",
+    "test-results-parser==0.5.*",
+    "tree-sitter==0.20.*",
+    "wrapt>=1.17.2",
+]
+license = {file = "LICENSE"}
+name = "codecov-cli"
+readme = "README.md"
+requires-python = ">= 3.9"
+version = "10.2.0"
+
+[project.scripts]
+codecov = "codecov_cli.main:run"
+codecovcli = "codecov_cli.main:run"
+
+[tool.pytest.ini_options]
+env = [
+    "CODECOV_ENV=test",
+]
+
+[tool.setuptools]
+packages = ["codecov_cli"]
+
+[tool.cibuildwheel]
+skip = ["pp*", "cp313-*"]
+test-command = "codecovcli --help"
+
+[tool.cibuildwheel.config-settings]
+pure-python = "false"
+
+[tool.cibuildwheel.environment]
+PIP_CONSTRAINT = "requirements.txt"

@@ -1,0 +1,404 @@
+Usage: codecovcli [OPTIONS] COMMAND [ARGS]...
+
+Options:
+  --auto-load-params-from [CircleCI|GithubActions|GitlabCI|Bitbucket|Bitrise|AppVeyor|Woodpecker|Heroku|DroneCI|BuildKite|AzurePipelines|Jenkins|CirrusCI|Teamcity|Travis|AWSCodeBuild|GoogleCloudBuild|Local]
+  --codecov-yml-path PATH
+  -u, --enterprise-url, --url TEXT
+                                  Change the upload host (Enterprise use)
+  -v, --verbose                   Use verbose logging
+  --disable-telem                 Disable sending telemetry data to Codecov
+  --version                       Show the version and exit.
+  --help                          Show this message and exit.
+
+Commands:
+  create-commit
+  create-report
+  create-report-results
+  do-upload
+  empty-upload
+  get-report-results
+  label-analysis
+  pr-base-picking
+  process-test-results
+  send-notifications
+  static-analysis
+  upload-coverage
+  upload-process
+
+Usage: codecovcli create-commit [OPTIONS]
+
+Options:
+  --parent-sha TEXT               SHA (with 40 chars) of what should be the
+                                  parent of this commit
+  -P, --pr, --pull-request-number TEXT
+                                  Specify the pull request number mannually.
+                                  Used to override pre-existing CI environment
+                                  variables
+  -B, --branch TEXT               Branch to which this commit belongs to
+  -C, --sha, --commit-sha TEXT    Commit SHA (with 40 chars)  [required]
+  -Z, --fail-on-error             Exit with non-zero code in case of error
+  --git-service [github|gitlab|bitbucket|github_enterprise|gitlab_enterprise|bitbucket_server]
+  -t, --token TEXT                Codecov upload token
+  -r, --slug TEXT                 owner/repo slug used instead of the private
+                                  repo token in Self-hosted
+  -h, --help                      Show this message and exit.
+
+Usage: codecovcli create-report [OPTIONS]
+
+Options:
+  --code TEXT                     The code of the report. If unsure, leave
+                                  default
+  -P, --pr, --pull-request-number TEXT
+                                  Specify the pull request number mannually.
+                                  Used to override pre-existing CI environment
+                                  variables
+  -C, --sha, --commit-sha TEXT    Commit SHA (with 40 chars)  [required]
+  -Z, --fail-on-error             Exit with non-zero code in case of error
+  --git-service [github|gitlab|bitbucket|github_enterprise|gitlab_enterprise|bitbucket_server]
+  -t, --token TEXT                Codecov upload token
+  -r, --slug TEXT                 owner/repo slug used instead of the private
+                                  repo token in Self-hosted
+  -h, --help                      Show this message and exit.
+
+Usage: codecovcli create-report-results [OPTIONS]
+
+Options:
+  --code TEXT                     The code of the report. If unsure, leave
+                                  default
+  -C, --sha, --commit-sha TEXT    Commit SHA (with 40 chars)  [required]
+  -Z, --fail-on-error             Exit with non-zero code in case of error
+  --git-service [github|gitlab|bitbucket|github_enterprise|gitlab_enterprise|bitbucket_server]
+  -t, --token TEXT                Codecov upload token
+  -r, --slug TEXT                 owner/repo slug used instead of the private
+                                  repo token in Self-hosted
+  -h, --help                      Show this message and exit.
+
+Usage: codecovcli do-upload [OPTIONS]
+
+Options:
+  --code, --report-code TEXT      The code of the report. If unsure, leave
+                                  default
+  --network-root-folder PATH      Root folder from which to consider paths on
+                                  the network section  [default: (Current
+                                  working directory)]
+  -s, --dir, --coverage-files-search-root-folder, --files-search-root-folder PATH
+                                  Folder where to search for coverage files
+                                  [default: (Current Working Directory)]
+  --exclude, --coverage-files-search-exclude-folder, --files-search-exclude-folder PATH
+                                  Folders to exclude from search
+  -f, --file, --coverage-files-search-direct-file, --files-search-direct-file PATH
+                                  Explicit files to upload. These will be
+                                  added to the coverage files found for
+                                  upload. If you wish to only upload the
+                                  specified files, please consider using
+                                  --disable-search to disable uploading other
+                                  files.
+  --recurse-submodules            Whether to enumerate files inside of
+                                  submodules for path-fixing purposes. Off by
+                                  default.
+  --disable-search                Disable search for coverage files. This is
+                                  helpful when specifying what files you want
+                                  to upload with the --file option.
+  --disable-file-fixes            Disable file fixes to ignore common lines
+                                  from coverage (e.g. blank lines or empty
+                                  brackets)
+  -b, --build, --build-code TEXT  Specify the build number manually
+  --build-url TEXT                The URL of the build where this is running
+  --job-code TEXT
+  -n, --name TEXT                 Custom defined name of the upload. Visible
+                                  in Codecov UI
+  -B, --branch TEXT               Branch to which this commit belongs to
+  -P, --pr, --pull-request-number TEXT
+                                  Specify the pull request number mannually.
+                                  Used to override pre-existing CI environment
+                                  variables
+  -e, --env, --env-var TEXT       Specify environment variables to be included
+                                  with this build.
+  -F, --flag TEXT                 Flag the upload to group coverage metrics.
+                                  Multiple flags allowed.
+  --plugin TEXT
+  -d, --dry-run                   Don't upload files to Codecov
+  --legacy, --use-legacy-uploader
+                                  Use the legacy upload endpoint
+  --handle-no-reports-found       Raise no exceptions when no coverage reports
+                                  found.
+  --report-type [coverage|test_results]
+                                  The type of the file to upload, coverage by
+                                  default. Possible values are: testing,
+                                  coverage.
+  --network-filter TEXT           Specify a filter on the files listed in the
+                                  network section of the Codecov report. This
+                                  will only add files whose path begin with
+                                  the specified filter. Useful for upload-
+                                  specific path fixing
+  --network-prefix TEXT           Specify a prefix on files listed in the
+                                  network section of the Codecov report.
+                                  Useful to help resolve path fixing
+  --gcov-args TEXT                Extra arguments to pass to gcov
+  --gcov-ignore TEXT              Paths to ignore during gcov gathering
+  --gcov-include TEXT             Paths to include during gcov gathering
+  --gcov-executable TEXT          gcov executable to run. Defaults to 'gcov'
+  --swift-project TEXT            Specify the swift project
+  -C, --sha, --commit-sha TEXT    Commit SHA (with 40 chars)  [required]
+  -Z, --fail-on-error             Exit with non-zero code in case of error
+  --git-service [github|gitlab|bitbucket|github_enterprise|gitlab_enterprise|bitbucket_server]
+  -t, --token TEXT                Codecov upload token
+  -r, --slug TEXT                 owner/repo slug used instead of the private
+                                  repo token in Self-hosted
+  -h, --help                      Show this message and exit.
+
+Usage: codecovcli empty-upload [OPTIONS]
+
+Options:
+  --force
+  -C, --sha, --commit-sha TEXT    Commit SHA (with 40 chars)  [required]
+  -Z, --fail-on-error             Exit with non-zero code in case of error
+  --git-service [github|gitlab|bitbucket|github_enterprise|gitlab_enterprise|bitbucket_server]
+  -t, --token TEXT                Codecov upload token
+  -r, --slug TEXT                 owner/repo slug used instead of the private
+                                  repo token in Self-hosted
+  -h, --help                      Show this message and exit.
+
+Usage: codecovcli get-report-results [OPTIONS]
+
+Options:
+  --code TEXT                     The code of the report. If unsure, leave
+                                  default
+  -C, --sha, --commit-sha TEXT    Commit SHA (with 40 chars)  [required]
+  -Z, --fail-on-error             Exit with non-zero code in case of error
+  --git-service [github|gitlab|bitbucket|github_enterprise|gitlab_enterprise|bitbucket_server]
+  -t, --token TEXT                Codecov upload token
+  -r, --slug TEXT                 owner/repo slug used instead of the private
+                                  repo token in Self-hosted
+  -h, --help                      Show this message and exit.
+
+Usage: codecovcli label-analysis [OPTIONS]
+
+Options:
+  --token TEXT                    The static analysis token (NOT the same
+                                  token as upload)  [required]
+  --head-sha TEXT                 Commit SHA (with 40 chars)  [required]
+  --base-sha TEXT                 Commit SHA (with 40 chars)  [required]
+  --runner-name, --runner TEXT    Runner to use
+  --max-wait-time INTEGER         Max time (in seconds) to wait for the label
+                                  analysis result before falling back to
+                                  running all tests. Default is to wait
+                                  forever.
+  --dry-run                       Print list of tests to run AND tests skipped
+                                  AND options that need to be added to the
+                                  test runner to stdout. Choose format with
+                                  --dry-run-format option. Default is JSON.
+  --dry-run-format [json|space-separated-list]
+                                  Format in which --dry-run data is printed.
+                                  Default is JSON.
+  --runner-param TEXT
+  -h, --help                      Show this message and exit.
+
+Usage: codecovcli pr-base-picking [OPTIONS]
+
+Options:
+  --base-sha TEXT   Base commit SHA (with 40 chars)  [required]
+  --pr TEXT         Pull Request id to associate commit with
+  --slug TEXT       owner/repo slug
+  -t, --token TEXT  Codecov upload token
+  --service TEXT    Specify the service provider of the repo e.g. github
+  -h, --help        Show this message and exit.
+
+Usage: codecovcli process-test-results [OPTIONS]
+
+Options:
+  -s, --dir, --files-search-root-folder PATH
+                                  Folder where to search for test results
+                                  files  [default: (Current Working
+                                  Directory)]
+  -f, --file, --files-search-direct-file PATH
+                                  Explicit files to upload. These will be
+                                  added to the test results files to be
+                                  processed. If you wish to only process the
+                                  specified files, please consider using
+                                  --disable-search to disable processing other
+                                  files.
+  --exclude, --files-search-exclude-folder PATH
+                                  Folders to exclude from search
+  --disable-search                Disable search for coverage files. This is
+                                  helpful when specifying what files you want
+                                  to upload with the --file option.
+  --github-token TEXT             If specified, output the message to the
+                                  specified GitHub PR.
+  -h, --help                      Show this message and exit.
+
+Usage: codecovcli send-notifications [OPTIONS]
+
+Options:
+  -C, --sha, --commit-sha TEXT    Commit SHA (with 40 chars)  [required]
+  -Z, --fail-on-error             Exit with non-zero code in case of error
+  --git-service [github|gitlab|bitbucket|github_enterprise|gitlab_enterprise|bitbucket_server]
+  -t, --token TEXT                Codecov upload token
+  -r, --slug TEXT                 owner/repo slug used instead of the private
+                                  repo token in Self-hosted
+  -h, --help                      Show this message and exit.
+
+Usage: codecovcli static-analysis [OPTIONS]
+
+Options:
+  --foldertosearch PATH      Folder to search
+  --numberprocesses INTEGER  number of processes to use
+  --pattern TEXT             file pattern to search for
+  --force / --no-force
+  --commit-sha TEXT          Commit SHA (with 40 chars)  [required]
+  --folders-to-exclude PATH  Folders not to search
+  --token TEXT               The static analysis token (NOT the same token as
+                             upload)  [required]
+  -h, --help                 Show this message and exit.
+
+Usage: codecovcli upload-coverage [OPTIONS]
+
+Options:
+  -C, --sha, --commit-sha TEXT    Commit SHA (with 40 chars)  [required]
+  -Z, --fail-on-error             Exit with non-zero code in case of error
+  --git-service [github|gitlab|bitbucket|github_enterprise|gitlab_enterprise|bitbucket_server]
+  -t, --token TEXT                Codecov upload token
+  -r, --slug TEXT                 owner/repo slug used instead of the private
+                                  repo token in Self-hosted
+  --code, --report-code TEXT      The code of the report. If unsure, leave
+                                  default
+  --network-root-folder PATH      Root folder from which to consider paths on
+                                  the network section  [default: (Current
+                                  working directory)]
+  -s, --dir, --coverage-files-search-root-folder, --files-search-root-folder PATH
+                                  Folder where to search for coverage files
+                                  [default: (Current Working Directory)]
+  --exclude, --coverage-files-search-exclude-folder, --files-search-exclude-folder PATH
+                                  Folders to exclude from search
+  -f, --file, --coverage-files-search-direct-file, --files-search-direct-file PATH
+                                  Explicit files to upload. These will be
+                                  added to the coverage files found for
+                                  upload. If you wish to only upload the
+                                  specified files, please consider using
+                                  --disable-search to disable uploading other
+                                  files.
+  --recurse-submodules            Whether to enumerate files inside of
+                                  submodules for path-fixing purposes. Off by
+                                  default.
+  --disable-search                Disable search for coverage files. This is
+                                  helpful when specifying what files you want
+                                  to upload with the --file option.
+  --disable-file-fixes            Disable file fixes to ignore common lines
+                                  from coverage (e.g. blank lines or empty
+                                  brackets)
+  -b, --build, --build-code TEXT  Specify the build number manually
+  --build-url TEXT                The URL of the build where this is running
+  --job-code TEXT
+  -n, --name TEXT                 Custom defined name of the upload. Visible
+                                  in Codecov UI
+  -B, --branch TEXT               Branch to which this commit belongs to
+  -P, --pr, --pull-request-number TEXT
+                                  Specify the pull request number mannually.
+                                  Used to override pre-existing CI environment
+                                  variables
+  -e, --env, --env-var TEXT       Specify environment variables to be included
+                                  with this build.
+  -F, --flag TEXT                 Flag the upload to group coverage metrics.
+                                  Multiple flags allowed.
+  --plugin TEXT
+  -d, --dry-run                   Don't upload files to Codecov
+  --legacy, --use-legacy-uploader
+                                  Use the legacy upload endpoint
+  --handle-no-reports-found       Raise no exceptions when no coverage reports
+                                  found.
+  --report-type [coverage|test_results]
+                                  The type of the file to upload, coverage by
+                                  default. Possible values are: testing,
+                                  coverage.
+  --network-filter TEXT           Specify a filter on the files listed in the
+                                  network section of the Codecov report. This
+                                  will only add files whose path begin with
+                                  the specified filter. Useful for upload-
+                                  specific path fixing
+  --network-prefix TEXT           Specify a prefix on files listed in the
+                                  network section of the Codecov report.
+                                  Useful to help resolve path fixing
+  --gcov-args TEXT                Extra arguments to pass to gcov
+  --gcov-ignore TEXT              Paths to ignore during gcov gathering
+  --gcov-include TEXT             Paths to include during gcov gathering
+  --gcov-executable TEXT          gcov executable to run. Defaults to 'gcov'
+  --swift-project TEXT            Specify the swift project
+  --parent-sha TEXT               SHA (with 40 chars) of what should be the
+                                  parent of this commit
+  -h, --help                      Show this message and exit.
+
+Usage: codecovcli upload-process [OPTIONS]
+
+Options:
+  -C, --sha, --commit-sha TEXT    Commit SHA (with 40 chars)  [required]
+  -Z, --fail-on-error             Exit with non-zero code in case of error
+  --git-service [github|gitlab|bitbucket|github_enterprise|gitlab_enterprise|bitbucket_server]
+  -t, --token TEXT                Codecov upload token
+  -r, --slug TEXT                 owner/repo slug used instead of the private
+                                  repo token in Self-hosted
+  --code, --report-code TEXT      The code of the report. If unsure, leave
+                                  default
+  --network-root-folder PATH      Root folder from which to consider paths on
+                                  the network section  [default: (Current
+                                  working directory)]
+  -s, --dir, --coverage-files-search-root-folder, --files-search-root-folder PATH
+                                  Folder where to search for coverage files
+                                  [default: (Current Working Directory)]
+  --exclude, --coverage-files-search-exclude-folder, --files-search-exclude-folder PATH
+                                  Folders to exclude from search
+  -f, --file, --coverage-files-search-direct-file, --files-search-direct-file PATH
+                                  Explicit files to upload. These will be
+                                  added to the coverage files found for
+                                  upload. If you wish to only upload the
+                                  specified files, please consider using
+                                  --disable-search to disable uploading other
+                                  files.
+  --recurse-submodules            Whether to enumerate files inside of
+                                  submodules for path-fixing purposes. Off by
+                                  default.
+  --disable-search                Disable search for coverage files. This is
+                                  helpful when specifying what files you want
+                                  to upload with the --file option.
+  --disable-file-fixes            Disable file fixes to ignore common lines
+                                  from coverage (e.g. blank lines or empty
+                                  brackets)
+  -b, --build, --build-code TEXT  Specify the build number manually
+  --build-url TEXT                The URL of the build where this is running
+  --job-code TEXT
+  -n, --name TEXT                 Custom defined name of the upload. Visible
+                                  in Codecov UI
+  -B, --branch TEXT               Branch to which this commit belongs to
+  -P, --pr, --pull-request-number TEXT
+                                  Specify the pull request number mannually.
+                                  Used to override pre-existing CI environment
+                                  variables
+  -e, --env, --env-var TEXT       Specify environment variables to be included
+                                  with this build.
+  -F, --flag TEXT                 Flag the upload to group coverage metrics.
+                                  Multiple flags allowed.
+  --plugin TEXT
+  -d, --dry-run                   Don't upload files to Codecov
+  --legacy, --use-legacy-uploader
+                                  Use the legacy upload endpoint
+  --handle-no-reports-found       Raise no exceptions when no coverage reports
+                                  found.
+  --report-type [coverage|test_results]
+                                  The type of the file to upload, coverage by
+                                  default. Possible values are: testing,
+                                  coverage.
+  --network-filter TEXT           Specify a filter on the files listed in the
+                                  network section of the Codecov report. This
+                                  will only add files whose path begin with
+                                  the specified filter. Useful for upload-
+                                  specific path fixing
+  --network-prefix TEXT           Specify a prefix on files listed in the
+                                  network section of the Codecov report.
+                                  Useful to help resolve path fixing
+  --gcov-args TEXT                Extra arguments to pass to gcov
+  --gcov-ignore TEXT              Paths to ignore during gcov gathering
+  --gcov-include TEXT             Paths to include during gcov gathering
+  --gcov-executable TEXT          gcov executable to run. Defaults to 'gcov'
+  --swift-project TEXT            Specify the swift project
+  --parent-sha TEXT               SHA (with 40 chars) of what should be the
+                                  parent of this commit
+  -h, --help                      Show this message and exit.

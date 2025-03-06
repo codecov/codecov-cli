@@ -1,3 +1,5 @@
+---
+# yamllint disable rule:line-length
 # This workflow will install Python dependencies, run tests and lint with a variety of Python versions
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
@@ -16,16 +18,35 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
+      - name: Check linting with ruff
+        run: |
+          make lint
+
+  detect-command-change:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install black==22.3.0 isort==5.10.1
-      - name: Check linting with black
+          pip install -r requirements.txt
+          python -m pip install -e .
+      - name: Run command_dump
         run: |
-          black --check codecov_cli
-      - name: Check imports order with isort
+          python command_dump.py
+      - name: Detect changes on commit
         run: |
-          isort --check --profile=black codecov_cli -p staticcodecov_languages
+          if [ -n "$(git diff codecovcli_commands)" ]; then
+            echo "Please run `python command_dump.py` before submitting, or install the hooks"
+            echo "$(git diff codecovcli_commands)"
+            exit 1
+          fi
 
   codecov-startup:
     runs-on: ubuntu-latest
@@ -35,10 +56,9 @@ jobs:
         with:
           submodules: true
           fetch-depth: 2
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v5
         with:
-          # Because of https://github.com/tree-sitter/py-tree-sitter/issues/162
-          python-version: '3.11.x'
+          python-version: "3.12"
       - name: Install CLI
         run: |
           pip install codecov-cli
@@ -55,79 +75,69 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - python-version: "3.13"
+          - python-version: "3.12"
           - python-version: "3.11"
           - python-version: "3.10"
           - python-version: "3.9"
-          - python-version: "3.8"
-    steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
-        fetch-depth: 2
-    - name: Set up Python ${{matrix.python-version}}
-      uses: actions/setup-python@v3
-      with:
-        python-version: "${{matrix.python-version}}"
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        python setup.py develop
-        pip install -r tests/requirements.txt
-    - name: Test with pytest
-      run: |
-        pytest --cov
-    - name: Dogfooding codecov-cli
-      if: ${{ !github.event.pull_request.head.repo.fork && github.repository_owner == 'codecov' }}
-      run: |
-        codecovcli do-upload --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
-
-  static-analysis:
-    runs-on: ubuntu-latest
-    needs: codecov-startup
-    if: ${{ !github.event.pull_request.head.repo.fork && github.repository_owner == 'codecov' }}
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
           fetch-depth: 2
-      - uses: actions/setup-python@v3
+      - name: Set up Python ${{matrix.python-version}}
+        uses: actions/setup-python@v5
         with:
-          # Because of https://github.com/tree-sitter/py-tree-sitter/issues/162
-          python-version: '3.11.x'
-      - name: Install CLI
+          python-version: "${{matrix.python-version}}"
+      - name: Install dependencies
         run: |
-          pip install codecov-cli
-      - uses: actions/checkout@v3
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python -m pip install -e .
+          pip install -r tests/requirements.txt
+      - name: Test with pytest
+        run: |
+          pytest --cov --junitxml=${{matrix.python-version}}junit.xml
+        env:
+          CODECOV_ENV: test
+      - name: Dogfooding codecov-cli
+        if: ${{ !github.event.pull_request.head.repo.fork && github.repository_owner == 'codecov' }}
+        run: |
+          codecovcli -v do-upload --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
+          codecovcli do-upload --report-type test_results --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}}
+      - name: Upload artifacts for test-results-processing
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
         with:
-          submodules: true
-          fetch-depth: 2
-      - name: Static Analysis
-        run: |
-          codecovcli static-analysis --token ${{ secrets.STATIC_TOKEN }}
+          name: ${{matrix.python-version}}junit.xml
+          path: ${{matrix.python-version}}junit.xml
 
-  label-analysis:
+  process-test-results:
+    if: ${{ always() }}
+    needs: build-test-upload
     runs-on: ubuntu-latest
-    needs: static-analysis
-    if: ${{ !github.event.pull_request.head.repo.fork && github.repository_owner == 'codecov' }}
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
-          fetch-depth: 0
-      - uses: actions/setup-python@v3
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
         with:
-          # Because of https://github.com/tree-sitter/py-tree-sitter/issues/162
-          python-version: '3.11.x'
-      - name: Install CLI
+          python-version: "3.12"
+      - name: Install dependencies for Dogfooding
         run: |
-          pip install -r requirements.txt -r tests/requirements.txt
-          pip install codecov-cli
-      - name: Label Analysis
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python -m pip install -e .
+          pip install -r tests/requirements.txt
+      - name: Download all test results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "*junit.xml"
+          path: "test_results"
+          merge-multiple: true
+
+      - name: Dogfooding codecov-cli
+        if: ${{ !cancelled() && github.ref && contains(github.ref, 'pull') }}
         run: |
-          BASE_SHA=$(git merge-base HEAD^ origin/main)
-          echo $BASE_SHA
-          codecovcli label-analysis --token ${{ secrets.STATIC_TOKEN }} --base-sha=$BASE_SHA --max-wait-time=120
-      - name: Upload smart-labels
-        run: |
-          codecovcli --codecov-yml-path=codecov.yml do-upload --plugin pycoverage --plugin compress-pycoverage --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --flag smart-labels
+          codecovcli process-test-results --dir test_results --github-token ${{ secrets.GITHUB_TOKEN }}

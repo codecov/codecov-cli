@@ -1,3 +1,4 @@
+---
 name: Build Compiled Assets
 
 on:
@@ -18,8 +19,10 @@ jobs:
         include:
           - os: macos-latest
             TARGET: macos
+            # currently, wrapt pulls the arm64 version instead of the universal one, so the below is a hack
             CMD_REQS: >
-              mkdir -p pip-packages && cd pip-packages && pip wheel --no-cache-dir --no-binary tree_sitter,ijson,charset_normalizer,PyYAML .. && cd .. &&
+              mkdir -p pip-packages && cd pip-packages && pip wheel --no-cache-dir --no-binary tree_sitter,ijson,charset_normalizer,PyYAML .. &&
+              rm $(ls | grep wrapt) && pip download wrapt --platform=universal2 --only-binary=:all: && pip install $(ls | grep wrapt) --force-reinstall && cd .. &&
               pip install --no-deps --no-index --find-links=pip-packages pip-packages/*
             CMD_BUILD: >
               STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
@@ -31,8 +34,7 @@ jobs:
           - os: ubuntu-20.04
             TARGET: ubuntu
             CMD_REQS: >
-              pip install -r requirements.txt
-              pip install .
+              pip install -r requirements.txt && pip install .
             CMD_BUILD: >
               STATICCODECOV_LIB_PATH=$(find build/ -maxdepth 1 -type d -name 'lib.*' -print -quit | xargs -I {} sh -c "find {} -type f -name 'staticcodecov*' -print -quit | sed 's|^./||'") &&
               pyinstaller --add-binary ${STATICCODECOV_LIB_PATH}:. --copy-metadata codecov-cli --hidden-import staticcodecov_languages -F codecov_cli/main.py &&
@@ -42,8 +44,7 @@ jobs:
           - os: windows-latest
             TARGET: windows
             CMD_REQS: >
-              pip install -r requirements.txt
-              pip install .
+              pip install -r requirements.txt && pip install .
             CMD_BUILD: >
               pyinstaller --add-binary "build\lib.win-amd64-cpython-311\staticcodecov_languages.cp311-win_amd64.pyd;." --copy-metadata codecov-cli --hidden-import staticcodecov_languages -F codecov_cli\main.py &&
               Copy-Item -Path ".\dist\main.exe" -Destination ".\dist\codecovcli_windows.exe"
@@ -66,9 +67,10 @@ jobs:
       - name: Build with pyinstaller for ${{matrix.TARGET}}
         run: ${{matrix.CMD_BUILD}}
       - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v3.1.3
+        uses: actions/upload-artifact@v4
         if: inputs.release == false
         with:
+          name: ${{ matrix.OUT_FILE_NAME }}
           path: ./dist/${{ matrix.OUT_FILE_NAME }}
       - name: Upload Release Asset
         if: inputs.release == true
@@ -93,10 +95,10 @@ jobs:
           - distro: "python:3.11-alpine3.18"
             arch: x86_64
             distro_name: alpine
-          - distro: "python:3.11"
+          - distro: "python:3.11-bullseye"
             arch: arm64
             distro_name: linux
-            
+
     steps:
     - uses: actions/checkout@v4
       with:
@@ -115,9 +117,10 @@ jobs:
           ${{ matrix.distro }} \
           ./scripts/build_${{ matrix.distro_name }}_arm.sh ${{ matrix.distro_name }}_${{ matrix.arch }}
     - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v3.1.3
+      uses: actions/upload-artifact@v4
       if: inputs.release == false
       with:
+        name: codecovcli_${{ matrix.distro_name }}_${{ matrix.arch }}
         path: ./dist/codecovcli_${{ matrix.distro_name }}_${{ matrix.arch }}
     - name: Upload Release Asset
       if: inputs.release == true
@@ -129,6 +132,3 @@ jobs:
         asset_name: codecovcli_${{ matrix.distro_name }}_${{ matrix.arch }}
         tag: ${{ github.ref }}
         overwrite: true
-    
-
-

@@ -1,4 +1,5 @@
-name: Build and Optionally Publish to PyPi
+---
+name: Build for PyPi
 
 on:
   workflow_call:
@@ -6,36 +7,59 @@ on:
       publish:
         type: boolean
         default: false
-        description: "Publish to PyPi"
+        description: "Build for PyPi"
 
 jobs:
-  build_for_pypi:
+
+  build_src_for_pypi:
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write # This is required for requesting the JWT
-      contents: read  # This is required for actions/checkout
     steps:
       - uses: actions/checkout@v4
         with:
+          persist-credentials: false
           submodules: true
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
-          python setup.py build
-          python setup.py develop
-      - name: Build distributions for different platforms
+          pip install build
+      - name: Build src dist
         run: |
-          pip install wheel
-          python setup.py sdist bdist_wheel --plat-name=manylinux2014_x86_64
-          python setup.py bdist_wheel --plat-name=macosx-12.6-x86_64
-          python setup.py bdist_wheel --plat-name=win_amd64
-      - name: Publish package to PyPi
-        if: inputs.publish == true
-        uses: pypa/gh-action-pypi-publish@release/v1
+          python -m build --sdist
+        env:
+          PIP_CONSTRAINT: requirements.txt
+      - name: Store the distribution packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: cibw-sdist
+          path: ./**/*.tar.gz
 
-
-
+  build_dist_for_pypi:
+    needs:
+      - build_src_for_pypi
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - macos-13
+          - macos-latest
+          - ubuntu-24.04-arm
+          - ubuntu-latest
+          - windows-latest
+    steps:
+      - name: Download the sdist
+        uses: actions/download-artifact@v4
+        with:
+          name: cibw-sdist
+      - name: Get sdist filename
+        id: get-sdist
+        run: |
+          echo "sdist_filename=$(ls dist/)" >> "${GITHUB_OUTPUT}"
+        shell: bash
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.22.0
+        with:
+          package-dir: dist/${{ steps.get-sdist.outputs.sdist_filename }}
+      - name: Store the distribution packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: cibw-wheels-${{ matrix.os }}
+          path: ./wheelhouse/*.whl

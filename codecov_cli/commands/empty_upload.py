@@ -25,7 +25,7 @@ logger = logging.getLogger("codecovcli")
     "--pr",
     "--pull-request-number",
     "pull_request_number",
-    help="Specify the pull request number mannually. Used to override pre-existing CI environment variables",
+    help="Specify the pull request number manually. Used to override pre-existing CI environment variables",
     cls=CodecovOption,
     fallback_field=FallbackFieldEnum.pull_request_number,
 )
@@ -55,20 +55,19 @@ def empty_upload(
             enterprise_url = ctx.obj.get("enterprise_url")
             args = get_cli_args(ctx)
 
-            if parent_sha and pull_request_number and branch:
-                logger.debug("Attempting to Create Commit before doing an empty upload.")
-                create_commit_logic(
-                    commit_sha,
-                    parent_sha,
-                    pull_request_number,
-                    branch,
-                    slug,
-                    token,
-                    git_service,
-                    enterprise_url,
-                    fail_on_error,
-                    args,
-                )
+            logger.debug("Attempting to Create Commit before doing an empty upload.")
+            create_commit_logic(
+                commit_sha,
+                parent_sha,
+                pull_request_number,
+                branch,
+                slug,
+                token,
+                git_service,
+                enterprise_url,
+                fail_on_error,
+                args,
+            )
 
             logger.debug(
                 "Starting empty upload process",

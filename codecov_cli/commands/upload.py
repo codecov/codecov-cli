@@ -124,7 +124,7 @@ _global_upload_options = [
         "--pr",
         "--pull-request-number",
         "pull_request_number",
-        help="Specify the pull request number mannually. Used to override pre-existing CI environment variables",
+        help="Specify the pull request number manually. Used to override pre-existing CI environment variables",
         cls=CodecovOption,
         fallback_field=FallbackFieldEnum.pull_request_number,
     ),

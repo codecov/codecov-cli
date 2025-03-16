@@ -1,4 +1,4 @@
-# CodecovCLI
+tab# CodecovCLI
 
 [![codecov](https://codecov.io/gh/codecov/codecov-cli/branch/master/graph/badge.svg?token=jN0CICuA6Z)](https://codecov.io/gh/codecov/codecov-cli)
 [![Build-Test-Upload](https://github.com/codecov/codecov-cli/actions/workflows/push_flow.yml/badge.svg)](https://github.com/codecov/codecov-cli/actions/workflows/push_flow.yml)
@@ -54,7 +54,7 @@ sudo chmod +x codecov
 ./codecov --help
 ```
 
-### Integrity Checking the Binary
+esc### Integrity Checking the Binary
 
 The binary can be integrity checked using a SHASUM256 and SHASUM256.sig file. The process for macos and Linux is identical. Linux is as follows:
 
@@ -98,7 +98,7 @@ The following tokens are suitable for uploading:
 * The [Repository Upload Token](https://docs.codecov.com/docs/codecov-uploader#upload-token): Found on the settings page of your repository, also viewable on the `/new` page when setting up a repository on Codecov for the first time.
 * The [Global Upload Token](https://docs.codecov.com/docs/codecov-uploader#organization-upload-token): Found on your organization settings page (e.g., `https://app.codecov.io/account/<scm>/<org>/org-upload-token`).
 
-# Usage
+tab# Usage
 If the installation is successful, running `codecovcli --help` will output the available commands along with the different general options that can be used with them.
 
 > [!IMPORTANT]

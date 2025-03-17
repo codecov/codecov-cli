@@ -2,9 +2,8 @@ import logging
 import pathlib
 import typing
 
-import sentry_sdk
-
 import click
+import sentry_sdk
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
 from codecov_cli.helpers.validators import validate_commit_sha

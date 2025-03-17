@@ -168,19 +168,11 @@ class GitVersioningSystem(VersioningSystemInterface):
         if dir_to_use is None:
             raise ValueError("Can't determine root folder")
 
-        cmd = ["git", "-C", str(dir_to_use), "ls-files"]
+        cmd = ["git", "-C", str(dir_to_use), "ls-files", "-z"]
         if recurse_submodules:
             cmd.append("--recurse-submodules")
         res = subprocess.run(cmd, capture_output=True)
-
-        return [
-            (
-                filename[1:-1]
-                if filename.startswith('"') and filename.endswith('"')
-                else filename
-            )
-            for filename in res.stdout.decode("unicode_escape").strip().split("\n")
-        ]
+        return res.stdout.decode().split("\0")
 
 
 class NoVersioningSystem(VersioningSystemInterface):

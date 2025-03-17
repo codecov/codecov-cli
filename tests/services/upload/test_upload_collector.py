@@ -87,6 +87,15 @@ def test_fix_php_files():
     assert fixes_for_php_file.fixed_lines_with_reason == set([])
 
 
+def test_can_read_unicode_file():
+    col = UploadCollector(None, None, None, None, True)
+
+    php_file = Path("tests/data/Контроллеры/Пользователь/ГлавныйКонтроллер.php")
+    _fixes = col._produce_file_fixes([php_file])
+    # we just want to assert that this is not throwing an error related to file encoding,
+    # see <https://github.com/codecov/codecov-action/issues/1539>
+
+
 def test_fix_for_cpp_swift_vala(tmp_path):
     cpp_file = Path("tests/data/files_to_fix_examples/sample.cpp")
 

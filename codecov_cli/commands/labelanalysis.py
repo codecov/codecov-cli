@@ -23,7 +23,7 @@ from codecov_cli.types import CommandContext
 logger = logging.getLogger("codecovcli")
 
 
-@click.command()
+@click.command(hidden=True, deprecated=True)
 @click.option(
     "--token",
     required=True,
@@ -141,7 +141,9 @@ def label_analysis(
             logger.info(f"Collected {len(requested_labels)} test labels")
             logger.debug(
                 "Labels collected",
-                extra=dict(extra_log_attributes=dict(labels_collected=requested_labels)),
+                extra=dict(
+                    extra_log_attributes=dict(labels_collected=requested_labels)
+                ),
             )
             payload["requested_labels"] = requested_labels
 

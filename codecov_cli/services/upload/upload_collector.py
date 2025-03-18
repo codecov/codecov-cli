@@ -115,7 +115,7 @@ class UploadCollector(object):
         eof = None
 
         try:
-            with open(filename, "r") as f:
+            with open(filename, "r", encoding="utf-8") as f:
                 # If lineno is unset that means that the
                 # file is empty thus the eof should be 0
                 # so lineno will be set to -1 here

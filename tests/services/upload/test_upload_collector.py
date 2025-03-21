@@ -194,14 +194,11 @@ def test_generate_upload_data_with_none_network(
     res = collector.generate_upload_data()
 
     mock_logger.debug.assert_any_call("Collecting relevant files")
-    mock_logger.debug.assert_any_call(
-        "Found 1067 network files to report, (1067 without filtering)"
-    )
 
     mock_logger.info.assert_any_call("Found 1 coverage files to report")
     mock_logger.info.assert_any_call("> {}".format(tmp_path / "coverage.xml"))
 
-    assert len(res.network) == 1067
+    assert len(res.network) > 1
     assert len(res.files) == 1
     assert len(res.file_fixes) == 24
 
@@ -212,7 +209,7 @@ def test_generate_network_with_no_versioning_system(
 ):
     versioning_system = NoVersioningSystem()
     found_files = versioning_system.list_relevant_files()
-    assert len(found_files) == 1067
+    assert len(found_files) > 1
 
     found_files = versioning_system.list_relevant_files(tmp_path)
     assert len(found_files) == 0

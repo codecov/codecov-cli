@@ -208,8 +208,8 @@ class NoVersioningSystem(VersioningSystemInterface):
         cmd = [
             "find",
             dir_to_use,
-            *chain(*[["-name", block, "-prune", "-o"] for block in self.__class__.blockdirs()]),
-            *chain(*[["-path", block, "-prune", "-o"] for block in self.__class__.blockfiles()]),
+            *chain.from_iterable(["-name", block, "-prune", "-o"] for block in self.__class__.blockdirs()),
+            *chain.from_iterable(["-path", block, "-prune", "-o"] for block in self.__class__.blockfiles()),
             "-type",
             "f",
             "-print",

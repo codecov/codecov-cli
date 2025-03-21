@@ -1,3 +1,4 @@
+from itertools import chain
 import logging
 import subprocess
 import typing as t
@@ -149,6 +150,45 @@ class GitVersioningSystem(VersioningSystemInterface):
 
 class NoVersioningSystem(VersioningSystemInterface):
     @classmethod
+    def blockdirs(cls):
+        return [
+            '*.egg-info',
+            '.DS_Store',
+            '.circleci',
+            '.env',
+            '.envs',
+            '.git',
+            '.gitignore',
+            '.mypy_cache',
+            '.nvmrc',
+            '.nyc_output',
+            '.ruff_cache',
+            '.venv',
+            '.venvns',
+            '.virtualenv',
+            '.virtualenvs',
+            '__pycache__',
+            'bower_components',
+            'build/lib/',
+            'jspm_packages',
+            'node_modules',
+            'vendor',
+            'virtualenv',
+            'virtualenvs',
+        ]
+
+    @classmethod
+    def blockfiles(cls):
+        return [
+            '*.gif',
+            '*.jpeg',
+            '*.jpg',
+            '*.md',
+            '*.png',
+            'shunit2*',
+        ]
+
+    @classmethod
     def is_available(cls):
         return True
 
@@ -161,4 +201,18 @@ class NoVersioningSystem(VersioningSystemInterface):
     def list_relevant_files(
         self, directory: t.Optional[Path] = None, recurse_submodules: bool = False
     ) -> t.List[str]:
-        return []
+        dir_to_use = directory or self.get_network_root()
+        if dir_to_use is None:
+            raise ValueError("Can't determine root folder")
+
+        cmd = [
+            "find",
+            dir_to_use,
+            *list(chain(*[["-name", block, "-prune", "-o"] for block in self.__class__.blockdirs()])),
+            *list(chain(*[["-path", block, "-prune", "-o"] for block in self.__class__.blockfiles()])),
+            "-type",
+            "f",
+            "-print",
+        ]
+        res = subprocess.run(cmd, capture_output=True)
+        return [filename for filename in res.stdout.decode("unicode_escape").strip().split("\n") if filename]

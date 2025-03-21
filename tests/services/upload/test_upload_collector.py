@@ -195,12 +195,28 @@ def test_generate_upload_data_with_none_network(
 
     mock_logger.debug.assert_any_call("Collecting relevant files")
     mock_logger.debug.assert_any_call(
-        "Found 0 network files to report, (0 without filtering)"
+        "Found 1067 network files to report, (1067 without filtering)"
     )
 
     mock_logger.info.assert_any_call("Found 1 coverage files to report")
     mock_logger.info.assert_any_call("> {}".format(tmp_path / "coverage.xml"))
 
-    assert res.network == []
+    assert len(res.network) == 1067
     assert len(res.files) == 1
-    assert len(res.file_fixes) == 0
+    assert len(res.file_fixes) == 24
+
+@patch("codecov_cli.services.upload.upload_collector.logger")
+@patch.object(GitVersioningSystem, "get_network_root", return_value=None)
+def test_generate_network_with_no_versioning_system(
+    mock_get_network_root, mock_logger, tmp_path
+):
+    versioning_system = NoVersioningSystem()
+    found_files = versioning_system.list_relevant_files()
+    assert len(found_files) == 1067
+
+    found_files = versioning_system.list_relevant_files(tmp_path)
+    assert len(found_files) == 0
+
+    (tmp_path / "coverage.xml").touch()
+    found_files = versioning_system.list_relevant_files(tmp_path)
+    assert len(found_files) == 1

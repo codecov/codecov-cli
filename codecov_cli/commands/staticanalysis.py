@@ -15,7 +15,7 @@ from codecov_cli.types import CommandContext
 logger = logging.getLogger("codecovcli")
 
 
-@click.command()
+@click.command(hidden=True, deprecated=True)
 @click.option(
     "--foldertosearch",
     default=".",

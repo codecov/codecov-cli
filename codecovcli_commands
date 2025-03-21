@@ -17,11 +17,9 @@ Commands:
   do-upload
   empty-upload
   get-report-results
-  label-analysis
   pr-base-picking
   process-test-results
   send-notifications
-  static-analysis
   upload-coverage
   upload-process
 
@@ -31,7 +29,7 @@ Options:
   --parent-sha TEXT               SHA (with 40 chars) of what should be the
                                   parent of this commit
   -P, --pr, --pull-request-number TEXT
-                                  Specify the pull request number mannually.
+                                  Specify the pull request number manually.
                                   Used to override pre-existing CI environment
                                   variables
   -B, --branch TEXT               Branch to which this commit belongs to
@@ -49,7 +47,7 @@ Options:
   --code TEXT                     The code of the report. If unsure, leave
                                   default
   -P, --pr, --pull-request-number TEXT
-                                  Specify the pull request number mannually.
+                                  Specify the pull request number manually.
                                   Used to override pre-existing CI environment
                                   variables
   -C, --sha, --commit-sha TEXT    Commit SHA (with 40 chars)  [required]
@@ -109,7 +107,7 @@ Options:
                                   in Codecov UI
   -B, --branch TEXT               Branch to which this commit belongs to
   -P, --pr, --pull-request-number TEXT
-                                  Specify the pull request number mannually.
+                                  Specify the pull request number manually.
                                   Used to override pre-existing CI environment
                                   variables
   -e, --env, --env-var TEXT       Specify environment variables to be included
@@ -151,6 +149,13 @@ Usage: codecovcli empty-upload [OPTIONS]
 
 Options:
   --force
+  --parent-sha TEXT               SHA (with 40 chars) of what should be the
+                                  parent of this commit
+  -P, --pr, --pull-request-number TEXT
+                                  Specify the pull request number manually.
+                                  Used to override pre-existing CI environment
+                                  variables
+  -B, --branch TEXT               Branch to which this commit belongs to
   -C, --sha, --commit-sha TEXT    Commit SHA (with 40 chars)  [required]
   -Z, --fail-on-error             Exit with non-zero code in case of error
   --git-service [github|gitlab|bitbucket|github_enterprise|gitlab_enterprise|bitbucket_server]
@@ -170,28 +175,6 @@ Options:
   -t, --token TEXT                Codecov upload token
   -r, --slug TEXT                 owner/repo slug used instead of the private
                                   repo token in Self-hosted
-  -h, --help                      Show this message and exit.
-
-Usage: codecovcli label-analysis [OPTIONS]
-
-Options:
-  --token TEXT                    The static analysis token (NOT the same
-                                  token as upload)  [required]
-  --head-sha TEXT                 Commit SHA (with 40 chars)  [required]
-  --base-sha TEXT                 Commit SHA (with 40 chars)  [required]
-  --runner-name, --runner TEXT    Runner to use
-  --max-wait-time INTEGER         Max time (in seconds) to wait for the label
-                                  analysis result before falling back to
-                                  running all tests. Default is to wait
-                                  forever.
-  --dry-run                       Print list of tests to run AND tests skipped
-                                  AND options that need to be added to the
-                                  test runner to stdout. Choose format with
-                                  --dry-run-format option. Default is JSON.
-  --dry-run-format [json|space-separated-list]
-                                  Format in which --dry-run data is printed.
-                                  Default is JSON.
-  --runner-param TEXT
   -h, --help                      Show this message and exit.
 
 Usage: codecovcli pr-base-picking [OPTIONS]
@@ -238,19 +221,6 @@ Options:
                                   repo token in Self-hosted
   -h, --help                      Show this message and exit.
 
-Usage: codecovcli static-analysis [OPTIONS]
-
-Options:
-  --foldertosearch PATH      Folder to search
-  --numberprocesses INTEGER  number of processes to use
-  --pattern TEXT             file pattern to search for
-  --force / --no-force
-  --commit-sha TEXT          Commit SHA (with 40 chars)  [required]
-  --folders-to-exclude PATH  Folders not to search
-  --token TEXT               The static analysis token (NOT the same token as
-                             upload)  [required]
-  -h, --help                 Show this message and exit.
-
 Usage: codecovcli upload-coverage [OPTIONS]
 
 Options:
@@ -293,7 +263,7 @@ Options:
                                   in Codecov UI
   -B, --branch TEXT               Branch to which this commit belongs to
   -P, --pr, --pull-request-number TEXT
-                                  Specify the pull request number mannually.
+                                  Specify the pull request number manually.
                                   Used to override pre-existing CI environment
                                   variables
   -e, --env, --env-var TEXT       Specify environment variables to be included
@@ -369,7 +339,7 @@ Options:
                                   in Codecov UI
   -B, --branch TEXT               Branch to which this commit belongs to
   -P, --pr, --pull-request-number TEXT
-                                  Specify the pull request number mannually.
+                                  Specify the pull request number manually.
                                   Used to override pre-existing CI environment
                                   variables
   -e, --env, --env-var TEXT       Specify environment variables to be included

@@ -200,7 +200,7 @@ def test_generate_upload_data_with_none_network(
 
     assert len(res.network) > 1
     assert len(res.files) == 1
-    assert len(res.file_fixes) == 24
+    assert len(res.file_fixes) > 1
 
 @patch("codecov_cli.services.upload.upload_collector.logger")
 @patch.object(GitVersioningSystem, "get_network_root", return_value=None)

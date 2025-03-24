@@ -11,6 +11,41 @@ from abc import ABC, abstractmethod
 
 logger = logging.getLogger("codecovcli")
 
+IGNORE_DIRS = [
+    '*.egg-info',
+    '.DS_Store',
+    '.circleci',
+    '.env',
+    '.envs',
+    '.git',
+    '.gitignore',
+    '.mypy_cache',
+    '.nvmrc',
+    '.nyc_output',
+    '.ruff_cache',
+    '.venv',
+    '.venvns',
+    '.virtualenv',
+    '.virtualenvs',
+    '__pycache__',
+    'bower_components',
+    'build/lib/',
+    'jspm_packages',
+    'node_modules',
+    'vendor',
+    'virtualenv',
+    'virtualenvs',
+]
+
+IGNORE_PATHS = [
+    '*.gif',
+    '*.jpeg',
+    '*.jpg',
+    '*.md',
+    '*.png',
+    'shunit2*',
+]
+
 
 class VersioningSystemInterface(ABC):
     def __repr__(self) -> str:
@@ -150,45 +185,6 @@ class GitVersioningSystem(VersioningSystemInterface):
 
 class NoVersioningSystem(VersioningSystemInterface):
     @classmethod
-    def blockdirs(cls):
-        return [
-            '*.egg-info',
-            '.DS_Store',
-            '.circleci',
-            '.env',
-            '.envs',
-            '.git',
-            '.gitignore',
-            '.mypy_cache',
-            '.nvmrc',
-            '.nyc_output',
-            '.ruff_cache',
-            '.venv',
-            '.venvns',
-            '.virtualenv',
-            '.virtualenvs',
-            '__pycache__',
-            'bower_components',
-            'build/lib/',
-            'jspm_packages',
-            'node_modules',
-            'vendor',
-            'virtualenv',
-            'virtualenvs',
-        ]
-
-    @classmethod
-    def blockfiles(cls):
-        return [
-            '*.gif',
-            '*.jpeg',
-            '*.jpg',
-            '*.md',
-            '*.png',
-            'shunit2*',
-        ]
-
-    @classmethod
     def is_available(cls):
         return True
 
@@ -208,8 +204,8 @@ class NoVersioningSystem(VersioningSystemInterface):
         cmd = [
             "find",
             dir_to_use,
-            *chain.from_iterable(["-name", block, "-prune", "-o"] for block in self.__class__.blockdirs()),
-            *chain.from_iterable(["-path", block, "-prune", "-o"] for block in self.__class__.blockfiles()),
+            *chain.from_iterable(["-name", block, "-prune", "-o"] for block in IGNORE_DIRS),
+            *chain.from_iterable(["-path", block, "-prune", "-o"] for block in IGNORE_PATHS),
             "-type",
             "f",
             "-print",

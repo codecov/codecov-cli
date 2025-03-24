@@ -1,3 +1,4 @@
+from itertools import chain
 import logging
 import subprocess
 import typing as t
@@ -9,6 +10,41 @@ from codecov_cli.helpers.git import parse_git_service, parse_slug
 from abc import ABC, abstractmethod
 
 logger = logging.getLogger("codecovcli")
+
+IGNORE_DIRS = [
+    '*.egg-info',
+    '.DS_Store',
+    '.circleci',
+    '.env',
+    '.envs',
+    '.git',
+    '.gitignore',
+    '.mypy_cache',
+    '.nvmrc',
+    '.nyc_output',
+    '.ruff_cache',
+    '.venv',
+    '.venvns',
+    '.virtualenv',
+    '.virtualenvs',
+    '__pycache__',
+    'bower_components',
+    'build/lib/',
+    'jspm_packages',
+    'node_modules',
+    'vendor',
+    'virtualenv',
+    'virtualenvs',
+]
+
+IGNORE_PATHS = [
+    '*.gif',
+    '*.jpeg',
+    '*.jpg',
+    '*.md',
+    '*.png',
+    'shunit2*',
+]
 
 
 class VersioningSystemInterface(ABC):
@@ -161,4 +197,18 @@ class NoVersioningSystem(VersioningSystemInterface):
     def list_relevant_files(
         self, directory: t.Optional[Path] = None, recurse_submodules: bool = False
     ) -> t.List[str]:
-        return []
+        dir_to_use = directory or self.get_network_root()
+        if dir_to_use is None:
+            raise ValueError("Can't determine root folder")
+
+        cmd = [
+            "find",
+            dir_to_use,
+            *chain.from_iterable(["-name", block, "-prune", "-o"] for block in IGNORE_DIRS),
+            *chain.from_iterable(["-path", block, "-prune", "-o"] for block in IGNORE_PATHS),
+            "-type",
+            "f",
+            "-print",
+        ]
+        res = subprocess.run(cmd, capture_output=True)
+        return [filename for filename in res.stdout.decode("unicode_escape").strip().split("\n") if filename]

@@ -176,7 +176,7 @@ class UploadSender(object):
             total_fixed_lines = list(
                 file_fixer.fixed_lines_without_reason.union(fixed_lines_with_reason)
             )
-            file_fixers[str(file_fixer.path)] = {
+            file_fixers[file_fixer.path.as_posix()] = {
                 "eof": file_fixer.eof,
                 "lines": total_fixed_lines,
             }

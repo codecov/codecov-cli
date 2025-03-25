@@ -267,9 +267,9 @@ class TestPayloadGeneration(object):
             b"\n", 1
         )
 
-        fake_result_file.get_filename.return_value = coverage_file_seperated[0][
-            len(b"# path=") :
-        ].strip()
+        fake_result_file.get_filename.return_value = (
+            coverage_file_seperated[0][len(b"# path=") :].strip().decode()
+        )
         fake_result_file.get_content.return_value = coverage_file_seperated[1][
             : -len(b"\n<<<<<< EOF\n")
         ]

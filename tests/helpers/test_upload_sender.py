@@ -142,9 +142,9 @@ def mocked_coverage_file(mocker):
     coverage_file_seperated = reports_examples.coverage_file_section_simple.split(
         b"\n", 1
     )
-    fake_result_file.get_filename.return_value = coverage_file_seperated[0][
-        len(b"# path=") :
-    ].strip()
+    fake_result_file.get_filename.return_value = (
+        coverage_file_seperated[0][len(b"# path=") :].strip().decode()
+    )
     fake_result_file.get_content.return_value = coverage_file_seperated[1][
         : -len(b"\n<<<<<< EOF\n")
     ]
@@ -564,7 +564,7 @@ class TestPayloadGeneration(object):
         json_formatted_coverage_file = UploadSender()._format_file(mocked_coverage_file)
         print(json_formatted_coverage_file["data"])
         assert json_formatted_coverage_file == {
-            "filename": mocked_coverage_file.get_filename().decode(),
+            "filename": mocked_coverage_file.get_filename(),
             "format": "base64+compressed",
             "data": "encoded_file_data",
             "labels": "",

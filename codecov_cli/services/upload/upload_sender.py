@@ -189,7 +189,7 @@ class UploadSender(object):
     def _format_file(self, file: UploadCollectionResultFile):
         format, formatted_content = self._get_format_info(file)
         return {
-            "filename": file.get_filename().decode(),
+            "filename": file.get_filename(),
             "format": format,
             "data": formatted_content,
             "labels": "",

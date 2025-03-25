@@ -259,7 +259,7 @@ def _parse_runner_params(runner_params: List[str]) -> Dict[str, str]:
         # a good reason for the param to include '=' in the value.
         if param.count("=") == 0:
             logger.warning(
-                f"Runner param {param} is not well formated. Setting value to None. Use '--runner-param key=value' to set value"
+                f"Runner param {param} is not well formatted. Setting value to None. Use '--runner-param key=value' to set value"
             )
             final_params[param] = None
         else:

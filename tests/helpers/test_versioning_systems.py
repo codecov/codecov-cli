@@ -105,7 +105,7 @@ class TestGitVersioningSystem(object):
             "codecov_cli.helpers.versioning_systems.subprocess.run",
             return_value=mocked_subprocess,
         )
-        # git ls-files diplays a single \n as \\\\n
+        # git ls-files displays a single \n as \\\\n
         mocked_subprocess.stdout = b'a.txt\nb.txt\n"a\\\\nb.txt"\nc.txt\nd.txt\n.circleci/config.yml\nLICENSE\napp/advanced calculations/advanced_calculator.js\n'
 
         vs = GitVersioningSystem()

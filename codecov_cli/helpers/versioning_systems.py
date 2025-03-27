@@ -12,38 +12,38 @@ from abc import ABC, abstractmethod
 logger = logging.getLogger("codecovcli")
 
 IGNORE_DIRS = [
-    '*.egg-info',
-    '.DS_Store',
-    '.circleci',
-    '.env',
-    '.envs',
-    '.git',
-    '.gitignore',
-    '.mypy_cache',
-    '.nvmrc',
-    '.nyc_output',
-    '.ruff_cache',
-    '.venv',
-    '.venvns',
-    '.virtualenv',
-    '.virtualenvs',
-    '__pycache__',
-    'bower_components',
-    'build/lib/',
-    'jspm_packages',
-    'node_modules',
-    'vendor',
-    'virtualenv',
-    'virtualenvs',
+    "*.egg-info",
+    ".DS_Store",
+    ".circleci",
+    ".env",
+    ".envs",
+    ".git",
+    ".gitignore",
+    ".mypy_cache",
+    ".nvmrc",
+    ".nyc_output",
+    ".ruff_cache",
+    ".venv",
+    ".venvns",
+    ".virtualenv",
+    ".virtualenvs",
+    "__pycache__",
+    "bower_components",
+    "build/lib/",
+    "jspm_packages",
+    "node_modules",
+    "vendor",
+    "virtualenv",
+    "virtualenvs",
 ]
 
 IGNORE_PATHS = [
-    '*.gif',
-    '*.jpeg',
-    '*.jpg',
-    '*.md',
-    '*.png',
-    'shunit2*',
+    "*.gif",
+    "*.jpeg",
+    "*.jpg",
+    "*.md",
+    "*.png",
+    "shunit2*",
 ]
 
 
@@ -203,12 +203,20 @@ class NoVersioningSystem(VersioningSystemInterface):
 
         cmd = [
             "find",
-            dir_to_use,
-            *chain.from_iterable(["-name", block, "-prune", "-o"] for block in IGNORE_DIRS),
-            *chain.from_iterable(["-path", block, "-prune", "-o"] for block in IGNORE_PATHS),
+            str(dir_to_use),
+            *chain.from_iterable(
+                ["-name", block, "-prune", "-o"] for block in IGNORE_DIRS
+            ),
+            *chain.from_iterable(
+                ["-path", block, "-prune", "-o"] for block in IGNORE_PATHS
+            ),
             "-type",
             "f",
             "-print",
         ]
         res = subprocess.run(cmd, capture_output=True)
-        return [filename for filename in res.stdout.decode("unicode_escape").strip().split("\n") if filename]
+        return [
+            filename
+            for filename in res.stdout.decode("unicode_escape").strip().split("\n")
+            if filename
+        ]

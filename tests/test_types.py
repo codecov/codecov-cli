@@ -5,11 +5,11 @@ class TestUploadCollectionResultFile(object):
     def test_get_file_name(self, tmp_path):
         filename = "a.txt"
         path = tmp_path / filename
-        assert UploadCollectionResultFile(path).get_filename() == bytes(path)
+        assert UploadCollectionResultFile(path).get_filename() == path.as_posix()
 
         filename = "sub/a.txt"
         path = tmp_path / filename
-        assert UploadCollectionResultFile(path).get_filename() == bytes(path)
+        assert UploadCollectionResultFile(path).get_filename() == path.as_posix()
 
     def test_get_content(self, tmp_path):
         content = b"first line\nsecondline\nlastline\n"

@@ -42,21 +42,25 @@ class XcodePlugin(object):
 
             filename_include_regex = globs_to_regex(["*.profdata"])
 
-            matched_paths = [
-                str(path)
-                for path in search_files(
+            matched_paths = list(
+                search_files(
                     folder_to_search=self.derived_data_folder,
                     folders_to_ignore=[],
                     filename_include_regex=filename_include_regex,
                 )
-            ]
+            )
+
             if not matched_paths:
                 logger.warning("No swift data found.")
                 return
 
             logger.info(
                 "Running swift coverage on the following list of files:",
-                extra=dict(extra_log_attributes=dict(matched_paths=matched_paths)),
+                extra=dict(
+                    extra_log_attributes=dict(
+                        matched_paths=[p.as_posix() for p in matched_paths]
+                    )
+                ),
             )
 
             for path in matched_paths:
@@ -64,36 +68,36 @@ class XcodePlugin(object):
 
             return PreparationPluginReturn(success=True, messages="")
 
-    def swiftcov(self, path, app_name: str):
+    def swiftcov(self, path: pathlib.Path, app_name: str) -> None:
         directory = os.path.dirname(path)
         build_dir = pathlib.Path(re.sub("(Build).*", "Build", directory))
 
         for type in ["app", "framework", "xctest"]:
             filename_include_regex = re.compile(translate(f"*.{type}"))
-            matched_dir_paths = [
-                str(path)
-                for path in search_files(
-                    folder_to_search=pathlib.Path(build_dir),
-                    folders_to_ignore=[],
-                    filename_include_regex=filename_include_regex,
-                    search_for_directories=True,
-                )
-            ]
+            matched_dir_paths = search_files(
+                folder_to_search=build_dir,
+                folders_to_ignore=[],
+                filename_include_regex=filename_include_regex,
+                search_for_directories=True,
+            )
+
             for dir_path in matched_dir_paths:
                 # proj name without extension
-                proj = pathlib.Path(dir_path).stem
+                proj = dir_path.stem
                 if app_name == "" or (app_name.lower() in proj.lower()):
                     logger.info(f"+ Building reports for {proj} {type}")
-                    proj_path = pathlib.Path(pathlib.Path(dir_path) / proj)
+                    proj_path = dir_path / proj
                     dest = (
                         proj_path
                         if proj_path.is_file()
-                        else pathlib.Path(f"{dir_path}/Contents/MacOS/{proj}")
+                        else dir_path / "Contents/MacOS/{proj}"
                     )
                     output_file_name = f"{proj}.{type}.coverage.txt".replace(" ", "")
                     self.run_llvm_cov(output_file_name, path, dest)
 
-    def run_llvm_cov(self, output_file_name, path, dest):
+    def run_llvm_cov(
+        self, output_file_name: str, path: pathlib.Path, dest: pathlib.Path
+    ) -> None:
         with open(output_file_name, "w") as output_file:
             s = subprocess.run(
                 [
@@ -101,7 +105,7 @@ class XcodePlugin(object):
                     "llvm-cov",
                     "show",
                     "-instr-profile",
-                    path,
+                    str(path),
                     str(dest),
                 ],
                 stdout=output_file,

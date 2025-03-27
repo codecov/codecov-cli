@@ -176,7 +176,7 @@ class UploadSender(object):
             total_fixed_lines = list(
                 file_fixer.fixed_lines_without_reason.union(fixed_lines_with_reason)
             )
-            file_fixers[str(file_fixer.path)] = {
+            file_fixers[file_fixer.path.as_posix()] = {
                 "eof": file_fixer.eof,
                 "lines": total_fixed_lines,
             }
@@ -189,7 +189,7 @@ class UploadSender(object):
     def _format_file(self, file: UploadCollectionResultFile):
         format, formatted_content = self._get_format_info(file)
         return {
-            "filename": file.get_filename().decode(),
+            "filename": file.get_filename(),
             "format": format,
             "data": formatted_content,
             "labels": "",

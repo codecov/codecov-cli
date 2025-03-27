@@ -268,6 +268,6 @@ def generate_message_payload(
                     payload.passed += 1
         except ParserError as err:
             raise click.ClickException(
-                f"Error parsing {str(result.get_filename(), 'utf8')} with error: {err}"
+                f"Error parsing {result.get_filename()} with error: {err}"
             )
     return payload

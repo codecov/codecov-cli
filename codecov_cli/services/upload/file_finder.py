@@ -197,8 +197,10 @@ class FileFinder(object):
         report_type: ReportType = ReportType.COVERAGE,
     ):
         self.search_root = search_root or Path(os.getcwd())
-        self.folders_to_ignore = list(folders_to_ignore) if folders_to_ignore else []
-        self.explicitly_listed_files = explicitly_listed_files or None
+        self.folders_to_ignore = (
+            [f.as_posix() for f in folders_to_ignore] if folders_to_ignore else []
+        )
+        self.explicitly_listed_files = explicitly_listed_files or []
         self.disable_search = disable_search
         self.report_type: ReportType = report_type
 
@@ -223,8 +225,7 @@ class FileFinder(object):
                 assert regex_patterns_to_include  # this is never `None`
                 files_paths = search_files(
                     self.search_root,
-                    default_folders_to_ignore
-                    + [str(folder) for folder in self.folders_to_ignore],
+                    default_folders_to_ignore + self.folders_to_ignore,
                     filename_include_regex=regex_patterns_to_include,
                     filename_exclude_regex=regex_patterns_to_exclude,
                 )
@@ -252,7 +253,7 @@ class FileFinder(object):
         for file in self.explicitly_listed_files:
             user_filenames_to_include.append(file.name)
             if regex_patterns_to_exclude.match(file.name):
-                files_excluded_but_user_includes.append(str(file))
+                files_excluded_but_user_includes.append(file.as_posix())
         if files_excluded_but_user_includes:
             logger.warning(
                 "Some files being explicitly added are found in the list of excluded files for upload. We are still going to search for the explicitly added files.",
@@ -262,7 +263,7 @@ class FileFinder(object):
             )
         regex_patterns_to_include = globs_to_regex(user_filenames_to_include)
         multipart_include_regex = globs_to_regex(
-            [str(path.resolve()) for path in self.explicitly_listed_files]
+            [path.resolve().as_posix() for path in self.explicitly_listed_files]
         )
         user_files_paths = list(
             search_files(

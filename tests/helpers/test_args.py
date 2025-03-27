@@ -1,7 +1,8 @@
 import os
-from pathlib import PosixPath
+import sys
 
 import click
+import pytest
 
 from codecov_cli import __version__
 from codecov_cli.helpers.args import get_cli_args
@@ -28,7 +29,10 @@ def test_get_cli_args():
     assert get_cli_args(ctx) == expected
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="requires posix platform")
 def test_get_cli_args_with_posix():
+    from pathlib import PosixPath
+
     ctx = click.Context(click.Command("do-upload"))
     ctx.obj = {}
     ctx.obj["cli_args"] = {

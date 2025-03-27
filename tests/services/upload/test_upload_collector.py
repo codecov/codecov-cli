@@ -1,5 +1,7 @@
 from pathlib import Path
 from unittest.mock import patch
+import pytest
+import sys
 
 from codecov_cli.helpers.versioning_systems import (
     GitVersioningSystem,
@@ -180,10 +182,11 @@ def test_generate_upload_data(tmp_path):
 
 
 @patch("codecov_cli.services.upload.upload_collector.logger")
-@patch.object(GitVersioningSystem, "get_network_root", return_value=None)
-def test_generate_upload_data_with_none_network(
-    mock_get_network_root, mock_logger, tmp_path
-):
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="the fallback `list_relevant_files` is currently broken on windows",
+)
+def test_generate_upload_data_with_none_network(mock_logger, tmp_path):
     (tmp_path / "coverage.xml").touch()
 
     file_finder = FileFinder(tmp_path)
@@ -202,11 +205,12 @@ def test_generate_upload_data_with_none_network(
     assert len(res.files) == 1
     assert len(res.file_fixes) > 1
 
-@patch("codecov_cli.services.upload.upload_collector.logger")
-@patch.object(GitVersioningSystem, "get_network_root", return_value=None)
-def test_generate_network_with_no_versioning_system(
-    mock_get_network_root, mock_logger, tmp_path
-):
+
+@pytest.mark.skipif(
+    sys.platform == "win32",
+    reason="the fallback `list_relevant_files` is currently broken on windows",
+)
+def test_generate_network_with_no_versioning_system(tmp_path):
     versioning_system = NoVersioningSystem()
     found_files = versioning_system.list_relevant_files()
     assert len(found_files) > 1

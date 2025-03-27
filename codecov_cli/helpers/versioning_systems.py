@@ -1,11 +1,13 @@
 from itertools import chain
 import logging
+import re
 import subprocess
 import typing as t
 from pathlib import Path
 from shutil import which
 
 from codecov_cli.fallbacks import FallbackFieldEnum
+from codecov_cli.helpers.folder_searcher import search_files
 from codecov_cli.helpers.git import parse_git_service, parse_slug
 from abc import ABC, abstractmethod
 
@@ -193,22 +195,7 @@ class NoVersioningSystem(VersioningSystemInterface):
         if dir_to_use is None:
             raise ValueError("Can't determine root folder")
 
-        cmd = [
-            "find",
-            str(dir_to_use),
-            *chain.from_iterable(
-                ["-name", block, "-prune", "-o"] for block in IGNORE_DIRS
-            ),
-            *chain.from_iterable(
-                ["-path", block, "-prune", "-o"] for block in IGNORE_PATHS
-            ),
-            "-type",
-            "f",
-            "-print",
-        ]
-        res = subprocess.run(cmd, capture_output=True)
-        return [
-            filename
-            for filename in res.stdout.decode("unicode_escape").strip().split("\n")
-            if filename
-        ]
+        files = search_files(
+            dir_to_use, folders_to_ignore=[], filename_include_regex=re.compile("")
+        )
+        return [f.relative_to(dir_to_use).as_posix() for f in files]

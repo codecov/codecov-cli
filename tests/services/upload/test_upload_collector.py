@@ -1,7 +1,5 @@
 from pathlib import Path
 from unittest.mock import patch
-import pytest
-import sys
 
 from codecov_cli.helpers.versioning_systems import (
     GitVersioningSystem,
@@ -191,10 +189,6 @@ def test_generate_upload_data(tmp_path):
 
 
 @patch("codecov_cli.services.upload.upload_collector.logger")
-@pytest.mark.skipif(
-    sys.platform == "win32",
-    reason="the fallback `list_relevant_files` is currently broken on windows",
-)
 def test_generate_upload_data_with_none_network(mock_logger, tmp_path):
     (tmp_path / "coverage.xml").touch()
 
@@ -215,10 +209,6 @@ def test_generate_upload_data_with_none_network(mock_logger, tmp_path):
     assert len(res.file_fixes) > 1
 
 
-@pytest.mark.skipif(
-    sys.platform == "win32",
-    reason="the fallback `list_relevant_files` is currently broken on windows",
-)
 def test_generate_network_with_no_versioning_system(tmp_path):
     versioning_system = NoVersioningSystem()
     found_files = versioning_system.list_relevant_files()

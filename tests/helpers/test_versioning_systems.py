@@ -3,7 +3,10 @@ from unittest.mock import MagicMock
 import pytest
 
 from codecov_cli.fallbacks import FallbackFieldEnum
-from codecov_cli.helpers.versioning_systems import GitVersioningSystem
+from codecov_cli.helpers.versioning_systems import (
+    GitVersioningSystem,
+    NoVersioningSystem,
+)
 
 
 class TestGitVersioningSystem(object):
@@ -147,6 +150,15 @@ def test_exotic_git_filenames():
     found_repo_files = vs.list_relevant_files()
 
     # See <https://github.com/codecov/codecov-action/issues/1550>
+    assert (
+        "tests/data/Контроллеры/Пользователь/ГлавныйКонтроллер.php" in found_repo_files
+    )
+
+
+def test_exotic_fallback_filenames():
+    vs = NoVersioningSystem()
+    found_repo_files = vs.list_relevant_files()
+
     assert (
         "tests/data/Контроллеры/Пользователь/ГлавныйКонтроллер.php" in found_repo_files
     )

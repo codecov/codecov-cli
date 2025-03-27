@@ -23,8 +23,8 @@ class UploadCollectionResultFile(object):
     def __init__(self, path: pathlib.Path):
         self.path = path
 
-    def get_filename(self) -> bytes:
-        return bytes(self.path)
+    def get_filename(self) -> str:
+        return self.path.as_posix()
 
     def get_content(self) -> bytes:
         with open(self.path, "rb") as f:

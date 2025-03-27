@@ -125,7 +125,7 @@ class LegacyUploadSender(object):
         return b"".join(self._format_coverage_file(file) for file in upload_data.files)
 
     def _format_coverage_file(self, file: UploadCollectionResultFile) -> bytes:
-        header = b"# path=" + file.get_filename() + b"\n"
+        header = b"# path=" + file.get_filename().encode() + b"\n"
         file_content = file.get_content() + b"\n"
         file_end = b"<<<<<< EOF\n"
 

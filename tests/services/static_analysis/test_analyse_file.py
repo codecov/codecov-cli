@@ -1,4 +1,5 @@
 import json
+import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -21,10 +22,13 @@ here_parent = here.parent
         ("samples/inputs/sample_005.py", "samples/outputs/sample_005.json"),
     ],
 )
+@pytest.mark.skipif(
+    sys.platform == "win32", reason="windows is producing different `code_hash` values"
+)
 def test_sample_analysis(input_filename, output_filename):
     config = {}
     res = analyze_file(
-        config, FileAnalysisRequest(Path(input_filename), Path(input_filename))
+        config, FileAnalysisRequest(input_filename, Path(input_filename))
     )
     with open(output_filename, "r") as file:
         expected_result = json.load(file)

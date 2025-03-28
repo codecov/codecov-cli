@@ -3,7 +3,10 @@ from unittest.mock import MagicMock
 import pytest
 
 from codecov_cli.fallbacks import FallbackFieldEnum
-from codecov_cli.helpers.versioning_systems import GitVersioningSystem
+from codecov_cli.helpers.versioning_systems import (
+    GitVersioningSystem,
+    NoVersioningSystem,
+)
 
 
 class TestGitVersioningSystem(object):
@@ -105,8 +108,7 @@ class TestGitVersioningSystem(object):
             "codecov_cli.helpers.versioning_systems.subprocess.run",
             return_value=mocked_subprocess,
         )
-        # git ls-files displays a single \n as \\\\n
-        mocked_subprocess.stdout = b'a.txt\nb.txt\n"a\\\\nb.txt"\nc.txt\nd.txt\n.circleci/config.yml\nLICENSE\napp/advanced calculations/advanced_calculator.js\n'
+        mocked_subprocess.stdout = b"a.txt\0b.txt\0a\\nb.txt\0c.txt\0d.txt\0.circleci/config.yml\0LICENSE\0app/advanced calculations/advanced_calculator.js"
 
         vs = GitVersioningSystem()
 
@@ -138,6 +140,25 @@ class TestGitVersioningSystem(object):
         vs = GitVersioningSystem()
         _ = vs.list_relevant_files(tmp_path, recurse_submodules=True)
         subproc_run.assert_called_with(
-            ["git", "-C", str(tmp_path), "ls-files", "--recurse-submodules"],
+            ["git", "-C", str(tmp_path), "ls-files", "-z", "--recurse-submodules"],
             capture_output=True,
         )
+
+
+def test_exotic_git_filenames():
+    vs = GitVersioningSystem()
+    found_repo_files = vs.list_relevant_files()
+
+    # See <https://github.com/codecov/codecov-action/issues/1550>
+    assert (
+        "tests/data/Контроллеры/Пользователь/ГлавныйКонтроллер.php" in found_repo_files
+    )
+
+
+def test_exotic_fallback_filenames():
+    vs = NoVersioningSystem()
+    found_repo_files = vs.list_relevant_files()
+
+    assert (
+        "tests/data/Контроллеры/Пользователь/ГлавныйКонтроллер.php" in found_repo_files
+    )

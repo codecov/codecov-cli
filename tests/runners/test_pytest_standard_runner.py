@@ -56,7 +56,7 @@ class TestPythonStandardRunner(object):
         runner = PytestStandardRunner(params)
         # Adding invalid config options emits a warning
         mock_warning.assert_called_with(
-            "Config parameter 'some_missing_option' is unknonw."
+            "Config parameter 'some_missing_option' is unknown."
         )
         # Warnings don't change the config
         assert runner.params == {**params, "some_missing_option": "option"}
@@ -91,7 +91,7 @@ class TestPythonStandardRunner(object):
                 cmd=command,
                 returncode=2,
                 output=b"Process running up to here...",
-                stderr=b"Some error occured",
+                stderr=b"Some error occurred",
             )
 
         mock_subprocess.run.side_effect = side_effect
@@ -100,7 +100,7 @@ class TestPythonStandardRunner(object):
             _ = self.runner._execute_pytest(["--option", "--ignore=batata"])
         assert (
             str(exp.value)
-            == "Pytest exited with non-zero code 2.\nThis is likely not a problem with label-analysis. Check pytest's output and options.\nPYTEST OUTPUT:\nProcess running up to here...\nSome error occured"
+            == "Pytest exited with non-zero code 2.\nThis is likely not a problem with label-analysis. Check pytest's output and options.\nPYTEST OUTPUT:\nProcess running up to here...\nSome error occurred"
         )
 
     @patch("codecov_cli.runners.pytest_standard_runner.subprocess")
@@ -112,7 +112,7 @@ class TestPythonStandardRunner(object):
             raise CalledProcessError(
                 cmd=command,
                 returncode=2,
-                stderr=b"Some error occured",
+                stderr=b"Some error occurred",
             )
 
         mock_subprocess.run.side_effect = side_effect
@@ -134,26 +134,26 @@ class TestPythonStandardRunner(object):
                     cmd=["python", "-m", "pytest", "missing_label"],
                     returncode=2,
                     output=b"Process running up to here...",
-                    stderr=b"Some error occured",
+                    stderr=b"Some error occurred",
                 ),
-                "\nProcess running up to here...\nSome error occured",
+                "\nProcess running up to here...\nSome error occurred",
             ),
             (
                 CalledProcessError(
                     cmd=["python", "-m", "pytest", "missing_label"],
                     returncode=2,
                     output="Process running up to here...",
-                    stderr="Some error occured",
+                    stderr="Some error occurred",
                 ),
-                "\nProcess running up to here...\nSome error occured",
+                "\nProcess running up to here...\nSome error occurred",
             ),
             (
                 CalledProcessError(
                     cmd=["python", "-m", "pytest", "missing_label"],
                     returncode=2,
-                    stderr=b"Some error occured",
+                    stderr=b"Some error occurred",
                 ),
-                "\nSome error occured",
+                "\nSome error occurred",
             ),
         ],
     )

@@ -76,7 +76,7 @@ class PytestStandardRunner(LabelAnalysisRunnerInterface):
         provided_config_params = config_params.keys()
         for provided_param in provided_config_params:
             if provided_param not in available_config_params:
-                logger.warning(f"Config parameter '{provided_param}' is unknonw.")
+                logger.warning(f"Config parameter '{provided_param}' is unknown.")
 
     def parse_captured_output_error(self, exp: CalledProcessError) -> str:
         result = ""

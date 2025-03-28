@@ -215,7 +215,7 @@ def test_get_report_results_200_error(mocker, capsys):
     mocked_response.assert_called_once()
     assert (
         "error",
-        'An error occured while processing the report. Please try again later. --- {"response_status_code": 200, "state": "error", "result": {}}',
+        'An error occurred while processing the report. Please try again later. --- {"response_status_code": 200, "state": "error", "result": {}}',
     ) in output
 
 

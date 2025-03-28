@@ -39,7 +39,7 @@ async def run_analysis_entrypoint(
     files = list(ff.find_files(folder, pattern, folders_to_exclude))
     processing_results = await process_files(files, numberprocesses, config)
     # Let users know if there were processing errors
-    # This is here and not in the funcition so we can add an option to ignore those (possibly)
+    # This is here and not in the function so we can add an option to ignore those (possibly)
     # Also makes the function easier to test
     processing_errors = processing_results["processing_errors"]
     log_processing_errors(processing_errors)

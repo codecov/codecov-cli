@@ -256,7 +256,7 @@ def test_search_directories(tmp_path):
     filename_include_regex = globs_to_regex(["*.app"])
     filepaths = [
         "banana.app/path/of/directory.txt",
-        "path/to/apple.app/path/of/directorys",
+        "path/to/apple.app/path/of/directories",
         "path/to/banana.app/folder/test.txt",
         "apple.py",
         "banana.py",

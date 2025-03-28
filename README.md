@@ -126,7 +126,7 @@ Codecov-cli supports user input. These inputs, along with their descriptions and
 | `create-report-results` | Used for local upload. It tells codecov that you finished local uploading and want it to calculate the results for you to get them locally.
 | `get-report-results` | Used for local upload. It asks codecov to provide you the report results you calculated with the previous command.
 | `pr-base-picking` | Tells codecov that you want to explicitly define a base for your PR
-| `upload-process` | A wrapper for 3 commands. Create-commit, create-report and do-upload. You can use this command to upload to codecov instead of using the previosly mentioned commands.
+| `upload-process` | A wrapper for 3 commands. Create-commit, create-report and do-upload. You can use this command to upload to codecov instead of using the previously mentioned commands.
 | `send-notifications` | A command that tells Codecov that you finished uploading and you want to be sent notifications. To disable automatically sent notifications please consider adding manual_trigger to your codecov.yml, so it will look like codecov: notify: manual_trigger: true.
 >**Note**: Every command has its own different options that will be mentioned later in this doc. Codecov will try to load these options from your CI environment variables, if not, it will try to load them from git, if not found, you may need to add them manually.
 

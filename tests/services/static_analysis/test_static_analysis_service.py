@@ -286,7 +286,7 @@ class TestStaticAnalysisService:
 
         async def side_effect(presigned_put, data):
             if presigned_put == "http://storage-url-003":
-                raise httpx.HTTPError("Some error occured in the request")
+                raise httpx.HTTPError("Some error occurred in the request")
 
         mock_client.put.side_effect = side_effect
 

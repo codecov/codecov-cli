@@ -16,7 +16,7 @@ class NodeVisitor(object):
             self.visit(c)
 
     def _is_function_docstring(self, node: Node):
-        """Skips docstrings for funtions, such as this one.
+        """Skips docstrings for functions, such as this one.
         Pytest doesn't include them in the report, so I don't think we should either,
         at least for now.
         """

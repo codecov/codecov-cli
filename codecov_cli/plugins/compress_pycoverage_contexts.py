@@ -64,7 +64,9 @@ class CompressPycoverageContexts(object):
                 )
                 return PreparationPluginReturn(
                     success=False,
-                    messages=[f"File to compress {self.file_to_compress} is not a file."],
+                    messages=[
+                        f"File to compress {self.file_to_compress} is not a file."
+                    ],
                 )
             # Create in and out streams
             fd_in = open(self.file_to_compress, "rb")

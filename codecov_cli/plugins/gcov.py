@@ -40,7 +40,9 @@ class GcovPlugin(object):
                 logger.warning(f"{self.executable} is not installed or can't be found.")
                 return
 
-            filename_include_regex = globs_to_regex(["*.gcno", *self.patterns_to_include])
+            filename_include_regex = globs_to_regex(
+                ["*.gcno", *self.patterns_to_include]
+            )
             filename_exclude_regex = globs_to_regex(self.patterns_to_ignore)
 
             matched_paths = [

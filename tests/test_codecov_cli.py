@@ -14,6 +14,7 @@ def test_existing_commands():
         "process-test-results",
         "send-notifications",
         "static-analysis",
+        "transplant-report",
         "upload-coverage",
         "upload-process",
     ]

@@ -6,7 +6,6 @@ import sentry_sdk
 
 from codecov_cli.fallbacks import CodecovOption, FallbackFieldEnum
 from codecov_cli.helpers.args import get_cli_args
-from codecov_cli.helpers.git import GitService
 from codecov_cli.helpers.options import global_options
 from codecov_cli.services.commit import create_commit_logic
 from codecov_cli.types import CommandContext

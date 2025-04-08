@@ -19,6 +19,7 @@ from codecov_cli.commands.staticanalysis import static_analysis
 from codecov_cli.commands.upload import do_upload
 from codecov_cli.commands.upload_coverage import upload_coverage
 from codecov_cli.commands.upload_process import upload_process
+from codecov_cli.commands.transplant_report import transplant_report
 from codecov_cli.helpers.ci_adapters import get_ci_adapter, get_ci_providers_list
 from codecov_cli.helpers.config import load_cli_config
 from codecov_cli.helpers.logging_utils import configure_logger
@@ -76,6 +77,7 @@ def cli(
 
 cli.add_command(do_upload)
 cli.add_command(create_commit)
+cli.add_command(transplant_report)
 cli.add_command(create_report)
 cli.add_command(create_report_results)
 cli.add_command(get_report_results)

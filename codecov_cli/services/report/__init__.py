@@ -101,9 +101,7 @@ def send_reports_result_request(
     enterprise_url,
     args,
 ):
-    data = {
-        "cli_args": args,
-    }
+    data = {"cli_args": args}
     headers = get_token_header(token)
     upload_url = enterprise_url or CODECOV_API_URL
     url = f"{upload_url}/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/results"
@@ -167,3 +165,28 @@ def send_reports_result_get_request(
         time.sleep(5)
         number_tries += 1
     return response_obj
+
+
+def transplant_report_logic(
+    from_sha: str,
+    to_sha: str,
+    slug: typing.Optional[str],
+    token: typing.Optional[str],
+    service: typing.Optional[str],
+    enterprise_url: typing.Optional[str] = None,
+    fail_on_error: bool = False,
+    args: typing.Union[dict, None] = None,
+):
+    slug = encode_slug(slug)
+    headers = get_token_header(token)
+
+    data = {"cli_args": args, "from_sha": from_sha, "to_sha": to_sha}
+
+    base_url = enterprise_url or CODECOV_INGEST_URL
+    url = f"{base_url}/upload/{service}/{slug}/commits/transplant"
+    sending_result = send_post_request(url=url, data=data, headers=headers)
+
+    log_warnings_and_errors_if_any(
+        sending_result, "Transplanting report", fail_on_error
+    )
+    return sending_result

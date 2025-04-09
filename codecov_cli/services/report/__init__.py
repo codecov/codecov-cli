@@ -55,10 +55,7 @@ def send_create_report_request(
     pull_request_number,
     args,
 ):
-    data = {
-        "cli_args": args,
-        "code": code,
-    }
+    data = {"cli_args": args, "code": code}
     headers = get_token_header(token)
     upload_url = enterprise_url or CODECOV_INGEST_URL
     url = f"{upload_url}/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports"
@@ -101,9 +98,7 @@ def send_reports_result_request(
     enterprise_url,
     args,
 ):
-    data = {
-        "cli_args": args,
-    }
+    data = {"cli_args": args}
     headers = get_token_header(token)
     upload_url = enterprise_url or CODECOV_API_URL
     url = f"{upload_url}/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/results"

@@ -31,44 +31,46 @@ def translate(pat, *, recursive=False, include_hidden=False, seps=None):
             seps = (os.path.sep, os.path.altsep)
         else:
             seps = os.path.sep
-    escaped_seps = ''.join(map(re.escape, seps))
-    any_sep = f'[{escaped_seps}]' if len(seps) > 1 else escaped_seps
-    not_sep = f'[^{escaped_seps}]'
+    escaped_seps = "".join(map(re.escape, seps))
+    any_sep = f"[{escaped_seps}]" if len(seps) > 1 else escaped_seps
+    not_sep = f"[^{escaped_seps}]"
     if include_hidden:
-        one_last_segment = f'{not_sep}+'
-        one_segment = f'{one_last_segment}{any_sep}'
-        any_segments = f'(?:.+{any_sep})?'
-        any_last_segments = '.*'
+        one_last_segment = f"{not_sep}+"
+        one_segment = f"{one_last_segment}{any_sep}"
+        any_segments = f"(?:.+{any_sep})?"
+        any_last_segments = ".*"
     else:
-        one_last_segment = f'[^{escaped_seps}.]{not_sep}*'
-        one_segment = f'{one_last_segment}{any_sep}'
-        any_segments = f'(?:{one_segment})*'
-        any_last_segments = f'{any_segments}(?:{one_last_segment})?'
+        one_last_segment = f"[^{escaped_seps}.]{not_sep}*"
+        one_segment = f"{one_last_segment}{any_sep}"
+        any_segments = f"(?:{one_segment})*"
+        any_last_segments = f"{any_segments}(?:{one_last_segment})?"
 
     results = []
     parts = re.split(any_sep, pat)
     last_part_idx = len(parts) - 1
     for idx, part in enumerate(parts):
-        if part == '*':
+        if part == "*":
             results.append(one_segment if idx < last_part_idx else one_last_segment)
-        elif recursive and part == '**':
+        elif recursive and part == "**":
             if idx < last_part_idx:
-                if parts[idx + 1] != '**':
+                if parts[idx + 1] != "**":
                     results.append(any_segments)
             else:
                 results.append(any_last_segments)
         else:
             if part:
-                if not include_hidden and part[0] in '*?':
-                    results.append(r'(?!\.)')
-                results.extend(_translate(part, f'{not_sep}*', not_sep)[0])
+                if not include_hidden and part[0] in "*?":
+                    results.append(r"(?!\.)")
+                results.extend(_translate(part, f"{not_sep}*", not_sep)[0])
             if idx < last_part_idx:
                 results.append(any_sep)
-    res = ''.join(results)
-    return fr'(?s:{res})\Z'
+    res = "".join(results)
+    return rf"(?s:{res})\Z"
 
 
-_re_setops_sub = re.compile(r'([&~|])').sub
+_re_setops_sub = re.compile(r"([&~|])").sub
+
+
 def _translate(pat, star, question_mark):
     res = []
     add = res.append
@@ -77,69 +79,70 @@ def _translate(pat, star, question_mark):
     i, n = 0, len(pat)
     while i < n:
         c = pat[i]
-        i = i+1
-        if c == '*':
+        i = i + 1
+        if c == "*":
             # store the position of the wildcard
             star_indices.append(len(res))
             add(star)
             # compress consecutive `*` into one
-            while i < n and pat[i] == '*':
+            while i < n and pat[i] == "*":
                 i += 1
-        elif c == '?':
+        elif c == "?":
             add(question_mark)
-        elif c == '[':
+        elif c == "[":
             j = i
-            if j < n and pat[j] == '!':
-                j = j+1
-            if j < n and pat[j] == ']':
-                j = j+1
-            while j < n and pat[j] != ']':
-                j = j+1
+            if j < n and pat[j] == "!":
+                j = j + 1
+            if j < n and pat[j] == "]":
+                j = j + 1
+            while j < n and pat[j] != "]":
+                j = j + 1
             if j >= n:
-                add('\\[')
+                add("\\[")
             else:
                 stuff = pat[i:j]
-                if '-' not in stuff:
-                    stuff = stuff.replace('\\', r'\\')
+                if "-" not in stuff:
+                    stuff = stuff.replace("\\", r"\\")
                 else:
                     chunks = []
-                    k = i+2 if pat[i] == '!' else i+1
+                    k = i + 2 if pat[i] == "!" else i + 1
                     while True:
-                        k = pat.find('-', k, j)
+                        k = pat.find("-", k, j)
                         if k < 0:
                             break
                         chunks.append(pat[i:k])
-                        i = k+1
-                        k = k+3
+                        i = k + 1
+                        k = k + 3
                     chunk = pat[i:j]
                     if chunk:
                         chunks.append(chunk)
                     else:
-                        chunks[-1] += '-'
+                        chunks[-1] += "-"
                     # Remove empty ranges -- invalid in RE.
-                    for k in range(len(chunks)-1, 0, -1):
-                        if chunks[k-1][-1] > chunks[k][0]:
-                            chunks[k-1] = chunks[k-1][:-1] + chunks[k][1:]
+                    for k in range(len(chunks) - 1, 0, -1):
+                        if chunks[k - 1][-1] > chunks[k][0]:
+                            chunks[k - 1] = chunks[k - 1][:-1] + chunks[k][1:]
                             del chunks[k]
                     # Escape backslashes and hyphens for set difference (--).
                     # Hyphens that create ranges shouldn't be escaped.
-                    stuff = '-'.join(s.replace('\\', r'\\').replace('-', r'\-')
-                                     for s in chunks)
-                i = j+1
+                    stuff = "-".join(
+                        s.replace("\\", r"\\").replace("-", r"\-") for s in chunks
+                    )
+                i = j + 1
                 if not stuff:
                     # Empty range: never match.
-                    add('(?!)')
-                elif stuff == '!':
+                    add("(?!)")
+                elif stuff == "!":
                     # Negated empty range: match any character.
-                    add('.')
+                    add(".")
                 else:
                     # Escape set operations (&&, ~~ and ||).
-                    stuff = _re_setops_sub(r'\\\1', stuff)
-                    if stuff[0] == '!':
-                        stuff = '^' + stuff[1:]
-                    elif stuff[0] in ('^', '['):
-                        stuff = '\\' + stuff
-                    add(f'[{stuff}]')
+                    stuff = _re_setops_sub(r"\\\1", stuff)
+                    if stuff[0] == "!":
+                        stuff = "^" + stuff[1:]
+                    elif stuff[0] in ("^", "["):
+                        stuff = "\\" + stuff
+                    add(f"[{stuff}]")
         else:
             add(re.escape(c))
     assert i == n

@@ -77,16 +77,18 @@ def cli(
 cli.add_command(do_upload)
 cli.add_command(create_commit)
 cli.add_command(create_report)
-cli.add_command(create_report_results)
-cli.add_command(get_report_results)
 cli.add_command(pr_base_picking)
-cli.add_command(label_analysis)
-cli.add_command(static_analysis)
 cli.add_command(empty_upload)
 cli.add_command(upload_coverage)
 cli.add_command(upload_process)
 cli.add_command(send_notifications)
 cli.add_command(process_test_results)
+
+# deprecated commands:
+cli.add_command(create_report_results)
+cli.add_command(get_report_results)
+cli.add_command(label_analysis)
+cli.add_command(static_analysis)
 
 
 def run():

@@ -17,12 +17,9 @@ CodecovCLI is a new way for users to interact with Codecov directly from the use
   - [create-commit](#create-commit)
   - [create-report](#create-report)
   - [do-upload](#do-upload)
-  - [create-report-results](#create-report-results)
-  - [get-report-results](#get-report-results)
   - [pr-base-picking](#pr-base-picking)
   - [send-notifications](#send-notifications)
   - [empty-upload](#empty-upload)
-- [How to Use Local Upload](#how-to-use-local-upload)
 - [Work in Progress Features](#work-in-progress-features)
   - [Plugin System](#plugin-system)
   - [Static Analysis](#static-analysis)
@@ -123,8 +120,6 @@ Codecov-cli supports user input. These inputs, along with their descriptions and
 | `create-commit` | Saves the commit's metadata in codecov, it's only necessary to run this once per commit
 | `create-report` | Creates an empty report in codecov with initial data e.g. report name, report's commit
 | `do-upload` | Searches for and uploads coverage data to codecov
-| `create-report-results` | Used for local upload. It tells codecov that you finished local uploading and want it to calculate the results for you to get them locally.
-| `get-report-results` | Used for local upload. It asks codecov to provide you the report results you calculated with the previous command.
 | `pr-base-picking` | Tells codecov that you want to explicitly define a base for your PR
 | `upload-process` | A wrapper for 3 commands. Create-commit, create-report and do-upload. You can use this command to upload to codecov instead of using the previously mentioned commands.
 | `send-notifications` | A command that tells Codecov that you finished uploading and you want to be sent notifications. To disable automatically sent notifications please consider adding manual_trigger to your codecov.yml, so it will look like codecov: notify: manual_trigger: true.
@@ -156,7 +151,6 @@ Codecov-cli supports user input. These inputs, along with their descriptions and
 |-r, --slug | owner/repo slug used instead of the private repo token in Self-hosted | Required
 |-t, --token | Codecov upload token | Required
 |--git-service | Git Provider. Options: github, gitlab, bitbucket, github_enterprise, gitlab_enterprise, bitbucket_server | Required
-|--code| The code of the report. This is used in local uploading to isolate local reports from regular or cloud reports uploaded to codecov so they don't get merged. It's basically a name you give to your report e.g. local-report. | Optional
 |-h, --help | Shows usage, and command options
 
 ## do-upload
@@ -165,7 +159,6 @@ Codecov-cli supports user input. These inputs, along with their descriptions and
 | Option  | Description | Usage
 | :---:     |     :---:   |    :---:   |
 |-C, --sha, --commit-sha|    Commit SHA (with 40 chars) | Required
-|--report-code | The code of the report defined when creating the report. If unsure, leave default | Optional
 |--network-root-folder |      Root folder from which to consider paths on the network section  default: (Current working directory) | Optional
 |-s, --dir, --coverage-files-search-root-folder | Folder where to search for coverage files default: (Current Working Directory) | Optional
 |--exclude, --coverage-files-search-exclude-folder | Folders to exclude from search | Optional
@@ -187,30 +180,6 @@ Codecov-cli supports user input. These inputs, along with their descriptions and
 |-d, --dry-run | Don't upload files to Codecov | Optional
 |--legacy, --use-legacy-uploader | Use the legacy upload endpoint | Optional
 |--git-service | Git Provider. Options: github, gitlab, bitbucket, github_enterprise, gitlab_enterprise, bitbucket_server | Required
-|-h, --help | Shows usage, and command options
-
-## create-report-results
-`codecovcli create-report-results [OPTIONS]`
-
-| Option  | Description | Usage
-| :---:     |     :---:   |    :---:   |
-|--commit-sha | Commit SHA (with 40 chars) | Required
-|--code | The code of the report. If unsure, leave default | Required
-|--slug | owner/repo slug | Required
-|--git-service | Git provider. Options: github, gitlab, bitbucket, github_enterprise, gitlab_enterprise, bitbucket_server | Optional
-|-t, --token | Codecov upload token | Required
-|-h, --help | Shows usage, and command options
-
-## get-report-results
-`codecovcli get-report-results [OPTIONS]`
-
-| Option  | Description | Usage
-| :---:     |     :---:   |    :---:   |
-|--commit-sha | Commit SHA (with 40 chars) | Required
-|--code | The code of the report. If unsure, leave default | Required
-|--slug | owner/repo slug | Required
-|--git-service | Git provider. Options: github, gitlab, bitbucket, github_enterprise, gitlab_enterprise, bitbucket_server | Optional
-|-t, --token | Codecov upload token | Required
 |-h, --help | Shows usage, and command options
 
 ## pr-base-picking
@@ -254,25 +223,6 @@ are ignored by codecov (including README and configuration files)
 |        --git-service         | Options: github, gitlab, bitbucket, github_enterprise, gitlab_enterprise, bitbucket_server | Optional |
 |          -h, --help          |                                Show this message and exit.                                 | Optional |
 
-# How to Use Local Upload
-
-The CLI also supports "dry run" local uploading. This is useful if you prefer to see Codecov status checks and coverage reporting locally, in your terminal, as opposed to opening a PR and waiting for your full CI to run. Local uploads do not interfere with regular uploads made from your CI for any given commit / Pull Request.
-
-Local Upload is accomplished as follows:
-
-```
-pip install codecov-cli
-codecovcli create-commit
-codecovcli create-report --code <CODE>
-codecovcli do-upload --report-code <CODE>
-codecovcli create-report-results --code <CODE>
-codecovcli get-report-results --code <CODE>
-```
-
-Codecov will calculate the coverage results, and return them in your terminal, telling you whether your PR will fail or pass the coverage check.
-
-Note: In order for Local Upload to work, it must be used against a commit on the origin repository. Local Upload does not work for arbitrary diffs or uncommitted changes on your local machine.
-
 # Work in Progress Features
 
 The following features are somewhat implemented in code, but are not yet meant for use. These features will be documented once they are fully implemented in the CLI.
@@ -280,10 +230,6 @@ The following features are somewhat implemented in code, but are not yet meant f
 ## Plugin System
 
 To provide extensibility to some of its commands, the CLI makes use of a plugin system. For most cases, the default commands are sufficient. But in some cases, having some custom logic specific to your use case can be beneficial. Note that full documentation of the plugin system is pending, as the feature is still heavily a work in progress.
-
-## Static Analysis
-
-The CLI can perform basic static analysis on Python code today. This static analysis is meant to power more future looking Codecov features and, as such, is not required or in active use today. As more functionality dependent on static analysis becomes available for use, we will document static analysis in detail here.
 
 # Contributions
 

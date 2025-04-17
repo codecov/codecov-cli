@@ -14,7 +14,7 @@ logger = logging.getLogger("codecovcli")
 
 @click.command()
 @click.option(
-    "--code", help="The code of the report. If unsure, leave default", default="default"
+    "--code", help="The code of the report. If unsure, leave default", default="default", hidden=True
 )
 @click.option(
     "-P",

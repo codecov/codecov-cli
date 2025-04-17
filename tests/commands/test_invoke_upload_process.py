@@ -75,8 +75,6 @@ def test_upload_process_options(mocker):
             "  -t, --token TEXT                Codecov upload token",
             "  -r, --slug TEXT                 owner/repo slug used instead of the private",
             "                                  repo token in Self-hosted",
-            "  --code, --report-code TEXT      The code of the report. If unsure, leave",
-            "                                  default",
             "  --network-root-folder PATH      Root folder from which to consider paths on",
             "                                  the network section  [default: (Current",
             "                                  working directory)]",

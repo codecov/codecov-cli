@@ -26,6 +26,7 @@ _global_upload_options = [
         "report_code",
         help="The code of the report. If unsure, leave default",
         default="default",
+        hidden=True,
     ),
     click.option(
         "--network-root-folder",

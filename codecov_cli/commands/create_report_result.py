@@ -11,7 +11,7 @@ from codecov_cli.types import CommandContext
 logger = logging.getLogger("codecovcli")
 
 
-@click.command()
+@click.command(hidden=True, deprecated=True)
 @click.option(
     "--code", help="The code of the report. If unsure, leave default", default="default"
 )

@@ -12,7 +12,7 @@ class LocalAdapter(CIAdapterBase):
         return s.returncode == SUCCESS
 
     def _get_branch(self):
-        return os.getenv("GIT_BRANCH") or os.getenv("BRANCH_NAME")
+        return os.getenv("GIT_BRANCH") or os.getenv("CIRCLE_BRANCH") or os.getenv("BRANCH_NAME")
 
     def _get_build_code(self):
         return None

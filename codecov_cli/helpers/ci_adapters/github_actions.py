@@ -66,21 +66,21 @@ class GithubActionsCIAdapter(CIAdapterBase):
         return os.getenv("GITHUB_REPOSITORY")
 
     def _get_branch(self):
-        branch = os.getenv("GITHUB_HEAD_REF")
-        if branch:
-            return branch
+        def remove_prefix(s, prefix):
+            if s.startswith(prefix):
+                return s[len(prefix) :]
+            return s
 
-        branch_ref = os.getenv("GITHUB_REF")
+        head_ref = os.getenv("GITHUB_HEAD_REF", "")
+        ref = remove_prefix(os.getenv("GITHUB_REF", ""), "refs/heads/")
 
-        if not branch_ref:
-            return None
+        branch = head_ref or ref
 
-        match = re.search(r"refs/heads/(.*)", branch_ref)
+        # branch format for merge queue CI runs:
+        # gh-readonly-queue/<branch-name>/<pr-number>-<pr-name>
+        if branch.startswith("gh-readonly-queue/"):
+            return branch.split("/")[1]
 
-        if match is None:
-            return None
-
-        branch = match.group(1)
         return branch or None
 
     def _get_service(self):

@@ -13,10 +13,8 @@ Options:
 Commands:
   create-commit
   create-report
-  create-report-results
   do-upload
   empty-upload
-  get-report-results
   pr-base-picking
   process-test-results
   send-notifications
@@ -44,8 +42,6 @@ Options:
 Usage: codecovcli create-report [OPTIONS]
 
 Options:
-  --code TEXT                     The code of the report. If unsure, leave
-                                  default
   -P, --pr, --pull-request-number TEXT
                                   Specify the pull request number manually.
                                   Used to override pre-existing CI environment
@@ -58,24 +54,9 @@ Options:
                                   repo token in Self-hosted
   -h, --help                      Show this message and exit.
 
-Usage: codecovcli create-report-results [OPTIONS]
-
-Options:
-  --code TEXT                     The code of the report. If unsure, leave
-                                  default
-  -C, --sha, --commit-sha TEXT    Commit SHA (with 40 chars)  [required]
-  -Z, --fail-on-error             Exit with non-zero code in case of error
-  --git-service [github|gitlab|bitbucket|github_enterprise|gitlab_enterprise|bitbucket_server]
-  -t, --token TEXT                Codecov upload token
-  -r, --slug TEXT                 owner/repo slug used instead of the private
-                                  repo token in Self-hosted
-  -h, --help                      Show this message and exit.
-
 Usage: codecovcli do-upload [OPTIONS]
 
 Options:
-  --code, --report-code TEXT      The code of the report. If unsure, leave
-                                  default
   --network-root-folder PATH      Root folder from which to consider paths on
                                   the network section  [default: (Current
                                   working directory)]
@@ -164,19 +145,6 @@ Options:
                                   repo token in Self-hosted
   -h, --help                      Show this message and exit.
 
-Usage: codecovcli get-report-results [OPTIONS]
-
-Options:
-  --code TEXT                     The code of the report. If unsure, leave
-                                  default
-  -C, --sha, --commit-sha TEXT    Commit SHA (with 40 chars)  [required]
-  -Z, --fail-on-error             Exit with non-zero code in case of error
-  --git-service [github|gitlab|bitbucket|github_enterprise|gitlab_enterprise|bitbucket_server]
-  -t, --token TEXT                Codecov upload token
-  -r, --slug TEXT                 owner/repo slug used instead of the private
-                                  repo token in Self-hosted
-  -h, --help                      Show this message and exit.
-
 Usage: codecovcli pr-base-picking [OPTIONS]
 
 Options:
@@ -230,8 +198,6 @@ Options:
   -t, --token TEXT                Codecov upload token
   -r, --slug TEXT                 owner/repo slug used instead of the private
                                   repo token in Self-hosted
-  --code, --report-code TEXT      The code of the report. If unsure, leave
-                                  default
   --network-root-folder PATH      Root folder from which to consider paths on
                                   the network section  [default: (Current
                                   working directory)]
@@ -306,8 +272,6 @@ Options:
   -t, --token TEXT                Codecov upload token
   -r, --slug TEXT                 owner/repo slug used instead of the private
                                   repo token in Self-hosted
-  --code, --report-code TEXT      The code of the report. If unsure, leave
-                                  default
   --network-root-folder PATH      Root folder from which to consider paths on
                                   the network section  [default: (Current
                                   working directory)]

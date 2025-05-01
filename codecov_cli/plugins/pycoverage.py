@@ -28,7 +28,7 @@ class PycoverageConfig(dict):
     def report_type(self) -> str:
         """
         Report type to generate.
-        Overrided if include_contexts == True
+        Overridden if include_contexts == True
         report_type: str [values xml|json; default xml]
         """
         return self.get("report_type", "xml")

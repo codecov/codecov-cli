@@ -57,6 +57,14 @@ def search_files(
         search_for_directories (bool)
 
     """
+    logger.debug(
+        "search_files",
+        extra=dict(
+            extra_log_attributes=dict(
+                local_args=locals(),
+            ),
+        ),
+    )
     this_is_included = functools.partial(
         _is_included, filename_include_regex, multipart_include_regex
     )
@@ -64,7 +72,27 @@ def search_files(
         _is_excluded, filename_exclude_regex, multipart_exclude_regex
     )
     for dirpath, dirnames, filenames in os.walk(folder_to_search):
+        logger.debug(
+            "search_files.os_walk",
+            extra=dict(
+                extra_log_attributes=dict(
+                    folder_to_search=folder_to_search,
+                    dirpath=dirpath,
+                    dirnames=dirnames,
+                    filenames=filenames,
+                ),
+            ),
+        )
         dirs_to_remove = set(d for d in dirnames if d in folders_to_ignore)
+        logger.debug(
+            "search_files.dirs_to_remove",
+            extra=dict(
+                extra_log_attributes=dict(
+                    dirs_to_remove=dirs_to_remove,
+                    folders_to_ignore=folders_to_ignore,
+                ),
+            ),
+        )
 
         if multipart_exclude_regex is not None:
             dirs_to_remove.union(
@@ -80,6 +108,16 @@ def search_files(
             # This is the documented way of doing this on python docs
             dirnames.remove(directory)
 
+        logger.debug(
+            "search_files.post_dir_removal",
+            extra=dict(
+                extra_log_attributes=dict(
+                    dirnames=dirnames,
+                    search_for_directories=search_for_directories,
+                ),
+            ),
+        )
+
         if search_for_directories:
             for directory in dirnames:
                 dir_path = pathlib.Path(dirpath) / directory
@@ -88,6 +126,18 @@ def search_files(
         else:
             for single_filename in filenames:
                 file_path = pathlib.Path(dirpath) / single_filename
+                logger.debug(
+                    "search_files.search_for_filenames",
+                    extra=dict(
+                        extra_log_attributes=dict(
+                            single_filename=single_filename,
+                            file_path=file_path,
+                            is_excluded=this_is_excluded(file_path),
+                            is_included=this_is_included(file_path),
+                            yield_it=(not this_is_excluded(file_path) and this_is_included(file_path)),
+                        ),
+                    ),
+                )
                 if not this_is_excluded(file_path) and this_is_included(file_path):
                     yield file_path
 

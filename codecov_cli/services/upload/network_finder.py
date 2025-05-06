@@ -1,7 +1,10 @@
+import logging
 import pathlib
 import typing
 
 from codecov_cli.helpers.versioning_systems import VersioningSystemInterface
+
+logger = logging.getLogger("codecovcli")
 
 
 class NetworkFinder(object):
@@ -24,13 +27,25 @@ class NetworkFinder(object):
             self.network_root_folder, self.recurse_submodules
         )
 
+        logger.debug(
+            "NetworkFinder.find_files",
+            extra=dict(
+                extra_log_attributes=dict(
+                    files=files,
+                    ignore_filters=ignore_filters,
+                    network_root_folder=self.network_root_folder,
+                    recurse_submodules=self.recurse_submodules,
+                ),
+            ),
+        )
+
         if files and not ignore_filters:
             if self.network_filter:
                 files = [file for file in files if file.startswith(self.network_filter)]
             if self.network_prefix:
                 files = [self.network_prefix + file for file in files]
 
-        return files
+        return files or []
 
 
 def select_network_finder(

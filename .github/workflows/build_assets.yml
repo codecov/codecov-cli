@@ -4,6 +4,9 @@ name: Build Compiled Assets
 on:
   workflow_dispatch:
     inputs:
+      sha:
+        type: string
+        description: "The sha"
       release:
         type: boolean
         default: false
@@ -60,6 +63,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
+      - uses: actions/checkout@v4
+        if: ${{ inputs.sha }}
+        with:
+          sha: ${{ inputs.sha }}
+          submodules: true
       - name: Set up Python 3.11
         uses: actions/setup-python@v3
         with:
@@ -109,6 +117,11 @@ jobs:
     - uses: actions/checkout@v4
       with:
         submodules: true
+      - uses: actions/checkout@v4
+        if: ${{ inputs.sha }}
+        with:
+          sha: ${{ inputs.sha }}
+          submodules: true
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1
       with:

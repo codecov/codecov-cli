@@ -3,7 +3,8 @@ name: Build Compiled Assets
 
 on:
   push:
-    - th/debug
+    branches:
+      - th/debug
   workflow_call:
     inputs:
       release:

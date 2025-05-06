@@ -2,15 +2,8 @@
 name: Build Compiled Assets
 
 on:
-  workflow_dispatch:
-    inputs:
-      sha:
-        type: string
-        description: "The sha"
-      release:
-        type: boolean
-        default: false
-        description: "Attach artifacts to a release"
+  push:
+    - th/debug
   workflow_call:
     inputs:
       release:
@@ -63,11 +56,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
-      - uses: actions/checkout@v4
-        if: ${{ inputs.sha }}
-        with:
-          sha: ${{ inputs.sha }}
-          submodules: true
       - name: Set up Python 3.11
         uses: actions/setup-python@v3
         with:
@@ -112,14 +100,10 @@ jobs:
           - distro: "python:3.11-bullseye"
             arch: arm64
             distro_name: linux
+
     steps:
     - uses: actions/checkout@v4
       with:
-        submodules: true
-    - uses: actions/checkout@v4
-      if: ${{ inputs.sha }}
-      with:
-        sha: ${{ inputs.sha }}
         submodules: true
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1

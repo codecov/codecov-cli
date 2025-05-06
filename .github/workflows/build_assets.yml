@@ -112,16 +112,15 @@ jobs:
           - distro: "python:3.11-bullseye"
             arch: arm64
             distro_name: linux
-
     steps:
     - uses: actions/checkout@v4
       with:
         submodules: true
-      - uses: actions/checkout@v4
-        if: ${{ inputs.sha }}
-        with:
-          sha: ${{ inputs.sha }}
-          submodules: true
+    - uses: actions/checkout@v4
+      if: ${{ inputs.sha }}
+      with:
+        sha: ${{ inputs.sha }}
+        submodules: true
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1
       with:

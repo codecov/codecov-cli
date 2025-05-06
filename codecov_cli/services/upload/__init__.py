@@ -165,5 +165,10 @@ def do_upload_logic(
             status_code=200,
             text="Data NOT sent to Codecov because of dry-run option",
         )
+        with open('coverage_report.txt', 'w+') as f:
+            print(upload_data)
+            f.write('\n'.join(upload_data.network))
+            f.write("<<< network")
+            f.write('\n'.join(upload_data.file_fixes))
     log_warnings_and_errors_if_any(sending_result, "Upload", fail_on_error)
     return sending_result

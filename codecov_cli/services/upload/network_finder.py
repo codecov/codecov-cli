@@ -31,7 +31,7 @@ class NetworkFinder(object):
             "NetworkFinder.find_files",
             extra=dict(
                 extra_log_attributes=dict(
-                    files=files,
+                    len_files=len(files),
                     ignore_filters=ignore_filters,
                     network_root_folder=self.network_root_folder,
                     recurse_submodules=self.recurse_submodules,

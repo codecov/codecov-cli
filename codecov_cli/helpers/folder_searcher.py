@@ -117,6 +117,6 @@ def globs_to_regex(patterns: List[str]) -> Optional[Pattern]:
     regex_patterns = []
     for pattern in patterns:
         regex_pattern = translate(pattern, recursive=True, include_hidden=True)
-        logger.debug(f"Translating `{pattern}` into `{regex_pattern}`")
+        # logger.debug(f"Translating `{pattern}` into `{regex_pattern}`")
         regex_patterns.append(regex_pattern)
     return re.compile("|".join(regex_patterns))

@@ -220,7 +220,8 @@ class NoVersioningSystem(VersioningSystemInterface):
             extra=dict(
                 extra_log_attributes=dict(
                     dir_to_use=dir_to_use,
-                    files=files,
+                    len_files=len(files),
+                    files=files[:100],
                 ),
             ),
         )
@@ -233,7 +234,8 @@ class NoVersioningSystem(VersioningSystemInterface):
             extra=dict(
                 extra_log_attributes=dict(
                     dir_to_use=dir_to_use,
-                    return_files=return_files,
+                    len_return_files=len(return_files),
+                    return_files=return_files[:100],
                 ),
             ),
         )

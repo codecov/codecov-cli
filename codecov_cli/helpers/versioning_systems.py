@@ -215,16 +215,6 @@ class NoVersioningSystem(VersioningSystemInterface):
         files = search_files(
             dir_to_use, folders_to_ignore=[], filename_include_regex=re.compile("")
         )
-        logger.debug(
-            "NoVersioningSystem.list_relevant_files.files",
-            extra=dict(
-                extra_log_attributes=dict(
-                    dir_to_use=dir_to_use,
-                    len_files=len(files),
-                    files=files[:100],
-                ),
-            ),
-        )
 
         return_files = []
         for f in files:

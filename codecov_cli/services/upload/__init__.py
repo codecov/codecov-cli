@@ -166,7 +166,7 @@ def do_upload_logic(
             text="Data NOT sent to Codecov because of dry-run option",
         )
         logger.debug(f"Network Files Sample: {upload_data.network[0:10]}")
-        logger.debug(f"Total network files: {len(upload_data.network)}")
+        logger.info(f"Total network files: {len(upload_data.network)}")
         with open('coverage_report.txt', 'w+') as f:
             f.write('\n'.join(upload_data.network))
             f.write("<<< network")

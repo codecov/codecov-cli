@@ -27,7 +27,7 @@ class NetworkFinder(object):
             self.network_root_folder, self.recurse_submodules
         )
 
-        logger.debug(
+        logger.info(
             "NetworkFinder.find_files",
             extra=dict(
                 extra_log_attributes=dict(
@@ -44,6 +44,19 @@ class NetworkFinder(object):
                 files = [file for file in files if file.startswith(self.network_filter)]
             if self.network_prefix:
                 files = [self.network_prefix + file for file in files]
+
+        logger.info(
+            "NetworkFinder.post_find_files",
+            extra=dict(
+                extra_log_attributes=dict(
+                    cwd=pathlib.Path.cwd(),
+                    len_files=len(files),
+                    ignore_filters=ignore_filters,
+                    network_root_folder=self.network_root_folder,
+                    recurse_submodules=self.recurse_submodules,
+                ),
+            ),
+        )
 
         return files or []
 

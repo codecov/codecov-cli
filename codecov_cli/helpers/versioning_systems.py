@@ -191,21 +191,14 @@ class NoVersioningSystem(VersioningSystemInterface):
     def list_relevant_files(
         self, directory: t.Optional[Path] = None, recurse_submodules: bool = False
     ) -> t.List[str]:
-        logger.debug(
-            "NoVersioningSystem.list_relevant_files.start",
-            extra=dict(
-                extra_log_attributes=dict(
-                    directory=directory,
-                    recurse_submodules=recurse_submodules,
-                ),
-            ),
-        )
         dir_to_use = directory or self.get_network_root()
-        logger.debug(
+        logger.info(
             "NoVersioningSystem.list_relevant_files.dir_to_use",
             extra=dict(
                 extra_log_attributes=dict(
+                    directory=directory,
                     dir_to_use=dir_to_use,
+                    recurse_submodules=recurse_submodules,
                 ),
             )
         )
@@ -219,7 +212,7 @@ class NoVersioningSystem(VersioningSystemInterface):
         return_files = []
         for f in files:
             return_files.append(f.relative_to(dir_to_use).as_posix())
-        logger.debug(
+        logger.info(
             "NoVersioningSystem.list_relevant_files.return_files",
             extra=dict(
                 extra_log_attributes=dict(

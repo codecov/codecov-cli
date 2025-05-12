@@ -16,7 +16,7 @@ charset-normalizer==3.4.1
     # via requests
 click==8.1.8
     # via codecov-cli (pyproject.toml)
-h11==0.14.0
+h11==0.16.0
     # via httpcore
 httpcore==1.0.7
     # via httpx

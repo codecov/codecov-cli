@@ -19,7 +19,6 @@ dependencies = [
     "responses==0.21.*",
     "sentry-sdk>=2.20.0",
     "test-results-parser==0.5.4",
-    "tree-sitter==0.20.*",
     "wrapt>=1.17.2",
 ]
 license = {file = "LICENSE"}

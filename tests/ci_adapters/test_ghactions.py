@@ -207,6 +207,12 @@ class TestGithubActions(object):
             ({GithubActionsEnvEnum.GITHUB_REF: r"doesn't_match"}, None),
             ({GithubActionsEnvEnum.GITHUB_REF: r"refs/heads/"}, None),
             ({GithubActionsEnvEnum.GITHUB_REF: r"refs/heads/abc"}, "abc"),
+            (
+                {
+                    GithubActionsEnvEnum.GITHUB_REF: r"refs/heads/gh-readonly-queue/abc/pr-name-number"
+                },
+                "abc",
+            ),
         ],
     )
     def test_branch(self, env_dict, expected, mocker):

@@ -33,7 +33,7 @@ pyyaml==6.0.2
     # via codecov-cli (pyproject.toml)
 regex==2024.11.6
     # via codecov-cli (pyproject.toml)
-requests==2.32.3
+requests==2.32.4
     # via responses
 responses==0.21.0
     # via codecov-cli (pyproject.toml)

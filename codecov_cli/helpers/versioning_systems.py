@@ -1,14 +1,52 @@
+from itertools import chain
 import logging
+import re
 import subprocess
 import typing as t
 from pathlib import Path
 from shutil import which
 
 from codecov_cli.fallbacks import FallbackFieldEnum
+from codecov_cli.helpers.folder_searcher import search_files
 from codecov_cli.helpers.git import parse_git_service, parse_slug
 from abc import ABC, abstractmethod
 
 logger = logging.getLogger("codecovcli")
+
+IGNORE_DIRS = [
+    "*.egg-info",
+    ".DS_Store",
+    ".circleci",
+    ".env",
+    ".envs",
+    ".git",
+    ".gitignore",
+    ".mypy_cache",
+    ".nvmrc",
+    ".nyc_output",
+    ".ruff_cache",
+    ".venv",
+    ".venvns",
+    ".virtualenv",
+    ".virtualenvs",
+    "__pycache__",
+    "bower_components",
+    "build/lib/",
+    "jspm_packages",
+    "node_modules",
+    "vendor",
+    "virtualenv",
+    "virtualenvs",
+]
+
+IGNORE_PATHS = [
+    "*.gif",
+    "*.jpeg",
+    "*.jpg",
+    "*.md",
+    "*.png",
+    "shunit2*",
+]
 
 
 class VersioningSystemInterface(ABC):
@@ -132,19 +170,11 @@ class GitVersioningSystem(VersioningSystemInterface):
         if dir_to_use is None:
             raise ValueError("Can't determine root folder")
 
-        cmd = ["git", "-C", str(dir_to_use), "ls-files"]
+        cmd = ["git", "-C", str(dir_to_use), "ls-files", "-z"]
         if recurse_submodules:
             cmd.append("--recurse-submodules")
         res = subprocess.run(cmd, capture_output=True)
-
-        return [
-            (
-                filename[1:-1]
-                if filename.startswith('"') and filename.endswith('"')
-                else filename
-            )
-            for filename in res.stdout.decode("unicode_escape").strip().split("\n")
-        ]
+        return res.stdout.decode().split("\0")
 
 
 class NoVersioningSystem(VersioningSystemInterface):
@@ -161,4 +191,11 @@ class NoVersioningSystem(VersioningSystemInterface):
     def list_relevant_files(
         self, directory: t.Optional[Path] = None, recurse_submodules: bool = False
     ) -> t.List[str]:
-        return []
+        dir_to_use = directory or self.get_network_root()
+        if dir_to_use is None:
+            raise ValueError("Can't determine root folder")
+
+        files = search_files(
+            dir_to_use, folders_to_ignore=[], filename_include_regex=re.compile("")
+        )
+        return [f.relative_to(dir_to_use).as_posix() for f in files]

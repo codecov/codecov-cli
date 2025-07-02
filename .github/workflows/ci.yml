@@ -70,16 +70,12 @@ jobs:
           codecovcli create-report -t ${{ secrets.CODECOV_TOKEN }} --git-service github
 
   build-test-upload:
-    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - python-version: "3.13"
-          - python-version: "3.12"
-          - python-version: "3.11"
-          - python-version: "3.10"
-          - python-version: "3.9"
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.13", "3.12", "3.11", "3.10", "3.9"]
+    runs-on: ${{matrix.os}}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -97,7 +93,7 @@ jobs:
           pip install -r tests/requirements.txt
       - name: Test with pytest
         run: |
-          pytest --cov --junitxml=${{matrix.python-version}}junit.xml
+          pytest --cov --junitxml=${{matrix.os}}-${{matrix.python-version}}junit.xml
         env:
           CODECOV_ENV: test
       - name: Dogfooding codecov-cli
@@ -109,8 +105,8 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: ${{matrix.python-version}}junit.xml
-          path: ${{matrix.python-version}}junit.xml
+          name: ${{matrix.os}}-${{matrix.python-version}}junit.xml
+          path: ${{matrix.os}}-${{matrix.python-version}}junit.xml
 
   process-test-results:
     if: ${{ always() }}

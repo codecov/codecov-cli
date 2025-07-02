@@ -48,7 +48,7 @@ class TestXcode(object):
         expected = (
             "info",
             'Running swift coverage on the following list of files: --- {"matched_paths": ["'
-            + f"{dir}/cov_data.profdata"
+            + f"{dir.as_posix()}/cov_data.profdata"
             + '"]}',
         )
         assert expected in output

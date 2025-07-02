@@ -17,7 +17,7 @@ def _is_included(
 ):
     return filename_include_regex.match(path.name) and (
         multipart_include_regex is None
-        or multipart_include_regex.match(str(path.resolve()))
+        or multipart_include_regex.match(path.resolve().as_posix())
     )
 
 
@@ -29,7 +29,8 @@ def _is_excluded(
     return (
         filename_exclude_regex is not None and filename_exclude_regex.match(path.name)
     ) or (
-        multipart_exclude_regex is not None and multipart_exclude_regex.match(str(path))
+        multipart_exclude_regex is not None
+        and multipart_exclude_regex.match(path.as_posix())
     )
 
 
@@ -69,7 +70,9 @@ def search_files(
             dirs_to_remove.union(
                 directory
                 for directory in dirnames
-                if multipart_exclude_regex.match(str(pathlib.Path(dirpath) / directory))
+                if multipart_exclude_regex.match(
+                    (pathlib.Path(dirpath) / directory).as_posix()
+                )
             )
 
         for directory in dirs_to_remove:

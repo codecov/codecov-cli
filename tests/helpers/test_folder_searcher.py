@@ -18,18 +18,18 @@ def test_search_files(tmp_path):
         relevant_filepath = tmp_path / f
         relevant_filepath.parent.mkdir(parents=True, exist_ok=True)
         relevant_filepath.touch()
-    expected_results = sorted(
+
+    assert sorted(
+        search_files(
+            tmp_path, [], filename_include_regex=search_for, filename_exclude_regex=None
+        )
+    ) == sorted(
         [
             tmp_path / "banana.txt",
             tmp_path / "banana.py",
             tmp_path / "path/to/banana.py",
             tmp_path / "path/to/banana.c",
         ]
-    )
-    assert expected_results == sorted(
-        search_files(
-            tmp_path, [], filename_include_regex=search_for, filename_exclude_regex=None
-        )
     )
 
 
@@ -51,7 +51,15 @@ def test_search_files_with_folder_exclusion(tmp_path):
         relevant_filepath = tmp_path / f
         relevant_filepath.parent.mkdir(parents=True, exist_ok=True)
         relevant_filepath.touch()
-    expected_results = sorted(
+
+    assert sorted(
+        search_files(
+            tmp_path,
+            ["to"],
+            filename_include_regex=search_for,
+            filename_exclude_regex=None,
+        )
+    ) == sorted(
         [
             tmp_path / "banana.txt",
             tmp_path / "banana.py",
@@ -59,14 +67,6 @@ def test_search_files_with_folder_exclusion(tmp_path):
             tmp_path / "another/some/banana.py",
             tmp_path / "path/folder with space/banana.py",
         ]
-    )
-    assert expected_results == sorted(
-        search_files(
-            tmp_path,
-            ["to"],
-            filename_include_regex=search_for,
-            filename_exclude_regex=None,
-        )
     )
 
 
@@ -83,7 +83,12 @@ def test_search_files_combined_regex(tmp_path):
         relevant_filepath = tmp_path / f
         relevant_filepath.parent.mkdir(parents=True, exist_ok=True)
         relevant_filepath.touch()
-    expected_results = sorted(
+
+    assert sorted(
+        search_files(
+            tmp_path, [], filename_include_regex=search_for, filename_exclude_regex=None
+        )
+    ) == sorted(
         [
             tmp_path / "banana.txt",
             tmp_path / "banana.py",
@@ -91,11 +96,6 @@ def test_search_files_combined_regex(tmp_path):
             tmp_path / "path/to/banana.py",
             tmp_path / "path/to/banana.c",
         ]
-    )
-    assert expected_results == sorted(
-        search_files(
-            tmp_path, [], filename_include_regex=search_for, filename_exclude_regex=None
-        )
     )
 
 
@@ -112,15 +112,15 @@ def test_search_files_with_exclude_regex(tmp_path):
         relevant_filepath = tmp_path / f
         relevant_filepath.parent.mkdir(parents=True, exist_ok=True)
         relevant_filepath.touch()
-    expected_results = sorted([tmp_path / "banana.txt", tmp_path / "path/to/banana.c"])
-    assert expected_results == sorted(
+
+    assert sorted(
         search_files(
             tmp_path,
             [],
             filename_include_regex=search_for,
             filename_exclude_regex=re.compile(r".*\.py"),
         )
-    )
+    ) == sorted([tmp_path / "banana.txt", tmp_path / "path/to/banana.c"])
 
 
 def test_search_files_with_multipart_excluded_regex_with_filename(tmp_path):
@@ -137,10 +137,7 @@ def test_search_files_with_multipart_excluded_regex_with_filename(tmp_path):
         relevant_filepath.parent.mkdir(parents=True, exist_ok=True)
         relevant_filepath.touch()
 
-    expected_results = sorted(
-        [tmp_path / "report.xml", tmp_path / "path/to/report.xml"]
-    )
-    assert expected_results == sorted(
+    assert sorted(
         search_files(
             tmp_path,
             [],
@@ -148,7 +145,7 @@ def test_search_files_with_multipart_excluded_regex_with_filename(tmp_path):
             filename_exclude_regex=None,
             multipart_exclude_regex=multipart_exclude_regex,
         )
-    )
+    ) == sorted([tmp_path / "report.xml", tmp_path / "path/to/report.xml"])
 
 
 def test_search_files_with_multipart_excluded_regex_with_foldername(tmp_path):
@@ -167,14 +164,7 @@ def test_search_files_with_multipart_excluded_regex_with_foldername(tmp_path):
         relevant_filepath.parent.mkdir(parents=True, exist_ok=True)
         relevant_filepath.touch()
 
-    expected_results = sorted(
-        [
-            tmp_path / "report.xml",
-            tmp_path / "path/to/report.xml",
-            tmp_path / "js/generated/report.xml",
-        ]
-    )
-    assert expected_results == sorted(
+    assert sorted(
         search_files(
             tmp_path,
             [],
@@ -182,6 +172,12 @@ def test_search_files_with_multipart_excluded_regex_with_foldername(tmp_path):
             filename_exclude_regex=None,
             multipart_exclude_regex=multipart_exclude_regex,
         )
+    ) == sorted(
+        [
+            tmp_path / "report.xml",
+            tmp_path / "path/to/report.xml",
+            tmp_path / "js/generated/report.xml",
+        ]
     )
 
 
@@ -260,7 +256,7 @@ def test_search_directories(tmp_path):
     filename_include_regex = globs_to_regex(["*.app"])
     filepaths = [
         "banana.app/path/of/directory.txt",
-        "path/to/apple.app/path/of/directorys",
+        "path/to/apple.app/path/of/directories",
         "path/to/banana.app/folder/test.txt",
         "apple.py",
         "banana.py",
@@ -269,14 +265,8 @@ def test_search_directories(tmp_path):
         relevant_filepath = tmp_path / f
         relevant_filepath.parent.mkdir(parents=True, exist_ok=True)
         relevant_filepath.touch()
-    expected_results = sorted(
-        [
-            tmp_path / "banana.app",
-            tmp_path / "path/to/banana.app",
-            tmp_path / "path/to/apple.app",
-        ]
-    )
-    assert expected_results == sorted(
+
+    assert sorted(
         search_files(
             tmp_path,
             [],
@@ -284,4 +274,10 @@ def test_search_directories(tmp_path):
             filename_exclude_regex=None,
             search_for_directories=True,
         )
+    ) == sorted(
+        [
+            tmp_path / "banana.app",
+            tmp_path / "path/to/banana.app",
+            tmp_path / "path/to/apple.app",
+        ]
     )

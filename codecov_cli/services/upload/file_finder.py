@@ -47,6 +47,8 @@ test_results_files_patterns = [
 ]
 
 coverage_files_excluded_patterns = [
+    "*.*js",
+    "*.SHA256SUM",
     "*.am",
     "*.bash",
     "*.bat",
@@ -59,20 +61,25 @@ coverage_files_excluded_patterns = [
     "*.cp",
     "*.cpp",
     "*.crt",
+    "*.csg",
     "*.css",
     "*.csv",
+    "*.dart",
     "*.data",
     "*.db",
     "*.dox",
     "*.ec",
     "*.egg",
+    "*.egg-info",
     "*.el",
     "*.env",
     "*.erb",
+    "*.err",
     "*.exe",
+    "*.feature",
     "*.ftl",
     "*.gif",
-    ".git*",
+    "*.go",
     "*.gradle",
     "*.gz",
     "*.h",
@@ -84,11 +91,14 @@ coverage_files_excluded_patterns = [
     "*.jpg",
     "*.js",
     "*.less",
+    "*.library",
     "*.log",
     "*.m4",
     "*.mak*",
+    "*.map",
     "*.md",
-    ".nvmrc",
+    "*.module",
+    "*.mp4",
     "*.o",
     "*.p12",
     "*.pem",
@@ -96,11 +106,13 @@ coverage_files_excluded_patterns = [
     "*.pom*",
     "*.profdata",
     "*.proto",
+    "*.prototxt",
     "*.ps1",
     "*.pth",
     "*.py",
     "*.pyc",
     "*.pyo",
+    "*.rake",
     "*.rb",
     "*.rsp",
     "*.rst",
@@ -109,6 +121,7 @@ coverage_files_excluded_patterns = [
     "*.scss",
     "*.serialized",
     "*.sh",
+    "*.sha256sum",
     "*.snapshot",
     "*.sql",
     "*.svg",
@@ -118,17 +131,21 @@ coverage_files_excluded_patterns = [
     "*.whl",
     "*.xcconfig",
     "*.xcoverage.*",
-    "*.yml",
     "*.yaml",
+    "*.yml",
+    "*.zip",
     "*/classycle/report.xml",
     "*codecov.yml",
-    "codecov.yaml",
     "*~",
     ".*coveragerc",
     ".coverage*",
-    "coverage-summary.json",
+    ".ds_store",
+    ".git*",
+    ".nvmrc",
     "codecov.SHA256SUM",
     "codecov.SHA256SUM.sig",
+    "codecov.yaml",
+    "coverage-summary.json",
     "createdFiles.lst",
     "fullLocaleNames.lst",
     "include.lst",
@@ -137,14 +154,9 @@ coverage_files_excluded_patterns = [
     "phpunit-coverage.xml",
     "remapInstanbul.coverage*.json",
     "scoverage.measurements.*",
-    "test_*_coverage.txt",
     "test-result-*-codecoverage.json",
+    "test_*_coverage.txt",
     "testrunner-coverage*",
-    "*.*js",
-    "*.map",
-    "*.egg-info",
-    ".ds_store",
-    "*.zip",
 ]
 
 test_results_files_excluded_patterns = (
@@ -197,8 +209,10 @@ class FileFinder(object):
         report_type: ReportType = ReportType.COVERAGE,
     ):
         self.search_root = search_root or Path(os.getcwd())
-        self.folders_to_ignore = list(folders_to_ignore) if folders_to_ignore else []
-        self.explicitly_listed_files = explicitly_listed_files or None
+        self.folders_to_ignore = (
+            [f.as_posix() for f in folders_to_ignore] if folders_to_ignore else []
+        )
+        self.explicitly_listed_files = explicitly_listed_files or []
         self.disable_search = disable_search
         self.report_type: ReportType = report_type
 
@@ -223,8 +237,7 @@ class FileFinder(object):
                 assert regex_patterns_to_include  # this is never `None`
                 files_paths = search_files(
                     self.search_root,
-                    default_folders_to_ignore
-                    + [str(folder) for folder in self.folders_to_ignore],
+                    default_folders_to_ignore + self.folders_to_ignore,
                     filename_include_regex=regex_patterns_to_include,
                     filename_exclude_regex=regex_patterns_to_exclude,
                 )
@@ -252,7 +265,7 @@ class FileFinder(object):
         for file in self.explicitly_listed_files:
             user_filenames_to_include.append(file.name)
             if regex_patterns_to_exclude.match(file.name):
-                files_excluded_but_user_includes.append(str(file))
+                files_excluded_but_user_includes.append(file.as_posix())
         if files_excluded_but_user_includes:
             logger.warning(
                 "Some files being explicitly added are found in the list of excluded files for upload. We are still going to search for the explicitly added files.",
@@ -262,7 +275,7 @@ class FileFinder(object):
             )
         regex_patterns_to_include = globs_to_regex(user_filenames_to_include)
         multipart_include_regex = globs_to_regex(
-            [str(path.resolve()) for path in self.explicitly_listed_files]
+            [path.resolve().as_posix() for path in self.explicitly_listed_files]
         )
         user_files_paths = list(
             search_files(

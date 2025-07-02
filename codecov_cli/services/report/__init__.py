@@ -138,7 +138,7 @@ def send_reports_result_get_request(
         state = response_content.get("state").lower()
         if state == "error":
             logger.error(
-                "An error occured while processing the report. Please try again later.",
+                "An error occurred while processing the report. Please try again later.",
                 extra=dict(
                     extra_log_attributes=dict(
                         response_status_code=response_obj.status_code,

@@ -130,3 +130,44 @@ jobs:
         asset_name: codecovcli_${{ matrix.distro_name }}_${{ matrix.arch }}
         tag: ${{ github.ref }}
         overwrite: true
+
+  build_assets_freebsd:
+    name: Build assets - FreeBSD
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+    - name: Run in VM
+      uses: vmactions/freebsd-vm@v1
+      with:
+        release: "13.5"
+        usesh: true
+        prepare: |
+          pkg update
+          pkg install -y python311
+        run: |
+          python3.11 -m venv .venv --upgrade-deps
+          . .venv/bin/activate
+          pip install -r requirements.txt
+          pip install .
+          python setup.py build
+          pip install pyinstaller
+          pyinstaller --copy-metadata codecov-cli -F codecov_cli/main.py
+          cp ./dist/main ./dist/codecovcli_freebsd
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v4
+      if: inputs.release == false
+      with:
+        name: codecovcli_freebsd
+        path: ./dist/codecovcli_freebsd
+    - name: Upload Release Asset
+      if: inputs.release == true
+      id: upload-release-asset
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: ./dist/codecovcli_freebsd
+        asset_name: codecovcli_freebsd
+        tag: ${{ github.ref }}
+        overwrite: true

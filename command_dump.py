@@ -17,7 +17,9 @@ def command_dump(commands):
 
     if "Commands:" in split_docs:
         sub_commands = [
-            sub_command.strip() for sub_command in split_docs[index_of + 1 :] if sub_command.strip()
+            sub_command.strip()
+            for sub_command in split_docs[index_of + 1 :]
+            if sub_command.strip()
         ]
         for sub_command in sub_commands:
             command_docs = "\n".join(

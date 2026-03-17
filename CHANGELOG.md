@@ -1,3 +1,9 @@
+## 11.2.7
+
+### Internal Changes 🔧
+
+- Change upload size log to .info by @calvin-codecov in [#109](https://github.com/getsentry/prevent-cli/pull/109)
+
 ## 11.2.6
 
 ### Bug Fixes 🐛

@@ -128,7 +128,7 @@ class UploadSender(object):
             with sentry_sdk.start_span(name="upload_sender_storage") as storage_span:
                 payload_size = sys.getsizeof(reports_payload)
                 storage_span.set_data("payload_size", payload_size)
-                logger.debug(f"Sending upload ({payload_size} bytes) to storage")
+                logger.info(f"Sending upload ({payload_size} bytes) to storage")
                 resp_from_storage = send_put_request(put_url, data=reports_payload)
 
             return resp_from_storage

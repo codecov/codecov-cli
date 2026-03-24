@@ -5,6 +5,7 @@ from pathlib import PosixPath
 import click
 
 from codecov_cli import __version__
+from codecov_cli.opentelemetry import set_cli_tags
 
 logger = logging.getLogger("codecovcli")
 
@@ -27,5 +28,7 @@ def get_cli_args(ctx: click.Context):
                 filtered_args[k] = args[k]
         except Exception:
             continue
+
+    set_cli_tags(filtered_args, ctx)
 
     return filtered_args

@@ -1,9 +1,10 @@
 import os
-import time
 
 import sentry_sdk
 
 from codecov_cli import __version__
+
+_SKIP_TAG_KEYS = {"branch", "flags", "commit_sha", "env_vars"}
 
 
 def init_telem(ctx):
@@ -20,6 +21,34 @@ def init_telem(ctx):
         environment=os.getenv("CODECOV_ENV", "production"),
         release=f"cli@{__version__}",
     )
+
+
+def set_cli_tags(args: dict, ctx):
+    """Set Sentry tags from resolved CLI arguments."""
+    for key, value in args.items():
+        if key in _SKIP_TAG_KEYS:
+            continue
+        if value is None or value in ([], (), {}):
+            continue
+        if isinstance(value, (list, tuple)):
+            value = ",".join(str(v) for v in value)
+        elif isinstance(value, dict):
+            value = ",".join(
+                f"{k}={v}" for k, v in value.items() if v is not None
+            )
+        sentry_sdk.set_tag(f"cli.{key}", str(value)[:200])
+
+    token = ctx.params.get("token") if hasattr(ctx, "params") else None
+    sentry_sdk.set_tag("cli.token_provided", str(bool(token)).lower())
+
+    ci_adapter = (
+        ctx.obj.get("ci_adapter") if hasattr(ctx, "obj") and ctx.obj else None
+    )
+    if ci_adapter is not None:
+        try:
+            sentry_sdk.set_tag("cli.ci_adapter", ci_adapter.get_service_name())
+        except Exception:
+            pass
 
 
 def close_telem():

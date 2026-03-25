@@ -23,6 +23,9 @@ lint:
 	make lint.install
 	make lint.run
 
+test:
+	cd codecov-cli && uv run pytest
+
 command_dump:
 	cd prevent-cli && uv run command_dump.py
 

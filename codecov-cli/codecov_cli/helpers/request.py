@@ -152,7 +152,7 @@ def log_warnings_and_errors_if_any(
     sending_result: RequestResult, process_desc: str, fail_on_error: bool = False
 ):
     logger.info(
-        f"Process {process_desc} complete",
+        f"{process_desc} complete",
     )
     logger.debug(
         f"{process_desc} result",

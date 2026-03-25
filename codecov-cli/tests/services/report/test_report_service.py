@@ -87,7 +87,7 @@ def test_create_report_command_with_warnings(mocker):
 
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
-        ("info", "Process Report creating complete"),
+        ("info", "Report creating complete"),
         ("info", "Report creating process had 1 warning"),
         ("warning", "Warning 1: somewarningmessage"),
     ]
@@ -130,7 +130,7 @@ def test_create_report_command_with_error(mocker):
 
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
-        ("info", "Process Report creating complete"),
+        ("info", "Report creating complete"),
         ("error", "Report creating failed: Permission denied"),
     ]
     assert res == RequestResult(

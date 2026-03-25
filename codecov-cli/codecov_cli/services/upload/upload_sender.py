@@ -117,7 +117,7 @@ class UploadSender(object):
                 resp_json_obj = json.loads(resp_from_codecov.text)
                 if resp_json_obj.get("url"):
                     logger.info(
-                        f"Your upload is now processing. When finished, results will be available at: {resp_json_obj.get('url')}"
+                        f"Your upload is now queued for processing. When finished, results will be available at: {resp_json_obj.get('url')}"
                     )
                 logger.debug(
                     "Upload request to Codecov complete.",

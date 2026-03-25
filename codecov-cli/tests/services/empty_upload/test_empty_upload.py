@@ -34,7 +34,7 @@ def test_empty_upload_with_warnings(mocker):
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
-        ("info", "Process Empty Upload complete"),
+        ("info", "Empty Upload complete"),
         ("info", "Empty Upload process had 1 warning"),
         ("warning", "Warning 1: somewarningmessage"),
     ]
@@ -71,7 +71,7 @@ def test_empty_upload_with_error(mocker):
 
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
-        ("info", "Process Empty Upload complete"),
+        ("info", "Empty Upload complete"),
         ("error", "Empty Upload failed: Permission denied"),
     ]
     assert res == mock_send_commit_data.return_value
@@ -97,7 +97,7 @@ def test_empty_upload_200(mocker):
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
-        ("info", "Process Empty Upload complete"),
+        ("info", "Empty Upload complete"),
         ("info", "All changed files are ignored. Triggering passing notifications."),
         ("info", "Non ignored files []"),
     ]
@@ -142,7 +142,7 @@ def test_empty_upload_force(mocker):
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
-        ("info", "Process Empty Upload complete"),
+        ("info", "Empty Upload complete"),
         ("info", "Force option was enabled. Triggering passing notifications."),
         ("info", "Non ignored files []"),
     ]
@@ -170,7 +170,7 @@ def test_empty_upload_no_token(mocker):
 
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
-        ("info", "Process Empty Upload complete"),
+        ("info", "Empty Upload complete"),
         ("info", "All changed files are ignored. Triggering passing notifications."),
         ("info", "Non ignored files []"),
     ]

@@ -165,5 +165,5 @@ def do_upload_logic(
             status_code=200,
             text="Data NOT sent to Codecov because of dry-run option",
         )
-    log_warnings_and_errors_if_any(sending_result, "Upload", fail_on_error)
+    log_warnings_and_errors_if_any(sending_result, "Upload queued for processing", fail_on_error)
     return sending_result

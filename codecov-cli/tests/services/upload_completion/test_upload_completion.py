@@ -27,7 +27,7 @@ def test_upload_completion_with_warnings(mocker):
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
-        ("info", "Process Upload Completion complete"),
+        ("info", "Upload Completion complete"),
         ("info", "Upload Completion process had 1 warning"),
         ("warning", "Warning 1: somewarningmessage"),
     ]
@@ -56,7 +56,7 @@ def test_upload_completion_with_error(mocker):
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
-        ("info", "Process Upload Completion complete"),
+        ("info", "Upload Completion complete"),
         ("error", "Upload Completion failed: Permission denied"),
     ]
     assert res == mock_send_commit_data.return_value
@@ -84,7 +84,7 @@ def test_upload_completion_200(mocker):
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
-        ("info", "Process Upload Completion complete"),
+        ("info", "Upload Completion complete"),
         (
             "info",
             "{'uploads_total': 2, 'uploads_success': 2, 'uploads_processing': 0, 'uploads_error': 0}",
@@ -113,7 +113,7 @@ def test_upload_completion_no_token(mocker):
         res = upload_completion_logic("commit_sha", "owner/repo", None, "service", None)
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
-        ("info", "Process Upload Completion complete"),
+        ("info", "Upload Completion complete"),
         (
             "info",
             "{'uploads_total': 2, 'uploads_success': 2, 'uploads_processing': 0, 'uploads_error': 0}",

@@ -40,7 +40,7 @@ def test_upload_raise_Z_option(mocker):
     result = runner.invoke(cli, ["do-upload", "--fail-on-error"], obj={})
     upload_sender.assert_called()
     upload_collector.assert_called()
-    assert ("error", "Upload failed: Unauthorized") in parse_outstreams_into_log_lines(
+    assert ("error", "Upload queued for processing failed: Unauthorized") in parse_outstreams_into_log_lines(
         result.output
     )
     assert str(result) == "<Result SystemExit(1)>"

@@ -1,10 +1,38 @@
 import os
+import random
 
 import sentry_sdk
 
 from codecov_cli import __version__
 
+_SAMPLED_MESSAGES = [
+    "Token required",
+]
+_SAMPLE_RATE = 100
 _SKIP_TAG_KEYS = {"branch", "flags", "commit_sha", "env_vars"}
+
+
+def _before_send(event, hint):
+    messages = []
+    if "message" in event and event.get("message") is not None:
+        messages.append(event.get("message"))
+    if "logentry" in event and "message" in event.get("logentry", {}) and event.get("logentry", {}).get("message") is not None:
+        messages.append(event.get("logentry", {}).get("message"))
+    if "exception" in event and event.get("exception") is not None:
+        for exc in event.get("exception", {}).get("values", []):
+            if "value" in exc:
+                messages.append(exc.get("value"))
+
+    matched = False
+    for message in messages:
+        for pattern in _SAMPLED_MESSAGES:
+            if pattern in message:
+                matched = True
+                break
+
+    if matched and random.randint(1, _SAMPLE_RATE) != 1:
+        return None
+    return event
 
 
 def init_telem(ctx):
@@ -20,6 +48,7 @@ def init_telem(ctx):
         enable_tracing=True,
         environment=os.getenv("CODECOV_ENV", "production"),
         release=f"cli@{__version__}",
+        before_send=_before_send,
     )
 
 

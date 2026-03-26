@@ -1,3 +1,24 @@
+## 11.2.8
+
+### New Features ✨
+
+- Clarify upload queueing logging and process completion logging by @calvin-codecov in [#110](https://github.com/getsentry/prevent-cli/pull/110)
+
+### Bug Fixes 🐛
+
+- Update deps by @thomasrockhu-codecov in [#117](https://github.com/getsentry/prevent-cli/pull/117)
+- Sample high-volume "Token required" Sentry errors at 1% by @thomasrockhu-codecov in [#116](https://github.com/getsentry/prevent-cli/pull/116)
+- Implement some sentry tagging to help identify issues by @thomasrockhu-codecov in [#115](https://github.com/getsentry/prevent-cli/pull/115)
+
+### Internal Changes 🔧
+
+#### Deps
+
+- Bump requests from 2.32.3 to 2.32.4 in /prevent-cli by @dependabot in [#111](https://github.com/getsentry/prevent-cli/pull/111)
+- Bump urllib3 from 2.3.0 to 2.6.3 in /prevent-cli by @dependabot in [#112](https://github.com/getsentry/prevent-cli/pull/112)
+- Bump urllib3 from 2.3.0 to 2.6.3 in /codecov-cli by @dependabot in [#113](https://github.com/getsentry/prevent-cli/pull/113)
+- Bump virtualenv from 20.26.6 to 20.36.1 in /codecov-cli by @dependabot in [#114](https://github.com/getsentry/prevent-cli/pull/114)
+
 ## 11.2.7
 
 ### Internal Changes 🔧

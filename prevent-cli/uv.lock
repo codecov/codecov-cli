@@ -108,13 +108,13 @@ wheels = [
 
 [[package]]
 name = "codecov-cli"
-version = "11.2.7"
+version = "11.2.8"
 source = { editable = "../codecov-cli" }
 dependencies = [
     { name = "click" },
     { name = "ijson" },
     { name = "pyyaml" },
-    { name = "responses" },
+    { name = "requests" },
     { name = "sentry-sdk" },
     { name = "test-results-parser" },
 ]
@@ -124,7 +124,7 @@ requires-dist = [
     { name = "click", specifier = ">=8.0.0,<8.3.0" },
     { name = "ijson", specifier = "==3.*" },
     { name = "pyyaml", specifier = "==6.*" },
-    { name = "responses", specifier = "==0.21.*" },
+    { name = "requests", specifier = ">=2.25.0" },
     { name = "sentry-sdk", specifier = "==2.*" },
     { name = "test-results-parser", specifier = "==0.6.1" },
 ]
@@ -137,6 +137,7 @@ dev = [
     { name = "pytest-cov", specifier = "==4.*" },
     { name = "pytest-env", specifier = "==1.*" },
     { name = "pytest-mock", specifier = "==3.*" },
+    { name = "responses", specifier = "==0.21.*" },
 ]
 
 [[package]]
@@ -382,21 +383,8 @@ wheels = [
 ]
 
 [[package]]
-name = "responses"
-version = "0.21.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "requests" },
-    { name = "urllib3" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/6d/db/b949a6bf2a75c64caea0a6b39d05e433aa2e51bea78ae9d5dda1110b31a5/responses-0.21.0.tar.gz", hash = "sha256:b82502eb5f09a0289d8e209e7bad71ef3978334f56d09b444253d5ad67bf5253", size = 65501, upload-time = "2022-05-25T14:20:48.308Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/bb/ad/fdd56219f0e320293c513ef0b3cdd018802a1bcfdb29ed9bc0c3bcb97f31/responses-0.21.0-py3-none-any.whl", hash = "sha256:2dcc863ba63963c0c3d9ee3fa9507cbe36b7d7b0fccb4f0bdfd9e96c539b1487", size = 45987, upload-time = "2022-05-25T14:20:48.508Z" },
-]
-
-[[package]]
 name = "sentry-prevent-cli"
-version = "11.2.7"
+version = "11.2.8"
 source = { editable = "." }
 dependencies = [
     { name = "click" },

@@ -15,7 +15,7 @@ dependencies = [
     "click>=8.0.0,<8.3.0",
     "ijson==3.*",
     "PyYAML==6.*",
-    "responses==0.21.*",
+    "requests>=2.25.0",
     "sentry-sdk==2.*",
     "test-results-parser==0.6.1",
 ]
@@ -28,6 +28,7 @@ dev = [
     "pytest-cov==4.*",
     "pytest-env==1.*",
     "pytest-mock==3.*",
+    "responses==0.21.*",
 ]
 
 [project.scripts]

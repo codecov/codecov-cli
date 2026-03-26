@@ -127,7 +127,7 @@ dependencies = [
     { name = "click" },
     { name = "ijson" },
     { name = "pyyaml" },
-    { name = "responses" },
+    { name = "requests" },
     { name = "sentry-sdk" },
     { name = "test-results-parser" },
 ]
@@ -140,6 +140,7 @@ dev = [
     { name = "pytest-cov" },
     { name = "pytest-env" },
     { name = "pytest-mock" },
+    { name = "responses" },
 ]
 
 [package.metadata]
@@ -147,7 +148,7 @@ requires-dist = [
     { name = "click", specifier = ">=8.0.0,<8.3.0" },
     { name = "ijson", specifier = "==3.*" },
     { name = "pyyaml", specifier = "==6.*" },
-    { name = "responses", specifier = "==0.21.*" },
+    { name = "requests", specifier = ">=2.25.0" },
     { name = "sentry-sdk", specifier = "==2.*" },
     { name = "test-results-parser", specifier = "==0.6.1" },
 ]
@@ -160,6 +161,7 @@ dev = [
     { name = "pytest-cov", specifier = "==4.*" },
     { name = "pytest-env", specifier = "==1.*" },
     { name = "pytest-mock", specifier = "==3.*" },
+    { name = "responses", specifier = "==0.21.*" },
 ]
 
 [[package]]

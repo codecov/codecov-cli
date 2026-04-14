@@ -14,6 +14,7 @@ from codecov_cli.helpers.request import (
     request_result,
     send_post_request,
 )
+from codecov_cli.helpers.upload_url_validation import validate_upload_service
 
 logger = logging.getLogger("codecovcli")
 MAX_NUMBER_TRIES = 3
@@ -61,7 +62,9 @@ def send_create_report_request(
     }
     headers = get_token_header(token)
     upload_url = enterprise_url or CODECOV_INGEST_URL
-    url = f"{upload_url}/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports"
+    service_part = (service or "").strip()
+    validate_upload_service(service_part)
+    url = f"{upload_url}/upload/{service_part}/{encoded_slug}/commits/{commit_sha}/reports"
     return send_post_request(url=url, headers=headers, data=data)
 
 
@@ -106,7 +109,9 @@ def send_reports_result_request(
     }
     headers = get_token_header(token)
     upload_url = enterprise_url or CODECOV_API_URL
-    url = f"{upload_url}/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/results"
+    service_part = (service or "").strip()
+    validate_upload_service(service_part)
+    url = f"{upload_url}/upload/{service_part}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/results"
     return send_post_request(url=url, data=data, headers=headers)
 
 
@@ -121,7 +126,9 @@ def send_reports_result_get_request(
 ):
     headers = get_token_header(token)
     upload_url = enterprise_url or CODECOV_API_URL
-    url = f"{upload_url}/upload/{service}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/results"
+    service_part = (service or "").strip()
+    validate_upload_service(service_part)
+    url = f"{upload_url}/upload/{service_part}/{encoded_slug}/commits/{commit_sha}/reports/{report_code}/results"
     number_tries = 0
     while number_tries < MAX_NUMBER_TRIES:
         resp = request.get(url=url, headers=headers)

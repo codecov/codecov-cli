@@ -1,6 +1,7 @@
 import json
 import logging
 
+from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.helpers.request import (
@@ -27,6 +28,7 @@ def upload_completion_logic(
     url = f"{upload_url}/upload/{git_service}/{encoded_slug}/commits/{commit_sha}/upload-complete"
     data = {
         "cli_args": args,
+        "version": codecov_cli_version,
     }
     sending_result = send_post_request(url=url, data=data, headers=headers)
     log_warnings_and_errors_if_any(

@@ -2,6 +2,7 @@ import uuid
 
 from click.testing import CliRunner
 
+from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.services.commit import create_commit_logic, send_commit_data
 from codecov_cli.types import RequestError, RequestResult, RequestResultWarning
 from tests.test_helpers import parse_outstreams_into_log_lines
@@ -171,6 +172,7 @@ def test_commit_sender_with_forked_repo(mocker):
             "commitid": "commit_sha",
             "parent_commit_id": "parent_sha",
             "pullid": "1",
+            "version": codecov_cli_version,
         },
         headers=None,
     )
@@ -201,6 +203,7 @@ def test_commit_without_token(mocker):
             "commitid": "commit_sha",
             "parent_commit_id": "parent_sha",
             "pullid": "1",
+            "version": codecov_cli_version,
         },
         headers=None,
     )
@@ -232,6 +235,7 @@ def test_commit_sender_with_forked_repo_bad_branch(mocker):
             "commitid": "commit_sha",
             "parent_commit_id": "parent_sha",
             "pullid": "1",
+            "version": codecov_cli_version,
         },
         headers=None,
     )

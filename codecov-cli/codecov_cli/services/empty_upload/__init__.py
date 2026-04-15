@@ -1,6 +1,7 @@
 import json
 import logging
 
+from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.helpers.request import (
@@ -32,6 +33,7 @@ def empty_upload_logic(
         data={
             "cli_args": args,
             "should_force": should_force,
+            "version": codecov_cli_version,
         },
     )
     log_warnings_and_errors_if_any(sending_result, "Empty Upload", fail_on_error)

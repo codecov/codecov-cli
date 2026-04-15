@@ -2,6 +2,7 @@ import logging
 import os
 import typing
 
+from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.helpers.config import CODECOV_INGEST_URL
 from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.helpers.request import (
@@ -75,6 +76,7 @@ def send_commit_data(
         "commitid": commit_sha,
         "parent_commit_id": parent_sha,
         "pullid": pr,
+        "version": codecov_cli_version,
     }
 
     upload_url = enterprise_url or CODECOV_INGEST_URL

@@ -3,8 +3,7 @@ import logging
 import time
 import typing
 
-import requests
-
+from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.helpers import request
 from codecov_cli.helpers.config import CODECOV_API_URL, CODECOV_INGEST_URL
 from codecov_cli.helpers.encoder import encode_slug
@@ -58,6 +57,7 @@ def send_create_report_request(
     data = {
         "cli_args": args,
         "code": code,
+        "version": codecov_cli_version,
     }
     headers = get_token_header(token)
     upload_url = enterprise_url or CODECOV_INGEST_URL
@@ -103,6 +103,7 @@ def send_reports_result_request(
 ):
     data = {
         "cli_args": args,
+        "version": codecov_cli_version,
     }
     headers = get_token_header(token)
     upload_url = enterprise_url or CODECOV_API_URL

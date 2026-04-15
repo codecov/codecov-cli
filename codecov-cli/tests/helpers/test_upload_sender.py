@@ -52,17 +52,49 @@ test_results_named_upload_data = {
     "ci_service": "ci_service",
     "git_service": "github",
 }
+
+
+def _upload_ingest_post_json_base(*, file_not_found: bool) -> dict:
+    return {
+        "ci_service": "ci_service",
+        "ci_url": "build_url",
+        "cli_args": None,
+        "env": {},
+        "flags": "flags",
+        "job_code": "job_code",
+        "name": "name",
+        "version": codecov_cli_version,
+        "file_not_found": file_not_found,
+    }
+
+
+_report_payload_bytes_coverage = len(
+    UploadSender()._generate_payload(
+        upload_collection, {}, ReportType.COVERAGE
+    )
+)
+
 request_data = {
-    "ci_service": "ci_service",
-    "ci_url": "build_url",
-    "cli_args": None,
-    "env": {},
-    "flags": "flags",
-    "job_code": "job_code",
-    "name": "name",
-    "version": codecov_cli_version,
-    "file_not_found": False,
+    **_upload_ingest_post_json_base(file_not_found=False),
+    "report_payload_bytes": _report_payload_bytes_coverage,
 }
+
+
+def _test_results_ingest_post_json(upload_data: UploadCollectionResult) -> dict:
+    # get_url_and_possibly_update_data always sets data["file_not_found"] from its
+    # default (False), overwriting the value set earlier when no test files exist.
+    return {
+        **_upload_ingest_post_json_base(file_not_found=False),
+        "slug": encode_slug("org/repo"),
+        "branch": "branch",
+        "commit": random_sha,
+        "service": "github",
+        "report_payload_bytes": len(
+            UploadSender()._generate_payload(
+                upload_data, {}, ReportType.TEST_RESULTS
+            )
+        ),
+    }
 
 
 @pytest.fixture
@@ -266,17 +298,19 @@ class TestUploadSender(object):
     ):
         headers = {"Authorization": f"token {random_token}"}
 
-        mocked_legacy_upload_endpoint.match = [
-            matchers.json_params_matcher(request_data),
-            matchers.header_matcher(headers),
-        ]
-
         ta_upload_collection = deepcopy(upload_collection)
 
         test_path = tmp_path / "test_results.xml"
         test_path.write_bytes(b"test_data")
 
         ta_upload_collection.files = [UploadCollectionResultFile(test_path)]
+
+        mocked_test_results_endpoint.match = [
+            matchers.json_params_matcher(
+                _test_results_ingest_post_json(ta_upload_collection)
+            ),
+            matchers.header_matcher(headers),
+        ]
 
         sending_result = UploadSender().send_upload_data(
             ta_upload_collection,
@@ -309,10 +343,9 @@ class TestUploadSender(object):
     ):
         headers = {"Authorization": f"token {random_token}"}
 
-        req_data = deepcopy(request_data)
-        req_data["file_not_found"] = True
+        req_data = _test_results_ingest_post_json(upload_collection)
 
-        mocked_legacy_upload_endpoint.match = [
+        mocked_test_results_endpoint_file_not_found.match = [
             matchers.json_params_matcher(req_data),
             matchers.header_matcher(headers),
         ]

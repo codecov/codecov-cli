@@ -91,6 +91,7 @@ class UploadSender(object):
                     commit_sha,
                     report_code,
                     upload_coverage,
+                    file_not_found=file_not_found,
                 )
                 # Data that goes to storage
                 reports_payload = self._generate_payload(

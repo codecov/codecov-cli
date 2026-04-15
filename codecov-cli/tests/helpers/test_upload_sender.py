@@ -80,11 +80,11 @@ request_data = {
 }
 
 
-def _test_results_ingest_post_json(upload_data: UploadCollectionResult) -> dict:
-    # get_url_and_possibly_update_data always sets data["file_not_found"] from its
-    # default (False), overwriting the value set earlier when no test files exist.
+def _test_results_ingest_post_json(
+    upload_data: UploadCollectionResult, *, file_not_found: bool
+) -> dict:
     return {
-        **_upload_ingest_post_json_base(file_not_found=False),
+        **_upload_ingest_post_json_base(file_not_found=file_not_found),
         "slug": encode_slug("org/repo"),
         "branch": "branch",
         "commit": random_sha,
@@ -307,7 +307,9 @@ class TestUploadSender(object):
 
         mocked_test_results_endpoint.match = [
             matchers.json_params_matcher(
-                _test_results_ingest_post_json(ta_upload_collection)
+                _test_results_ingest_post_json(
+                    ta_upload_collection, file_not_found=False
+                )
             ),
             matchers.header_matcher(headers),
         ]
@@ -343,7 +345,9 @@ class TestUploadSender(object):
     ):
         headers = {"Authorization": f"token {random_token}"}
 
-        req_data = _test_results_ingest_post_json(upload_collection)
+        req_data = _test_results_ingest_post_json(
+            upload_collection, file_not_found=True
+        )
 
         mocked_test_results_endpoint_file_not_found.match = [
             matchers.json_params_matcher(req_data),

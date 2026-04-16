@@ -12,6 +12,7 @@ from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.helpers.config import CODECOV_INGEST_URL
 from codecov_cli.helpers.encoder import encode_slug
 from codecov_cli.helpers.upload_type import ReportType
+from codecov_cli.helpers.upload_url_validation import validate_upload_service
 from codecov_cli.helpers.request import (
     get_token_header,
     send_post_request,
@@ -218,8 +219,11 @@ class UploadSender(object):
         upload_coverage=False,
         file_not_found=False,
     ):
+        service_part = (git_service or "").strip()
+
         if report_type == ReportType.COVERAGE:
-            base_url = f"{upload_url}/upload/{git_service}/{encoded_slug}"
+            validate_upload_service(service_part)
+            base_url = f"{upload_url}/upload/{service_part}/{encoded_slug}"
             if upload_coverage:
                 url = f"{base_url}/upload-coverage"
             else:
@@ -228,7 +232,7 @@ class UploadSender(object):
             data["slug"] = encoded_slug
             data["branch"] = branch
             data["commit"] = commit_sha
-            data["service"] = git_service
+            data["service"] = service_part if service_part else None
             data["file_not_found"] = file_not_found
             url = f"{upload_url}/upload/test_results/v1"
 

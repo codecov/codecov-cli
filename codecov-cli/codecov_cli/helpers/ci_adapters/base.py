@@ -17,6 +17,7 @@ class CIAdapterBase(ABC):
             FallbackFieldEnum.pull_request_number: self._get_pull_request_number,
             FallbackFieldEnum.job_code: self._get_job_code,
             FallbackFieldEnum.git_service: self._get_git_service,
+            FallbackFieldEnum.job_name: self._get_job_name,
         }
 
     def get_fallback_value(
@@ -99,4 +100,11 @@ class CIAdapterBase(ABC):
         raise NotImplementedError("`get_service_name()` must be implemented.")
 
     def _get_git_service(self):
+        return None
+
+    def _get_job_name(self):
+        """
+        Name of the job that gets displayed in the Codecov UI
+        Returns: string
+        """
         return None

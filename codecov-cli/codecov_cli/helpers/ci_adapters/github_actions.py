@@ -87,3 +87,10 @@ class GithubActionsCIAdapter(CIAdapterBase):
 
     def get_service_name(self):
         return "GithubActions"
+
+    def _get_job_name(self):
+        github_workflow = os.getenv("GITHUB_WORKFLOW")
+        github_job = os.getenv("GITHUB_JOB")
+        if github_workflow and github_job:
+            return f"{github_workflow} - {github_job}"
+        return github_workflow or github_job or None

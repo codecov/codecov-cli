@@ -21,6 +21,7 @@ class FakeProvider(CIAdapterBase):
             FallbackFieldEnum.service: "FAKE_PROVIDER",
             FallbackFieldEnum.pull_request_number: "PR_NUMBER",
             FallbackFieldEnum.job_code: "JOB_CODE",
+            FallbackFieldEnum.job_name: None,
             FallbackFieldEnum.git_service: "FAKE_PROVIDER",
         }
         final_values = {**default_values, **values_dict}
@@ -52,6 +53,9 @@ class FakeProvider(CIAdapterBase):
 
     def _get_job_code(self):
         return self.values_dict[FallbackFieldEnum.job_code]
+
+    def _get_job_name(self):
+        return self.values_dict.get(FallbackFieldEnum.job_name)
 
     def get_service_name(self):
         return self.values_dict[FallbackFieldEnum.git_service]

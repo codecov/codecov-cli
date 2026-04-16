@@ -14,11 +14,31 @@ class FallbackFieldEnum(Enum):
     pull_request_number = auto()
     service = auto()
     slug = auto()
+    job_name = auto()
+
+
+_FIELDS_WITH_VERSIONING_FALLBACK = frozenset(
+    {
+        FallbackFieldEnum.branch,
+        FallbackFieldEnum.commit_sha,
+        FallbackFieldEnum.slug,
+        FallbackFieldEnum.git_service,
+    }
+)
 
 
 class CodecovOption(click.Option):
+    fallback_fields: typing.Optional[tuple[FallbackFieldEnum, ...]]
+
     def __init__(self, *args, **kwargs):
-        self.fallback_field = kwargs.pop("fallback_field", None)
+        fallback_fields = kwargs.pop("fallback_fields", None)
+        fallback_field = kwargs.pop("fallback_field", None)
+        if fallback_fields is not None:
+            self.fallback_fields = tuple(fallback_fields)
+        elif fallback_field is not None:
+            self.fallback_fields = (fallback_field,)
+        else:
+            self.fallback_fields = None
         super().__init__(*args, **kwargs)
 
     def get_default(
@@ -27,17 +47,19 @@ class CodecovOption(click.Option):
         res = super().get_default(ctx, call=call)
         if res is not None:
             return res
-        if self.fallback_field is not None:
-            if ctx.obj.get("ci_adapter") is not None:
-                res = ctx.obj.get("ci_adapter").get_fallback_value(self.fallback_field)
-                if res is not None:
-                    return res
-            if ctx.obj.get("versioning_system") is not None:
-                res = ctx.obj.get("versioning_system").get_fallback_value(
-                    self.fallback_field
-                )
-                if res is not None:
-                    return res
+        if self.fallback_fields is not None:
+            for field in self.fallback_fields:
+                if ctx.obj.get("ci_adapter") is not None:
+                    res = ctx.obj.get("ci_adapter").get_fallback_value(field)
+                    if res is not None:
+                        return res
+                if (
+                    ctx.obj.get("versioning_system") is not None
+                    and field in _FIELDS_WITH_VERSIONING_FALLBACK
+                ):
+                    res = ctx.obj.get("versioning_system").get_fallback_value(field)
+                    if res is not None:
+                        return res
         return None
 
 

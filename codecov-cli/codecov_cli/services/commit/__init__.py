@@ -9,9 +9,9 @@ from codecov_cli.helpers.request import (
     log_warnings_and_errors_if_any,
     send_post_request,
 )
+from codecov_cli.helpers.upload_url_validation import validate_upload_service
 
 logger = logging.getLogger("codecovcli")
-
 
 def create_commit_logic(
     commit_sha: str,
@@ -78,7 +78,9 @@ def send_commit_data(
     }
 
     upload_url = enterprise_url or CODECOV_INGEST_URL
-    url = f"{upload_url}/upload/{service}/{slug}/commits"
+    service_part = (service or "").strip()
+    validate_upload_service(service_part)
+    url = f"{upload_url}/upload/{service_part}/{slug}/commits"
     return send_post_request(
         url=url,
         data=data,

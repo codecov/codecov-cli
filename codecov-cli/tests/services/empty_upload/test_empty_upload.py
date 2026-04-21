@@ -26,7 +26,7 @@ def test_empty_upload_with_warnings(mocker):
             "commit_sha",
             "owner/repo",
             uuid.uuid4(),
-            "service",
+            "github",
             None,
             False,
             False,
@@ -62,7 +62,7 @@ def test_empty_upload_with_error(mocker):
             "commit_sha",
             "owner/repo",
             uuid.uuid4(),
-            "service",
+            "github",
             None,
             False,
             False,
@@ -93,7 +93,7 @@ def test_empty_upload_200(mocker):
     runner = CliRunner()
     with runner.isolation() as outstreams:
         res = empty_upload_logic(
-            "commit_sha", "owner/repo", token, "service", None, False, False, None
+            "commit_sha", "owner/repo", token, "github", None, False, False, None
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
@@ -113,7 +113,7 @@ def test_empty_upload_403(mocker):
     )
     token = uuid.uuid4()
     res = empty_upload_logic(
-        "commit_sha", "owner/repo", token, "service", None, False, False, None
+        "commit_sha", "owner/repo", token, "github", None, False, False, None
     )
     assert res.error == RequestError(
         code="HTTP Error 403",
@@ -138,7 +138,7 @@ def test_empty_upload_force(mocker):
     runner = CliRunner()
     with runner.isolation() as outstreams:
         res = empty_upload_logic(
-            "commit_sha", "owner/repo", token, "service", None, False, True, None
+            "commit_sha", "owner/repo", token, "github", None, False, True, None
         )
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
@@ -165,7 +165,7 @@ def test_empty_upload_no_token(mocker):
     runner = CliRunner()
     with runner.isolation() as outstreams:
         res = empty_upload_logic(
-            "commit_sha", "owner/repo", None, "service", None, False, False, None
+            "commit_sha", "owner/repo", None, "github", None, False, False, None
         )
 
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())

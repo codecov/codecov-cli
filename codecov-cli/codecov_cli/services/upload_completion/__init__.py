@@ -3,6 +3,7 @@ import logging
 
 from codecov_cli.helpers.config import CODECOV_API_URL
 from codecov_cli.helpers.encoder import encode_slug
+from codecov_cli.helpers.upload_url_validation import validate_upload_service
 from codecov_cli.helpers.request import (
     get_token_header,
     log_warnings_and_errors_if_any,
@@ -24,7 +25,9 @@ def upload_completion_logic(
     encoded_slug = encode_slug(slug)
     headers = get_token_header(token)
     upload_url = enterprise_url or CODECOV_API_URL
-    url = f"{upload_url}/upload/{git_service}/{encoded_slug}/commits/{commit_sha}/upload-complete"
+    service_part = (git_service or "").strip()
+    validate_upload_service(service_part)
+    url = f"{upload_url}/upload/{service_part}/{encoded_slug}/commits/{commit_sha}/upload-complete"
     data = {
         "cli_args": args,
     }

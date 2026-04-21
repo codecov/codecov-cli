@@ -18,7 +18,7 @@ def test_send_create_report_request_200(mocker):
         "github",
         uuid.uuid4(),
         "owner::::repo",
-        "enterprise_url",
+        "https://enterprise.example.com",
         1,
         None,
     )
@@ -38,7 +38,7 @@ def test_send_create_report_request_no_token(mocker):
         "github",
         None,
         "owner::::repo",
-        "enterprise_url",
+        "https://enterprise.example.com",
         1,
         None,
     )
@@ -125,7 +125,7 @@ def test_create_report_command_with_error(mocker):
             service="github",
             token="token",
             pull_request_number=1,
-            enterprise_url="enterprise_url",
+            enterprise_url="https://enterprise.example.com",
         )
 
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
@@ -149,7 +149,7 @@ def test_create_report_command_with_error(mocker):
         "github",
         "token",
         "owner::::repo",
-        "enterprise_url",
+        "https://enterprise.example.com",
         1,
         None,
     )

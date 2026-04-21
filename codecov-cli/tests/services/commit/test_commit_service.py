@@ -1,5 +1,7 @@
 import uuid
 
+import click
+import pytest
 from click.testing import CliRunner
 
 from codecov_cli.services.commit import create_commit_logic, send_commit_data
@@ -26,7 +28,7 @@ def test_commit_command_with_warnings(mocker):
             branch="branch",
             slug="owner/repo",
             token="token",
-            service="service",
+            service="github",
         )
 
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
@@ -43,7 +45,7 @@ def test_commit_command_with_warnings(mocker):
         branch="branch",
         slug="owner::::repo",
         token="token",
-        service="service",
+        service="github",
         enterprise_url=None,
         args=None,
     )
@@ -72,7 +74,7 @@ def test_commit_command_with_error(mocker):
             branch="branch",
             slug="owner/repo",
             token="token",
-            service="service",
+            service="github",
             enterprise_url=None,
             args={},
         )
@@ -93,7 +95,7 @@ def test_commit_command_with_error(mocker):
         branch="branch",
         slug="owner::::repo",
         token="token",
-        service="service",
+        service="github",
         enterprise_url=None,
         args={},
     )
@@ -112,7 +114,7 @@ def test_commit_sender_200(mocker):
         "branch",
         "owner::::repo",
         token,
-        "service",
+        "github",
         None,
         None,
     )
@@ -134,7 +136,7 @@ def test_commit_sender_403(mocker):
         "branch",
         "owner::::repo",
         token,
-        "service",
+        "github",
         None,
         None,
     )
@@ -174,6 +176,33 @@ def test_commit_sender_with_forked_repo(mocker):
         },
         headers=None,
     )
+
+
+@pytest.mark.parametrize(
+    "service,slug,enterprise_url,fragment",
+    [
+        (None, "o::::r", None, "Upload service is missing"),
+        ("", "o::::r", None, "Upload service is missing"),
+        ("circleci", "o::::r", None, "Invalid upload service"),
+    ],
+)
+def test_commit_sender_rejects_invalid_url_parts(
+    mocker, service, slug, enterprise_url, fragment
+):
+    mocker.patch("codecov_cli.helpers.request.requests.post")
+    with pytest.raises(click.ClickException) as excinfo:
+        send_commit_data(
+            "commit_sha",
+            "parent_sha",
+            "pr",
+            "branch",
+            slug,
+            uuid.uuid4(),
+            service,
+            enterprise_url,
+            None,
+        )
+    assert fragment in str(excinfo.value)
 
 
 def test_commit_without_token(mocker):

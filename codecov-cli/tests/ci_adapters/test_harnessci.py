@@ -8,6 +8,7 @@ from codecov_cli.helpers.ci_adapters import HarnessAdapter
 
 
 class HarnessEnvEnum(str, Enum):
+    HARNESS_BUILD_ID = "HARNESS_BUILD_ID"
     CI_BUILD_LINK = "CI_BUILD_LINK"
     CI_BUILD_NUMBER = "CI_BUILD_NUMBER"
     CI_REPO = "CI_REPO"
@@ -21,7 +22,7 @@ class TestHarnessCI(object):
         "env_dict,expected",
         [
         ({}, False),
-        ({HarnessEnvEnum.DRONE: "true"}, True),
+        ({HarnessEnvEnum.HARNESS_BUILD_ID: "123"}, True),
         ],
     )
     def test_detect(self, env_dict, expected, mocker):

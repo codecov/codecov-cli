@@ -47,8 +47,8 @@ Homepage = "https://about.codecov.io"
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-packages = ["codecov_cli"]
+[tool.setuptools.packages.find]
+include = ["codecov_cli*"]
 
 [tool.pytest.ini_options]
 env = ["CODECOV_ENV=test"]

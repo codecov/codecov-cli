@@ -8,7 +8,7 @@ from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
 # The DRONE variables overlap with the Drone CI Adapter as Harness CI is built on top 
 class HarnessAdapter(CIAdapterBase):
     def detect(self) -> bool:
-        return os.getenv("DRONE") == "true"
+        return bool(os.getenv("HARNESS_BUILD_ID"))
 
     def _get_branch(self):
         return os.getenv("DRONE_COMMIT_BRANCH")

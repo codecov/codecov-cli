@@ -27,7 +27,7 @@ def test_report_results_command_with_warnings(mocker):
         res = create_report_results_logic(
             commit_sha="commit_sha",
             code="code",
-            service="service",
+            service="github",
             slug="owner/repo",
             token="token",
             enterprise_url=None,
@@ -46,7 +46,7 @@ def test_report_results_command_with_warnings(mocker):
         args=None,
         commit_sha="commit_sha",
         report_code="code",
-        service="service",
+        service="github",
         encoded_slug="owner::::repo",
         token="token",
         enterprise_url=None,
@@ -72,7 +72,7 @@ def test_report_results_command_with_error(mocker):
         res = create_report_results_logic(
             commit_sha="commit_sha",
             code="code",
-            service="service",
+            service="github",
             slug="owner/repo",
             token="token",
             enterprise_url=None,
@@ -89,7 +89,7 @@ def test_report_results_command_with_error(mocker):
         args=None,
         commit_sha="commit_sha",
         report_code="code",
-        service="service",
+        service="github",
         encoded_slug="owner::::repo",
         token="token",
         enterprise_url=None,
@@ -103,7 +103,7 @@ def test_report_results_request_200(mocker):
     )
     token = uuid.uuid4()
     res = send_reports_result_request(
-        "commit_sha", "report_code", "encoded_slug", "service", token, None, None
+        "commit_sha", "report_code", "encoded_slug", "github", token, None, None
     )
     assert res.error is None
     assert res.warnings == []
@@ -116,7 +116,7 @@ def test_report_results_request_no_token(mocker):
         return_value=mocker.MagicMock(status_code=200),
     )
     res = send_reports_result_request(
-        "commit_sha", "report_code", "encoded_slug", "service", None, None, None
+        "commit_sha", "report_code", "encoded_slug", "github", None, None, None
     )
     assert res.error is None
     assert res.warnings == []
@@ -130,7 +130,7 @@ def test_report_results_403(mocker):
     )
     token = uuid.uuid4()
     res = send_reports_result_request(
-        "commit_sha", "report_code", "encoded_slug", "service", token, None, None
+        "commit_sha", "report_code", "encoded_slug", "github", token, None, None
     )
     assert res.error == RequestError(
         code="HTTP Error 403",
@@ -150,7 +150,7 @@ def test_get_report_results_200_completed(mocker, capsys):
     )
     token = uuid.uuid4()
     res = send_reports_result_get_request(
-        "commit_sha", "report_code", "encoded_slug", "service", token, None
+        "commit_sha", "report_code", "encoded_slug", "github", token, None
     )
     output = parse_outstreams_into_log_lines(capsys.readouterr().err)
     assert res.error is None
@@ -171,7 +171,7 @@ def test_get_report_results_no_token(mocker, capsys):
         ),
     )
     res = send_reports_result_get_request(
-        "commit_sha", "report_code", "encoded_slug", "service", None, None
+        "commit_sha", "report_code", "encoded_slug", "github", None, None
     )
     assert res.error is None
     assert res.warnings == []
@@ -189,7 +189,7 @@ def test_get_report_results_200_pending(mocker, capsys):
     )
     token = uuid.uuid4()
     res = send_reports_result_get_request(
-        "commit_sha", "report_code", "encoded_slug", "service", token, None
+        "commit_sha", "report_code", "encoded_slug", "github", token, None
     )
     output = parse_outstreams_into_log_lines(capsys.readouterr().err)
     assert res.error is None
@@ -207,7 +207,7 @@ def test_get_report_results_200_error(mocker, capsys):
     )
     token = uuid.uuid4()
     res = send_reports_result_get_request(
-        "commit_sha", "report_code", "encoded_slug", "service", token, None
+        "commit_sha", "report_code", "encoded_slug", "github", token, None
     )
     output = parse_outstreams_into_log_lines(capsys.readouterr().err)
     assert res.error is None
@@ -228,7 +228,7 @@ def test_get_report_results_200_undefined_state(mocker, capsys):
     )
     token = uuid.uuid4()
     res = send_reports_result_get_request(
-        "commit_sha", "report_code", "encoded_slug", "service", token, None
+        "commit_sha", "report_code", "encoded_slug", "github", token, None
     )
     output = parse_outstreams_into_log_lines(capsys.readouterr().err)
     assert res.error is None
@@ -246,7 +246,7 @@ def test_get_report_results_401(mocker, capsys):
     )
     token = uuid.uuid4()
     res = send_reports_result_get_request(
-        "commit_sha", "report_code", "encoded_slug", "service", token, None
+        "commit_sha", "report_code", "encoded_slug", "github", token, None
     )
     output = parse_outstreams_into_log_lines(capsys.readouterr().err)
     assert res.error == RequestError(

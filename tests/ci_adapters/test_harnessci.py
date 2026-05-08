@@ -11,11 +11,15 @@ class HarnessEnvEnum(str, Enum):
     HARNESS_BUILD_ID = "HARNESS_BUILD_ID"
     CI_BUILD_LINK = "CI_BUILD_LINK"
     CI_BUILD_NUMBER = "CI_BUILD_NUMBER"
+    CI_REMOTE_URL = "CI_REMOTE_URL"
     CI_REPO = "CI_REPO"
-    DRONE = "DRONE"
+    CI_REPO_LINK = "CI_REPO_LINK"
+    CI_REPO_REMOTE = "CI_REPO_REMOTE"
     DRONE_COMMIT_BRANCH = "DRONE_COMMIT_BRANCH"
     DRONE_COMMIT_SHA = "DRONE_COMMIT_SHA"
     DRONE_PULL_REQUEST = "DRONE_PULL_REQUEST"
+    DRONE_GIT_HTTP_URL = "DRONE_GIT_HTTP_URL"
+    DRONE_REMOTE_URL = "DRONE_REMOTE_URL"
 
 class TestHarnessCI(object):
     @pytest.mark.parametrize(
@@ -93,8 +97,51 @@ class TestHarnessCI(object):
     @pytest.mark.parametrize(
         "env_dict,expected",
         [
+<<<<<<< HEAD:tests/ci_adapters/test_harnessci.py
         ({}, None),
         ({HarnessEnvEnum.CI_REPO: "repo"}, "repo"),
+=======
+            ({}, None),
+            ({HarnessEnvEnum.CI_REPO: "owner/repo"}, "owner/repo"),
+            ({HarnessEnvEnum.CI_REPO: "repo"}, None),
+            (
+                {
+                    HarnessEnvEnum.CI_REPO_REMOTE: "https://gitlab.com/mygroup/myrepo.git",
+                },
+                "mygroup/myrepo",
+            ),
+            (
+                {
+                    HarnessEnvEnum.CI_REMOTE_URL: "https://github.com/from-remote-url/from-remote-url",
+                },
+                "from-remote-url/from-remote-url",
+            ),
+            (
+                {
+                    HarnessEnvEnum.CI_REPO_LINK: "https://github.com/from-repo-link/from-repo-link",
+                },
+                "from-repo-link/from-repo-link",
+            ),
+            (
+                {
+                    HarnessEnvEnum.DRONE_GIT_HTTP_URL: "https://github.com/myorg/myrepo.git",
+                },
+                "myorg/myrepo",
+            ),
+            (
+                {
+                    HarnessEnvEnum.DRONE_REMOTE_URL: "git@github.com:acme/coverage.git",
+                },
+                "acme/coverage",
+            ),
+            (
+                {
+                    HarnessEnvEnum.CI_REPO_REMOTE: "https://github.com/first/first.git",
+                    HarnessEnvEnum.DRONE_GIT_HTTP_URL: "https://github.com/second/second.git",
+                },
+                "first/first",
+            ),
+>>>>>>> da0fd08 (fix: Fix harness ci slug parsing):codecov-cli/tests/ci_adapters/test_harnessci.py
         ],
     )
     def test_slug(self, env_dict, expected, mocker):

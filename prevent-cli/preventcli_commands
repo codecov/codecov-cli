@@ -1,7 +1,7 @@
 Usage: sentry-prevent-cli [OPTIONS] COMMAND [ARGS]...
 
 Options:
-  --auto-load-params-from [CircleCI|GithubActions|GitlabCI|Bitbucket|Bitrise|AppVeyor|Woodpecker|Heroku|DroneCI|BuildKite|AzurePipelines|Jenkins|CirrusCI|Teamcity|Travis|AWSCodeBuild|GoogleCloudBuild|Local]
+  --auto-load-params-from [CircleCI|GithubActions|GitlabCI|Bitbucket|Bitrise|AppVeyor|Woodpecker|Harness|Heroku|DroneCI|BuildKite|AzurePipelines|Jenkins|CirrusCI|Teamcity|Travis|AWSCodeBuild|GoogleCloudBuild|Local]
   --yml-path PATH
   -u, --enterprise-url, --url TEXT
                                   Change the upload host (Enterprise use)

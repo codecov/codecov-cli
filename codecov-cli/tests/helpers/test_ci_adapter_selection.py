@@ -12,6 +12,7 @@ from codecov_cli.helpers.ci_adapters import (
     DroneCIAdapter,
     GithubActionsCIAdapter,
     GitlabCIAdapter,
+    HarnessAdapter,
     HerokuCIAdapter,
     JenkinsAdapter,
     LocalAdapter,
@@ -52,6 +53,9 @@ class TestCISelector(object):
 
     def test_returns_teamcity(self):
         assert isinstance(get_ci_adapter("teamcity"), TeamcityAdapter)
+
+    def test_returns_harness(self):
+        assert isinstance(get_ci_adapter("harness"), HarnessAdapter)
 
     def test_returns_herokuci(self):
         assert isinstance(get_ci_adapter("heroku"), HerokuCIAdapter)

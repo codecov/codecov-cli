@@ -9,8 +9,3 @@ uv python pin 3.9
 uv sync --no-binary-package pyyaml --no-binary-package ijson
 uv run pyinstaller -F codecov_cli/main.py
 mv ./dist/main ./dist/codecovcli_$1
-
-# codecov linux binary should be just codecovcli_linux
-if [ "$1" = "linux_x86_64" ]; then
-    mv ./dist/codecovcli_$1 ./dist/codecovcli_linux
-fi

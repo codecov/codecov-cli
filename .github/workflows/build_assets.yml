@@ -1,0 +1,131 @@
+name: Build Compiled Assets
+
+on:
+  workflow_call:
+    inputs:
+      release:
+        type: boolean
+        default: false
+        description: "Attach artifacts to a release"
+
+permissions:
+  contents: read
+
+jobs:
+  build_assets:
+    name: Build packages - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write # needed for svenstaro/upload-release-action when inputs.release == true
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - os: macos-latest
+            TARGET: macos
+            CMD_BUILD: >
+              uv run pyinstaller --target-arch universal2 -F codecov_cli/main.py &&
+              mv dist/main dist/codecovcli_macos &&
+              lipo -archs dist/codecovcli_macos | grep 'x86_64 arm64'
+            OUT_FILE_NAME: codecovcli_macos
+            ASSET_MIME: application/octet-stream
+          - os: ubuntu-22.04
+            TARGET: ubuntu
+            CMD_BUILD: >
+              uv run pyinstaller -F codecov_cli/main.py &&
+              cp ./dist/main ./dist/codecovcli_linux
+            OUT_FILE_NAME: codecovcli_linux
+            ASSET_MIME: application/octet-stream
+          - os: windows-latest
+            TARGET: windows
+            CMD_BUILD: >
+              uv run pyinstaller -F .\codecov_cli\main.py &&
+              Copy-Item -Path ".\dist\main.exe" -Destination ".\dist\codecovcli_windows.exe"
+            OUT_FILE_NAME: codecovcli_windows.exe
+            ASSET_MIME: application/vnd.microsoft.portable-executable
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install uv and dependencies
+        run: |
+          pip install uv
+          # Need to build pyyaml and ijson from sdists to get universal2 macos build to work
+          uv sync --no-binary-package pyyaml --no-binary-package ijson
+
+      - name: Build with pyinstaller for ${{matrix.TARGET}}
+        run: ${{matrix.CMD_BUILD}}
+
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v4
+        if: inputs.release == false
+        with:
+          name: ${{ matrix.OUT_FILE_NAME }}
+          path: ./dist/${{ matrix.OUT_FILE_NAME }}
+
+      - name: Upload Release Asset
+        if: inputs.release == true
+        id: upload-release-asset
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./dist/${{ matrix.OUT_FILE_NAME }}
+          asset_name: ${{ matrix.OUT_FILE_NAME }}
+          tag: ${{ github.ref }}
+          overwrite: true
+
+  build_assets_alpine_arm:
+    name: Build assets - Alpine and ARM
+    runs-on: ${{ matrix.runs-on }}
+    permissions:
+      contents: write # needed for svenstaro/upload-release-action when inputs.release == true
+    strategy:
+      matrix:
+        include:
+          - distro: "alpine:3.14"
+            arch: arm64
+            distro_name: alpine
+            runs-on: ubuntu-24.04-arm
+          - distro: "alpine:3.14"
+            arch: x86_64
+            distro_name: alpine
+            runs-on: ubuntu-24.04
+          - distro: "ubuntu:20.04"
+            arch: arm64
+            distro_name: linux
+            runs-on: ubuntu-24.04-arm
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run in Docker
+        run: |
+          docker run \
+            --rm \
+            -v $(pwd):/${{ github.workspace }} \
+            -w ${{ github.workspace }} \
+            --platform linux/${{ matrix.arch }} \
+            ${{ matrix.distro }} \
+            ./scripts/build_${{ matrix.distro_name }}_arm.sh ${{ matrix.distro_name }}_${{ matrix.arch }}
+
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v4
+        if: inputs.release == false
+        with:
+          name: codecovcli_${{ matrix.distro_name }}_${{ matrix.arch }}
+          path: ./dist/codecovcli_${{ matrix.distro_name }}_${{ matrix.arch }}
+
+      - name: Upload Release Asset
+        if: inputs.release == true
+        id: upload-release-asset
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./dist/codecovcli_${{ matrix.distro_name }}_${{ matrix.arch }}
+          asset_name: codecovcli_${{ matrix.distro_name }}_${{ matrix.arch }}
+          tag: ${{ github.ref }}
+          overwrite: true

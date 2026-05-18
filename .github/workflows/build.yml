@@ -1,6 +1,5 @@
-# This workflow builds both sentry-prevent-cli and codecov-cli on push to a
-# release/* branch. These are later released by Craft and another workflow,
-# respectively.
+# This workflow builds codecov-cli on push to a release/* branch. The artifacts
+# are later picked up and released by Craft.
 name: Build release
 
 on:
@@ -25,26 +24,13 @@ jobs:
         run: pip install uv
 
       - name: Build codecov-cli sdist and bdist
-        run: |
-          cd codecov-cli
-          uv build
-
-      - name: Build prevent-cli sdist and bdist
-        run: |
-          cd prevent-cli
-          uv build
+        run: uv build
 
       - name: Upload codecov-cli artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: codecov-cli_wheel
-          path: ./codecov-cli/dist/*
-
-      - name: Upload prevent-cli artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: sentry-prevent-cli_wheel
-          path: ./prevent-cli/dist/*
+          path: ./dist/*
 
   build_assets:
     name: Build ${{ matrix.os }} binaries
@@ -56,24 +42,16 @@ jobs:
           - os: macos-14
             TARGET: macos
             CMD_BUILD: >
-              cd ./codecov-cli &&
               uv run pyinstaller --target-arch universal2 -F ./codecov_cli/main.py &&
-              mv ./dist/main ./dist/codecovcli_macos && 
-              cd ../prevent-cli &&
-              uv run pyinstaller --target-arch universal2 -F ./src/prevent_cli/main.py &&
-              mv ./dist/main ./dist/sentry-prevent-cli_macos
+              mv ./dist/main ./dist/codecovcli_macos
             OUT_FILE_SUFFIX: _macos
             ASSET_MIME: application/octet-stream
 
           - os: windows-2022
             TARGET: windows
             CMD_BUILD: >
-              Set-Location .\codecov-cli &&
               uv run pyinstaller -F .\codecov_cli\main.py &&
-              Move-Item -Path ".\dist\main.exe" -Destination ".\dist\codecovcli_windows.exe" &&
-              Set-Location ..\prevent-cli &&
-              uv run pyinstaller -F .\src\prevent_cli\main.py &&
-              Move-Item -Path ".\dist\main.exe" -Destination ".\dist\sentry-prevent-cli_windows.exe"
+              Move-Item -Path ".\dist\main.exe" -Destination ".\dist\codecovcli_windows.exe"
             OUT_FILE_SUFFIX: _windows.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
 
@@ -88,14 +66,8 @@ jobs:
       - name: Install dependencies
         run: |
           pip install uv
-          cd prevent-cli
           # Need to build pyyaml and ijson from sdists to get universal2 macos build to work
           uv sync --no-binary-package pyyaml --no-binary-package ijson
-          cd ../codecov-cli
-          uv sync --no-binary-package pyyaml --no-binary-package ijson
-
-      - name: Run pre-build script
-        run: ./scripts/pre-build.sh
 
       - name: Build with pyinstaller for ${{matrix.TARGET}}
         run: ${{matrix.CMD_BUILD}}
@@ -104,13 +76,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: codecovcli${{matrix.OUT_FILE_SUFFIX}}
-          path: ./codecov-cli/dist/codecovcli${{matrix.OUT_FILE_SUFFIX}}
-
-      - name: Upload sentry-prevent-cli binary for ${{matrix.TARGET}}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: sentry-prevent-cli${{matrix.OUT_FILE_SUFFIX}}
-          path: ./prevent-cli/dist/sentry-prevent-cli${{matrix.OUT_FILE_SUFFIX}}
+          path: ./dist/codecovcli${{matrix.OUT_FILE_SUFFIX}}
 
   build_linux_assets:
     name: Build ${{ matrix.distro_name }}_${{ matrix.arch }} binary
@@ -152,46 +118,23 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: codecovcli_${{ matrix.distro_name }}_${{ matrix.arch }}
-          path: ./codecov-cli/dist/codecovcli_*
-
-      - name: Upload sentry-prevent-cli binary for ${{matrix.distro_name}}_${{ matrix.arch}}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: sentry-prevent-cli_${{ matrix.distro_name }}_${{ matrix.arch }}
-          path: ./prevent-cli/dist/sentry-prevent-cli_*
+          path: ./dist/codecovcli_*
 
   package_artifacts:
     # Craft requires one artifact named after the long commit sha of the release.
     name: Package assets for Craft
     runs-on: ubuntu-latest
     needs: [build_for_pypi, build_assets, build_linux_assets]
-    permissions:
-      id-token: write # needed for signing binaries with OIDC token via Cosign
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          pattern: "{sentry-prevent-,codecov-,codecov}cli*"
-
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@d58896d6a1865668819e1d91763c7751a165e159 # v3.9.2
-
-      - name: Sign sentry-prevent-cli binaries
-        run: |
-          # Glob matches all prevent-cli binaries, not python wheel nor anything else.
-          for file in sentry-prevent-cli_*/sentry-prevent-cli_*; do
-            cosign sign-blob $file --bundle "$file.bundle" --yes;
-            # Test verification because why not
-            cosign verify-blob $file --bundle "$file.bundle" --certificate-identity-regexp="^https://github\.com/getsentry/prevent-cli/\.github/workflows/build\.yml@refs/heads/release/[0-9]+\.[0-9]+\.[0-9]+" --certificate-oidc-issuer=https://token.actions.githubusercontent.com
-          done
+          pattern: "{codecov-,codecov}cli*"
 
       - name: Upload release artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ${{ github.sha }}
           path: |
-            sentry-prevent-cli*
-            sentry-prevent-cli_wheel/*
             codecovcli*
             codecov-cli_wheel/*
-            *.bundle

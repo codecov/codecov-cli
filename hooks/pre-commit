@@ -3,5 +3,4 @@
 set -e
 
 make command_dump
-git add codecov-cli/codecovcli_commands
-git add prevent-cli/preventcli_commands
+git add codecovcli_commands

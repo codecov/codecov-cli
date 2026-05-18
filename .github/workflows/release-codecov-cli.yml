@@ -20,13 +20,13 @@ jobs:
         with:
           tag: ${{ github.ref_name }}
           fileName: codecov_cli-*
-          out-file-path: codecov-cli/dist
+          out-file-path: dist
 
       - name: Publish package to PyPi
         uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
         with:
           verbose: true
-          packages-dir: codecov-cli/dist
+          packages-dir: dist
 
   publish_release:
     name: Publish release

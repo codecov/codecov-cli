@@ -151,7 +151,7 @@ def test_exotic_git_filenames():
 
     # See <https://github.com/codecov/codecov-action/issues/1550>
     assert (
-        "codecov-cli/tests/data/Контроллеры/Пользователь/ГлавныйКонтроллер.php" in found_repo_files
+        "tests/data/Контроллеры/Пользователь/ГлавныйКонтроллер.php" in found_repo_files
     )
 
 

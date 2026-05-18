@@ -1,16 +1,15 @@
 github:
-  owner: getsentry
-  repo: prevent-cli
+  owner: codecov
+  repo: codecov-cli
 
 changelogPolicy: auto
 
 targets:
-  # For direct binary downloads + cosign bundles
   - name: github
     tagPrefix: v
     checksums:
       - algorithm: sha256
-    includeNames: /^(sentry-prevent-|sentry_prevent_|codecov|codecov_)cli.*/i
+    includeNames: /^(codecov|codecov_)cli.*/i
 
   - name: pypi
-    includeNames: /sentry_prevent_cli-*/i
+    includeNames: /codecov_cli-*/i

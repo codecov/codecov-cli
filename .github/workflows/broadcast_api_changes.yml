@@ -6,7 +6,7 @@ name: Broadcast API changes
 on:
   push:
     branches: ['main']
-    paths: ['codecov-cli/codecovcli_commands', 'prevent-cli/preventcli_commands']
+    paths: ['codecovcli_commands']
 
 jobs:
   run:

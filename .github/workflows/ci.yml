@@ -37,7 +37,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install uv
-          uv sync --project prevent-cli
+          uv sync
 
       - name: Run command_dump
         run: |
@@ -45,15 +45,15 @@ jobs:
 
       - name: Detect changes on commit
         run: |
-          if [ -n "$(git diff codecov-cli/codecovcli_commands prevent-cli/preventcli_commands)" ]; then
+          if [ -n "$(git diff codecovcli_commands)" ]; then
             echo "Please run `make command_dump` before submitting, or install the hooks"
-            echo "$(git diff codecov-cli/codecovcli_commands prevent-cli/preventcli_commands)"
+            echo "$(git diff codecovcli_commands)"
             exit 1
           fi
 
   codecov-startup:
     runs-on: ubuntu-latest
-    if: ${{ !github.event.pull_request.head.repo.fork && github.repository_owner == 'getsentry' }}
+    if: ${{ !github.event.pull_request.head.repo.fork && github.repository_owner == 'codecov' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -66,15 +66,15 @@ jobs:
       - name: Install CLI
         run: |
           pip install uv
-          uv sync --project codecov-cli
+          uv sync
 
       - name: Create commit in codecov
         run: |
-          uv run --project codecov-cli codecovcli -v create-commit -t ${{ secrets.CODECOV_TOKEN }} --git-service github
+          uv run codecovcli -v create-commit -t ${{ secrets.CODECOV_TOKEN }} --git-service github
 
       - name: Create commit report in codecov
         run: |
-          uv run --project codecov-cli codecovcli -v create-report -t ${{ secrets.CODECOV_TOKEN }} --git-service github
+          uv run codecovcli -v create-report -t ${{ secrets.CODECOV_TOKEN }} --git-service github
 
   build-test-upload:
     strategy:
@@ -96,25 +96,16 @@ jobs:
       - name: Install dependencies
         run: |
           pip install uv
-          uv sync --project codecov-cli
-          uv sync --project prevent-cli
+          uv sync
 
       - name: Test with pytest
         run: |
-          cd codecov-cli
           uv run pytest --cov --junitxml=${{matrix.os}}-${{matrix.python-version}}junit.xml
         env:
           CODECOV_ENV: test
 
       - name: Dogfooding codecov-cli
-        if: ${{ !github.event.pull_request.head.repo.fork && github.repository_owner == 'getsentry' }}
+        if: ${{ !github.event.pull_request.head.repo.fork && github.repository_owner == 'codecov' }}
         run: |
-          uv run --project codecov-cli codecovcli -v do-upload --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}} --flag codecovcli
-          uv run --project codecov-cli codecovcli do-upload --report-type test_results --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}} --flag codecovcli
-
-      - name: Dogfooding sentry-prevent-cli
-        if: ${{ !github.event.pull_request.head.repo.fork && github.repository_owner == 'getsentry' }}
-        run: |
-          uv run --project prevent-cli sentry-prevent-cli upload --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}} --flag sentry-prevent-cli
-          uv run --project prevent-cli sentry-prevent-cli upload --report-type test_results --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}} --flag sentry-prevent-cli
-          uv run --project prevent-cli sentry-prevent-cli upload --report-type test-results --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}} --flag sentry-prevent-cli
+          uv run codecovcli -v do-upload --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}} --flag codecovcli
+          uv run codecovcli do-upload --report-type test_results --fail-on-error -t ${{ secrets.CODECOV_TOKEN }} --plugin pycoverage --flag python${{matrix.python-version}} --flag codecovcli

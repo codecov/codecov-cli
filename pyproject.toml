@@ -38,10 +38,10 @@ codecov-cli = "codecov_cli.main:run"
 
 [project.urls]
 Homepage = "https://about.codecov.io"
-"CI: GitHub" = "https://github.com/getsentry/prevent-cli/actions/workflows/ci.yml"
+"CI: GitHub" = "https://github.com/codecov/codecov-cli/actions/workflows/ci.yml"
 "Docs" = "https://docs.codecov.com"
-"GitHub: issues" = "https://github.com/getsentry/prevent-cli/issues"
-"GitHub: repo" = "https://github.com/getsentry/prevent-cli"
+"GitHub: issues" = "https://github.com/codecov/codecov-cli/issues"
+"GitHub: repo" = "https://github.com/codecov/codecov-cli"
 
 [build-system]
 requires = ["setuptools"]

@@ -24,10 +24,10 @@ lint:
 	make lint.run
 
 test:
-	cd codecov-cli && uv run pytest
+	uv run pytest
 
 command_dump:
-	cd prevent-cli && uv run command_dump.py
+	uv run python command_dump.py
 
 tag.release:
 ifeq ($(shell echo ${version} | egrep "${tag_regex}"),)

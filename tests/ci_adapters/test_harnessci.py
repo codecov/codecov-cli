@@ -97,10 +97,6 @@ class TestHarnessCI(object):
     @pytest.mark.parametrize(
         "env_dict,expected",
         [
-<<<<<<< HEAD:tests/ci_adapters/test_harnessci.py
-        ({}, None),
-        ({HarnessEnvEnum.CI_REPO: "repo"}, "repo"),
-=======
             ({}, None),
             ({HarnessEnvEnum.CI_REPO: "owner/repo"}, "owner/repo"),
             ({HarnessEnvEnum.CI_REPO: "repo"}, None),
@@ -141,7 +137,6 @@ class TestHarnessCI(object):
                 },
                 "first/first",
             ),
->>>>>>> da0fd08 (fix: Fix harness ci slug parsing):codecov-cli/tests/ci_adapters/test_harnessci.py
         ],
     )
     def test_slug(self, env_dict, expected, mocker):

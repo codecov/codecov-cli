@@ -1,6 +1,7 @@
 import os
 
 from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
+from codecov_cli.helpers.git import parse_slug
 
 # https://developer.harness.io/docs/continuous-integration/troubleshoot-ci/ci-env-var/
 
@@ -29,7 +30,20 @@ class HarnessAdapter(CIAdapterBase):
         return os.getenv("CI_BUILD_LINK")
 
     def _get_slug(self):
-        return os.getenv("CI_REPO")
+        ci_repo = os.getenv("CI_REPO")
+        if ci_repo and "/" in ci_repo:
+            return ci_repo
+        for env_var in (
+            "CI_REPO_REMOTE",
+            "CI_REMOTE_URL",
+            "CI_REPO_LINK",
+            "DRONE_GIT_HTTP_URL",
+            "DRONE_REMOTE_URL",
+        ):
+            if url := os.getenv(env_var):
+                if slug := parse_slug(url):
+                    return slug
+        return None
 
     def _get_service(self):
         return "harness"

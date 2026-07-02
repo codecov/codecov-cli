@@ -16,21 +16,14 @@ jobs:
       issues: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Install GitHub CLI
         uses: dev-hanz-ops/install-gh-cli-action@v0.1.0
-
-      - name: Get auth token
-        id: token
-        uses: actions/create-github-app-token@df432ceedc7162793a195dd1713ff69aefc7379e # v2.0.6
-        with:
-          app-id: ${{ vars.SENTRY_RELEASE_BOT_CLIENT_ID }}
-          private-key: ${{ secrets.SENTRY_RELEASE_BOT_PRIVATE_KEY }}
 
       - name: Open issue on wrapper
         run: |
           gh issue create -R codecov/wrapper -t 'New change on CLI' -b "$(gh pr diff $BRANCH)"
         env:
           BRANCH: ${{ github.head_ref }}
-          GH_TOKEN: ${{ steps.token.outputs.token }}
+          GH_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}

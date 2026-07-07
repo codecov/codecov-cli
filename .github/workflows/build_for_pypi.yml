@@ -1,0 +1,28 @@
+---
+name: Build for PyPi
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  build_for_pypi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Build sdist and wheel
+        run: uv build
+
+      - name: Store the distribution packages
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cibw-codecov-cli
+          path: ./dist/*

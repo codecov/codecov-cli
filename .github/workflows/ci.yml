@@ -18,7 +18,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Check linting with ruff
         run: |
@@ -27,7 +27,7 @@ jobs:
   detect-command-change:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Set up Python 3.13
         uses: actions/setup-python@v5
@@ -55,7 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ !github.event.pull_request.head.repo.fork && github.repository_owner == 'codecov' }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 2
 
@@ -84,7 +84,7 @@ jobs:
         python-version: ["3.13", "3.12", "3.11", "3.10", "3.9"]
     runs-on: ${{matrix.os}}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 2
 

@@ -25,7 +25,10 @@ class GcovPlugin(object):
     ):
         self.executable = executable or "gcov"
         self.extra_arguments = extra_arguments or []
-        self.folders_to_ignore = folders_to_ignore or []
+        default_folders_to_ignore = ["node_modules", ".git", "vendor"]
+        self.folders_to_ignore = list(
+            set(default_folders_to_ignore + (folders_to_ignore or []))
+        )
         self.patterns_to_ignore = patterns_to_ignore or []
         self.patterns_to_include = patterns_to_include or []
         self.project_root = project_root or pathlib.Path(os.getcwd())

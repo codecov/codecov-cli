@@ -21,6 +21,8 @@ jobs:
 
   buildassets:
     name: Build packages
+    permissions:
+      contents: write # required so the reusable workflow can attach release assets
     uses: ./.github/workflows/build_assets.yml
     with:
       release: true

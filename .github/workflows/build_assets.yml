@@ -9,7 +9,7 @@ on:
         description: "Attach artifacts to a release"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build_assets:

@@ -29,13 +29,6 @@ jobs:
               lipo -archs dist/codecovcli_macos | grep 'x86_64 arm64'
             OUT_FILE_NAME: codecovcli_macos
 
-          - os: ubuntu-22.04
-            TARGET: ubuntu
-            CMD_BUILD: >
-              uv run pyinstaller -F codecov_cli/main.py &&
-              cp ./dist/main ./dist/codecovcli_linux
-            OUT_FILE_NAME: codecovcli_linux
-
           - os: windows-latest
             TARGET: windows
             CMD_BUILD: >
@@ -85,7 +78,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - distro: "alpine:3.14"
+          - distro: "alpine:3.14" # alpine 3.14 needed for musl 1.2.2/python 3.9 compatibility
             arch: arm64
             distro_name: alpine
             runs-on: ubuntu-24.04-arm
@@ -93,10 +86,14 @@ jobs:
             arch: x86_64
             distro_name: alpine
             runs-on: ubuntu-24.04
-          - distro: "ubuntu:20.04"
+          - distro: "ubuntu:20.04" # ubuntu 20.04 needed for glibc 2.31/python 3.9 compatibility
             arch: arm64
             distro_name: linux
             runs-on: ubuntu-24.04-arm
+          - distro: "ubuntu:20.04"
+            arch: x86_64
+            distro_name: linux
+            runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -116,14 +113,14 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: codecovcli_${{ matrix.distro_name }}_${{ matrix.arch }}
-          path: ./dist/codecovcli_${{ matrix.distro_name }}_${{ matrix.arch }}
+          path: ./dist/codecovcli_*
 
       - name: Upload Release Asset
         if: inputs.release == true
         uses: svenstaro/upload-release-action@81c65b7cd4de9b2570615ce3aad67a41de5b1a13 # v2.11.2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./dist/codecovcli_${{ matrix.distro_name }}_${{ matrix.arch }}
-          asset_name: codecovcli_${{ matrix.distro_name }}_${{ matrix.arch }}
+          file: ./dist/codecovcli_*
+          file_glob: true
           tag: ${{ github.ref }}
           overwrite: true

@@ -273,25 +273,17 @@ class FileFinder(object):
                     extra_log_attributes=dict(files=files_excluded_but_user_includes)
                 ),
             )
-        regex_patterns_to_include = globs_to_regex(user_filenames_to_include)
-        multipart_include_regex = globs_to_regex(
-            [path.resolve().as_posix() for path in self.explicitly_listed_files]
-        )
-        user_files_paths = list(
-            search_files(
-                self.search_root,
-                self.folders_to_ignore,
-                filename_include_regex=regex_patterns_to_include,
-                multipart_include_regex=multipart_include_regex,
-            )
-        )
+        user_files_paths = []
         not_found_files = []
-        user_files_paths_resolved = [path.resolve() for path in user_files_paths]
         for filepath in self.explicitly_listed_files:
-            if filepath.resolve() not in user_files_paths_resolved:
-                ## The file given might be linked or in a parent dir, check to see if it exists
-                if filepath.exists():
-                    user_files_paths.append(filepath)
+            # Try the path as-is (works for absolute paths or relative to cwd)
+            if filepath.exists():
+                user_files_paths.append(filepath)
+            else:
+                # Try relative to search_root
+                candidate = self.search_root / filepath
+                if candidate.exists():
+                    user_files_paths.append(candidate)
                 else:
                     not_found_files.append(filepath)
 

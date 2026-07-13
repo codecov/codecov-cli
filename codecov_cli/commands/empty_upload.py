@@ -76,5 +76,12 @@ def empty_upload(
                 ),
             )
             return empty_upload_logic(
-                commit_sha, slug, token, git_service, enterprise_url, fail_on_error, force, args
+                commit_sha,
+                slug,
+                token,
+                git_service,
+                enterprise_url,
+                fail_on_error,
+                force,
+                args,
             )

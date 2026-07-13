@@ -37,5 +37,12 @@ def create_report_results(
                 ),
             )
             create_report_results_logic(
-                commit_sha, code, slug, git_service, token, enterprise_url, fail_on_error, args
+                commit_sha,
+                code,
+                slug,
+                git_service,
+                token,
+                enterprise_url,
+                fail_on_error,
+                args,
             )

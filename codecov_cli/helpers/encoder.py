@@ -1,4 +1,7 @@
+import logging
 import re
+
+logger = logging.getLogger("codecovcli")
 
 slug_without_subgroups_regex = re.compile(r"[^/\s]+\/[^/\s]+$")
 slug_with_subgroups_regex = re.compile(r"[^/\s]+(\/[^/\s]+)+$")
@@ -12,6 +15,16 @@ def encode_slug(slug: str):
     encoded_owner = ":::".join(owner.split("/"))
     encoded_slug = "::::".join([encoded_owner, repo])
     return encoded_slug
+
+
+def safe_encode_slug(slug):
+    try:
+        return encode_slug(slug)
+    except ValueError:
+        logger.error(
+            "The provided slug is invalid. Please provide a valid slug in the form owner/repo."
+        )
+        return None
 
 
 def decode_slug(slug: str):

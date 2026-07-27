@@ -2,9 +2,11 @@ import logging
 import os
 import typing
 
+import click
+
 from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.helpers.config import CODECOV_INGEST_URL
-from codecov_cli.helpers.encoder import encode_slug
+from codecov_cli.helpers.encoder import safe_encode_slug
 from codecov_cli.helpers.request import (
     get_token_header,
     log_warnings_and_errors_if_any,
@@ -26,7 +28,9 @@ def create_commit_logic(
     fail_on_error: bool = False,
     args: dict = None,
 ):
-    encoded_slug = encode_slug(slug)
+    encoded_slug = safe_encode_slug(slug)
+    if encoded_slug is None:
+        raise click.UsageError("The provided slug is invalid")
     sending_result = send_commit_data(
         commit_sha=commit_sha,
         parent_sha=parent_sha,

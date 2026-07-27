@@ -4,7 +4,7 @@ import click
 import sentry_sdk
 
 from codecov_cli.helpers.args import get_cli_args
-from codecov_cli.helpers.encoder import encode_slug
+from codecov_cli.helpers.encoder import safe_encode_slug
 from codecov_cli.helpers.options import global_options
 from codecov_cli.services.report import send_reports_result_get_request
 from codecov_cli.types import CommandContext
@@ -38,7 +38,9 @@ def get_report_results(
                     extra_log_attributes=args,
                 ),
             )
-            encoded_slug = encode_slug(slug)
+            encoded_slug = safe_encode_slug(slug)
+            if encoded_slug is None:
+                raise click.UsageError("The provided slug is invalid")
             send_reports_result_get_request(
                 commit_sha=commit_sha,
                 report_code=code,

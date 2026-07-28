@@ -122,7 +122,16 @@ class LegacyUploadSender(object):
         return network_files_section.encode() + b"<<<<<< network\n"
 
     def _generate_coverage_files_section(self, upload_data: UploadCollectionResult):
-        return b"".join(self._format_coverage_file(file) for file in upload_data.files)
+        sections = []
+        for file in upload_data.files:
+            try:
+                sections.append(self._format_coverage_file(file))
+            except FileNotFoundError:
+                logger.warning(
+                    "Coverage file not found, skipping: %s",
+                    file.get_filename(),
+                )
+        return b"".join(sections)
 
     def _format_coverage_file(self, file: UploadCollectionResultFile) -> bytes:
         header = b"# path=" + file.get_filename().encode() + b"\n"

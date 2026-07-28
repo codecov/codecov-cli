@@ -189,7 +189,16 @@ class UploadSender(object):
         return file_fixers
 
     def _get_files(self, upload_data: UploadCollectionResult):
-        return [self._format_file(file) for file in upload_data.files]
+        files = []
+        for file in upload_data.files:
+            try:
+                files.append(self._format_file(file))
+            except FileNotFoundError:
+                logger.warning(
+                    "Coverage file not found, skipping: %s",
+                    file.get_filename(),
+                )
+        return files
 
     def _format_file(self, file: UploadCollectionResultFile):
         format, formatted_content = self._get_format_info(file)

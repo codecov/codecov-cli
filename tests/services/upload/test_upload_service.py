@@ -42,7 +42,7 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
     versioning_system = mocker.MagicMock()
     ci_adapter = mocker.MagicMock()
     ci_adapter.get_fallback_value.return_value = "service"
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     with runner.isolation() as outstreams:
         res = do_upload_logic(
             cli_config,
@@ -159,7 +159,7 @@ def test_do_upload_logic_happy_path(mocker):
     versioning_system = mocker.MagicMock()
     ci_adapter = mocker.MagicMock()
     ci_adapter.get_fallback_value.return_value = "service"
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     with runner.isolation() as outstreams:
         res = do_upload_logic(
             cli_config,
@@ -270,7 +270,7 @@ def test_do_upload_logic_dry_run(mocker):
     versioning_system = mocker.MagicMock()
     ci_adapter = mocker.MagicMock()
     ci_adapter.get_fallback_value.return_value = "service"
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     with runner.isolation() as outstreams:
         res = do_upload_logic(
             cli_config,
@@ -356,7 +356,7 @@ def test_do_upload_logic_verbose(mocker, use_verbose_option):
     versioning_system = mocker.MagicMock()
     ci_adapter = mocker.MagicMock()
     ci_adapter.get_fallback_value.return_value = "service"
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     with runner.isolation() as outstreams:
         res = do_upload_logic(
             cli_config,
@@ -438,7 +438,7 @@ def test_do_upload_no_cov_reports_found(mocker):
     versioning_system = mocker.MagicMock()
     ci_adapter = mocker.MagicMock()
     ci_adapter.get_fallback_value.return_value = "service"
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     with runner.isolation() as outstreams:
         res = do_upload_logic(
             cli_config,
@@ -634,7 +634,7 @@ def test_do_upload_logic_happy_path_test_results(mocker):
     versioning_system = mocker.MagicMock()
     ci_adapter = mocker.MagicMock()
     ci_adapter.get_fallback_value.return_value = "service"
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     with runner.isolation() as outstreams:
         res = do_upload_logic(
             cli_config,

@@ -14,7 +14,7 @@ def test_base_picking_command(mocker):
         return_value=RequestResult(status_code=200, error=None, warnings=[], text=""),
     )
     token = uuid.uuid4()
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         pr_base_picking,
         [
@@ -37,7 +37,7 @@ def test_base_picking_command(mocker):
 
 def test_base_picking_command_slug_invalid(mocker):
     token = uuid.uuid4()
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         pr_base_picking,
         [
@@ -72,7 +72,7 @@ def test_base_picking_command_warnings(mocker):
         ),
     )
     token = uuid.uuid4()
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         pr_base_picking,
         [
@@ -116,7 +116,7 @@ def test_base_picking_command_error(mocker):
         ),
     )
     token = uuid.uuid4()
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         pr_base_picking,
         [
@@ -146,7 +146,7 @@ def test_base_picking_no_token(mocker):
         "codecov_cli.services.commit.base_picking.send_put_request",
         return_value=RequestResult(status_code=200, error=None, warnings=[], text=""),
     )
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         pr_base_picking,
         [

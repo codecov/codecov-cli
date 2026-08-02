@@ -20,7 +20,7 @@ def test_upload_completion_with_warnings(mocker):
             text="",
         ),
     )
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     with runner.isolation() as outstreams:
         res = upload_completion_logic(
             "commit_sha", "owner/repo", uuid.uuid4(), "github", None
@@ -49,7 +49,7 @@ def test_upload_completion_with_error(mocker):
             text="Permission denied",
         ),
     )
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     with runner.isolation() as outstreams:
         res = upload_completion_logic(
             "commit_sha", "owner/repo", uuid.uuid4(), "github", None
@@ -77,7 +77,7 @@ def test_upload_completion_200(mocker):
         ),
     )
     token = uuid.uuid4()
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     with runner.isolation() as outstreams:
         res = upload_completion_logic(
             "commit_sha", "owner/repo", token, "github", None
@@ -108,7 +108,7 @@ def test_upload_completion_no_token(mocker):
             status_code=200, error=None, warnings=[], text=json.dumps(res)
         ),
     )
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     with runner.isolation() as outstreams:
         res = upload_completion_logic("commit_sha", "owner/repo", None, "github", None)
     out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())

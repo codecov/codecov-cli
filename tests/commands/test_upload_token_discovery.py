@@ -41,6 +41,6 @@ def test_no_cli_token_config_fallback(
     mocker.patch.object(upload, "do_upload_logic")
     do_upload_cmd_spy = mocker.spy(upload, "do_upload_logic")
 
-    CliRunner().invoke(cli, ["do-upload", "--commit-sha=deadbeef"], obj={})
+    CliRunner(mix_stderr=False).invoke(cli, ["do-upload", "--commit-sha=deadbeef"], obj={})
 
     assert do_upload_cmd_spy.call_args[-1]["token"] == "sentinel-value"

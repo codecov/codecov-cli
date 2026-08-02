@@ -104,6 +104,16 @@ def do_upload_logic(
         upload_data = collector.generate_upload_data(report_type)
     except click.ClickException as exp:
         if handle_no_reports_found:
+            if slug is None:
+                logger.warning(
+                    "No coverage reports found. Cannot trigger upload completion: no slug provided."
+                )
+                return RequestResult(
+                    error=None,
+                    warnings=None,
+                    status_code=200,
+                    text="No coverage reports found. Upload completion skipped: no slug provided.",
+                )
             logger.info(
                 "No coverage reports found. Triggering notifications without uploading."
             )

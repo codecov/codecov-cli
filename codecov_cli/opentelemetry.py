@@ -1,9 +1,24 @@
+import logging
 import os
 import random
 
 import sentry_sdk
 
 from codecov_cli import __version__
+
+logger = logging.getLogger(__name__)
+
+_SENTRY_SDK_MIN_VERSION = (2, 0, 0)
+
+
+def _sentry_sdk_version_ok() -> bool:
+    """Return True if the installed sentry-sdk meets the minimum required version."""
+    try:
+        version_str = sentry_sdk.VERSION
+        parts = tuple(int(x) for x in version_str.split(".")[:3])
+        return parts >= _SENTRY_SDK_MIN_VERSION
+    except Exception:
+        return False
 
 _SAMPLED_MESSAGES = [
     "Token required",
@@ -42,6 +57,13 @@ def init_telem(ctx):
     if ctx["enterprise_url"]:  # dont run on dedicated cloud
         return
     if os.getenv("CODECOV_ENV", "production") == "test":
+        return
+    if not _sentry_sdk_version_ok():
+        logger.warning(
+            "sentry-sdk version %s is too old (requires >= %s); telemetry disabled.",
+            sentry_sdk.VERSION,
+            ".".join(str(v) for v in _SENTRY_SDK_MIN_VERSION),
+        )
         return
 
     sentry_sdk.init(

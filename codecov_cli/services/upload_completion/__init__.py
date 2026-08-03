@@ -23,6 +23,17 @@ def upload_completion_logic(
     fail_on_error=False,
     args=None,
 ):
+    if not slug:
+        logger.error(
+            "Slug is missing. Please provide the --slug option (owner/repo) or ensure your "
+            "CI environment variables are set so the slug can be auto-detected."
+        )
+        if fail_on_error:
+            raise ValueError(
+                "Slug is required. Provide --slug owner/repo or ensure your CI environment "
+                "variables are set so the slug can be auto-detected."
+            )
+        return None
     encoded_slug = encode_slug(slug)
     headers = get_token_header(token)
     upload_url = enterprise_url or CODECOV_API_URL

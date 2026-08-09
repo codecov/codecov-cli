@@ -109,13 +109,14 @@ class UploadCollector(object):
     def _get_file_fixes(
         self, filename: str, fix_patterns_to_apply: fix_patterns_to_apply
     ) -> UploadCollectionResultFileFixer:
-        path = pathlib.Path(filename)
+        absolute_path = self.network_finder.network_root_folder / filename
+        path = pathlib.Path(absolute_path)
         fixed_lines_without_reason = set()
         fixed_lines_with_reason = set()
         eof = None
 
         try:
-            with open(filename, "r", encoding="utf-8") as f:
+            with open(absolute_path, "r", encoding="utf-8") as f:
                 # If lineno is unset that means that the
                 # file is empty thus the eof should be 0
                 # so lineno will be set to -1 here
@@ -142,6 +143,10 @@ class UploadCollector(object):
                     encoding=err.encoding,
                     reason=err.reason,
                 ),
+            )
+        except FileNotFoundError:
+            logger.warning(
+                f"File not found: {absolute_path}, file fixes were not applied to this file."
             )
         except IsADirectoryError:
             logger.info(f"Skipping {filename}, found a directory not a file")

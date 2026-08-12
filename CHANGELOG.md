@@ -1,3 +1,15 @@
+## 11.3.1
+
+### Breaking Changes ⚠
+
+- Drop support for Python 3.9. `codecov-cli` now requires Python 3.10 or newer
+  (`requires-python = ">=3.10"`). This is required to adopt `urllib3>=2.7.0`,
+  which patches Dependabot high alerts and no longer supports Python 3.9.
+
+### Internal Changes 🔧
+
+- Floor `urllib3` to `>=2.7.0` and remove Python 3.9 from the CI test matrix.
+
 ## 11.2.8
 
 ### New Features ✨

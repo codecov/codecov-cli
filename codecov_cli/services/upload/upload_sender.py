@@ -50,7 +50,10 @@ class UploadSender(object):
         upload_coverage: bool = False,
         args: dict = None,
     ) -> RequestResult:
-        current_transaction = sentry_sdk.get_current_scope().transaction
+        try:
+            current_transaction = sentry_sdk.get_current_scope().transaction
+        except AttributeError:
+            current_transaction = None
         if current_transaction:
             current_transaction.set_data("commit_sha", commit_sha)
             current_transaction.set_data("slug", slug)

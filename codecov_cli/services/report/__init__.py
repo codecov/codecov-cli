@@ -78,6 +78,8 @@ def create_report_results_logic(
     fail_on_error: bool = False,
     args: typing.Union[dict, None] = None,
 ):
+    if not service:
+        validate_upload_service("")
     encoded_slug = encode_slug(slug)
     sending_result = send_reports_result_request(
         commit_sha=commit_sha,

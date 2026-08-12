@@ -31,12 +31,23 @@ CodecovCLI is a new way for users to interact with Codecov directly from the use
 
 # Installing
 
+> [!IMPORTANT]
+> **Python 3.9 support is dropped.** Starting with this release, `codecov-cli`
+> requires **Python 3.10 or newer**. Python 3.9 reached end-of-life in October
+> 2025, and a security update to `urllib3` (2.7.0) no longer supports 3.9.
+> Please upgrade your runtime (or pin an older `codecov-cli` release) before
+> installing.
+
 ## Using PIP
 To use codecov-cli in your local machine, or your CI workflows, you need to install it:
 
 `pip install codecov-cli`
 
 The above command will download the latest version of Codecov-cli. If you wish to use a specific version, releases can be viewed [here](https://pypi.org/project/codecov-cli/#history).
+
+**Requires Python 3.10+.** On Python 3.9, `pip install codecov-cli` will fail
+to resolve a compatible release; upgrade Python or pin a prior version that
+still supports 3.9.
 
 Note: If you're installing in a `pyenv` environment, you may need to call `pyenv rehash` before the CLI will work.
 
@@ -236,6 +247,9 @@ To provide extensibility to some of its commands, the CLI makes use of a plugin 
 This repository, like all of Codecov's repositories, strives to follow our general [Contributing guidelines](https://github.com/codecov/contributing). If you're considering making a contribution to this repository, we encourage review of our Contributing guidelines first.
 
 ## Requirements
+
+Development and runtime require **Python 3.10 or newer** (Python 3.9 is no
+longer supported).
 
 Most of this package is a very conventional Python package. The main difference is the static the CLI's analysis module uses both git submodules and C code
 

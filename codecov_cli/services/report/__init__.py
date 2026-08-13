@@ -6,7 +6,9 @@ import typing
 from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.helpers import request
 from codecov_cli.helpers.config import CODECOV_API_URL, CODECOV_INGEST_URL
-from codecov_cli.helpers.encoder import encode_slug
+import click
+
+from codecov_cli.helpers.encoder import safe_encode_slug
 from codecov_cli.helpers.request import (
     get_token_header,
     log_warnings_and_errors_if_any,
@@ -30,7 +32,9 @@ def create_report_logic(
     fail_on_error: bool = False,
     args: typing.Union[dict, None] = None,
 ):
-    encoded_slug = encode_slug(slug)
+    encoded_slug = safe_encode_slug(slug)
+    if encoded_slug is None:
+        raise click.UsageError("The provided slug is invalid")
     sending_result = send_create_report_request(
         commit_sha,
         code,
@@ -78,7 +82,9 @@ def create_report_results_logic(
     fail_on_error: bool = False,
     args: typing.Union[dict, None] = None,
 ):
-    encoded_slug = encode_slug(slug)
+    encoded_slug = safe_encode_slug(slug)
+    if encoded_slug is None:
+        raise click.UsageError("The provided slug is invalid")
     sending_result = send_reports_result_request(
         commit_sha=commit_sha,
         report_code=code,

@@ -73,7 +73,7 @@ def test_create_report_command_with_warnings(mocker):
             text="",
         ),
     )
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     with runner.isolation() as outstreams:
         res = create_report_logic(
             commit_sha="commit_sha",
@@ -116,7 +116,7 @@ def test_create_report_command_with_error(mocker):
             warnings=[],
         ),
     )
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     with runner.isolation() as outstreams:
         res = create_report_logic(
             commit_sha="commit_sha",

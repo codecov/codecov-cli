@@ -20,7 +20,7 @@ def test_commit_command_with_warnings(mocker):
             text="",
         ),
     )
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     with runner.isolation() as outstreams:
         res = create_commit_logic(
             commit_sha="commit_sha",
@@ -66,7 +66,7 @@ def test_commit_command_with_error(mocker):
             text="Permission denied",
         ),
     )
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     with runner.isolation() as outstreams:
         res = create_commit_logic(
             commit_sha="commit_sha",

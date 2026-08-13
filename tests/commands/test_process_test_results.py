@@ -26,7 +26,7 @@ def test_process_test_results(
             status_code=200, error=None, warnings=[], text="yay it worked"
         ),
     )
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         [
@@ -68,7 +68,7 @@ def test_process_test_results_create_github_message(
             status_code=200, error=None, warnings=[], text="yay it worked"
         ),
     )
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         [
@@ -138,7 +138,7 @@ def test_process_test_results_update_github_message(
             status_code=200, error=None, warnings=[], text="yay it worked"
         ),
     )
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         [
@@ -189,7 +189,7 @@ def test_process_test_results_errors_getting_comments(
             status_code=200, error=None, warnings=[], text="yay it worked"
         ),
     )
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         [
@@ -222,7 +222,7 @@ def test_process_test_results_non_existent_file(mocker, tmpdir):
             status_code=200, error=None, warnings=[], text="yay it worked"
         ),
     )
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         [
@@ -260,7 +260,7 @@ def test_process_test_results_missing_repo(mocker, tmpdir):
             status_code=200, error=None, warnings=[], text="yay it worked"
         ),
     )
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         [
@@ -301,7 +301,7 @@ def test_process_test_results_missing_ref(mocker, tmpdir):
             status_code=200, error=None, warnings=[], text="yay it worked"
         ),
     )
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(
         cli,
         [

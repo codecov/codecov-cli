@@ -21,7 +21,7 @@ def hello_world(ctx, test):
 
 
 def test_branded_option():
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
 
     result = runner.invoke(cli, ["hello-world"], env={"CODECOV_TEST": "hello_codecov"})
     assert result.output == "hello_codecov\n"
@@ -52,7 +52,7 @@ def with_name_fallback(name):
 
 
 def test_codecov_option_fallback_fields_uses_second_when_first_is_none():
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     adapter = MagicMock()
 
     def get_fallback(field):
@@ -73,7 +73,7 @@ def test_codecov_option_fallback_fields_uses_second_when_first_is_none():
 
 
 def test_codecov_option_fallback_fields_prefers_first_when_set():
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     adapter = MagicMock()
 
     def get_fallback(field):

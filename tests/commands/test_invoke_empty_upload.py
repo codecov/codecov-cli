@@ -11,7 +11,7 @@ def test_invoke_empty_upload_with_create_commit(mocker):
     fake_ci_provider = FakeProvider({FallbackFieldEnum.commit_sha: None})
     mocker.patch("codecov_cli.main.get_ci_adapter", return_value=fake_ci_provider)
 
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(cli, ["empty-upload",
                     "-C", "command-sha",
                     "--slug", "owner/repo",

@@ -47,7 +47,7 @@ class CodecovOption(click.Option):
         res = super().get_default(ctx, call=call)
         if res is not None:
             return res
-        if self.fallback_fields is not None:
+        if self.fallback_fields is not None and ctx.obj is not None:
             for field in self.fallback_fields:
                 if ctx.obj.get("ci_adapter") is not None:
                     res = ctx.obj.get("ci_adapter").get_fallback_value(field)

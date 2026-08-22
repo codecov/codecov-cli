@@ -6,6 +6,7 @@ import click
 
 from codecov_cli.fallbacks import FallbackFieldEnum
 from codecov_cli.helpers.ci_adapters.base import CIAdapterBase
+from codecov_cli.helpers.encoder import slug_with_subgroups_is_invalid
 from codecov_cli.helpers.request import log_warnings_and_errors_if_any
 from codecov_cli.helpers.versioning_systems import VersioningSystemInterface
 from codecov_cli.helpers.upload_type import ReportType
@@ -64,6 +65,11 @@ def do_upload_logic(
     report_type: ReportType = ReportType.COVERAGE,
     use_legacy_uploader: bool = False,
 ):
+    if not slug or slug_with_subgroups_is_invalid(slug):
+        raise click.ClickException(
+            "Slug is required but was not provided or is invalid. "
+            "Please provide it via the --slug option in the format 'owner/repo'."
+        )
     plugin_config = {
         "folders_to_ignore": files_search_exclude_folders,
         "gcov_args": gcov_args,

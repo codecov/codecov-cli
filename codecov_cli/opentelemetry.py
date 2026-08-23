@@ -17,10 +17,11 @@ def _before_send(event, hint):
     messages = []
     if "message" in event and event.get("message") is not None:
         messages.append(event.get("message"))
-    if "logentry" in event and "message" in event.get("logentry", {}) and event.get("logentry", {}).get("message") is not None:
-        messages.append(event.get("logentry", {}).get("message"))
+    logentry = event.get("logentry") or {}
+    if logentry.get("message") is not None:
+        messages.append(logentry.get("message"))
     if "exception" in event and event.get("exception") is not None:
-        for exc in event.get("exception", {}).get("values", []):
+        for exc in (event.get("exception") or {}).get("values") or []:
             if "value" in exc:
                 messages.append(exc.get("value"))
 

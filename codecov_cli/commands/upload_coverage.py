@@ -135,14 +135,14 @@ def upload_coverage(
                     slug=slug,
                     token=token,
                     git_service=git_service,
-                    fail_on_error=True,
+                    fail_on_error=fail_on_error,
                 )
                 if report_type == ReportType.COVERAGE:
                     ctx.invoke(
                         create_report,
                         token=token,
                         code=report_code,
-                        fail_on_error=True,
+                        fail_on_error=fail_on_error,
                         commit_sha=commit_sha,
                         slug=slug,
                         git_service=git_service,

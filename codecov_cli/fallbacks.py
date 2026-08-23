@@ -3,6 +3,8 @@ from enum import Enum, auto
 
 import click
 
+from codecov_cli.branding import Branding
+
 
 class FallbackFieldEnum(Enum):
     branch = auto()
@@ -66,8 +68,13 @@ class CodecovOption(click.Option):
 class BrandedOption(click.Option):
     def resolve_envvar_value(self, ctx: click.Context) -> typing.Optional[str]:
         actual_var = self.envvar
+        branding = (
+            ctx.obj.get("branding", [Branding.CODECOV])
+            if ctx.obj is not None
+            else [Branding.CODECOV]
+        )
         self.envvar = [
-            f"{brand.value.upper()}_{actual_var}" for brand in ctx.obj["branding"]
+            f"{brand.value.upper()}_{actual_var}" for brand in branding
         ]
         res = super().resolve_envvar_value(ctx)
         self.envvar = actual_var

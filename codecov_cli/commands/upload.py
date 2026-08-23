@@ -261,8 +261,8 @@ def do_upload(
 ):
     with sentry_sdk.start_transaction(op="task", name="Do Upload"):
         with sentry_sdk.start_span(name="do_upload"):
-            versioning_system = ctx.obj["versioning_system"]
-            codecov_yaml = ctx.obj["codecov_yaml"] or {}
+            versioning_system = ctx.obj.get("versioning_system")
+            codecov_yaml = ctx.obj.get("codecov_yaml") or {}
             cli_config = codecov_yaml.get("cli", {})
             ci_adapter = ctx.obj.get("ci_adapter")
             enterprise_url = ctx.obj.get("enterprise_url")

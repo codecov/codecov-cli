@@ -77,8 +77,8 @@ def upload_coverage(
             report_type = report_type_from_str(report_type_str)
 
             if not use_legacy_uploader and report_type == ReportType.COVERAGE:
-                versioning_system = ctx.obj["versioning_system"]
-                codecov_yaml = ctx.obj["codecov_yaml"] or {}
+                versioning_system = ctx.obj.get("versioning_system")
+                codecov_yaml = ctx.obj.get("codecov_yaml") or {}
                 cli_config = codecov_yaml.get("cli", {})
                 ci_adapter = ctx.obj.get("ci_adapter")
                 enterprise_url = ctx.obj.get("enterprise_url")

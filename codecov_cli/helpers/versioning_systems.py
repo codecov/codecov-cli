@@ -174,7 +174,7 @@ class GitVersioningSystem(VersioningSystemInterface):
         if recurse_submodules:
             cmd.append("--recurse-submodules")
         res = subprocess.run(cmd, capture_output=True)
-        return res.stdout.decode().split("\0")
+        return res.stdout.decode(errors="replace").split("\0")
 
 
 class NoVersioningSystem(VersioningSystemInterface):

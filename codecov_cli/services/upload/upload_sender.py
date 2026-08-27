@@ -189,10 +189,21 @@ class UploadSender(object):
         return file_fixers
 
     def _get_files(self, upload_data: UploadCollectionResult):
-        return [self._format_file(file) for file in upload_data.files]
+        return [
+            result
+            for result in (self._format_file(file) for file in upload_data.files)
+            if result is not None
+        ]
 
     def _format_file(self, file: UploadCollectionResultFile):
-        format, formatted_content = self._get_format_info(file)
+        try:
+            format, formatted_content = self._get_format_info(file)
+        except FileNotFoundError:
+            logger.warning(
+                f"Coverage file not found, skipping: {file.get_filename()}. "
+                "The file may have been removed before upload (e.g. a temporary coverage file cleaned up by the test framework)."
+            )
+            return None
         return {
             "filename": file.get_filename(),
             "format": format,

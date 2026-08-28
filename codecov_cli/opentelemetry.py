@@ -14,6 +14,12 @@ _SKIP_TAG_KEYS = {"branch", "flags", "commit_sha", "env_vars"}
 
 
 def _before_send(event, hint):
+    exc_info = hint.get("exc_info")
+    if exc_info:
+        exc_type, exc_value, _ = exc_info
+        if exc_type is SystemExit and exc_value.code in (0, None):
+            return None
+
     messages = []
     if "message" in event and event.get("message") is not None:
         messages.append(event.get("message"))

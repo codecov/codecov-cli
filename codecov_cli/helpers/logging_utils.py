@@ -42,11 +42,12 @@ class ColorFormatter(logging.Formatter):
                     f"{prefix} - {asctime} -- {x}" for x in msg.splitlines()
                 )
             if hasattr(record, "extra_log_attributes"):
-                token = record.extra_log_attributes.get("token")
-                if token:
-                    record.extra_log_attributes["token"] = (
-                        "NOTOKEN" if not token else (str(token)[:1] + 18 * "*")
-                    )
+                passed_token_attribute = record.extra_log_attributes.get("token")
+                record.extra_log_attributes["token"] = (
+                    "NOTOKEN"
+                    if passed_token_attribute is None
+                    else (str(passed_token_attribute)[:1] + 18 * "*")
+                )
                 msg += " --- " + json.dumps(
                     record.extra_log_attributes, cls=JsonEncoder
                 )

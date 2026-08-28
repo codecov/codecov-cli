@@ -71,7 +71,7 @@ def search_files(
                 directory
                 for directory in dirnames
                 if multipart_exclude_regex.match(
-                    (pathlib.Path(dirpath) / directory).as_posix()
+                    pathlib.Path(os.path.join(str(dirpath), directory)).as_posix()
                 )
             )
 
@@ -82,12 +82,12 @@ def search_files(
 
         if search_for_directories:
             for directory in dirnames:
-                dir_path = pathlib.Path(dirpath) / directory
+                dir_path = pathlib.Path(os.path.join(str(dirpath), directory))
                 if not this_is_excluded(dir_path) and this_is_included(dir_path):
                     yield dir_path
         else:
             for single_filename in filenames:
-                file_path = pathlib.Path(dirpath) / single_filename
+                file_path = pathlib.Path(os.path.join(str(dirpath), single_filename))
                 if not this_is_excluded(file_path) and this_is_included(file_path):
                     yield file_path
 

@@ -145,6 +145,13 @@ class UploadCollector(object):
             )
         except IsADirectoryError:
             logger.info(f"Skipping {filename}, found a directory not a file")
+        except TypeError as err:
+            logger.warning(
+                f"There was an issue applying file fixes to: {filename}, file fixes were not applied to this file.",
+                extra=dict(
+                    reason=str(err),
+                ),
+            )
 
         return UploadCollectionResultFileFixer(
             path, fixed_lines_without_reason, fixed_lines_with_reason, eof

@@ -3,17 +3,20 @@ name ?= codecovcli
 tag_regex := ^v([0-9]{1,}\.){2}[0-9]{1,}([-_]\w+)?$
 
 lint.install:
-	echo "Installing ruff..."
-	pip install -Iv ruff
+	echo "Installing codespell and ruff..."
+	pip install -Iv codespell ruff
 
 # The preferred method (for now) w.r.t. fixable rules is to manually update the makefile
 # with --fix and re-run 'make lint.' Since ruff is constantly adding rules this is a slight
 # amount of "needed" friction imo.
 lint.run:
+	codespell --ignore-words-list=aks,doesnt,elemen
 	ruff check --ignore F401 --exclude languages --exclude samples
 	ruff format --exclude languages --exclude samples
 
 lint.check:
+	echo "Spell checking..."
+	codespell --ignore-words-list=aks,doesnt,elemen
 	echo "Linting..."
 	ruff check --ignore F401 --exclude languages --exclude samples
 	echo "Formatting..."

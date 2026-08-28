@@ -226,12 +226,16 @@ class TestCoverageFileFinderUserInput:
         for file in coverage_files:
             file.touch()
 
-        coverage_file_finder.explicitly_listed_files = [Path("coverage.xml/coverage.xml")]
+        coverage_file_finder.explicitly_listed_files = [
+            Path("coverage.xml/coverage.xml")
+        ]
         result = sorted(
             [file.get_filename() for file in coverage_file_finder.find_files()]
         )
         expected = [
-            UploadCollectionResultFile(Path(f"{project_root}/coverage.xml/coverage.xml")),
+            UploadCollectionResultFile(
+                Path(f"{project_root}/coverage.xml/coverage.xml")
+            ),
         ]
         expected_paths = sorted([file.get_filename() for file in expected])
         assert result == expected_paths
@@ -241,7 +245,9 @@ class TestCoverageFileFinderUserInput:
             [file.get_filename() for file in coverage_file_finder.find_files()]
         )
         expected = [
-            UploadCollectionResultFile(Path(f"{project_root}/coverage.xml/coverage.xml")),
+            UploadCollectionResultFile(
+                Path(f"{project_root}/coverage.xml/coverage.xml")
+            ),
         ]
         expected_paths = sorted([file.get_filename() for file in expected])
         assert result == expected_paths

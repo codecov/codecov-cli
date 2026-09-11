@@ -145,6 +145,10 @@ class UploadCollector(object):
             )
         except IsADirectoryError:
             logger.info(f"Skipping {filename}, found a directory not a file")
+        except FileNotFoundError:
+            logger.warning(
+                f"Skipping {filename}, file not found on disk (may be from a sparse checkout)"
+            )
 
         return UploadCollectionResultFileFixer(
             path, fixed_lines_without_reason, fixed_lines_with_reason, eof

@@ -125,6 +125,9 @@ class GitVersioningSystem(VersioningSystemInterface):
 
             remotes = p.stdout.decode().strip().splitlines()
 
+            if not remotes:
+                return None
+
             remote_name = "origin" if "origin" in remotes else remotes[0]
 
             p = subprocess.run(
@@ -145,6 +148,10 @@ class GitVersioningSystem(VersioningSystemInterface):
                 return None
 
             remotes = p.stdout.decode().strip().splitlines()
+
+            if not remotes:
+                return None
+
             remote_name = "origin" if "origin" in remotes else remotes[0]
             p = subprocess.run(
                 ["git", "ls-remote", "--get-url", remote_name], capture_output=True

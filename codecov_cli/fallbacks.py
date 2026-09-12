@@ -50,14 +50,20 @@ class CodecovOption(click.Option):
         if self.fallback_fields is not None:
             for field in self.fallback_fields:
                 if ctx.obj.get("ci_adapter") is not None:
-                    res = ctx.obj.get("ci_adapter").get_fallback_value(field)
+                    try:
+                        res = ctx.obj.get("ci_adapter").get_fallback_value(field)
+                    except KeyError:
+                        res = None
                     if res is not None:
                         return res
                 if (
                     ctx.obj.get("versioning_system") is not None
                     and field in _FIELDS_WITH_VERSIONING_FALLBACK
                 ):
-                    res = ctx.obj.get("versioning_system").get_fallback_value(field)
+                    try:
+                        res = ctx.obj.get("versioning_system").get_fallback_value(field)
+                    except KeyError:
+                        res = None
                     if res is not None:
                         return res
         return None

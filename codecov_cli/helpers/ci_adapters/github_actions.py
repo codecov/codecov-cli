@@ -18,12 +18,15 @@ class GithubActionsCIAdapter(CIAdapterBase):
             return commit
 
         # actions/checkout should be run with fetch-depth > 1 or set to 0 for this to work
-        completed_subprocess = subprocess.run(
-            ["git", "rev-parse", "HEAD^@"], capture_output=True
-        )
-        parents_hash = completed_subprocess.stdout.decode().strip().splitlines()
-        if len(parents_hash) == 2:
-            return parents_hash[1]
+        try:
+            completed_subprocess = subprocess.run(
+                ["git", "rev-parse", "HEAD^@"], capture_output=True
+            )
+            parents_hash = completed_subprocess.stdout.decode().strip().splitlines()
+            if len(parents_hash) == 2:
+                return parents_hash[1]
+        except OSError:
+            pass  # git not available in PATH; fall back to GITHUB_SHA
 
         return commit
 

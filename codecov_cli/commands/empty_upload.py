@@ -55,6 +55,11 @@ def empty_upload(
             enterprise_url = ctx.obj.get("enterprise_url")
             args = get_cli_args(ctx)
 
+            if not commit_sha or not str(commit_sha).strip():
+                raise click.UsageError(
+                    "Unable to determine the commit SHA. Please provide it explicitly with -C/--sha/--commit-sha."
+                )
+
             logger.debug("Attempting to Create Commit before doing an empty upload.")
             create_commit_logic(
                 commit_sha,

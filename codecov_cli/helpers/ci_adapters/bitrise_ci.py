@@ -10,7 +10,10 @@ class BitriseCIAdapter(CIAdapterBase):
         return bool(os.getenv("CI")) and bool(os.getenv("BITRISE_IO"))
 
     def _get_commit_sha(self):
-        return os.getenv("GIT_CLONE_COMMIT_HASH")
+        commit_sha = os.getenv("GIT_CLONE_COMMIT_HASH")
+        if commit_sha is None or not commit_sha.strip():
+            return None
+        return commit_sha.strip()
 
     def _get_build_url(self):
         return os.getenv("BITRISE_BUILD_URL")

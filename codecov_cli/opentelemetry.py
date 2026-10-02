@@ -13,7 +13,35 @@ _SAMPLE_RATE = 100
 _SKIP_TAG_KEYS = {"branch", "flags", "commit_sha", "env_vars"}
 
 
+def _is_frame_from_cli(frame) -> bool:
+    module = frame.get("module") or ""
+    if module == "codecov_cli" or module.startswith("codecov_cli."):
+        return True
+    path = (frame.get("abs_path") or frame.get("filename") or "").replace("\\", "/")
+    return "/codecov_cli/" in path or path.startswith("codecov_cli/")
+
+
+def _exception_originates_outside_cli(event) -> bool:
+    """Return True if the event has exception stack frames but none from codecov_cli.
+
+    This happens when the CLI is invoked in-process by an external script or
+    test harness and an unrelated uncaught exception is captured by the SDK's
+    excepthook. Such events are not CLI errors and should not be reported.
+    """
+    exception = event.get("exception") or {}
+    frames = []
+    for exc in exception.get("values") or []:
+        stacktrace = (exc or {}).get("stacktrace") or {}
+        frames.extend(stacktrace.get("frames") or [])
+    if not frames:
+        return False
+    return not any(_is_frame_from_cli(frame or {}) for frame in frames)
+
+
 def _before_send(event, hint):
+    if _exception_originates_outside_cli(event):
+        return None
+
     messages = []
     if "message" in event and event.get("message") is not None:
         messages.append(event.get("message"))

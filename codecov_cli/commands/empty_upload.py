@@ -13,6 +13,25 @@ from codecov_cli.types import CommandContext
 
 logger = logging.getLogger("codecovcli")
 
+_EXPLICIT_SOURCES = (
+    click.core.ParameterSource.COMMANDLINE,
+    click.core.ParameterSource.ENVIRONMENT,
+)
+
+
+def _should_create_commit(ctx: click.Context, **values: typing.Any) -> bool:
+    """Only create a commit when the user explicitly provided commit values.
+
+    Values populated through CI/versioning-system fallbacks (e.g. the current
+    git branch) do not count as explicitly provided.
+    """
+    for name, value in values.items():
+        if value is None:
+            continue
+        if ctx.get_parameter_source(name) in _EXPLICIT_SOURCES:
+            return True
+    return False
+
 
 @click.command()
 @click.option("--force", is_flag=True, default=False)
@@ -55,19 +74,31 @@ def empty_upload(
             enterprise_url = ctx.obj.get("enterprise_url")
             args = get_cli_args(ctx)
 
-            logger.debug("Attempting to Create Commit before doing an empty upload.")
-            create_commit_logic(
-                commit_sha,
-                parent_sha,
-                pull_request_number,
-                branch,
-                slug,
-                token,
-                git_service,
-                enterprise_url,
-                fail_on_error,
-                args,
-            )
+            if _should_create_commit(
+                ctx,
+                parent_sha=parent_sha,
+                pull_request_number=pull_request_number,
+                branch=branch,
+            ):
+                logger.debug(
+                    "Attempting to Create Commit before doing an empty upload."
+                )
+                create_commit_logic(
+                    commit_sha,
+                    parent_sha,
+                    pull_request_number,
+                    branch,
+                    slug,
+                    token,
+                    git_service,
+                    enterprise_url,
+                    fail_on_error,
+                    args,
+                )
+            else:
+                logger.debug(
+                    "No parent SHA, pull request number or branch provided. Skipping commit creation."
+                )
 
             logger.debug(
                 "Starting empty upload process",

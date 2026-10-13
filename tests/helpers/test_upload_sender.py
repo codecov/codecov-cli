@@ -69,9 +69,7 @@ def _upload_ingest_post_json_base(*, file_not_found: bool) -> dict:
 
 
 _report_payload_bytes_coverage = len(
-    UploadSender()._generate_payload(
-        upload_collection, {}, ReportType.COVERAGE
-    )
+    UploadSender()._generate_payload(upload_collection, {}, ReportType.COVERAGE)
 )
 
 request_data = {
@@ -90,9 +88,7 @@ def _test_results_ingest_post_json(
         "commit": random_sha,
         "service": "github",
         "report_payload_bytes": len(
-            UploadSender()._generate_payload(
-                upload_data, {}, ReportType.TEST_RESULTS
-            )
+            UploadSender()._generate_payload(upload_data, {}, ReportType.TEST_RESULTS)
         ),
     }
 
@@ -515,7 +511,7 @@ class TestPayloadGeneration(object):
                     },
                     "SwiftExample/Hello.swift": {
                         "eof": 30,
-                        "lines": [1, 17, 3, 22, 7, 9, 12, 14],
+                        "lines": [1, 3, 7, 9, 12, 14, 17, 18, 19, 20, 21, 22],
                     },
                     "SwiftExample/ViewController.swift": {
                         "eof": None,
@@ -606,3 +602,43 @@ class TestPayloadGeneration(object):
             "data": "encoded_file_data",
             "labels": "",
         }
+
+
+@pytest.mark.parametrize(
+    "start,stop",
+    [
+        ("// LCOV_EXCL_START", "// LCOV_EXCL_STOP"),
+        ("// LCOV_EXCL_START", "// LCOV_EXCL_END"),
+        ("    /*", "    */"),
+    ],
+)
+def test_payload_expands_exclusion_blocks(start, stop):
+    fixes = UploadCollectionResultFileFixer(
+        Path("sample.cpp"), {1}, {(3, start), (6, stop)}, None
+    )
+    data = UploadCollectionResult([], [], [fixes])
+    payload = json.loads(UploadSender()._generate_payload(data, {}))
+    assert payload["report_fixes"]["value"]["sample.cpp"]["lines"] == [1, 3, 4, 5, 6]
+
+
+@pytest.mark.parametrize(
+    "markers,expected",
+    [
+        ({(3, "// LCOV_EXCL_START")}, [3]),
+        ({(6, "// LCOV_EXCL_STOP")}, [6]),
+        ({(3, "// LCOV_EXCL_LINE")}, [3]),
+        (
+            {
+                (3, "// LCOV_EXCL_START"),
+                (5, "// LCOV_EXCL_STOP"),
+                (8, "// LCOV_EXCL_START"),
+                (10, "// LCOV_EXCL_END"),
+            },
+            [3, 4, 5, 8, 9, 10],
+        ),
+    ],
+)
+def test_payload_exclusion_boundaries(markers, expected):
+    fixes = UploadCollectionResultFileFixer(Path("sample.cpp"), set(), markers, None)
+    data = UploadCollectionResult([], [], [fixes])
+    assert UploadSender()._get_file_fixers(data)["sample.cpp"]["lines"] == expected

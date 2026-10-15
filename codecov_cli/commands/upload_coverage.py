@@ -20,8 +20,8 @@ logger = logging.getLogger("codecovcli")
 
 # These options are the combined options of commit, report and upload commands
 @click.command()
-@global_options
 @global_upload_options
+@global_options
 @click.option(
     "--parent-sha",
     help="SHA (with 40 chars) of what should be the parent of this commit",

@@ -33,7 +33,9 @@ logger = logging.getLogger("codecovcli")
     fallback_field=FallbackFieldEnum.pull_request_number,
 )
 @click.option(
+    "-r",
     "--slug",
+    "slug",
     cls=BrandedCodecovOption,
     fallback_field=FallbackFieldEnum.slug,
     help="owner/repo slug",

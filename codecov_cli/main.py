@@ -58,7 +58,7 @@ def cli(
     verbose: bool = False,
     disable_telem: bool = False,
 ):
-    ctx.obj["cli_args"] = ctx.params
+    ctx.obj["cli_args"] = dict(ctx.params)
     ctx.obj["cli_args"]["version"] = f"cli-{__version__}"
     configure_logger(logger, log_level=(logging.DEBUG if verbose else logging.INFO))
     ctx.help_option_names = ["-h", "--help"]

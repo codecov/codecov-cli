@@ -7,9 +7,10 @@
 - Update the other runtime packages: click 8.2.1, ijson 3.6.0, PyYAML 6.0.3,
   requests 2.34.2, sentry-sdk 2.73.0, urllib3 2.8.0, charset-normalizer 3.5.2,
   and idna 3.20. Click stays below 8.3.
-- Build the Linux and Alpine release binaries with Python 3.11.18. Those jobs
-  were still compiling on the image Python 3.9, which has no patch for
-  CVE-2026-115557.
+- Build the Alpine release binary on `alpine:edge` (Python 3.14.10). That
+  binary now needs musl 1.2.6, which means Alpine 3.24 or newer. Build the
+  Linux binaries with Python 3.11.18. Both jobs were still compiling on the
+  image Python 3.9, which has no patch for CVE-2026-115557.
 
 ## 11.3.1
 

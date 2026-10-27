@@ -78,11 +78,11 @@ jobs:
     strategy:
       matrix:
         include:
-          - distro: "alpine:3.14" # musl 1.2.2; Python 3.11.18 is built from source in the image
+          - distro: "alpine:edge" # Python 3.14.10; binary needs musl 1.2.6 (Alpine 3.24+)
             arch: arm64
             distro_name: alpine
             runs-on: ubuntu-24.04-arm
-          - distro: "alpine:3.14"
+          - distro: "alpine:edge"
             arch: x86_64
             distro_name: alpine
             runs-on: ubuntu-24.04

@@ -25,7 +25,7 @@ def test_upload_completion_with_warnings(mocker):
         res = upload_completion_logic(
             "commit_sha", "owner/repo", uuid.uuid4(), "github", None
         )
-    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+        out_bytes = parse_outstreams_into_log_lines(outstreams[2].getvalue())
     assert out_bytes == [
         ("info", "Upload Completion complete"),
         ("info", "Upload Completion process had 1 warning"),
@@ -54,7 +54,7 @@ def test_upload_completion_with_error(mocker):
         res = upload_completion_logic(
             "commit_sha", "owner/repo", uuid.uuid4(), "github", None
         )
-    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+        out_bytes = parse_outstreams_into_log_lines(outstreams[2].getvalue())
     assert out_bytes == [
         ("info", "Upload Completion complete"),
         ("error", "Upload Completion failed: Permission denied"),
@@ -82,7 +82,7 @@ def test_upload_completion_200(mocker):
         res = upload_completion_logic(
             "commit_sha", "owner/repo", token, "github", None
         )
-    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+        out_bytes = parse_outstreams_into_log_lines(outstreams[2].getvalue())
     assert out_bytes == [
         ("info", "Upload Completion complete"),
         (
@@ -111,7 +111,7 @@ def test_upload_completion_no_token(mocker):
     runner = CliRunner()
     with runner.isolation() as outstreams:
         res = upload_completion_logic("commit_sha", "owner/repo", None, "github", None)
-    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+        out_bytes = parse_outstreams_into_log_lines(outstreams[2].getvalue())
     assert out_bytes == [
         ("info", "Upload Completion complete"),
         (

@@ -78,7 +78,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - distro: "alpine:3.14" # alpine 3.14 needed for musl 1.2.2/python 3.9 compatibility
+          - distro: "alpine:3.14" # musl 1.2.2; Python 3.11.18 is built from source in the image
             arch: arm64
             distro_name: alpine
             runs-on: ubuntu-24.04-arm
@@ -86,7 +86,7 @@ jobs:
             arch: x86_64
             distro_name: alpine
             runs-on: ubuntu-24.04
-          - distro: "ubuntu:20.04" # ubuntu 20.04 needed for glibc 2.31/python 3.9 compatibility
+          - distro: "ubuntu:20.04" # glibc 2.31; the binary bundles Python 3.11.18 (glibc 2.17)
             arch: arm64
             distro_name: linux
             runs-on: ubuntu-24.04-arm

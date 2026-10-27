@@ -33,8 +33,7 @@ def test_report_results_command_with_warnings(mocker):
             enterprise_url=None,
             args=None,
         )
-
-    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+        out_bytes = parse_outstreams_into_log_lines(outstreams[2].getvalue())
     assert out_bytes == [
         ("info", "Report results creating complete"),
         ("info", "Report results creating process had 1 warning"),
@@ -78,8 +77,7 @@ def test_report_results_command_with_error(mocker):
             enterprise_url=None,
             args=None,
         )
-
-    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+        out_bytes = parse_outstreams_into_log_lines(outstreams[2].getvalue())
     assert out_bytes == [
         ("info", "Report results creating complete"),
         ("error", "Report results creating failed: Permission denied"),

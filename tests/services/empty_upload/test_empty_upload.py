@@ -32,7 +32,7 @@ def test_empty_upload_with_warnings(mocker):
             False,
             None,
         )
-    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+        out_bytes = parse_outstreams_into_log_lines(outstreams[2].getvalue())
     assert out_bytes == [
         ("info", "Empty Upload complete"),
         ("info", "Empty Upload process had 1 warning"),
@@ -68,8 +68,7 @@ def test_empty_upload_with_error(mocker):
             False,
             None,
         )
-
-    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+        out_bytes = parse_outstreams_into_log_lines(outstreams[2].getvalue())
     assert out_bytes == [
         ("info", "Empty Upload complete"),
         ("error", "Empty Upload failed: Permission denied"),
@@ -95,7 +94,7 @@ def test_empty_upload_200(mocker):
         res = empty_upload_logic(
             "commit_sha", "owner/repo", token, "github", None, False, False, None
         )
-    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+        out_bytes = parse_outstreams_into_log_lines(outstreams[2].getvalue())
     assert out_bytes == [
         ("info", "Empty Upload complete"),
         ("info", "All changed files are ignored. Triggering passing notifications."),
@@ -140,7 +139,7 @@ def test_empty_upload_force(mocker):
         res = empty_upload_logic(
             "commit_sha", "owner/repo", token, "github", None, False, True, None
         )
-    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+        out_bytes = parse_outstreams_into_log_lines(outstreams[2].getvalue())
     assert out_bytes == [
         ("info", "Empty Upload complete"),
         ("info", "Force option was enabled. Triggering passing notifications."),
@@ -167,8 +166,7 @@ def test_empty_upload_no_token(mocker):
         res = empty_upload_logic(
             "commit_sha", "owner/repo", None, "github", None, False, False, None
         )
-
-    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+        out_bytes = parse_outstreams_into_log_lines(outstreams[2].getvalue())
     assert out_bytes == [
         ("info", "Empty Upload complete"),
         ("info", "All changed files are ignored. Triggering passing notifications."),

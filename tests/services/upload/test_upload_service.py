@@ -78,7 +78,7 @@ def test_do_upload_logic_happy_path_legacy_uploader(mocker):
             enterprise_url=None,
             args=None,
         )
-    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+        out_bytes = parse_outstreams_into_log_lines(outstreams[2].getvalue())
     assert out_bytes == [
         ("info", "Upload queued for processing complete"),
         ("info", "Upload queued for processing process had 1 warning"),
@@ -193,7 +193,7 @@ def test_do_upload_logic_happy_path(mocker):
             git_service="git_service",
             enterprise_url=None,
         )
-    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+        out_bytes = parse_outstreams_into_log_lines(outstreams[2].getvalue())
     assert out_bytes == [
         ("info", "Upload queued for processing complete"),
         ("info", "Upload queued for processing process had 1 warning"),
@@ -305,7 +305,7 @@ def test_do_upload_logic_dry_run(mocker):
             git_service="git_service",
             enterprise_url=None,
         )
-    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+        out_bytes = parse_outstreams_into_log_lines(outstreams[2].getvalue())
     mock_select_file_finder.assert_called_with(
         None, None, None, False, ReportType.COVERAGE
     )
@@ -392,7 +392,7 @@ def test_do_upload_logic_verbose(mocker, use_verbose_option):
             report_type=ReportType.COVERAGE,
             use_legacy_uploader=True,
         )
-    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+        out_bytes = parse_outstreams_into_log_lines(outstreams[2].getvalue())
     assert out_bytes == [
         (
             "debug",
@@ -473,7 +473,7 @@ def test_do_upload_no_cov_reports_found(mocker):
             enterprise_url=None,
             handle_no_reports_found=True,
         )
-    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+        out_bytes = parse_outstreams_into_log_lines(outstreams[2].getvalue())
     assert out_bytes == [
         (
             "info",
@@ -669,7 +669,7 @@ def test_do_upload_logic_happy_path_test_results(mocker):
             token="token",
             report_type=ReportType.TEST_RESULTS,
         )
-    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
+        out_bytes = parse_outstreams_into_log_lines(outstreams[2].getvalue())
     assert out_bytes == [
         ("info", "Upload queued for processing complete"),
         ("info", "Upload queued for processing process had 1 warning"),

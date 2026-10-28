@@ -1,14 +1,3 @@
-## Unreleased
-
-### Bug Fixes 🐛
-
-- Require `certifi>=2026.10.23` so uploads do not trust the compromised eMudhra
-  intermediate CAs. `requests` and `sentry-sdk` load this bundle.
-- Update the other runtime packages: click 8.2.1, ijson 3.6.0, PyYAML 6.0.3,
-  requests 2.34.2, sentry-sdk 2.73.0, urllib3 2.8.0, charset-normalizer 3.5.2,
-  and idna 3.20. Click stays below 8.3.
-- Build the Linux release binaries with Python 3.10 instead of 3.9.
-
 ## 11.3.1
 
 ### Breaking Changes ⚠

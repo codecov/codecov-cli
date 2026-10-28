@@ -31,7 +31,8 @@ def test_commit_command_with_warnings(mocker):
             token="token",
             service="github",
         )
-        out_bytes = parse_outstreams_into_log_lines(outstreams[2].getvalue())
+
+    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
         ("info", "Commit creating complete"),
         ("info", "Commit creating process had 1 warning"),
@@ -78,7 +79,8 @@ def test_commit_command_with_error(mocker):
             enterprise_url=None,
             args={},
         )
-        out_bytes = parse_outstreams_into_log_lines(outstreams[2].getvalue())
+
+    out_bytes = parse_outstreams_into_log_lines(outstreams[0].getvalue())
     assert out_bytes == [
         (
             "info",

@@ -86,7 +86,7 @@ jobs:
             arch: x86_64
             distro_name: alpine
             runs-on: ubuntu-24.04
-          - distro: "ubuntu:20.04" # ubuntu 20.04 needed for glibc 2.31 compatibility
+          - distro: "ubuntu:20.04" # ubuntu 20.04 needed for glibc 2.31/python 3.9 compatibility
             arch: arm64
             distro_name: linux
             runs-on: ubuntu-24.04-arm

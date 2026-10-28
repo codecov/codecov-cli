@@ -78,11 +78,11 @@ jobs:
     strategy:
       matrix:
         include:
-          - distro: "alpine:edge" # Python 3.14.10; binary needs musl 1.2.6 (Alpine 3.24+)
+          - distro: "alpine:3.14" # alpine 3.14 needed for musl 1.2.2/python 3.9 compatibility
             arch: arm64
             distro_name: alpine
             runs-on: ubuntu-24.04-arm
-          - distro: "alpine:edge"
+          - distro: "alpine:3.14"
             arch: x86_64
             distro_name: alpine
             runs-on: ubuntu-24.04

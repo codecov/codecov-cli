@@ -78,19 +78,19 @@ jobs:
     strategy:
       matrix:
         include:
-          - distro: "alpine:3.14" # alpine 3.14 needed for musl 1.2.2/python 3.9 compatibility
+          - distro: "alpine:3.16" # oldest Alpine with Python 3.10 (musl 1.2.3)
             arch: arm64
             distro_name: alpine
             runs-on: ubuntu-24.04-arm
-          - distro: "alpine:3.14"
+          - distro: "alpine:3.16"
             arch: x86_64
             distro_name: alpine
             runs-on: ubuntu-24.04
-          - distro: "ubuntu:20.04" # ubuntu 20.04 needed for glibc 2.31/python 3.9 compatibility
+          - distro: "python:3.10-bullseye" # Python 3.10 on glibc 2.31, same floor as ubuntu 20.04
             arch: arm64
             distro_name: linux
             runs-on: ubuntu-24.04-arm
-          - distro: "ubuntu:20.04"
+          - distro: "python:3.10-bullseye"
             arch: x86_64
             distro_name: linux
             runs-on: ubuntu-24.04
@@ -100,8 +100,10 @@ jobs:
 
       - name: Run in Docker
         run: |
+          # python:* images set ENTRYPOINT to python3, which would swallow the build script.
           docker run \
             --rm \
+            --entrypoint /bin/sh \
             -v $(pwd):/${{ github.workspace }} \
             -w ${{ github.workspace }} \
             --platform linux/${{ matrix.arch }} \

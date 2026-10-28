@@ -1,6 +1,6 @@
 [project]
 name = "codecov-cli"
-version = "11.3.1"
+version = "11.3.2"
 description = "Codecov Command Line Interface"
 readme = "README.md"
 license-files = ["LICENSE"]

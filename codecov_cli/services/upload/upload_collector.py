@@ -83,6 +83,9 @@ class UploadCollector(object):
         )
 
         file_regex_patterns = {
+            # D reports already identify executable lines. Only collect explicit
+            # exclusion markers, including those indented inside functions.
+            "*.d": fix_patterns_to_apply([], [], False),
             "*.kt": kt_patterns_to_apply,
             "*.go": go_patterns_to_apply,
             "*.dart": dart_patterns_to_apply,
@@ -116,6 +119,14 @@ class UploadCollector(object):
 
         try:
             with open(filename, "r", encoding="utf-8") as f:
+                if path.suffix == ".d":
+                    from codecov_cli.services.upload.d_file_fixes import (
+                        d_exclusion_markers,
+                    )
+
+                    return UploadCollectionResultFileFixer(
+                        path, set(), d_exclusion_markers(f.read()), None
+                    )
                 # If lineno is unset that means that the
                 # file is empty thus the eof should be 0
                 # so lineno will be set to -1 here

@@ -293,3 +293,31 @@ The version tag must match the regex defined on the Makefile (`tag_regex := ^v([
 >**Note**: \
 >Releases with `test` word in them are created as `draft`. \
 >Releases with `beta` word in them are created as `pre-release`.
+
+### D coverage exclusions
+
+When file fixes are enabled, the CLI recognizes these markers in D `//`
+comments, including indented comments and comments after executable code:
+
+```d
+return double.nan; // LCOV_EXCL_LINE
+
+// LCOV_EXCL_START
+fallback();
+// LCOV_EXCL_STOP
+```
+
+`LCOV_EXCL_LINE` excludes only the marked line. `LCOV_EXCL_START` and
+`LCOV_EXCL_STOP` delimit an excluded block; `LCOV_EXCL_END` is also accepted
+as a closing marker. Pair block markers in source order and do not nest them.
+Branch-only exclusion markers are not supported for D's line-based reports.
+
+Markers must appear immediately after `//` and whitespace. Text in ordinary,
+raw, or backtick strings, character literals, and block comments is ignored.
+As a conservative limitation, files containing D token or delimited strings
+(`q{...}` or `q"..."`) receive no exclusions. These forms require a fuller D
+lexer to distinguish their contents safely.
+
+The source files must be available to the CLI. Exclusions are uploaded as
+file-fix metadata; the original `.lst` reports are not modified. Setting
+`--disable-file-fixes` disables this processing.

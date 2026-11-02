@@ -178,12 +178,29 @@ class UploadSender(object):
             fixed_lines_with_reason = set(
                 [fixer[0] for fixer in file_fixer.fixed_lines_with_reason]
             )
-            total_fixed_lines = list(
+            total_fixed_lines = set(
                 file_fixer.fixed_lines_without_reason.union(fixed_lines_with_reason)
             )
+            # The JSON payload has no source text for the worker to expand.
+            # Match the legacy worker's pairing of sorted block boundaries
+            # before discarding their reasons. Unpaired markers exclude only
+            # their own lines, rather than the rest of the file.
+            starts, stops = [], []
+            for line, source in file_fixer.fixed_lines_with_reason:
+                source = source.strip()
+                if source.startswith("/*") or "LCOV_EXCL_START" in source:
+                    starts.append(line)
+                elif (
+                    source.endswith("*/")
+                    or "LCOV_EXCL_STOP" in source
+                    or "LCOV_EXCL_END" in source
+                ):
+                    stops.append(line)
+            for start, stop in zip(sorted(starts), sorted(stops)):
+                total_fixed_lines.update(range(start + 1, stop))
             file_fixers[file_fixer.path.as_posix()] = {
                 "eof": file_fixer.eof,
-                "lines": total_fixed_lines,
+                "lines": sorted(total_fixed_lines),
             }
 
         return file_fixers

@@ -222,3 +222,82 @@ def test_generate_network_with_no_versioning_system(tmp_path):
     (tmp_path / "coverage.xml").touch()
     found_files = versioning_system.list_relevant_files(tmp_path)
     assert len(found_files) == 1
+
+
+def test_fix_d_exclusion_blocks(tmp_path):
+    source = tmp_path / "sample.d"
+    source.write_text(
+        "void main() {\n"
+        "    before();\n"
+        "    // LCOV_EXCL_START\n"
+        "    excluded();\n"
+        "    // LCOV_EXCL_STOP\n"
+        "    after();\n"
+        "}\n",
+        encoding="utf-8",
+    )
+    collector = UploadCollector(None, None, None, None)
+    fixes = collector._produce_file_fixes([source])
+    assert len(fixes) == 1
+    assert fixes[0].eof is None
+    assert fixes[0].fixed_lines_without_reason == set()
+    assert fixes[0].fixed_lines_with_reason == {
+        (3, "// LCOV_EXCL_START\n"),
+        (5, "// LCOV_EXCL_STOP\n"),
+    }
+
+
+def test_fix_d_exclusions_disabled(tmp_path):
+    source = tmp_path / "sample.d"
+    source.write_text("// LCOV_EXCL_START\nreturn;\n// LCOV_EXCL_END\n")
+    collector = UploadCollector(None, None, None, None, True)
+    assert collector._produce_file_fixes([source]) == []
+
+
+def test_fix_d_preserves_unmarked_code(tmp_path):
+    source = tmp_path / "sample.d"
+    source.write_text('void main() {\n    auto text = "// LCOV_EXCL_START";\n}\n')
+    collector = UploadCollector(None, None, None, None)
+    fixes = collector._produce_file_fixes([source])
+    assert fixes[0].fixed_lines_without_reason == set()
+    assert fixes[0].fixed_lines_with_reason == set()
+
+
+def test_d_exclusion_block_in_upload_payload(tmp_path):
+    import json
+    from codecov_cli.services.upload.upload_sender import UploadSender
+    from codecov_cli.types import UploadCollectionResult
+
+    source = tmp_path / "sample.d"
+    source.write_text(
+        "void main() {\n"
+        "    before();\n"
+        "    // LCOV_EXCL_START\n"
+        "    excluded();\n"
+        "    // LCOV_EXCL_STOP\n"
+        "    after();\n"
+        "}\n"
+    )
+    fixes = UploadCollector(None, None, None, None)._produce_file_fixes([source])
+    payload = json.loads(
+        UploadSender()._generate_payload(UploadCollectionResult([], [], fixes), {})
+    )
+    assert payload["report_fixes"]["value"][source.as_posix()]["lines"] == [3, 4, 5]
+
+
+def test_d_single_line_exclusion_in_upload_payload(tmp_path):
+    import json
+    from codecov_cli.services.upload.upload_sender import UploadSender
+    from codecov_cli.types import UploadCollectionResult
+
+    source = tmp_path / "sample.d"
+    source.write_text(
+        'auto text = "// LCOV_EXCL_LINE";\n'
+        "return double.nan; // LCOV_EXCL_LINE\n"
+        "keep();\n"
+    )
+    fixes = UploadCollector(None, None, None, None)._produce_file_fixes([source])
+    payload = json.loads(
+        UploadSender()._generate_payload(UploadCollectionResult([], [], fixes), {})
+    )
+    assert payload["report_fixes"]["value"][source.as_posix()]["lines"] == [2]

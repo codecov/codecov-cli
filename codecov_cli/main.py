@@ -1,5 +1,7 @@
 import logging
 import pathlib
+import signal
+import sys
 import typing
 
 import click
@@ -93,7 +95,23 @@ cli.add_command(static_analysis)
 
 
 def run():
-    cli(obj={})
+    # Restore default SIGPIPE handling on POSIX so the OS terminates the
+    # process cleanly when a pipe reader closes early, before Python raises
+    # BrokenPipeError inside Click's echo().
+    if hasattr(signal, "SIGPIPE"):
+        signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+
+    try:
+        cli(obj={})
+    except BrokenPipeError:
+        # Swallow broken-pipe errors that occur when stdout/stderr is closed
+        # by the consuming process (e.g. piped into `head`). Flush remaining
+        # output silently and exit with a non-zero code.
+        try:
+            sys.stderr.flush()
+        except BrokenPipeError:
+            pass
+        sys.exit(1)
 
 
 if __name__ == "__main__":

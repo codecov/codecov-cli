@@ -76,6 +76,7 @@ def pr_base_picking(
                 logger.error(
                     "Slug is invalid. Slug should be in the form of owner_username/repo_name"
                 )
+                ctx.exit(1)
                 return
 
             base_picking_logic(base_sha, pr, slug, token, service, enterprise_url, args)

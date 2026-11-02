@@ -150,7 +150,7 @@ Usage: codecovcli pr-base-picking [OPTIONS]
 Options:
   --base-sha TEXT   Base commit SHA (with 40 chars)  [required]
   --pr TEXT         Pull Request id to associate commit with
-  --slug TEXT       owner/repo slug
+  -r, --slug TEXT   owner/repo slug
   -t, --token TEXT  Codecov upload token
   --service TEXT    Specify the service provider of the repo e.g. github
   -h, --help        Show this message and exit.

@@ -45,7 +45,7 @@ def post(
     params: Optional[dict] = None,
 ) -> requests.Response:
     headers = _set_user_agent(headers)
-    return requests.post(url, json=data, headers=headers, params=params)
+    return requests.post(url=url, json=data, headers=headers, params=params)
 
 
 def backoff_time(curr_retry):

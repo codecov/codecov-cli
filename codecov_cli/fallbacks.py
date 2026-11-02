@@ -27,6 +27,15 @@ _FIELDS_WITH_VERSIONING_FALLBACK = frozenset(
 )
 
 
+def _is_missing(value: typing.Any) -> bool:
+    """A value is considered missing if it is None or a blank string."""
+    if value is None:
+        return True
+    if isinstance(value, str) and not value.strip():
+        return True
+    return False
+
+
 class CodecovOption(click.Option):
     fallback_fields: typing.Optional[tuple[FallbackFieldEnum, ...]]
 
@@ -45,20 +54,20 @@ class CodecovOption(click.Option):
         self, ctx: click.Context, call: bool = True
     ) -> typing.Optional[typing.Union[typing.Any, typing.Callable[[], typing.Any]]]:
         res = super().get_default(ctx, call=call)
-        if res is not None:
+        if not _is_missing(res):
             return res
         if self.fallback_fields is not None:
             for field in self.fallback_fields:
                 if ctx.obj.get("ci_adapter") is not None:
                     res = ctx.obj.get("ci_adapter").get_fallback_value(field)
-                    if res is not None:
+                    if not _is_missing(res):
                         return res
                 if (
                     ctx.obj.get("versioning_system") is not None
                     and field in _FIELDS_WITH_VERSIONING_FALLBACK
                 ):
                     res = ctx.obj.get("versioning_system").get_fallback_value(field)
-                    if res is not None:
+                    if not _is_missing(res):
                         return res
         return None
 

@@ -145,6 +145,10 @@ class UploadCollector(object):
             )
         except IsADirectoryError:
             logger.info(f"Skipping {filename}, found a directory not a file")
+        except FileNotFoundError:
+            logger.warning(
+                f"Skipping {filename}, file is tracked by git but was not found on disk; file fixes were not applied to this file."
+            )
 
         return UploadCollectionResultFileFixer(
             path, fixed_lines_without_reason, fixed_lines_with_reason, eof

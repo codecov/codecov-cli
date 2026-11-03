@@ -2,6 +2,7 @@ import inspect
 import logging
 import random
 import subprocess
+import sys
 from subprocess import CalledProcessError
 from sys import stdout
 from typing import List, Optional
@@ -20,7 +21,7 @@ class PytestStandardRunnerConfigParams(dict):
     @property
     def python_path(self) -> str:
         python_path = self.get("python_path")
-        return python_path or "python"
+        return python_path or sys.executable
 
     @property
     def collect_tests_options(self) -> List[str]:

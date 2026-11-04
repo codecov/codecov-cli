@@ -34,6 +34,12 @@ def select_preparation_plugins(
 
 
 def _load_plugin_from_yaml(plugin_dict: typing.Dict):
+    if not plugin_dict.get("module") or not plugin_dict.get("class"):
+        click.secho(
+            "Plugin config must include 'module' and 'class' keys",
+            err=True,
+        )
+        return NoopPlugin()
     try:
         module_obj = import_module(plugin_dict["module"])
         class_obj = getattr(module_obj, plugin_dict["class"])

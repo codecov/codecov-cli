@@ -5,12 +5,11 @@ import typing
 import click
 import sentry_sdk
 
-from codecov_cli.commands.commit import create_commit
-from codecov_cli.commands.report import create_report
-from codecov_cli.commands.upload import do_upload, global_upload_options
+from codecov_cli.commands.upload import global_upload_options
 from codecov_cli.helpers.args import get_cli_args
 from codecov_cli.helpers.options import global_options
 from codecov_cli.helpers.upload_type import report_type_from_str, ReportType
+from codecov_cli.services.upload_process import upload_process_logic
 from codecov_cli.types import CommandContext
 
 logger = logging.getLogger("codecovcli")
@@ -72,31 +71,18 @@ def upload_process(
                 ),
             )
 
-            ctx.invoke(
-                create_commit,
-                commit_sha=commit_sha,
-                parent_sha=parent_sha,
-                pull_request_number=pull_request_number,
-                branch=branch,
-                slug=slug,
-                token=token,
-                git_service=git_service,
-                fail_on_error=True,
-            )
-
+            versioning_system = ctx.obj["versioning_system"]
+            codecov_yaml = ctx.obj["codecov_yaml"] or {}
+            cli_config = codecov_yaml.get("cli", {})
+            ci_adapter = ctx.obj.get("ci_adapter")
+            enterprise_url = ctx.obj.get("enterprise_url")
             report_type = report_type_from_str(report_type_str)
-            if report_type == ReportType.COVERAGE:
-                ctx.invoke(
-                    create_report,
-                    token=token,
-                    code=report_code,
-                    fail_on_error=True,
-                    commit_sha=commit_sha,
-                    slug=slug,
-                    git_service=git_service,
-                )
-            ctx.invoke(
-                do_upload,
+
+            upload_process_logic(
+                cli_config,
+                versioning_system,
+                ci_adapter,
+                enterprise_url,
                 branch=branch,
                 build_code=build_code,
                 build_url=build_url,
@@ -121,13 +107,15 @@ def upload_process(
                 network_filter=network_filter,
                 network_prefix=network_prefix,
                 network_root_folder=network_root_folder,
+                parent_sha=parent_sha,
                 plugin_names=plugin_names,
                 pull_request_number=pull_request_number,
                 recurse_submodules=recurse_submodules,
                 report_code=report_code,
-                report_type_str=report_type_str,
+                report_type=report_type,
                 slug=slug,
                 swift_project=swift_project,
                 token=token,
                 use_legacy_uploader=use_legacy_uploader,
+                args=args,
             )

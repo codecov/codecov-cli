@@ -1,3 +1,4 @@
+import click
 import pytest
 
 from codecov_cli.helpers.encoder import (
@@ -21,7 +22,7 @@ from codecov_cli.helpers.encoder import (
     ],
 )
 def test_encode_invalid_slug(slug):
-    with pytest.raises(ValueError):
+    with pytest.raises(click.ClickException):
         encode_slug(slug)
 
 

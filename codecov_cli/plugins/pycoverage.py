@@ -57,7 +57,8 @@ class Pycoverage(object):
 
     def run_preparation(self, collector) -> PreparationPluginReturn:
         with sentry_sdk.start_span(name="pycoverage"):
-            if shutil.which("coverage") is None:
+            coverage_bin = shutil.which("coverage")
+            if coverage_bin is None:
                 logger.warning("coverage.py is not installed or can't be found.")
                 return
 
@@ -67,9 +68,9 @@ class Pycoverage(object):
                 return
             coverage_dir = pathlib.Path(path_to_coverage_data).parent
             if self.config.report_type == "xml":
-                return self._generate_XML_report(coverage_dir)
+                return self._generate_XML_report(coverage_dir, coverage_bin)
             if self.config.report_type == "json":
-                return self._generate_JSON_report(coverage_dir)
+                return self._generate_JSON_report(coverage_dir, coverage_bin)
             return PreparationPluginReturn(
                 success=False,
                 messages=[f"report type {self.config.report_type} unknown"],
@@ -93,24 +94,26 @@ class Pycoverage(object):
             None,
         )
 
-    def _generate_XML_report(self, dir: pathlib.Path) -> PreparationPluginReturn:
+    def _generate_XML_report(
+        self, dir: pathlib.Path, coverage_bin: str
+    ) -> PreparationPluginReturn:
         """Generates up-to-date XML report in the given directory"""
         # the following if conditions avoid creating dummy .coverage file
         if next(iglob(str(dir / ".coverage.*")), None) is not None:
             logger.info(f"Running coverage combine -a in {dir}")
-            subprocess.run(["coverage", "combine", "-a"], cwd=dir)
+            subprocess.run([coverage_bin, "combine", "-a"], cwd=dir)
 
         if (dir / ".coverage").exists():
             logger.info(f"Generating coverage.xml report in {dir}")
             completed_process = subprocess.run(
-                ["coverage", "xml", "-i"], cwd=dir, capture_output=True
+                [coverage_bin, "xml", "-i"], cwd=dir, capture_output=True
             )
 
             output = completed_process.stdout.decode().strip()
             logger.info(output)
         return PreparationPluginReturn(success=True, messages=[])
 
-    def _generate_JSON_report(self, dir: pathlib.Path):
+    def _generate_JSON_report(self, dir: pathlib.Path, coverage_bin: str):
         if (dir / ".coverage").exists():
             logger.info(
                 f"Generating JSON report in {dir}",
@@ -120,7 +123,7 @@ class Pycoverage(object):
                     )
                 ),
             )
-            command = ["coverage", "json"]
+            command = [coverage_bin, "json"]
             if self.config.include_contexts:
                 command.append("--show-contexts")
             completed_process = subprocess.run(command, cwd=dir, capture_output=True)

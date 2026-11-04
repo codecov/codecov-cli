@@ -59,4 +59,7 @@ def static_analysis(
 ):
     with sentry_sdk.start_transaction(op="task", name="Static Analysis"):
         with sentry_sdk.start_span(name="static_analysis"):
-            pass
+            logger.error(
+                "The static-analysis command has been removed and no longer performs any analysis. "
+                "Please upgrade to the latest version of codecov-cli and remove this command from your CI configuration."
+            )

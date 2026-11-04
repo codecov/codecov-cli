@@ -1,9 +1,12 @@
+import logging
 import os
 import random
 
 import sentry_sdk
 
 from codecov_cli import __version__
+
+logger = logging.getLogger("codecovcli")
 
 _SAMPLED_MESSAGES = [
     "Token required",
@@ -43,6 +46,14 @@ def init_telem(ctx):
         return
     if os.getenv("CODECOV_ENV", "production") == "test":
         return
+
+    sdk_version = tuple(int(x) for x in sentry_sdk.VERSION.split(".")[:2])
+    if sdk_version < (2, 0):
+        logger.warning(
+            "sentry-sdk %s is installed but codecov-cli requires >=2.0. "
+            "Some telemetry features may not work correctly.",
+            sentry_sdk.VERSION,
+        )
 
     sentry_sdk.init(
         dsn="https://0bea75c61745c221a6ef1ac1709b1f4d@o26192.ingest.us.sentry.io/4508615876083713",

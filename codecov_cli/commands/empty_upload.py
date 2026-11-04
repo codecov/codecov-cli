@@ -57,16 +57,16 @@ def empty_upload(
 
             logger.debug("Attempting to Create Commit before doing an empty upload.")
             create_commit_logic(
-                commit_sha,
-                parent_sha,
-                pull_request_number,
-                branch,
-                slug,
-                token,
-                git_service,
-                enterprise_url,
-                fail_on_error,
-                args,
+                commit_sha=commit_sha,
+                parent_sha=parent_sha,
+                pr=pull_request_number,
+                branch=branch,
+                slug=slug,
+                token=token,
+                service=git_service,
+                enterprise_url=enterprise_url,
+                fail_on_error=fail_on_error,
+                args=args,
             )
 
             logger.debug(

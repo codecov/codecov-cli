@@ -111,10 +111,7 @@ _global_upload_options = [
         "--name",
         help="Custom defined name of the upload. Visible in Codecov UI",
         cls=CodecovOption,
-        fallback_fields=(
-            FallbackFieldEnum.job_name,
-            FallbackFieldEnum.build_code,
-        ),
+        fallback_field=FallbackFieldEnum.job_name,
     ),
     click.option(
         "-B",

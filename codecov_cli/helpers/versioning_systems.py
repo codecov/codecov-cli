@@ -170,6 +170,25 @@ class GitVersioningSystem(VersioningSystemInterface):
         if dir_to_use is None:
             raise ValueError("Can't determine root folder")
 
+        if recurse_submodules:
+            init_res = subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(dir_to_use),
+                    "submodule",
+                    "update",
+                    "--init",
+                    "--recursive",
+                ],
+                capture_output=True,
+            )
+            if init_res.returncode != 0:
+                logger.warning(
+                    "git submodule update --init --recursive failed; submodule files may be missing from the network. "
+                    + init_res.stderr.decode().strip()
+                )
+
         cmd = ["git", "-C", str(dir_to_use), "ls-files", "-z"]
         if recurse_submodules:
             cmd.append("--recurse-submodules")

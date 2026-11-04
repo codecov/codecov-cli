@@ -15,7 +15,7 @@ def test_upload_process_missing_commit_sha(mocker):
         "codecov_cli.main.get_versioning_system", return_value=fake_versioning_system
     )
     mocker.patch("codecov_cli.main.get_ci_adapter", return_value=fake_ci_provider)
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     with runner.isolated_filesystem():
         result = runner.invoke(cli, ["upload-process"], obj={})
         assert result.exit_code != 0
@@ -29,7 +29,7 @@ def test_upload_process_raise_Z_option(mocker, use_verbose_option):
         error=error, warnings=[], status_code=401, text="Unauthorized"
     )
 
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     with runner.isolated_filesystem():
         with patch(
             "codecov_cli.services.commit.send_commit_data"
@@ -56,11 +56,11 @@ def test_upload_process_raise_Z_option(mocker, use_verbose_option):
 
 
 def test_upload_process_options(mocker):
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     fake_ci_provider = FakeProvider({FallbackFieldEnum.commit_sha: None})
     mocker.patch("codecov_cli.main.get_ci_adapter", return_value=fake_ci_provider)
     with runner.isolated_filesystem():
-        runner = CliRunner()
+        runner = CliRunner(mix_stderr=False)
         result = runner.invoke(cli, ["upload-process", "-h"], obj={})
         assert result.exit_code == 0
         print(result.output)

@@ -136,7 +136,7 @@ class TestLabelAnalysisNotInvoke(object):
 class TestLabelAnalysisCommand(object):
     def test_invoke_label_analysis_missing_token(self, mocker, fake_ci_provider):
         mocker.patch("codecov_cli.main.get_ci_adapter", return_value=fake_ci_provider)
-        runner = CliRunner()
+        runner = CliRunner(mix_stderr=False)
 
         result = runner.invoke(cli, ["label-analysis"], obj={})
         print(result.output)
@@ -145,7 +145,7 @@ class TestLabelAnalysisCommand(object):
 
     def test_invoke_label_analysis_missing_base_sha(self, mocker, fake_ci_provider):
         mocker.patch("codecov_cli.main.get_ci_adapter", return_value=fake_ci_provider)
-        runner = CliRunner()
+        runner = CliRunner(mix_stderr=False)
 
         result = runner.invoke(cli, ["label-analysis", "--token=STATIC_TOKEN"], obj={})
         print(result.output)
@@ -156,7 +156,7 @@ class TestLabelAnalysisCommand(object):
         self, mocker, fake_ci_provider
     ):
         mocker.patch("codecov_cli.main.get_ci_adapter", return_value=fake_ci_provider)
-        runner = CliRunner()
+        runner = CliRunner(mix_stderr=False)
 
         result = runner.invoke(
             cli,

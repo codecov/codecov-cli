@@ -15,7 +15,7 @@ def test_upload_missing_commit_sha(mocker, use_verbose_option):
         "codecov_cli.main.get_versioning_system", return_value=fake_versioning_system
     )
     mocker.patch("codecov_cli.main.get_ci_adapter", return_value=fake_ci_provider)
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(cli, ["do-upload"], obj={})
     assert result.exit_code != 0
     print(result.output)
@@ -36,7 +36,7 @@ def test_upload_raise_Z_option(mocker):
     fake_ci_provider = FakeProvider({FallbackFieldEnum.commit_sha: None})
     mocker.patch("codecov_cli.main.get_ci_adapter", return_value=fake_ci_provider)
 
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     result = runner.invoke(cli, ["do-upload", "--fail-on-error"], obj={})
     upload_sender.assert_called()
     upload_collector.assert_called()

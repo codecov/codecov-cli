@@ -20,7 +20,7 @@ def test_empty_upload_with_warnings(mocker):
             text="",
         ),
     )
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     with runner.isolation() as outstreams:
         res = empty_upload_logic(
             "commit_sha",
@@ -56,7 +56,7 @@ def test_empty_upload_with_error(mocker):
             text="Permission denied",
         ),
     )
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     with runner.isolation() as outstreams:
         res = empty_upload_logic(
             "commit_sha",
@@ -90,7 +90,7 @@ def test_empty_upload_200(mocker):
         ),
     )
     token = uuid.uuid4()
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     with runner.isolation() as outstreams:
         res = empty_upload_logic(
             "commit_sha", "owner/repo", token, "github", None, False, False, None
@@ -135,7 +135,7 @@ def test_empty_upload_force(mocker):
         ),
     )
     token = uuid.uuid4()
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     with runner.isolation() as outstreams:
         res = empty_upload_logic(
             "commit_sha", "owner/repo", token, "github", None, False, True, None
@@ -162,7 +162,7 @@ def test_empty_upload_no_token(mocker):
             status_code=200, error=None, warnings=[], text=json.dumps(res)
         ),
     )
-    runner = CliRunner()
+    runner = CliRunner(mix_stderr=False)
     with runner.isolation() as outstreams:
         res = empty_upload_logic(
             "commit_sha", "owner/repo", None, "github", None, False, False, None

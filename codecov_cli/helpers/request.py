@@ -101,6 +101,23 @@ def send_get_request(
     return request_result(get(url=url, headers=headers, params=params))
 
 
+def _validate_token(token: str) -> str:
+    """
+    Strips leading/trailing whitespace from the token and raises a
+    ClickException if the token still contains newline or carriage-return
+    characters (e.g. when a YAML block was passed instead of a plain UUID).
+    """
+    token = str(token).strip()
+    if "\n" in token or "\r" in token:
+        raise click.ClickException(
+            "The Codecov token contains newline or carriage-return characters, "
+            "which are not allowed in an HTTP header. "
+            "Please set CODECOV_TOKEN (or the -t flag) to the plain token UUID only, "
+            "not a YAML block (e.g. 'codecov:\\n  token: <uuid>')."
+        )
+    return token
+
+
 def get_token_header_or_fail(token: Optional[str]) -> dict:
     """
     Rejects requests with no Authorization token. Prevents tokenless uploads.
@@ -109,6 +126,7 @@ def get_token_header_or_fail(token: Optional[str]) -> dict:
         raise click.ClickException(
             "Codecov token not found. Please provide Codecov token with -t flag."
         )
+    token = _validate_token(token)
     return {"Authorization": f"token {token}"}
 
 
@@ -118,6 +136,7 @@ def get_token_header(token: Optional[str]) -> Optional[dict]:
     """
     if token is None:
         return None
+    token = _validate_token(token)
     return {"Authorization": f"token {token}"}
 
 

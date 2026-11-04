@@ -1,5 +1,7 @@
 import re
 
+import click
+
 slug_without_subgroups_regex = re.compile(r"[^/\s]+\/[^/\s]+$")
 slug_with_subgroups_regex = re.compile(r"[^/\s]+(\/[^/\s]+)+$")
 encoded_slug_regex = re.compile(r"[^:\s]+(:::[^:\s]+)*(::::[^:\s]+){1}$")
@@ -7,7 +9,9 @@ encoded_slug_regex = re.compile(r"[^:\s]+(:::[^:\s]+)*(::::[^:\s]+){1}$")
 
 def encode_slug(slug: str):
     if slug_with_subgroups_is_invalid(slug):
-        raise ValueError("The provided slug is invalid")
+        raise click.ClickException(
+            "The provided slug is invalid. Slug must be in the format <owner>/<repo>"
+        )
     owner, repo = slug.rsplit("/", 1)
     encoded_owner = ":::".join(owner.split("/"))
     encoded_slug = "::::".join([encoded_owner, repo])

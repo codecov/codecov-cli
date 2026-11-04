@@ -8,6 +8,7 @@ from codecov_cli import __version__
 _SAMPLED_MESSAGES = [
     "Token required",
     "No JUnit XML reports found",
+    "The provided slug is invalid",
 ]
 _SAMPLE_RATE = 100
 _SKIP_TAG_KEYS = {"branch", "flags", "commit_sha", "env_vars"}

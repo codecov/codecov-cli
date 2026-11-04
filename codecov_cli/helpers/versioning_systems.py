@@ -95,7 +95,7 @@ class GitVersioningSystem(VersioningSystemInterface):
                 ["git", "rev-parse", "HEAD^@"],
                 capture_output=True,
             )
-            parents_hash = p.stdout.decode().strip().splitlines()
+            parents_hash = p.stdout.decode("utf-8", errors="surrogateescape").strip().splitlines()
             if len(parents_hash) == 2:
                 # IFF the current commit is a merge commit it will have 2 parents
                 # We return the 2nd one - The commit that came from the branch merged into ours
@@ -104,14 +104,14 @@ class GitVersioningSystem(VersioningSystemInterface):
             # so we get it's SHA and return that
             p = subprocess.run(["git", "log", "-1", "--format=%H"], capture_output=True)
             if p.stdout:
-                return p.stdout.decode().strip()
+                return p.stdout.decode("utf-8", errors="surrogateescape").strip()
 
         if fallback_field == FallbackFieldEnum.branch:
             p = subprocess.run(
                 ["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True
             )
             if p.stdout:
-                branch_name = p.stdout.decode().strip()
+                branch_name = p.stdout.decode("utf-8", errors="surrogateescape").strip()
                 # branch_name will be 'HEAD' if we are in 'detached HEAD' state
                 return branch_name if branch_name != "HEAD" else None
 
@@ -123,7 +123,7 @@ class GitVersioningSystem(VersioningSystemInterface):
             if not p.stdout:
                 return None
 
-            remotes = p.stdout.decode().strip().splitlines()
+            remotes = p.stdout.decode("utf-8", errors="surrogateescape").strip().splitlines()
 
             remote_name = "origin" if "origin" in remotes else remotes[0]
 
@@ -133,7 +133,7 @@ class GitVersioningSystem(VersioningSystemInterface):
             if not p.stdout:
                 return None
 
-            remote_url = p.stdout.decode().strip()
+            remote_url = p.stdout.decode("utf-8", errors="surrogateescape").strip()
 
             return parse_slug(remote_url)
 
@@ -144,7 +144,7 @@ class GitVersioningSystem(VersioningSystemInterface):
             if not p.stdout:
                 return None
 
-            remotes = p.stdout.decode().strip().splitlines()
+            remotes = p.stdout.decode("utf-8", errors="surrogateescape").strip().splitlines()
             remote_name = "origin" if "origin" in remotes else remotes[0]
             p = subprocess.run(
                 ["git", "ls-remote", "--get-url", remote_name], capture_output=True
@@ -152,7 +152,7 @@ class GitVersioningSystem(VersioningSystemInterface):
             if not p.stdout:
                 return None
 
-            remote_url = p.stdout.decode().strip()
+            remote_url = p.stdout.decode("utf-8", errors="surrogateescape").strip()
             return parse_git_service(remote_url)
 
         return None
@@ -160,7 +160,7 @@ class GitVersioningSystem(VersioningSystemInterface):
     def get_network_root(self):
         p = subprocess.run(["git", "rev-parse", "--show-toplevel"], capture_output=True)
         if p.stdout:
-            return Path(p.stdout.decode().rstrip())
+            return Path(p.stdout.decode("utf-8", errors="surrogateescape").rstrip())
         return None
 
     def list_relevant_files(
@@ -174,7 +174,7 @@ class GitVersioningSystem(VersioningSystemInterface):
         if recurse_submodules:
             cmd.append("--recurse-submodules")
         res = subprocess.run(cmd, capture_output=True)
-        return res.stdout.decode().split("\0")
+        return res.stdout.decode("utf-8", errors="surrogateescape").split("\0")
 
 
 class NoVersioningSystem(VersioningSystemInterface):

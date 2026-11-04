@@ -83,6 +83,11 @@ def upload_coverage(
                 ci_adapter = ctx.obj.get("ci_adapter")
                 enterprise_url = ctx.obj.get("enterprise_url")
                 args = get_cli_args(ctx)
+                if not slug:
+                    raise click.ClickException(
+                        "Slug is required but was not provided. "
+                        "Please supply it via --slug owner/repo."
+                    )
                 ctx.invoke(
                     upload_coverage_logic,
                     cli_config,

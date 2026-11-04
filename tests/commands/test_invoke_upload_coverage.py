@@ -8,6 +8,57 @@ from codecov_cli.types import RequestError, RequestResult
 from tests.factory import FakeProvider, FakeVersioningSystem
 
 
+def test_upload_coverage_recurse_submodules_flag_plumbing(mocker):
+    """Verify --recurse-submodules is correctly passed through to upload_coverage_logic."""
+    fake_ci_provider = FakeProvider()
+    fake_versioning_system = FakeVersioningSystem()
+    mocker.patch(
+        "codecov_cli.main.get_versioning_system", return_value=fake_versioning_system
+    )
+    mocker.patch("codecov_cli.main.get_ci_adapter", return_value=fake_ci_provider)
+
+    runner = CliRunner()
+
+    # With --recurse-submodules flag -> should pass True to logic
+    with patch(
+        "codecov_cli.commands.upload_coverage.upload_coverage_logic"
+    ) as mock_logic:
+        with runner.isolated_filesystem():
+            result = runner.invoke(
+                cli,
+                [
+                    "upload-coverage",
+                    "-C",
+                    "1111111111111111111111111111111111111111",
+                    "--recurse-submodules",
+                ],
+                obj={},
+            )
+        assert result.exit_code == 0, result.output
+        call = mock_logic.call_args
+        assert call is not None, "upload_coverage_logic was not called"
+        assert call.kwargs.get("recurse_submodules") is True
+
+    # Without --recurse-submodules flag -> should pass False to logic
+    with patch(
+        "codecov_cli.commands.upload_coverage.upload_coverage_logic"
+    ) as mock_logic:
+        with runner.isolated_filesystem():
+            result = runner.invoke(
+                cli,
+                [
+                    "upload-coverage",
+                    "-C",
+                    "1111111111111111111111111111111111111111",
+                ],
+                obj={},
+            )
+        assert result.exit_code == 0, result.output
+        call = mock_logic.call_args
+        assert call is not None, "upload_coverage_logic was not called"
+        assert call.kwargs.get("recurse_submodules") is False
+
+
 def test_upload_coverage_missing_commit_sha(mocker):
     fake_ci_provider = FakeProvider({FallbackFieldEnum.commit_sha: None})
     fake_versioning_system = FakeVersioningSystem({FallbackFieldEnum.commit_sha: None})

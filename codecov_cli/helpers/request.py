@@ -109,6 +109,7 @@ def get_token_header_or_fail(token: Optional[str]) -> dict:
         raise click.ClickException(
             "Codecov token not found. Please provide Codecov token with -t flag."
         )
+    token = str(token).strip("\ufeff").strip()
     return {"Authorization": f"token {token}"}
 
 
@@ -118,6 +119,7 @@ def get_token_header(token: Optional[str]) -> Optional[dict]:
     """
     if token is None:
         return None
+    token = str(token).strip("\ufeff").strip()
     return {"Authorization": f"token {token}"}
 
 

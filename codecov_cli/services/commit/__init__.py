@@ -2,6 +2,8 @@ import logging
 import os
 import typing
 
+import click
+
 from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.helpers.config import CODECOV_INGEST_URL
 from codecov_cli.helpers.encoder import encode_slug
@@ -26,6 +28,11 @@ def create_commit_logic(
     fail_on_error: bool = False,
     args: dict = None,
 ):
+    if not slug:
+        raise click.UsageError(
+            "No slug provided. Please provide a slug using the '--slug' option (e.g. 'owner/repo'). "
+            "This is required when it cannot be auto-detected from the CI environment."
+        )
     encoded_slug = encode_slug(slug)
     sending_result = send_commit_data(
         commit_sha=commit_sha,

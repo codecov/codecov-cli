@@ -3,6 +3,8 @@ import logging
 import time
 import typing
 
+import click
+
 from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.helpers import request
 from codecov_cli.helpers.config import CODECOV_API_URL, CODECOV_INGEST_URL
@@ -30,6 +32,11 @@ def create_report_logic(
     fail_on_error: bool = False,
     args: typing.Union[dict, None] = None,
 ):
+    if slug is None:
+        raise click.ClickException(
+            "Slug is required but was not provided. "
+            "Please pass it via the --slug option or ensure your CI environment exposes the repository slug."
+        )
     encoded_slug = encode_slug(slug)
     sending_result = send_create_report_request(
         commit_sha,

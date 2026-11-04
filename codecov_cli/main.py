@@ -72,7 +72,10 @@ def cli(
     ctx.obj["enterprise_url"] = enterprise_url
     ctx.obj["disable_telem"] = disable_telem
     ctx.obj["branding"] = [Branding.CODECOV]
-    init_telem(ctx.obj)
+    try:
+        init_telem(ctx.obj)
+    except Exception as e:
+        logger.debug(f"Failed to initialize telemetry: {e}")
 
 
 cli.add_command(do_upload)

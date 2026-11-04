@@ -5,11 +5,12 @@ import typing
 import zlib
 from typing import Any, Dict
 
+import click
 import sentry_sdk
 
 from codecov_cli import __version__ as codecov_cli_version
 from codecov_cli.helpers.config import CODECOV_INGEST_URL
-from codecov_cli.helpers.encoder import encode_slug
+from codecov_cli.helpers.encoder import safe_encode_slug
 from codecov_cli.helpers.upload_type import ReportType
 from codecov_cli.helpers.upload_url_validation import validate_upload_service
 from codecov_cli.helpers.request import (
@@ -80,7 +81,9 @@ class UploadSender(object):
                     data["parent_commit_id"] = parent_sha
                     data["pullid"] = pull_request_number
                 headers = get_token_header(token)
-                encoded_slug = encode_slug(slug)
+                encoded_slug = safe_encode_slug(slug)
+                if encoded_slug is None:
+                    raise click.UsageError("The provided slug is invalid")
                 upload_url = enterprise_url or CODECOV_INGEST_URL
                 url, data = self.get_url_and_possibly_update_data(
                     data,

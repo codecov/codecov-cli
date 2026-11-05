@@ -13,7 +13,31 @@ _SAMPLE_RATE = 100
 _SKIP_TAG_KEYS = {"branch", "flags", "commit_sha", "env_vars"}
 
 
+def _frame_in_cli(frame):
+    module = frame.get("module") or ""
+    if module == "codecov_cli" or module.startswith("codecov_cli."):
+        return True
+    path = (frame.get("abs_path") or frame.get("filename") or "").replace("\\", "/")
+    return "/codecov_cli/" in path or path.startswith("codecov_cli/")
+
+
+def _originates_in_cli(event):
+    """Return True if any exception stack frame comes from the codecov_cli package."""
+    for exc in (event.get("exception") or {}).get("values") or []:
+        frames = (exc.get("stacktrace") or {}).get("frames") or []
+        if any(_frame_in_cli(frame) for frame in frames):
+            return True
+    return False
+
+
 def _before_send(event, hint):
+    # When the CLI is invoked programmatically (e.g. via CliRunner in a script),
+    # sentry_sdk.init installs a process-wide excepthook. Unhandled exceptions
+    # raised purely by the host script, with no codecov_cli frames, are not CLI
+    # failures, so we don't report them as CLI crashes.
+    if (event.get("exception") or {}).get("values") and not _originates_in_cli(event):
+        return None
+
     messages = []
     if "message" in event and event.get("message") is not None:
         messages.append(event.get("message"))

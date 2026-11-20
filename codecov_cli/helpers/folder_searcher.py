@@ -15,7 +15,12 @@ def _is_included(
     multipart_include_regex: Optional[Pattern],
     path: pathlib.Path,
 ):
-    return filename_include_regex.match(path.name) and (
+    try:
+        path_name = path.name
+    except TypeError:
+        logger.warning(f"Unable to determine name for path: {path}")
+        return False
+    return filename_include_regex.match(path_name) and (
         multipart_include_regex is None
         or multipart_include_regex.match(path.resolve().as_posix())
     )

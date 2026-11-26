@@ -26,7 +26,8 @@ class CIAdapterBase(ABC):
         if fallback_field not in self.fallback_to_method:
             raise ValueError("The provided fallback_field is not valid")
 
-        return self.fallback_to_method[fallback_field]()
+        # CI envs are often set but empty; an empty string is "no value", not a value.
+        return self.fallback_to_method[fallback_field]() or None
 
     def detect(self) -> bool:
         """

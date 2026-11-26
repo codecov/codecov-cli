@@ -118,6 +118,13 @@ class TestAzurePipelines(object):
                 "123",
             ),
             ({AzurePipelinesEnvEnum.SYSTEM_PULLREQUEST_PULLREQUESTID: "111"}, "111"),
+            (
+                {
+                    AzurePipelinesEnvEnum.SYSTEM_PULLREQUEST_PULLREQUESTNUMBER: "",
+                    AzurePipelinesEnvEnum.SYSTEM_PULLREQUEST_PULLREQUESTID: "",
+                },
+                None,
+            ),
         ],
     )
     def test_pull_request_number(self, env_dict, expected, mocker):
